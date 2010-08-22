@@ -1,0 +1,1658 @@
+<html>
+<head>
+<title>Docs For Class guifiAPI</title>
+<link rel="stylesheet" type="text/css" href="../media/style.css">
+</head>
+<body>
+
+<table border="0" cellspacing="0" cellpadding="0" height="48" width="100%">
+  <tr>
+    <td class="header_top">default</td>
+  </tr>
+  <tr><td class="header_line"><img src="../media/empty.png" width="1" height="1" border="0" alt=""  /></td></tr>
+  <tr>
+    <td class="header_menu">
+        
+                                    
+                              		  [ <a href="../classtrees_default.html" class="menu">class tree: default</a> ]
+		  [ <a href="../elementindex_default.html" class="menu">index: default</a> ]
+		  	    [ <a href="../elementindex.html" class="menu">all elements</a> ]
+    </td>
+  </tr>
+  <tr><td class="header_line"><img src="../media/empty.png" width="1" height="1" border="0" alt=""  /></td></tr>
+</table>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="200" class="menu">
+      <b>Packages:</b><br />
+              <a href="../li_default.html">default</a><br />
+            <br /><br />
+                        <b>Files:</b><br />
+      	  <div class="package">
+			<a href="../default/_examples.guifi_api.device.php.html">		examples.guifi_api.device.php
+		</a><br>
+			<a href="../default/_examples.guifi_api.interface.php.html">		examples.guifi_api.interface.php
+		</a><br>
+			<a href="../default/_examples.guifi_api.link.php.html">		examples.guifi_api.link.php
+		</a><br>
+			<a href="../default/_examples.guifi_api.misc.php.html">		examples.guifi_api.misc.php
+		</a><br>
+			<a href="../default/_examples.guifi_api.node.php.html">		examples.guifi_api.node.php
+		</a><br>
+			<a href="../default/_examples.guifi_api.radio.php.html">		examples.guifi_api.radio.php
+		</a><br>
+			<a href="../default/_examples.guifi_api.simple_user.php.html">		examples.guifi_api.simple_user.php
+		</a><br>
+			<a href="../default/_examples.guifi_api.simple_user.step2.php.html">		examples.guifi_api.simple_user.step2.php
+		</a><br>
+			<a href="../default/_examples.guifi_api.simple_user.step3.php.html">		examples.guifi_api.simple_user.step3.php
+		</a><br>
+			<a href="../default/_examples.guifi_api.zone.php.html">		examples.guifi_api.zone.php
+		</a><br>
+			<a href="../default/_guifi_api.php.html">		guifi_api.php
+		</a><br>
+	  </div><br />
+      
+      
+            <b>Classes:</b><br />
+        <div class="package">
+		    		<a href="../default/guifiAPI.html">guifiAPI</a><br />
+	  </div>
+                </td>
+    <td>
+      <table cellpadding="10" cellspacing="0" width="100%" border="0"><tr><td valign="top">
+
+<h1>Class: guifiAPI</h1>
+Source Location: /guifi_api.php<br /><br />
+
+
+<table width="100%" border="0">
+<tr><td valign="top">
+
+<h3><a href="#class_details">Class Overview</a></h3>
+<pre></pre><br />
+<div class="description">Client class for the guifi.net API</div><br /><br />
+
+
+
+
+
+
+        
+</td>
+
+
+<td valign="top">
+<h3><a href="#class_consts">Constants</a></h3>
+<ul>
+    <li><a href="../default/guifiAPI.html#constdev_mode">dev_mode</a></li>
+    <li><a href="../default/guifiAPI.html#consthttp_interface">http_interface</a></li>
+    <li><a href="../default/guifiAPI.html#constinput_format">input_format</a></li>
+    <li><a href="../default/guifiAPI.html#constoutput_format">output_format</a></li>
+  </ul>
+</td>
+
+<td valign="top">
+<h3><a href="#class_methods">Methods</a></h3>
+<ul>
+    <li><a href="../default/guifiAPI.html#method__construct">__construct</a></li>
+    <li><a href="../default/guifiAPI.html#methodaddDevice">addDevice</a></li>
+    <li><a href="../default/guifiAPI.html#methodaddInterface">addInterface</a></li>
+    <li><a href="../default/guifiAPI.html#methodaddLink">addLink</a></li>
+    <li><a href="../default/guifiAPI.html#methodaddNode">addNode</a></li>
+    <li><a href="../default/guifiAPI.html#methodaddRadio">addRadio</a></li>
+    <li><a href="../default/guifiAPI.html#methodaddZone">addZone</a></li>
+    <li><a href="../default/guifiAPI.html#methodauthenticateUser">authenticateUser</a></li>
+    <li><a href="../default/guifiAPI.html#methodgenerateAuthHeader">generateAuthHeader</a></li>
+    <li><a href="../default/guifiAPI.html#methodgetAuthToken">getAuthToken</a></li>
+    <li><a href="../default/guifiAPI.html#methodgetChannels">getChannels</a></li>
+    <li><a href="../default/guifiAPI.html#methodgetErrors">getErrors</a></li>
+    <li><a href="../default/guifiAPI.html#methodgetErrorsStr">getErrorsStr</a></li>
+    <li><a href="../default/guifiAPI.html#methodgetFirmwares">getFirmwares</a></li>
+    <li><a href="../default/guifiAPI.html#methodgetManufacturers">getManufacturers</a></li>
+    <li><a href="../default/guifiAPI.html#methodgetModels">getModels</a></li>
+    <li><a href="../default/guifiAPI.html#methodgetProtocols">getProtocols</a></li>
+    <li><a href="../default/guifiAPI.html#methodhttpRequest">httpRequest</a></li>
+    <li><a href="../default/guifiAPI.html#methodnearestRadio">nearestRadio</a></li>
+    <li><a href="../default/guifiAPI.html#methodnearestZone">nearestZone</a></li>
+    <li><a href="../default/guifiAPI.html#methodparseResponse">parseResponse</a></li>
+    <li><a href="../default/guifiAPI.html#methodremoveDevice">removeDevice</a></li>
+    <li><a href="../default/guifiAPI.html#methodremoveInterface">removeInterface</a></li>
+    <li><a href="../default/guifiAPI.html#methodremoveLink">removeLink</a></li>
+    <li><a href="../default/guifiAPI.html#methodremoveNode">removeNode</a></li>
+    <li><a href="../default/guifiAPI.html#methodremoveRadio">removeRadio</a></li>
+    <li><a href="../default/guifiAPI.html#methodremoveZone">removeZone</a></li>
+    <li><a href="../default/guifiAPI.html#methodsendRequest">sendRequest</a></li>
+    <li><a href="../default/guifiAPI.html#methodupdateDevice">updateDevice</a></li>
+    <li><a href="../default/guifiAPI.html#methodupdateLink">updateLink</a></li>
+    <li><a href="../default/guifiAPI.html#methodupdateNode">updateNode</a></li>
+    <li><a href="../default/guifiAPI.html#methodupdateRadio">updateRadio</a></li>
+    <li><a href="../default/guifiAPI.html#methodupdateZone">updateZone</a></li>
+  </ul>
+</td>
+
+</tr></table>
+<hr />
+
+<table width="100%" border="0"><tr>
+
+
+
+
+
+
+</tr></table>
+<hr />
+
+<a name="class_details"></a>
+<h3>Class Details</h3>
+<div class="tags">
+[line <a href="../__filesource/fsource_default__guifi_api.php.html#a14">14</a>]<br />
+Client class for the guifi.net API<br /><br /></div><br /><br />
+<div class="top">[ <a href="#top">Top</a> ]</div><br />
+
+
+<hr />
+<a name="class_methods"></a>
+<h3>Class Methods</h3>
+<div class="tags">
+
+  <hr />
+	<a name="method__construct"></a>
+	<h3>constructor __construct <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a587">587</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>guifiAPI __construct(
+String
+$username, String
+$password, [String
+$token = null])</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Constructor function for all new guifiAPI instances<br /><br /><p>Set up authentication with guifi and gets authentication token</p><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">String&nbsp;&nbsp;</td>
+        <td><b>$username</b>&nbsp;&nbsp;</td>
+        <td>Username of the guifi.net account wanted to authenticate</td>
+      </tr>
+          <tr>
+        <td class="type">String&nbsp;&nbsp;</td>
+        <td><b>$password</b>&nbsp;&nbsp;</td>
+        <td>Password of the guifi.net account wanted to authenticate</td>
+      </tr>
+          <tr>
+        <td class="type">String&nbsp;&nbsp;</td>
+        <td><b>$token</b>&nbsp;&nbsp;</td>
+        <td>If any token is given, no need to send the username and password to the server</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodaddDevice"></a>
+	<h3>method addDevice <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a226">226</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>mixed addDevice(
+$node_id
+$node_id, $type
+$type, $parameters
+$mac, [
+$parameters = array()])</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Adds a guifi device to a node<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>The response with the newly created device_id or false in case of error</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$node_id&nbsp;&nbsp;</td>
+        <td><b>$node_id</b>&nbsp;&nbsp;</td>
+        <td>ID of the node where the device should be added</td>
+      </tr>
+          <tr>
+        <td class="type">$type&nbsp;&nbsp;</td>
+        <td><b>$type</b>&nbsp;&nbsp;</td>
+        <td>Type of device which should be added (radio, mobile, server, nat, generic, adsl, cam, phone)</td>
+      </tr>
+          <tr>
+        <td class="type">$parameters&nbsp;&nbsp;</td>
+        <td><b>$mac</b>&nbsp;&nbsp;</td>
+        <td>Other parameters depending on the type of device, such as model_id, MAC address or firmware</td>
+      </tr>
+          <tr>
+        <td class="type">&nbsp;&nbsp;</td>
+        <td><b>$parameters</b>&nbsp;&nbsp;</td>
+        <td></td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodaddInterface"></a>
+	<h3>method addInterface <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a382">382</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>mixed addInterface(
+$device_id
+$device_id, $radiodev_counter
+$radiodev_counter)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Adds a wLan interface to a radio to accept more clients<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Information about the newly created interface, such as interface_id</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$device_id&nbsp;&nbsp;</td>
+        <td><b>$device_id</b>&nbsp;&nbsp;</td>
+        <td>Device where the interface should be added</td>
+      </tr>
+          <tr>
+        <td class="type">$radiodev_counter&nbsp;&nbsp;</td>
+        <td><b>$radiodev_counter</b>&nbsp;&nbsp;</td>
+        <td>Position of the radio within the device where the interface should be added</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodaddLink"></a>
+	<h3>method addLink <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a421">421</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>mixed addLink(
+$from_device_id
+$from_device_id, $from_radiodev_counter
+$from_radiodev_counter, $to_device_id
+$to_device_id, $to_radiodev_counter
+$to_radiodev_counter, [$parameters
+$parameters = array()])</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Adds a link to an guifi.net interface<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Information about the newly created link, such as link_id</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$from_device_id&nbsp;&nbsp;</td>
+        <td><b>$from_device_id</b>&nbsp;&nbsp;</td>
+        <td>Device ID of the origin of the link</td>
+      </tr>
+          <tr>
+        <td class="type">$from_radiodev_counter&nbsp;&nbsp;</td>
+        <td><b>$from_radiodev_counter</b>&nbsp;&nbsp;</td>
+        <td>Position of the radio within its device of the origin of the link</td>
+      </tr>
+          <tr>
+        <td class="type">$to_device_id&nbsp;&nbsp;</td>
+        <td><b>$to_device_id</b>&nbsp;&nbsp;</td>
+        <td>Device ID of the other extreme of the link</td>
+      </tr>
+          <tr>
+        <td class="type">$to_radiodev_counter&nbsp;&nbsp;</td>
+        <td><b>$to_radiodev_counter</b>&nbsp;&nbsp;</td>
+        <td>Position of the radio within its device of the other extreme of the link</td>
+      </tr>
+          <tr>
+        <td class="type">$parameters&nbsp;&nbsp;</td>
+        <td><b>$parameters</b>&nbsp;&nbsp;</td>
+        <td>Other parameters of the link to be added</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodaddNode"></a>
+	<h3>method addNode <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a160">160</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>mixed addNode(
+$title
+$title, $zone_id
+$zone_id, $lat
+$lat, $lon
+$lon, [$parameters
+$parameters = array()])</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Adds a new guifi.net node<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Information of the newly created node (node_id)</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$title&nbsp;&nbsp;</td>
+        <td><b>$title</b>&nbsp;&nbsp;</td>
+        <td>Title of the node</td>
+      </tr>
+          <tr>
+        <td class="type">$zone_id&nbsp;&nbsp;</td>
+        <td><b>$zone_id</b>&nbsp;&nbsp;</td>
+        <td>Zone ID of the node</td>
+      </tr>
+          <tr>
+        <td class="type">$lat&nbsp;&nbsp;</td>
+        <td><b>$lat</b>&nbsp;&nbsp;</td>
+        <td>Latitude where the node is</td>
+      </tr>
+          <tr>
+        <td class="type">$lon&nbsp;&nbsp;</td>
+        <td><b>$lon</b>&nbsp;&nbsp;</td>
+        <td>Longitude where the node is</td>
+      </tr>
+          <tr>
+        <td class="type">$parameters&nbsp;&nbsp;</td>
+        <td><b>$parameters</b>&nbsp;&nbsp;</td>
+        <td>Parameters to specify node settings</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodaddRadio"></a>
+	<h3>method addRadio <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a290">290</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>mixed addRadio(
+$mode
+$mode, $device_id
+$device_id, [$mac
+$mac = ''], [
+$parameters = array()])</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Adds a guifi Radio to a device<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Information about the added radio, such as radiodev_counter</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$mode&nbsp;&nbsp;</td>
+        <td><b>$mode</b>&nbsp;&nbsp;</td>
+        <td>Mode of the radio to be added</td>
+      </tr>
+          <tr>
+        <td class="type">$device_id&nbsp;&nbsp;</td>
+        <td><b>$device_id</b>&nbsp;&nbsp;</td>
+        <td>Device where the radio should be added</td>
+      </tr>
+          <tr>
+        <td class="type">$mac&nbsp;&nbsp;</td>
+        <td><b>$mac</b>&nbsp;&nbsp;</td>
+        <td>MAC address of the radio</td>
+      </tr>
+          <tr>
+        <td class="type">&nbsp;&nbsp;</td>
+        <td><b>$parameters</b>&nbsp;&nbsp;</td>
+        <td></td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodaddZone"></a>
+	<h3>method addZone <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a68">68</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>mixed addZone(
+$title
+$title, $master
+$master, $miny
+$miny, $minx
+$minx, $maxy
+$maxy, $maxx
+$maxx, [$parameters
+$parameters = array()])</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Adds a zone to guifi.net<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>An array with the zone_id, or false in case of failure</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$title&nbsp;&nbsp;</td>
+        <td><b>$title</b>&nbsp;&nbsp;</td>
+        <td>Title of the zone</td>
+      </tr>
+          <tr>
+        <td class="type">$master&nbsp;&nbsp;</td>
+        <td><b>$master</b>&nbsp;&nbsp;</td>
+        <td>Parent zone of the new zone</td>
+      </tr>
+          <tr>
+        <td class="type">$miny&nbsp;&nbsp;</td>
+        <td><b>$miny</b>&nbsp;&nbsp;</td>
+        <td>Latitude coordinate, in decimal degrees, of the lower-left corner of the zone (SW)</td>
+      </tr>
+          <tr>
+        <td class="type">$minx&nbsp;&nbsp;</td>
+        <td><b>$minx</b>&nbsp;&nbsp;</td>
+        <td>Longitude coordinate, in decimal degrees, of the lower-left corner of the zone (SW)</td>
+      </tr>
+          <tr>
+        <td class="type">$maxy&nbsp;&nbsp;</td>
+        <td><b>$maxy</b>&nbsp;&nbsp;</td>
+        <td>Latitude coordinate, in decimal degrees, of the upper-right corner of the zone (NE)</td>
+      </tr>
+          <tr>
+        <td class="type">$maxx&nbsp;&nbsp;</td>
+        <td><b>$maxx</b>&nbsp;&nbsp;</td>
+        <td>Longitude coordinate, in decimal degrees, of the upper-right corner of the zone (NE)</td>
+      </tr>
+          <tr>
+        <td class="type">$parameters&nbsp;&nbsp;</td>
+        <td><b>$parameters</b>&nbsp;&nbsp;</td>
+        <td>Extra parameters to create the zone</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodauthenticateUser"></a>
+	<h3>method authenticateUser <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a604">604</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>boolean authenticateUser(
+
+$username, string
+$password, string
+$email)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Authenticate guifi.net account against guifi.net<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Whether the authentication was successful or not</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>protected</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">string&nbsp;&nbsp;</td>
+        <td><b>$email</b>&nbsp;&nbsp;</td>
+        <td></td>
+      </tr>
+          <tr>
+        <td class="type">string&nbsp;&nbsp;</td>
+        <td><b>$password</b>&nbsp;&nbsp;</td>
+        <td></td>
+      </tr>
+          <tr>
+        <td class="type">&nbsp;&nbsp;</td>
+        <td><b>$username</b>&nbsp;&nbsp;</td>
+        <td></td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodgenerateAuthHeader"></a>
+	<h3>method generateAuthHeader <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a636">636</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>mixed generateAuthHeader(
+)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Generates the authentication header to authenticate using a token against guifi.net<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Header of authentication</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>protected</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodgetAuthToken"></a>
+	<h3>method getAuthToken <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a628">628</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>string getAuthToken(
+)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Retreives the authentication token used to authenticate the user in upcoming methods without sending the username and password each time<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Authentication token</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodgetChannels"></a>
+	<h3>method getChannels <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a564">564</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>string[] getChannels(
+$protocol
+$protocol)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Gets a list of channels to be used with links<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Channels retrieved from the server</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$protocol&nbsp;&nbsp;</td>
+        <td><b>$protocol</b>&nbsp;&nbsp;</td>
+        <td>Protocol the channels apply to</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodgetErrors"></a>
+	<h3>method getErrors <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a723">723</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>string[] getErrors(
+)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Retreives the possible errors commited during a method<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodgetErrorsStr"></a>
+	<h3>method getErrorsStr <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a733">733</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>string getErrorsStr(
+[string
+$format = 'html'])</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Retreives a list of the errors parsed as a string<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>List of formatted errors</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">string&nbsp;&nbsp;</td>
+        <td><b>$format</b>&nbsp;&nbsp;</td>
+        <td>Format of the list, either 'html' or 'plain'</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodgetFirmwares"></a>
+	<h3>method getFirmwares <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a524">524</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>string[] getFirmwares(
+[$parameters
+$parameters = array()])</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Gets a list of supported firmwares to be used with devices<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Firmwares retrieved from the server</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$parameters&nbsp;&nbsp;</td>
+        <td><b>$parameters</b>&nbsp;&nbsp;</td>
+        <td>Firmware filters to be applied</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodgetManufacturers"></a>
+	<h3>method getManufacturers <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a506">506</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>string[] getManufacturers(
+)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Gets a list of device manufacturers<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Manufacturers retrieved from the server</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodgetModels"></a>
+	<h3>method getModels <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a484">484</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>string[] getModels(
+[$parameters
+$parameters = array()])</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Gets a list of devices models<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Models retrieved from the server</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$parameters&nbsp;&nbsp;</td>
+        <td><b>$parameters</b>&nbsp;&nbsp;</td>
+        <td>string[] of possible parameters to retrieve filtered models</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodgetProtocols"></a>
+	<h3>method getProtocols <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a546">546</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>string[] getProtocols(
+)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Gets a list of supported protocols to be used with links<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Protocols retrieved from the server</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodhttpRequest"></a>
+	<h3>method httpRequest <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a768">768</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>void httpRequest(
+
+$url, [array
+$get_variables = null], [array
+$post_variables = null], [array
+$headers = null])</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Perform HTTP request<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>protected</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">array&nbsp;&nbsp;</td>
+        <td><b>$get_variables</b>&nbsp;&nbsp;</td>
+        <td></td>
+      </tr>
+          <tr>
+        <td class="type">array&nbsp;&nbsp;</td>
+        <td><b>$post_variables</b>&nbsp;&nbsp;</td>
+        <td></td>
+      </tr>
+          <tr>
+        <td class="type">array&nbsp;&nbsp;</td>
+        <td><b>$headers</b>&nbsp;&nbsp;</td>
+        <td></td>
+      </tr>
+          <tr>
+        <td class="type">&nbsp;&nbsp;</td>
+        <td><b>$url</b>&nbsp;&nbsp;</td>
+        <td></td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodnearestRadio"></a>
+	<h3>method nearestRadio <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a356">356</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>mixed nearestRadio(
+$node_id
+$node_id, [$parameters
+$parameters = array()])</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Searches the nearest radios from a given node<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Nearest radios from a given node</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$node_id&nbsp;&nbsp;</td>
+        <td><b>$node_id</b>&nbsp;&nbsp;</td>
+        <td>Node where to find the nearest radios</td>
+      </tr>
+          <tr>
+        <td class="type">$parameters&nbsp;&nbsp;</td>
+        <td><b>$parameters</b>&nbsp;&nbsp;</td>
+        <td>Parameters such as maximum or minimum distance</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodnearestZone"></a>
+	<h3>method nearestZone <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a135">135</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>mixed nearestZone(
+$lat
+$lat, $lon
+$lon)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Gets the zone which can contain a certain point<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Nearest zones which can contain a certain point</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$lat&nbsp;&nbsp;</td>
+        <td><b>$lat</b>&nbsp;&nbsp;</td>
+        <td>Latitude of the point</td>
+      </tr>
+          <tr>
+        <td class="type">$lon&nbsp;&nbsp;</td>
+        <td><b>$lon</b>&nbsp;&nbsp;</td>
+        <td>Longitude of the point</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodparseResponse"></a>
+	<h3>method parseResponse <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a674">674</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>mixed parseResponse(
+$response
+$response)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Parses a response from the server, according ti the input format<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Returns the body of the response in case of success, false in case of failure</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>protected</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$response&nbsp;&nbsp;</td>
+        <td><b>$response</b>&nbsp;&nbsp;</td>
+        <td>Response string to be parsed</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodremoveDevice"></a>
+	<h3>method removeDevice <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a273">273</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>boolean removeDevice(
+$device_id
+$device_id)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Removes a guifi device from a node<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Whether the device was removed or not</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$device_id&nbsp;&nbsp;</td>
+        <td><b>$device_id</b>&nbsp;&nbsp;</td>
+        <td>ID of the device which should be removed</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodremoveInterface"></a>
+	<h3>method removeInterface <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a402">402</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>boolean removeInterface(
+$interface_id
+$interface_id)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Removes a guifi interface from a radio<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Whether the interface was removed or not</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$interface_id&nbsp;&nbsp;</td>
+        <td><b>$interface_id</b>&nbsp;&nbsp;</td>
+        <td>ID of the interface to be removed</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodremoveLink"></a>
+	<h3>method removeLink <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a469">469</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>boolean removeLink(
+$link_id
+$link_id)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Removes a link from guifi.net<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Whether the link was removed or not</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$link_id&nbsp;&nbsp;</td>
+        <td><b>$link_id</b>&nbsp;&nbsp;</td>
+        <td>Link ID to be removed</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodremoveNode"></a>
+	<h3>method removeNode <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a209">209</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>boolean removeNode(
+$zone_id
+$node_id)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Removes a guifi node<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Whether the node was removed or not</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$zone_id&nbsp;&nbsp;</td>
+        <td><b>$node_id</b>&nbsp;&nbsp;</td>
+        <td>ID of the node which should be removed</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodremoveRadio"></a>
+	<h3>method removeRadio <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a339">339</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>boolean removeRadio(
+$device_id
+$device_id, $radiodev_counter
+$radiodev_counter)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Removes a guifi radio from a device<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Whether the radio was removed or not</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$device_id&nbsp;&nbsp;</td>
+        <td><b>$device_id</b>&nbsp;&nbsp;</td>
+        <td>ID of the device where the radio to be removed is</td>
+      </tr>
+          <tr>
+        <td class="type">$radiodev_counter&nbsp;&nbsp;</td>
+        <td><b>$radiodev_counter</b>&nbsp;&nbsp;</td>
+        <td>Position within the device where the radio is</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodremoveZone"></a>
+	<h3>method removeZone <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a119">119</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>boolean removeZone(
+$zone_id
+$zone_id)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Removes a guifi zone<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Whether the zone was removed or not</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$zone_id&nbsp;&nbsp;</td>
+        <td><b>$zone_id</b>&nbsp;&nbsp;</td>
+        <td>ID of the zone which should be removed</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodsendRequest"></a>
+	<h3>method sendRequest <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a650">650</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>mixed sendRequest(
+$url
+$url, $variables
+$variables)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Performs the request to the guifi.net API server<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>response from the API server</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>protected</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$url&nbsp;&nbsp;</td>
+        <td><b>$url</b>&nbsp;&nbsp;</td>
+        <td>URL to send the request to</td>
+      </tr>
+          <tr>
+        <td class="type">$variables&nbsp;&nbsp;</td>
+        <td><b>$variables</b>&nbsp;&nbsp;</td>
+        <td>Variables to be formatted to be sent to the server</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodupdateDevice"></a>
+	<h3>method updateDevice <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a253">253</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>boolean updateDevice(
+$device_id
+$device_id, $parameters
+$parameters)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Updates a guifi device<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Whether the device was edited or not</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$device_id&nbsp;&nbsp;</td>
+        <td><b>$device_id</b>&nbsp;&nbsp;</td>
+        <td>Device ID to edit</td>
+      </tr>
+          <tr>
+        <td class="type">$parameters&nbsp;&nbsp;</td>
+        <td><b>$parameters</b>&nbsp;&nbsp;</td>
+        <td>Parameters to edit</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodupdateLink"></a>
+	<h3>method updateLink <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a449">449</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>boolean updateLink(
+$link_id
+$link_id, $parameters
+$parameters)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Updates a guifi link<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Whether the link was updated or not</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$link_id&nbsp;&nbsp;</td>
+        <td><b>$link_id</b>&nbsp;&nbsp;</td>
+        <td>Link ID to be updated</td>
+      </tr>
+          <tr>
+        <td class="type">$parameters&nbsp;&nbsp;</td>
+        <td><b>$parameters</b>&nbsp;&nbsp;</td>
+        <td>Parameters of the link to be updated</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodupdateNode"></a>
+	<h3>method updateNode <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a189">189</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>boolean updateNode(
+$node_id
+$node_id, $parameters
+$parameters)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Updates a guifi node<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Whether the node was edited or not</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$node_id&nbsp;&nbsp;</td>
+        <td><b>$node_id</b>&nbsp;&nbsp;</td>
+        <td>Node ID to edit</td>
+      </tr>
+          <tr>
+        <td class="type">$parameters&nbsp;&nbsp;</td>
+        <td><b>$parameters</b>&nbsp;&nbsp;</td>
+        <td>Parameters to edit</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodupdateRadio"></a>
+	<h3>method updateRadio <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a317">317</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>boolean updateRadio(
+$device_id
+$device_id, $radiodev_counter
+$radiodev_counter, 
+$parameters)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Updates a guifi radio of a device<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Whether the radio was updated or not</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$device_id&nbsp;&nbsp;</td>
+        <td><b>$device_id</b>&nbsp;&nbsp;</td>
+        <td>Device ID of the radio to be updated</td>
+      </tr>
+          <tr>
+        <td class="type">$radiodev_counter&nbsp;&nbsp;</td>
+        <td><b>$radiodev_counter</b>&nbsp;&nbsp;</td>
+        <td>Position within the device where the radio is location</td>
+      </tr>
+          <tr>
+        <td class="type">&nbsp;&nbsp;</td>
+        <td><b>$parameters</b>&nbsp;&nbsp;</td>
+        <td></td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+  <hr />
+	<a name="methodupdateZone"></a>
+	<h3>method updateZone <span class="smalllinenumber">[line <a href="../__filesource/fsource_default__guifi_api.php.html#a99">99</a>]</span></h3>
+	<div class="function">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>boolean updateZone(
+$zone_id
+$zone_id, $parameters
+$parameters)</code>
+    </td></tr></table>
+    </td></tr></table><br />
+	
+		Updates a guifi zone<br /><br /><br /><br />
+<h4>Tags:</h4>
+<div class="tags">
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td><b>return:</b>&nbsp;&nbsp;</td><td>Whether the zone was edited or not</td>
+  </tr>
+  <tr>
+    <td><b>access:</b>&nbsp;&nbsp;</td><td>public</td>
+  </tr>
+</table>
+</div>
+<br /><br />
+
+	
+        <h4>Parameters:</h4>
+    <div class="tags">
+    <table border="0" cellspacing="0" cellpadding="0">
+          <tr>
+        <td class="type">$zone_id&nbsp;&nbsp;</td>
+        <td><b>$zone_id</b>&nbsp;&nbsp;</td>
+        <td>Zone ID to edit</td>
+      </tr>
+          <tr>
+        <td class="type">$parameters&nbsp;&nbsp;</td>
+        <td><b>$parameters</b>&nbsp;&nbsp;</td>
+        <td>Parameters to edit</td>
+      </tr>
+        </table>
+    </div><br />
+        <div class="top">[ <a href="#top">Top</a> ]</div>
+  </div>
+</div><br />
+
+<hr />
+<a name="class_consts"></a>
+<h3>Class Constants</h3>
+<div class="tags">
+	<a name="constdev_mode"></a>
+	<p></p>
+	<h4>dev_mode = <span class="value">&nbsp;false</span></h4>
+	<p>[line <a href="../__filesource/fsource_default__guifi_api.php.html#a37">37</a>]</p>
+  Whether the class is using the Development mode or not<br /><br />
+  <br />
+	<div class="top">[ <a href="#top">Top</a> ]</div><br />
+	<a name="consthttp_interface"></a>
+	<p></p>
+	<h4>http_interface = <span class="value">&nbsp;'auto'</span></h4>
+	<p>[line <a href="../__filesource/fsource_default__guifi_api.php.html#a19">19</a>]</p>
+  Which is the HTTP interface used by PHP to open HTTP connections (either curl, fopen or autodetection)<br /><br />
+  <br />
+	<div class="top">[ <a href="#top">Top</a> ]</div><br />
+	<a name="constinput_format"></a>
+	<p></p>
+	<h4>input_format = <span class="value">&nbsp;'json'</span></h4>
+	<p>[line <a href="../__filesource/fsource_default__guifi_api.php.html#a43">43</a>]</p>
+  What is the input format of the incoming responses from the API<br /><br />
+  <br />
+	<div class="top">[ <a href="#top">Top</a> ]</div><br />
+	<a name="constoutput_format"></a>
+	<p></p>
+	<h4>output_format = <span class="value">&nbsp;'get'</span></h4>
+	<p>[line <a href="../__filesource/fsource_default__guifi_api.php.html#a49">49</a>]</p>
+  What is the output format of the outcoming parameters to the API<br /><br />
+  <br />
+	<div class="top">[ <a href="#top">Top</a> ]</div><br />
+</div><br />
+
+        <div class="credit">
+		    <hr />
+		    Documentation generated on Sun, 10 Jan 2010 21:02:50 +0100 by <a href="http://www.phpdoc.org">phpDocumentor 1.4.3</a>
+	      </div>
+      </td></tr></table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

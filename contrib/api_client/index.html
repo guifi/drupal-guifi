@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Client PHP per l'API de guifi.net</title>
+<link rel="stylesheet" type="text/css" href="style.css" />
+</head>
+<body>
+
+<div id="container">
+<div id="content">
+<h1>Client PHP de l'API de guifi.net</h1>
+
+<h2>Descàrrega</h2>
+<p><a href="guifi_api_client-0.1.tar.gz">Descarrega</a> els fitxers
+del client PHP de l'API de guifi.net.</p>
+		<p>En aquest arxiu comprimit s'hi poden trobar diversos fitxers d'<a href="#examples">exemples d'ús</a> del client.</p>
+	
+		<h2>PHPDoc</h2>
+		<p>Es pot trobar la documentació generada pel PHPDocumentator del client PHP a <a href="phpdoc/">phpdoc/</a></p>
+	
+		<h2>Posada a punt</h2>
+		
+		<p>El funcionament bàsic del client és molt simple.</p>
+		
+		<blockquote><pre>&lt;?php
+  $username = ""; // Nom del teu usuari de guifi.net
+  $password = ""; // Contrasenya del teu usuari de guifi.net
+  $gapi = new guifiAPI( $username, $password );
+?&gt;</pre></blockquote>
+
+		<h2 id="examples">Exemples d'ús</h2>
+		
+		<h3>Gestionar zones</h3>
+		
+		<p>El codi bàsic per afegir una zona nova és:</p>
+		
+		<blockquote><pre>&lt;?php
+  $title = "Sant Jaume de Frontanyà"; // Nom de la zona
+  $parent_zone = 4176; // Zona pare
+  $min_lat = '42.183122730364815'; // Latitud de l'escaire SO de la zona
+  $min_lon = '2.0180511474609375'; // Longitud de l'escaire SO de la zona
+  $max_lat = '42.19139028706819'; // Latitud de l'escaire NE de la zona
+  $max_lon = '2.0276641845703125'; // Longitud de l'escaire NE de la zona
+	
+  $gapi-&gt;addZone( $title, $parent_zone, $min_lat, $min_lon, $max_lat, $max_lon, $max_lat );
+?&gt;</pre></blockquote>
+
+	<p>Es pot trobar un exemple més complet a <a href="examples.guifi_api.zone.phps">examples.guifi_api.zone.phps</a>.</p>
+		
+		<h3>Gestionar nodes</h3>
+		
+		<p>El codi bàsic per afegir un node nou és:</p>
+		
+		<blockquote><pre>&lt;?php
+  $title = "Plaça Major, 34"; // Nom del node
+  $parent_zone = 27182; // Zona pare
+  $lat = '42.187065853813635'; // Latitud del node
+  $lon = '2.0233726501464844'; // Longitud del node
+	
+  $gapi-&gt;addNode( $title, $parent_zone, $lat, $lon );
+?&gt;</pre></blockquote>
+
+	<p>Es pot trobar un exemple més complet a <a href="examples.guifi_api.node.phps">examples.guifi_api.node.phps</a>.</p>
+	
+		<h3>Gestionar dispositius</h3>
+		
+		<p>El codi bàsic per afegir un dispositiu nou és:</p>
+		
+		<blockquote><pre>&lt;?php
+  $node_id = 27187;
+  $type = 'radio';
+  $mac = 'AB:CD:EF:AB:CD:EF';
+	
+  $gapi-&gt;addDevice( $node_id, $type, $mac );
+?&gt;</pre></blockquote>
+
+		<p>Es pot trobar un exemple més complet a <a href="examples.guifi_api.device.phps">examples.guifi_api.device.phps</a>.</p>
+	
+		<h3>Gestionar ràdios</h3>
+		
+		<p>El codi bàsic per afegir un dispositiu nou és:</p>
+		
+		<blockquote><pre>&lt;?php
+  $mode = "ap";
+  $device_id = 19534;
+  $mac = 'AA:BB:CC:DD:EE:FF';
+	
+  $gapi-&gt;addRadio( $mode, $device_id, $mac );
+?&gt;</pre></blockquote>
+
+		<p>Es pot trobar un exemple més complet a <a href="examples.guifi_api.radio.phps">examples.guifi_api.radio.phps</a>.</p>
+		
+		<h3>Gestionar Interfícies</h3>
+		
+		<p>El codi bàsic per afegir una interfície a una ràdio (en mode AP) és:</p>
+		
+		<blockquote><pre>&lt;?php
+  $device_id = 19534;
+  $radiodev_counter = 1;
+	
+  $gapi-&gt;addInterface( $device_id, $radiodev_counter );
+?&gt;</pre></blockquote>
+
+		<p>Es pot trobar un exemple més complet a <a href="examples.guifi_api.interface.phps">examples.guifi_api.interface.phps</a>.</p>
+		
+		<h3>Gestionar enllaços</h3>
+		
+		<p>El codi bàsic per afegir un enllaç a una ràdio és:</p>
+		
+		<blockquote><pre>&lt;?php
+  $from_device_id = 19534;
+  $from_radiodev_counter = 1;
+  $to_device_id = 10018;
+  $to_radiodev_counter = 0;
+	
+  $gapi-&gt;addLink( $from_device_id, $from_radiodev_counter, $to_device_id, $to_radiodev_counter );
+?&gt;</pre></blockquote>
+
+		<p>Es pot trobar un exemple més complet a <a href="examples.guifi_api.link.phps">examples.guifi_api.link.phps</a>.</p>
+		
+		<h3>Miscel·lània</h3>
+		
+		<p>Hi ha també un seguit d'altres mètodes que també es poden utilitzar dins de l'API de guifi.net.</p>
+		
+		<p>Es pot trobar un exemple complet de com utilitzar aquests mètodes a <a href="examples.guifi_api.misc.phps">examples.guifi_api.misc.php</a></p>
+		
+		<h3>Exemple complet</h3>
+		
+		<p>Finalment, hi ha un exemple complet de mashup per afegir nodes client molt fàcilment.</p>
+		
+		<p>L'exemple es composa de tres fitxers (<a href="examples.guifi_api.simple_user.phps">[1]</a>, 
+			<a href="examples.guifi_api.simple_user.step2.phps">[2]</a>, <a href="examples.guifi_api.simple_user.step3.phps">[3]</a>),
+			i encara que és una aplicació molt simple serveix per veure el potencial que té l'API de guifi.net per crear noves aplicacions.
+		</p>
+		
+	</div>
+</div>
+
+
+</body>
+</html>

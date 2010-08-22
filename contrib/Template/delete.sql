@@ -1,0 +1,18 @@
+TRUNCATE `access`;
+TRUNCATE `cache`;
+TRUNCATE `cache_block`;
+TRUNCATE `cache_filter`;
+TRUNCATE `cache_form`;
+TRUNCATE `cache_menu`;
+TRUNCATE `cache_page`;
+TRUNCATE `cache_update`;
+TRUNCATE `sessions`;
+TRUNCATE `watchdog`;
+TRUNCATE `guifi_networks`;
+TRUNCATE `guifi_zone`;
+TRUNCATE `guifi_location`;
+TRUNCATE `node`;
+TRUNCATE `node_comment_statistics`;
+TRUNCATE `node_revisions`;
+TRUNCATE `url_alias`;
+UPDATE `variable` SET `name` = 'site_frontpage', `value` = 's:4:"node";' WHERE  CONVERT(`variable`.`name` USING utf8) = 'site_frontpage'; 

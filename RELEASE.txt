@@ -1,0 +1,71 @@
+NEW FEATURES in guifi.net module v4.0
+
+New Features:
+- Notification engine, every zone/node/device contact address will be contacted
+  with a summary of the changes/insert/updates where he might be affected.
+- New abbreviation algorithm used by default at zone level, in case the user
+  doesn't provide it. The abbreviation is used while constructing the SSID using
+  the mask:
+    guifi.net-ZoneNodeRd#mode
+- Now the multiple radio devices are always numbered in sequence starting from 0 
+  and radios can be moved up & down, so can be reordered to match the position
+  on the device.
+- New profiles maps with the ability to dynamically create profiles directly
+  over the map, working worldwide and based on heywhatsthat.com calls.
+- New IPv4 engine, much faster and CPU effective.
+- Users are now able to create their users at nodes, admins can approve through
+  a new queue report to chech status and confirm the connection.
+- Improved report for availability
+- Improved reports for network & ip allocation at zones, much richer.
+- New menus with most used options ant tools & utilities, with options for 
+  finding available free sloots, used ip's, query MAC's, etc...
+
+  
+User interface:
+- Collapsible forms to make complex forms such as edit device simpler and more
+  user friendly.
+- Integration with google maps while creating/editing zones (limits) or 
+  nodes to select lat/lon coordinates. Google Maps gives the background,
+  while the guifi.net WMS service displays the network (nodes & links) as
+  a custom layer.
+- Filter forms while listing candidate devices/interfaces to link with
+- Now while listing neighbors nodes, provides a small icon with the line of 
+  sight directly in the same report page
+- Reworked breadcrumbs when makes sense, integrated with drupal's breadcrumbs
+- While creating nodes from the zone maps, zone is passed as a parameter, so 
+  the user has no longer the need to specify at which node is creating the node.
+- Added ahah calls to validate/refresh field values, i.e. while navigating
+  through a large zone hierarchy, providing the right values for firmwares
+  depending on the device brand, or providing the right channel choices 
+  per each selected protocol.
+- While looking at the distances, there are some filters provided available 
+  to be customized by the user, so no longer need to get a hughe and heavy 
+  list to look for something.
+- Filters also available when looking to the possible links, list is refreshed
+  by ahah calls without having to reload the page.
+- Enabled jquery/validation scripts for client-site validations without having
+  to submit the entire form
+- Added image buttons to simplify the user interface while editing devices.
+- Improved reports
+
+Database:
+- Add comments on tables to document primary/foreign key relationships
+- Complete rework on the database INS/DEL/UPD engine to enforce database 
+  integrity. Now creates a complete dynamic statements, with no dependencies
+  in column names, linked to the notification engine and with separated 
+  delete, insert & update triggers for each table.
+  See: _guifi_db_delete and _guifi_db_sql at guifi_includes.inc.php
+- The database schema is created/dropped by using the new drupal 6.2 install 
+  and uninstall procedures.
+  
+BUG FIXES:
+
+TODO: 
+  -Integration of zone & node location
+  	-KML export for GoogleEarth
+  -Define ap/client links
+  -Generate a simple cnml (xml) for export/import nodes
+  -Create guifi statistics/versions of nodes and track history.
+  
+  
+... and much more! :)

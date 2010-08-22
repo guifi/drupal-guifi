@@ -1,0 +1,101 @@
+
+(under development!!)
+
+Install & configuration of guifi.net module:
+--------------------------------------------
+
+- Install & configure your site with a supported drupal engine (6.x)
+
+- Enable your site  with clean url's 
+  (Administer->Site configuration->Clean URLs)
+  Apache's mod_rewrite has to be enabled
+
+- Place the guifi.net module files in the standard drupal subdirectory tree 
+  for modules (modules/guifi).
+  Take the files from the SVN latest release, ex. of anonymous get:
+    Being at the modules directory:
+    # svn co --username anonymous 
+      https://svn.projectes.lafarga.cat/svn/guifi/drupal6x/modules .
+    Being at the themes directory (once it gets available, in the meantime, 
+    the most tested theme is garland):
+    
+- Enable guifi.net module by checking the check box and save the changes
+  (Administer->Site building->Modules->guifi.net)
+  This will create all the initial database schema needed by guifi.net module  
+
+- Set up the permission controls for guifi.net
+  You might consider to create a few roles before, such as "network admins" and
+  "network contributors", you can do so at:
+  (Administer->User Management->Roles)
+  Grant the permissions at each role at:
+  (Administer->User Management->Roles / edit permissions)
+
+- Configure the guifi.net general parameters
+  (Administer->Site configuration->guifi.net configuration)
+    
+- Create you first geographic zones tree to be able to host your nodes:
+  (create content->guifi.net zone)
+  I.e.: you could make a geography zone tree which appears like:
+  
+  <State/Region>
+    <County>
+      <City A>
+        <Neighborhood B>
+        <Neighborhood C>
+      <Village D>
+        <Neighborhood E>
+        <Neighborhood F>
+
+- Network IPv4 ranges allocations
+  Assign at least one public and one private ipv4 network ranges allocations to 
+  be used to allocate network IP addresses for your futures nodes. Following
+  the original freenetworks.org convention, the public range should be a unique
+  range for your network within the 10.0.0.0/8 range, and the internal ranges
+  fall within the 172.16.x.x. 
+  Public ranges must be distinct in every network you would like to have 
+  direct connection without NAT.
+  Networks can be assigned by network administrators granted users by accessing
+  to a zone, and then use tab "Add ipv4 network"
+  As an example, you can give an 10.0.0.0/16 as a public range for your ROOT
+  zone and a 172.16.0.0/23 for your private ranges.
+  You can assign also distinct ranges within other zones of the zone hierarchy
+  tree, if you don't, when a zone child requests an IPv4 address, will be taken
+  a free network range from its parents. To avoid network fragmentation but keep
+  an optimization usage, first range will be taken with a /24 mask, and once 
+  gets completely used, will take a /23, then a /22 ... and so on.
+  
+- (Optional) 
+  (To be reworked)
+  Install & configure your own mapping system using guifi.net 
+  OpenGIS mapping system, or federate with an existing one, to create your own 
+  WMS mapping network diagrams.
+  In the meantime, at the guifi.net module configuration you could setup a 
+  Google Maps API key, and simply point to the production guifi.net WMS standard 
+  layers.
+  
+- (Optional)
+  Allocate the guifi.net statistics block in one of the regions
+  
+- Start creating your network by creating nodes, devices, services and linking
+  them! 
+  
+- Enjoy.
+
+Developer's tips & tricks:
+--------------------------
+- You should consider to install the drupal Devel module to help you
+- Feel free to provide patches to the current SUBVERSION release
+- You can activate trace levels by going to the guifi.net configuration page
+  (Administer->Site configuration->guifi.net)
+- You can use our template with an Zone, nodes and network examples. Requiere FULL clean drupal and guifi.net module installation.
+  You can find it on a contrib/template/sample.sql file.
+  
+NOTES:
+  Local LOS graphs require the gnuplot package installed and a grid file,
+  Currently there is a grid file available only for Catalonia (cata.grd).
+  LOS for the rest of the world are obtained by external links to 
+  heywhatsthat.com 
+  If you are synching with the SVN development version, use the "rebuild menus"
+  option often to update registered url calls, if not AHAH calls would fail.
+  
+  

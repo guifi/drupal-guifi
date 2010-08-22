@@ -1,0 +1,1798 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2010-01-19 00:05+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: guifi.auth.login.php:1
+msgid "guifi.auth.login"
+msgstr ""
+
+#: guifi.auth.login.php:3
+msgid "Autentica un usuari contra guifi.net."
+msgstr ""
+
+#: guifi.auth.login.php:5 guifi.device.add.php:4 guifi.device.remove.php:10
+#: guifi.device.update.php:4 guifi.interface.add.php:10
+#: guifi.interface.remove.php:18 guifi.link.add.php:10
+#: guifi.link.remove.php:11 guifi.link.update.php:4 guifi.misc.channel.php:4
+#: guifi.misc.firmware.php:5 guifi.misc.model.php:5 guifi.node.add.php:4
+#: guifi.node.remove.php:10 guifi.node.update.php:4 guifi.radio.add.php:4
+#: guifi.radio.nearest.php:5 guifi.radio.remove.php:11
+#: guifi.radio.update.php:4 guifi.zone.add.php:4 guifi.zone.nearest.php:5
+#: guifi.zone.remove.php:11 guifi.zone.update.php:4
+msgid "Paràmetres"
+msgstr ""
+
+#: guifi.auth.login.php:7 guifi.device.add.php:6 guifi.device.remove.php:12
+#: guifi.device.update.php:6 guifi.interface.add.php:12
+#: guifi.interface.remove.php:20 guifi.link.add.php:12
+#: guifi.link.remove.php:13 guifi.link.update.php:6 guifi.misc.channel.php:6
+#: guifi.misc.firmware.php:7 guifi.misc.model.php:7 guifi.node.add.php:6
+#: guifi.node.remove.php:12 guifi.node.update.php:6 guifi.radio.add.php:6
+#: guifi.radio.nearest.php:7 guifi.radio.remove.php:13
+#: guifi.radio.update.php:6 guifi.zone.add.php:6 guifi.zone.nearest.php:7
+#: guifi.zone.remove.php:13 guifi.zone.update.php:6
+msgid ""
+"L'ordre bàsica d'ús d'aquest mètode conté els camps bàsics descrits a la "
+"taula de continuació."
+msgstr ""
+
+#: guifi.auth.login.php:17 guifi.auth.login.php:49 guifi.device.add.php:16
+#: guifi.device.add.php:100 guifi.device.add.php:169
+#: guifi.device.remove.php:22 guifi.device.update.php:16
+#: guifi.device.update.php:93 guifi.interface.add.php:22
+#: guifi.interface.add.php:56 guifi.interface.remove.php:30
+#: guifi.link.add.php:22 guifi.link.add.php:86 guifi.link.add.php:131
+#: guifi.link.remove.php:23 guifi.link.update.php:16 guifi.link.update.php:62
+#: guifi.misc.channel.php:16 guifi.misc.channel.php:44
+#: guifi.misc.firmware.php:17 guifi.misc.firmware.php:44
+#: guifi.misc.manufacturer.php:17 guifi.misc.model.php:17
+#: guifi.misc.model.php:60 guifi.misc.protocol.php:18 guifi.node.add.php:16
+#: guifi.node.add.php:115 guifi.node.remove.php:22 guifi.node.update.php:16
+#: guifi.radio.add.php:16 guifi.radio.add.php:95 guifi.radio.add.php:172
+#: guifi.radio.nearest.php:17 guifi.radio.nearest.php:57
+#: guifi.radio.remove.php:23 guifi.radio.update.php:16
+#: guifi.radio.update.php:86 guifi.working.codes.php:16
+#: guifi.working.errors.php:20 guifi.working.responses.php:19
+#: guifi.zone.add.php:16 guifi.zone.add.php:140 guifi.zone.nearest.php:17
+#: guifi.zone.nearest.php:50 guifi.zone.remove.php:23 guifi.zone.update.php:16
+msgid "Nom"
+msgstr ""
+
+#: guifi.auth.login.php:18 guifi.auth.login.php:50 guifi.device.add.php:17
+#: guifi.device.add.php:101 guifi.device.add.php:170
+#: guifi.device.remove.php:23 guifi.device.update.php:17
+#: guifi.device.update.php:94 guifi.interface.add.php:23
+#: guifi.interface.add.php:57 guifi.interface.remove.php:31
+#: guifi.link.add.php:23 guifi.link.add.php:87 guifi.link.add.php:132
+#: guifi.link.remove.php:24 guifi.link.update.php:17 guifi.link.update.php:63
+#: guifi.misc.channel.php:17 guifi.misc.channel.php:45
+#: guifi.misc.firmware.php:18 guifi.misc.firmware.php:45
+#: guifi.misc.manufacturer.php:18 guifi.misc.model.php:18
+#: guifi.misc.model.php:61 guifi.misc.protocol.php:19 guifi.node.add.php:17
+#: guifi.node.add.php:116 guifi.node.remove.php:23 guifi.node.update.php:17
+#: guifi.radio.add.php:17 guifi.radio.add.php:96 guifi.radio.add.php:173
+#: guifi.radio.nearest.php:18 guifi.radio.nearest.php:58
+#: guifi.radio.remove.php:24 guifi.radio.update.php:17
+#: guifi.radio.update.php:87 guifi.working.codes.php:17
+#: guifi.working.errors.php:21 guifi.working.responses.php:20
+#: guifi.zone.add.php:17 guifi.zone.add.php:141 guifi.zone.nearest.php:18
+#: guifi.zone.nearest.php:51 guifi.zone.remove.php:24 guifi.zone.update.php:17
+msgid "Tipus"
+msgstr ""
+
+#: guifi.auth.login.php:19 guifi.auth.login.php:51 guifi.device.add.php:18
+#: guifi.device.add.php:102 guifi.device.add.php:171
+#: guifi.device.remove.php:24 guifi.device.update.php:18
+#: guifi.device.update.php:95 guifi.interface.add.php:24
+#: guifi.interface.add.php:58 guifi.interface.remove.php:32
+#: guifi.link.add.php:24 guifi.link.add.php:88 guifi.link.add.php:133
+#: guifi.link.remove.php:25 guifi.link.update.php:18 guifi.link.update.php:64
+#: guifi.misc.channel.php:18 guifi.misc.channel.php:46
+#: guifi.misc.firmware.php:19 guifi.misc.firmware.php:46
+#: guifi.misc.manufacturer.php:19 guifi.misc.model.php:19
+#: guifi.misc.model.php:62 guifi.misc.protocol.php:20 guifi.node.add.php:18
+#: guifi.node.add.php:117 guifi.node.remove.php:24 guifi.node.update.php:18
+#: guifi.radio.add.php:18 guifi.radio.add.php:97 guifi.radio.add.php:174
+#: guifi.radio.nearest.php:19 guifi.radio.nearest.php:59
+#: guifi.radio.remove.php:25 guifi.radio.update.php:18
+#: guifi.radio.update.php:88 guifi.working.codes.php:18
+#: guifi.working.errors.php:22 guifi.working.responses.php:21
+#: guifi.zone.add.php:18 guifi.zone.add.php:142 guifi.zone.nearest.php:19
+#: guifi.zone.nearest.php:52 guifi.zone.remove.php:25 guifi.zone.update.php:18
+msgid "Descripció"
+msgstr ""
+
+#: guifi.auth.login.php:20 guifi.device.add.php:19 guifi.device.add.php:103
+#: guifi.device.remove.php:25 guifi.device.update.php:19
+#: guifi.device.update.php:96 guifi.interface.add.php:25
+#: guifi.interface.remove.php:33 guifi.link.add.php:25 guifi.link.add.php:89
+#: guifi.link.remove.php:26 guifi.link.update.php:19 guifi.link.update.php:65
+#: guifi.misc.channel.php:19 guifi.misc.firmware.php:20
+#: guifi.misc.model.php:20 guifi.node.add.php:19 guifi.node.remove.php:25
+#: guifi.node.update.php:19 guifi.radio.add.php:19 guifi.radio.add.php:98
+#: guifi.radio.nearest.php:20 guifi.radio.remove.php:26
+#: guifi.radio.update.php:19 guifi.radio.update.php:89 guifi.zone.add.php:19
+#: guifi.zone.nearest.php:20 guifi.zone.remove.php:26 guifi.zone.update.php:19
+msgid "Per defecte"
+msgstr ""
+
+#: guifi.auth.login.php:27
+msgid "Nom d'usuari que es vol autenticar."
+msgstr ""
+
+#: guifi.auth.login.php:33
+msgid "Contrasenya de l'usuari que es vol autenticar."
+msgstr ""
+
+#: guifi.auth.login.php:39 guifi.device.add.php:159 guifi.interface.add.php:45
+#: guifi.link.add.php:118 guifi.node.add.php:104 guifi.radio.add.php:156
+#: guifi.radio.nearest.php:46 guifi.zone.add.php:129 guifi.zone.nearest.php:39
+msgid "Retorn"
+msgstr ""
+
+#: guifi.auth.login.php:40 guifi.device.add.php:160 guifi.interface.add.php:47
+#: guifi.link.add.php:122 guifi.misc.channel.php:34 guifi.misc.firmware.php:35
+#: guifi.misc.manufacturer.php:7 guifi.misc.model.php:50
+#: guifi.misc.protocol.php:9 guifi.node.add.php:106 guifi.radio.add.php:163
+#: guifi.radio.nearest.php:48 guifi.zone.add.php:131 guifi.zone.nearest.php:41
+msgid ""
+"Els camps que retorna aquest mètode en cas d'èxit són els descrits a "
+"continuació:"
+msgstr ""
+
+#: guifi.auth.login.php:58
+msgid ""
+"<a href=\"#auth_token\">Testimoni d'autenticació</a> a utilitzar per futures "
+"consultes dins de la mateixa sessió"
+msgstr ""
+
+#: guifi.auth.php:2
+msgid ""
+"Per utilitzar l'API de guifi.net es necessita autenticar un usari vàlid "
+"registrat de la web de <a href=\"http://www.guifi.net\">guifi.net</a>."
+msgstr ""
+
+#: guifi.auth.php:5
+msgid ""
+"Per autenticar l'usuari, s'ha de fer servir el mètode <a href="
+"\"#method_auth_login\">guifi.auth.login</a>, descrit anteriorment."
+msgstr ""
+
+#: guifi.auth.php:8
+msgid ""
+"Els mètodes tenen en compte els permisos de l'usuari autenticat, de manera "
+"que si aquest usuari no té permisos per fer una acció en concret, es "
+"retornarà un <a href=\"#working_errors\">codi d'error</a>."
+msgstr ""
+
+#: guifi.auth.php:11
+msgid "Testimoni d'autenticació"
+msgstr ""
+
+#: guifi.auth.php:13
+msgid ""
+"Un cop feta l'autenticació, el mateix mètode <a href=\"#method_auth_login"
+"\">guifi.auth.login</a> retorna un testimoni d'autenticació (<em>auth token</"
+"em>), que es pot fer servir per autenticar-se sense haver d'enviar l'usuari "
+"i la contrasenya un altre cop."
+msgstr ""
+
+#: guifi.auth.php:17
+msgid ""
+"Per poder fer servir aquest testimoni d'autenticació, cal que a cada futur "
+"mètode s'inclogui la següent capçalera HTTP fins de la consulta:"
+msgstr ""
+
+#: guifi.auth.php:23
+msgid ""
+"on <em><strong>&lt;authToken&gt;</strong></em> és el testimoni "
+"d'autenticació retornat pel mètode <a href=\"#method_auth_login_return"
+"\">guifi.auth.login</a>."
+msgstr ""
+
+#: guifi.auth.php:26
+msgid "Expiració del testimoni d'autenticació"
+msgstr ""
+
+#: guifi.auth.php:28
+msgid ""
+"Aquest testimoni d'autenticació té una data d'expiració, que és de 12 hores "
+"a partir del moment que va ser creada."
+msgstr ""
+
+#: guifi.auth.php:30
+msgid ""
+"Quan aquest testimoni d'autenticació expiri, o bé el testimoni que s'enviï "
+"al servidor sigui invàlid, el servidor retornarà un <a href=\"#working_errors"
+"\">codi d'error</a>, que significarà que el client s'ha de tornar a "
+"autenticar mitjançant el mètode <a href=\"#method_auth_login\">guifi.auth."
+"login</a>."
+msgstr ""
+
+#: guifi.device.add.php:1
+msgid "guifi.device.add"
+msgstr ""
+
+#: guifi.device.add.php:2
+msgid "Afegeix un nou dispositiu a la xarxa."
+msgstr ""
+
+#: guifi.device.add.php:26
+msgid "ID del node on el dispositiu s'afegirà."
+msgstr ""
+
+#: guifi.device.add.php:32
+msgid "Nom del nou dispositiu."
+msgstr ""
+
+#: guifi.device.add.php:33 guifi.node.add.php:33 guifi.node.add.php:39
+#: guifi.node.update.php:39 guifi.node.update.php:45 guifi.zone.add.php:33
+#: guifi.zone.add.php:46 guifi.zone.update.php:39 guifi.zone.update.php:52
+msgid "generat automàticament"
+msgstr ""
+
+#: guifi.device.add.php:38
+msgid ""
+"Tipus del nou dispositiu. Possibles valors: <em><strong>radio</strong></em>\n"
+"\t\t\t(Trasto sense fils), <em><strong>server</strong></em> (Servidor), "
+"<em><strong>nat</strong></em>\n"
+"\t\t\t(Tallafocs, xarxa privada darrere NAT), <em><strong>generic</strong></"
+"em>\n"
+"\t\t\t(Trasto genèric), <em><strong>adsl</strong></em> (Router ADSL o\n"
+"\t\t\ttrasto proveïdor d'accés a Internet), <em><strong>cam</strong></em>\n"
+"\t\t\t(Càmera en xarxa), <em><strong>phone</strong></em> (Telèfon mòbil\n"
+"\t\t\tVoIP)."
+msgstr ""
+
+#: guifi.device.add.php:50 guifi.device.update.php:44
+msgid "Adreça electrònica de notificació de canvis del dispositiu."
+msgstr ""
+
+#: guifi.device.add.php:51 guifi.node.add.php:57 guifi.node.update.php:63
+#: guifi.zone.add.php:100 guifi.zone.update.php:106
+msgid "Adreça electrònica de l'usuari autenticat."
+msgstr ""
+
+#: guifi.device.add.php:56
+msgid ""
+"Adreça MAC del dispositiu nou a afegir (del tipus <em>AA:BB:CC:DD:EE:FF</"
+"em>)."
+msgstr ""
+
+#: guifi.device.add.php:62
+msgid "Comentaris extra del dispositiu a afegir."
+msgstr ""
+
+#: guifi.device.add.php:68 guifi.device.update.php:62 guifi.link.add.php:62
+#: guifi.link.update.php:38 guifi.node.add.php:94 guifi.node.update.php:100
+#, php-format
+msgid ""
+"Estat del dispositiu. Possibles valors: <em><strong>%s</strong></em>\n"
+"\t\t\t(Projectat), <em><strong>%s</strong></em> (Reservat), <em><strong>%s</"
+"strong></em>\n"
+"\t\t\t(En construcció), <em><strong>%s</strong></em> (En proves), "
+"<em><strong>%s</strong></em>\n"
+"\t\t\t(Operatiu) i <em><strong>%s</strong></em> (Esborrat).</td>\n"
+"\t\t\t<td><em>Working</em>"
+msgstr ""
+
+#: guifi.device.add.php:77 guifi.node.add.php:87 guifi.node.update.php:93
+msgid ""
+"ID del servidor de gràfiques que recull les dades de\n"
+"\t\t\tdisponibilitat del dispositiu."
+msgstr ""
+
+#: guifi.device.add.php:79
+msgid "Agafat del node pare"
+msgstr ""
+
+#: guifi.device.add.php:85 guifi.device.update.php:79
+msgid ""
+"A més, segons el camp <strong>type</strong> d'aquest mètode hi ha un\n"
+"seguit de camps extra que complementen la informació sobre el dispositiu\n"
+"que s'està afegint. Aquests altres camps estan separats a una segona\n"
+"taula, especificant sobre quin dispositiu s'utilitzen."
+msgstr ""
+
+#: guifi.device.add.php:113
+msgid ""
+"ID del <a href=\"#method_misc_model\">model de trasto</a> sense fils per "
+"afegir"
+msgstr ""
+
+#: guifi.device.add.php:119
+msgid ""
+"<a href=\"#method_misc_firmware\">Firmware</a> que utilitza el trasto sense "
+"fils per afegir"
+msgstr ""
+
+#: guifi.device.add.php:128 guifi.device.update.php:123
+msgid ""
+"Ample de banda de baixada del dispositiu en bytes per segon. Per\n"
+"\t\t\texemple per una velocitat de baixada de 10 Mbps, s'hi ha d'introduir\n"
+"\t\t\t<strong><em>10000000</em></strong>."
+msgstr ""
+
+#: guifi.device.add.php:136 guifi.device.update.php:131
+msgid ""
+"Ample de banda de pujada del dispositiu en bytes per segon. Per\n"
+"\t\t\texemple per una velocitat de pujada de 512 kbps, s'hi ha d'introduir\n"
+"\t\t\t<strong><em>512000</em></strong>."
+msgstr ""
+
+#: guifi.device.add.php:144 guifi.device.add.php:153
+msgid ""
+"Interfície SNMP per agafar informació sobre el tràfic d'aquest dispositiu."
+msgstr ""
+
+#: guifi.device.add.php:178
+msgid "ID del dispositiu afegit"
+msgstr ""
+
+#: guifi.device.remove.php:1
+msgid "guifi.device.remove"
+msgstr ""
+
+#: guifi.device.remove.php:3
+msgid "Esborra un dispositiu de la xarxa."
+msgstr ""
+
+#: guifi.device.remove.php:6 guifi.interface.remove.php:6
+#: guifi.link.remove.php:6 guifi.node.remove.php:5 guifi.radio.remove.php:5
+#: guifi.zone.remove.php:6
+msgid "Vés amb compte"
+msgstr ""
+
+#: guifi.device.remove.php:7
+msgid ""
+"Aquesta acció no té marxa enrere, i un dispositiu esborrat deixarà de "
+"mostrar-se a la pàgina web de guifi.net."
+msgstr ""
+
+#: guifi.device.remove.php:32
+msgid "ID del dispositiu a esborrar."
+msgstr ""
+
+#: guifi.device.update.php:1
+msgid "guifi.device.update"
+msgstr ""
+
+#: guifi.device.update.php:2
+msgid "Actualitza un nou dispositiu de la xarxa."
+msgstr ""
+
+#: guifi.device.update.php:26
+msgid "ID del dispositiu a editar."
+msgstr ""
+
+#: guifi.device.update.php:32
+msgid "Node on el dispositiu se situa."
+msgstr ""
+
+#: guifi.device.update.php:38
+msgid "Nom del dispositiu."
+msgstr ""
+
+#: guifi.device.update.php:50
+msgid "Adreça MAC del dispositiu (del tipus <em>AA:BB:CC:DD:EE:FF</em>)."
+msgstr ""
+
+#: guifi.device.update.php:56
+msgid "Comentaris extra del dispositiu."
+msgstr ""
+
+#: guifi.device.update.php:72
+msgid ""
+"ID del servidor que recull les dades de disponibilitat del\n"
+"\t\t\tdispositiu."
+msgstr ""
+
+#: guifi.device.update.php:106
+#, php-format
+msgid ""
+"ID del <a href=\"%s\">model de trasto</a> sense\n"
+"\t\t\tfils per afegir"
+msgstr ""
+
+#: guifi.device.update.php:113
+#, php-format
+msgid ""
+"<a href=\"%s\">Firmware</a> que utilitza el\n"
+"\t\t\ttrasto sense fils per afegir"
+msgstr ""
+
+#: guifi.device.update.php:139 guifi.device.update.php:149
+msgid ""
+"Interfície SNMP per agafar informació sobre el tràfic d'aquest\n"
+"\t\t\tdispositiu."
+msgstr ""
+
+#: guifi.interface.add.php:1
+msgid "guifi.interface.add"
+msgstr ""
+
+#: guifi.interface.add.php:2
+msgid "Afegeix una nova interfície a una ràdio de la xarxa."
+msgstr ""
+
+#: guifi.interface.add.php:4
+msgid ""
+"L'API només suporta afegir interfícies de ràdio sense fils per poder\n"
+"afegir rangs d'adreces IP per clients.</p>\n"
+"<p>En cas que la ràdio funcioni en mode <em><strong>client</strong></em>\n"
+"no es podran afegir més interfícies.</p>\n"
+"<p>Queda per implementar el suport de les connexions per cable."
+msgstr ""
+
+#: guifi.interface.add.php:32
+msgid "ID del dispositiu on es vol afegir la interfície."
+msgstr ""
+
+#: guifi.interface.add.php:38
+msgid ""
+"Posició de la ràdio on es vol afegir la interfície respecte\n"
+"\t\t\taltres ràdios del mateix dispositiu."
+msgstr ""
+
+#: guifi.interface.add.php:65
+msgid "ID de la interfície afegida"
+msgstr ""
+
+#: guifi.interface.add.php:70
+msgid "Informació sobre la xarxa IPv4 que s'hagi afegit."
+msgstr ""
+
+#: guifi.interface.add.php:77 guifi.link.add.php:152
+msgid ""
+"Tipus\n"
+"\t\t\t\td'adreçament IPv4. Possibles valors: <em><strong>1</strong></em>\n"
+"\t\t\t\t(Adreces públiques), <em><strong>2</strong></em> (Adreces troncals)."
+msgstr ""
+
+#: guifi.interface.add.php:88 guifi.link.add.php:163 guifi.radio.add.php:222
+msgid "Adreça IPv4."
+msgstr ""
+
+#: guifi.interface.add.php:97 guifi.link.add.php:172 guifi.radio.add.php:231
+msgid "Màscara de l'adreça IPv4."
+msgstr ""
+
+#: guifi.interface.remove.php:1
+msgid "guifi.interface.remove"
+msgstr ""
+
+#: guifi.interface.remove.php:3
+msgid "Esborra una interfície de ràdio de la xarxa."
+msgstr ""
+
+#: guifi.interface.remove.php:7
+msgid ""
+"Aquesta acció no té marxa enrere, i una interfície esborrada deixarà de\n"
+"mostrar-se a la pàgina web de guifi.net."
+msgstr ""
+
+#: guifi.interface.remove.php:11
+msgid "L'API només suporta gestionar interfícies de ràdio sense fils"
+msgstr ""
+
+#: guifi.interface.remove.php:12
+msgid ""
+"No es poden esborrar interfícies del tipus wLan/Lan, així com tampoc\n"
+"hi pot haver cap ràdio sense interfícies. Les úniques interfícies que es\n"
+"poden treure són les de tipus <em><strong>wLan</strong></em>, les que\n"
+"afegeixen rangs d'IP per clients."
+msgstr ""
+
+#: guifi.interface.remove.php:16
+msgid "Queda per implementar el suport de les connexions per cable."
+msgstr ""
+
+#: guifi.interface.remove.php:40
+msgid "ID de la interfície a esborrar."
+msgstr ""
+
+#: guifi.link.add.php:1
+msgid "guifi.link.add"
+msgstr ""
+
+#: guifi.link.add.php:2
+msgid "Afegeix un nou enllaç entre dues interfícies de la xarxa."
+msgstr ""
+
+#: guifi.link.add.php:3
+msgid ""
+"Aquest mètode només és vàlid entre interfícies del tipus <strong><em>Wan</"
+"em></strong>\n"
+"i <strong><em>wLan/Lan</em></strong> o <strong><em>wLan</em></strong>\n"
+"(els anomenats enllaços <strong><em>link2ap</em></strong>); o bé entre\n"
+"interfícies <em><strong>wds</strong></em> (els anomenats enllaços "
+"<em><strong>wds</strong></em>)."
+msgstr ""
+
+#: guifi.link.add.php:7
+msgid ""
+"Segons les interfícies que s'introdueixin a aquest mètode, l'API\n"
+"detecterà automàticament quin tipus d'enllaç nou crear."
+msgstr ""
+
+#: guifi.link.add.php:32
+#, php-format
+msgid "Identificador de <a href=\"%s\">dispositiu</a> des d'on fer l'enllaç."
+msgstr ""
+
+#: guifi.link.add.php:38 guifi.link.add.php:50
+msgid "Posició de la ràdio dins del dispositiu cap on fer l'enllaç."
+msgstr ""
+
+#: guifi.link.add.php:44
+#, php-format
+msgid "Identificador de <a href=\"%s\">dispositiu</a> cap on fer l'enllaç."
+msgstr ""
+
+#: guifi.link.add.php:56
+msgid ""
+"Adreça IP que ha de tenir el dispositiu de l'enllaç amb identificador "
+"<em><strong>from_device_id</strong></em>. Aquesta adreça es verificarà, i si "
+"no és correcta no s'afegirà l'enllaç."
+msgstr ""
+
+#: guifi.link.add.php:57
+msgid "Generat automàticament"
+msgstr ""
+
+#: guifi.link.add.php:72
+msgid ""
+"A més, segons el camp <strong>mode</strong> d'aquest mètode hi ha un\n"
+"seguit de camps extra que complementen la informació sobre l'enllaç que\n"
+"s'està afegint. Aquests altres camps estan separats a una segona taula,\n"
+"especificant sobre quin tipus d'enllaç s'utilitzen."
+msgstr ""
+
+#: guifi.link.add.php:103
+#, php-format
+msgid "Identificador d'<a href=\"%s\">interfície</a> cap on fer l'enllaç."
+msgstr ""
+
+#: guifi.link.add.php:109 guifi.link.update.php:79
+#, php-format
+msgid ""
+"Tipus d'enrutament aplicat a aquest enllaç. Possibles valors: <em><strong>%"
+"s</strong></em>\n"
+"\t\t\t(<abbr title=\"Open Shortest Path First\">OSPF</abbr>), <em><strong>%"
+"s</strong></em>\n"
+"\t\t\t(<abbr title=\"Border Gateway Protocol\">BGP</abbr>), <em><strong>%s</"
+"strong></em>\n"
+"\t\t\t(estàtic)."
+msgstr ""
+
+#: guifi.link.add.php:119
+msgid ""
+"A l'afegir un enllaç a un dispositiu de guifi.net, automàticament es\n"
+"s'afegeix la configuració IP de l'enllaç."
+msgstr ""
+
+#: guifi.link.add.php:140
+msgid "Identificador del nou enllaç afegit"
+msgstr ""
+
+#: guifi.link.add.php:145
+msgid "Informació sobre la xarxa IPv4 que s'hagi afegit a la interfície."
+msgstr ""
+
+#: guifi.link.add.php:179 guifi.radio.add.php:238
+msgid "Exemple de retorn"
+msgstr ""
+
+#: guifi.link.add.php:180 guifi.radio.add.php:239
+msgid ""
+"Per clarificar els conceptes, a continuació hi ha un exemple típic\n"
+"d'un possible retorn agafat a l'atzar a l'hora d'afegir una ràdio nova."
+msgstr ""
+
+#: guifi.link.remove.php:1
+msgid "guifi.link.remove"
+msgstr ""
+
+#: guifi.link.remove.php:3
+msgid "Esborra un enllaç de la xarxa."
+msgstr ""
+
+#: guifi.link.remove.php:7
+msgid ""
+"Aquesta acció no té marxa enrere, i un enllaç esborrat deixarà de\n"
+"mostrar-se a la pàgina web de guifi.net."
+msgstr ""
+
+#: guifi.link.remove.php:33
+msgid "ID de la enllaç a esborrar."
+msgstr ""
+
+#: guifi.link.update.php:1
+msgid "guifi.link.update"
+msgstr ""
+
+#: guifi.link.update.php:2
+msgid "Actualitza un nou enllaç de la xarxa."
+msgstr ""
+
+#: guifi.link.update.php:26
+msgid "ID de l'enllaç a editar."
+msgstr ""
+
+#: guifi.link.update.php:32
+msgid ""
+"Adreça IP que ha de tenir el dispositiu de l'enllaç amb identificador "
+"<em><strong>from_device_id</strong></em>. Aquesta adreça es verificarà, i si "
+"no és correcta no s'afegirà l'enllaç.</td>\n"
+"\t\t\t<td><em>Generat automàticament</em>"
+msgstr ""
+
+#: guifi.link.update.php:48
+msgid ""
+"A més, segons el <strong>mode</strong> de l'enllaç a editar hi ha un\n"
+"seguit de camps extra que complementen la informació sobre l'enllaç que\n"
+"s'està editant. Aquests altres camps estan separats a una segona taula,\n"
+"especificant sobre quin tipus d'enllaç s'utilitzen."
+msgstr ""
+
+#: guifi.misc.channel.php:1
+msgid "guifi.misc.channel"
+msgstr ""
+
+#: guifi.misc.channel.php:2
+msgid ""
+"Aquest mètode serveix per retornar els diversos tipus de channels de "
+"dispositius (o trastos) suportats per guifi.net."
+msgstr ""
+
+#: guifi.misc.channel.php:26
+#, php-format
+msgid "<a href=\"%s\">Nom del protocol</a> que suporta els canals retornats."
+msgstr ""
+
+#: guifi.misc.channel.php:32 guifi.misc.firmware.php:33
+#: guifi.misc.manufacturer.php:5 guifi.misc.model.php:48
+#: guifi.misc.protocol.php:7
+msgid "Retorna"
+msgstr ""
+
+#: guifi.misc.channel.php:53
+msgid "Canals suportats de guifi.net retornats"
+msgstr ""
+
+#: guifi.misc.channel.php:60
+msgid "Nom del canal."
+msgstr ""
+
+#: guifi.misc.channel.php:69
+msgid "Descripció del canal."
+msgstr ""
+
+#: guifi.misc.channel.php:76 guifi.misc.firmware.php:76
+#: guifi.misc.manufacturer.php:58 guifi.misc.model.php:119
+#: guifi.misc.protocol.php:50
+msgid "Llistat"
+msgstr ""
+
+#: guifi.misc.channel.php:77
+#, php-format
+msgid ""
+"Un llistat útil de canals és el següent, ordenats per <a href=\"%s\">nom de "
+"protocol</a>:"
+msgstr ""
+
+#: guifi.misc.channel.php:81
+msgid "Nom del canal"
+msgstr ""
+
+#: guifi.misc.channel.php:82
+msgid "Descripció del canal"
+msgstr ""
+
+#: guifi.misc.firmware.php:1
+msgid "guifi.misc.firmware"
+msgstr ""
+
+#: guifi.misc.firmware.php:2
+msgid ""
+"Aquest mètode serveix per retornar els diversos tipus de firmwares de\n"
+"dispositius (o trastos) suportats per guifi.net."
+msgstr ""
+
+#: guifi.misc.firmware.php:27
+#, php-format
+msgid "<a href=\"%s\">ID de model</a> que suporta el firmware retornat."
+msgstr ""
+
+#: guifi.misc.firmware.php:53
+msgid "Firmwares suportats de guifi.net retornats"
+msgstr ""
+
+#: guifi.misc.firmware.php:60
+msgid "Nom del firmware."
+msgstr ""
+
+#: guifi.misc.firmware.php:69
+msgid "Descripció del firmware."
+msgstr ""
+
+#: guifi.misc.firmware.php:77
+msgid "Un llistat útil de firmwares de dispositius és el següent:"
+msgstr ""
+
+#: guifi.misc.firmware.php:85
+msgid "Nom del firmware"
+msgstr ""
+
+#: guifi.misc.firmware.php:86
+msgid "Descripció del firmware"
+msgstr ""
+
+#: guifi.misc.manufacturer.php:1
+msgid "guifi.misc.manufacturer"
+msgstr ""
+
+#: guifi.misc.manufacturer.php:2
+msgid ""
+"Aquest mètode serveix per retornar els diversos fabricants de\n"
+"dispositius (o trastos) suportats per guifi.net."
+msgstr ""
+
+#: guifi.misc.manufacturer.php:26
+msgid "Tots els fabricants suportats a guifi.net"
+msgstr ""
+
+#: guifi.misc.manufacturer.php:33
+msgid "ID del fabricant."
+msgstr ""
+
+#: guifi.misc.manufacturer.php:42
+msgid "Nom del fabricant."
+msgstr ""
+
+#: guifi.misc.manufacturer.php:51
+msgid "Adreça web del fabricant."
+msgstr ""
+
+#: guifi.misc.manufacturer.php:59
+msgid "Un llistat útil de fabricants de dispositius és el següent:"
+msgstr ""
+
+#: guifi.misc.model.php:1
+msgid "guifi.misc.model"
+msgstr ""
+
+#: guifi.misc.model.php:2
+msgid ""
+"Aquest mètode serveix per retornar els diversos tipus de models de\n"
+"dispositius (o trastos) suportats per guifi.net."
+msgstr ""
+
+#: guifi.misc.model.php:27
+msgid ""
+"Tipus de models a retornar. Possibles valors: <em><strong>Extern</strong></"
+"em>,\n"
+"\t\t\t<em><strong>PCMCIA</strong></em>, <em><strong>PCI</strong></em>."
+msgstr ""
+
+#: guifi.misc.model.php:34
+#, php-format
+msgid "<a href=\"%s\">ID del fabricant</a> dels models a retornar."
+msgstr ""
+
+#: guifi.misc.model.php:40
+msgid ""
+"Si el model està suportat o no. Possibles valors: <em><strong>Yes</strong></"
+"em>\n"
+"\t\t\t(se suporta el model), <em><strong>Deprecated</strong></em> (ja no se\n"
+"\t\t\tsuporta el model)."
+msgstr ""
+
+#: guifi.misc.model.php:69
+msgid "Tots els models que concorden amb els paràmetres passats"
+msgstr ""
+
+#: guifi.misc.model.php:76
+msgid "ID del model."
+msgstr ""
+
+#: guifi.misc.model.php:85
+msgid "ID del fabricant del model."
+msgstr ""
+
+#: guifi.misc.model.php:94
+msgid "Nom del model."
+msgstr ""
+
+#: guifi.misc.model.php:103
+msgid "Tipus del model."
+msgstr ""
+
+#: guifi.misc.model.php:112
+msgid "Si se suporta el model o no."
+msgstr ""
+
+#: guifi.misc.model.php:120
+msgid "Un llistat útil de models de dispositius és el següent:"
+msgstr ""
+
+#: guifi.misc.protocol.php:1
+msgid "guifi.misc.protocol"
+msgstr ""
+
+#: guifi.misc.protocol.php:2
+msgid ""
+"Aquest mètode serveix per retornar els diversos tipus de protocols de\n"
+"dispositius (o trastos) suportats per guifi.net."
+msgstr ""
+
+#: guifi.misc.protocol.php:5
+msgid "No té paràmetres d'entrada, només de retorn."
+msgstr ""
+
+#: guifi.misc.protocol.php:27
+msgid "Protocols suportats de guifi.net retornats"
+msgstr ""
+
+#: guifi.misc.protocol.php:34
+msgid "Nom del protocol."
+msgstr ""
+
+#: guifi.misc.protocol.php:43
+msgid "Descripció del protocol."
+msgstr ""
+
+#: guifi.misc.protocol.php:51
+msgid "Un llistat útil de protocols és el següent:"
+msgstr ""
+
+#: guifi.node.add.php:1
+msgid "guifi.node.add"
+msgstr ""
+
+#: guifi.node.add.php:2
+msgid "Afegeix un nou node (o localització) guifi.net a la xarxa."
+msgstr ""
+
+#: guifi.node.add.php:26 guifi.node.update.php:32
+msgid "Nom del lloc del node guifi.net."
+msgstr ""
+
+#: guifi.node.add.php:32 guifi.node.update.php:38
+msgid "Nom curt del lloc."
+msgstr ""
+
+#: guifi.node.add.php:38
+msgid "Descripció del nou node guifi.net."
+msgstr ""
+
+#: guifi.node.add.php:44
+msgid "ID de zona on estarà ubicat aquest nou lloc."
+msgstr ""
+
+#: guifi.node.add.php:50 guifi.node.update.php:56
+msgid "Descripció de la zona on està localitzat el nou node guifi.net."
+msgstr ""
+
+#: guifi.node.add.php:56 guifi.node.update.php:62
+msgid "Adreça electrònica de notificació de canvis del node."
+msgstr ""
+
+#: guifi.node.add.php:62
+msgid "Latitud, en graus decimals, de la localització del nou node guifi.net."
+msgstr ""
+
+#: guifi.node.add.php:68
+msgid "Longitud, en graus decimals, de la localització del nou node guifi.net."
+msgstr ""
+
+#: guifi.node.add.php:74 guifi.node.update.php:80
+msgid "Elevació, en metres, de la localització del nou node guifi.net."
+msgstr ""
+
+#: guifi.node.add.php:80 guifi.node.update.php:86
+#, php-format
+msgid ""
+"Serveix el node per expandir la xarxa? Possibles valors: <em><strong>%s</"
+"strong></em>\n"
+"\t\t\t(Sí), <em><strong>%s</strong></em> (No)."
+msgstr ""
+
+#: guifi.node.add.php:89 guifi.node.update.php:95 guifi.zone.add.php:64
+#: guifi.zone.add.php:70 guifi.zone.add.php:76 guifi.zone.add.php:82
+#: guifi.zone.update.php:70 guifi.zone.update.php:76 guifi.zone.update.php:82
+#: guifi.zone.update.php:88
+msgid "Agafat de la zona pare"
+msgstr ""
+
+#: guifi.node.add.php:124
+msgid "ID del nou node guifi.net afegit."
+msgstr ""
+
+#: guifi.node.remove.php:1
+msgid "guifi.node.remove"
+msgstr ""
+
+#: guifi.node.remove.php:2
+msgid "Esborra un node (o localització) guifi.net de la xarxa."
+msgstr ""
+
+#: guifi.node.remove.php:6
+msgid ""
+"Aquesta acció no té marxa enrere, i un node esborrat deixarà de\n"
+"mostrar-se a la pàgina web de guifi.net."
+msgstr ""
+
+#: guifi.node.remove.php:32
+msgid "ID del node a esborrar."
+msgstr ""
+
+#: guifi.node.update.php:1
+msgid "guifi.node.update"
+msgstr ""
+
+#: guifi.node.update.php:2
+msgid "Actualitza un node (o localització) guifi.net a la xarxa."
+msgstr ""
+
+#: guifi.node.update.php:26
+msgid "ID del node guifi.net a editar."
+msgstr ""
+
+#: guifi.node.update.php:50
+msgid "ID de zona on està ubicat aquest lloc."
+msgstr ""
+
+#: guifi.node.update.php:68
+msgid "Latitud, en graus decimals, de la localització del node guifi.net."
+msgstr ""
+
+#: guifi.node.update.php:74
+msgid "Longitud, en graus decimals, de la localització del node guifi.net."
+msgstr ""
+
+#: guifi.radio.add.php:1
+msgid "guifi.radio.add"
+msgstr ""
+
+#: guifi.radio.add.php:2 guifi.radio.update.php:2
+msgid "Afegeix una nova ràdio a un dispositiu de la xarxa."
+msgstr ""
+
+#: guifi.radio.add.php:26
+#, php-format
+msgid ""
+"Mode de funcionament de la ràdio. Possibles valors: <strong>Mode "
+"infrastructura</strong>: <em><strong>%s</strong></em> (AP o AP amb\n"
+"\t\t\tWDS), <em><strong>%s</strong></em> (Client sense fils), "
+"<em><strong>routedclient</strong></em>\n"
+"\t\t\t(Client enrutat); <strong>Mode ad-hoc</strong>: <em><strong>%s</"
+"strong></em>\n"
+"\t\t\t(Ad-hoc)"
+msgstr ""
+
+#: guifi.radio.add.php:35
+msgid "Dispositiu on anirà situada aquesta ràdio."
+msgstr ""
+
+#: guifi.radio.add.php:41
+msgid "Adreça MAC de la primera interfície de la ràdio."
+msgstr ""
+
+#: guifi.radio.add.php:42
+msgid ""
+"A la primera ràdio es genera a partir de l'adreça MAC del\n"
+"\t\t\tdispositiu. Les altres són obligatòries.</em>"
+msgstr ""
+
+#: guifi.radio.add.php:48 guifi.radio.update.php:38
+#, php-format
+msgid ""
+"Angle d'obertura de l'antena. Possibles valors: <em><strong>%d</strong></"
+"em>\n"
+"\t\t\t(original/integrada), <em><strong>%d</strong></em> (yagi/directiva), "
+"<em><strong>%d</strong></em>\n"
+"\t\t\t(patch 60 graus), <em><strong>%d</strong></em> (patch 90 graus), "
+"<em><strong>%d</strong></em>\n"
+"\t\t\t(sector 120 graus), <em><strong>%d</strong></em> (omnidirectiva)."
+msgstr ""
+
+#: guifi.radio.add.php:52 guifi.radio.update.php:42
+msgid "Depèn del mode."
+msgstr ""
+
+#: guifi.radio.add.php:57 guifi.radio.update.php:48
+#, php-format
+msgid ""
+"Guany de l'antena. Possibles valors: <em><strong>%s</strong></em>\n"
+"\t\t\t(2 dB), <em><strong>%d</strong></em> (8 dB), <em><strong>%d</strong></"
+"em>\n"
+"\t\t\t(12 dB), <em><strong>%d</strong></em> (14 dB), <em><strong>18</"
+"strong></em>\n"
+"\t\t\t(18 dB), <em><strong>%d</strong></em> (21 dB), <em><strong>24</"
+"strong></em>\n"
+"\t\t\t(24 dB), <em><strong>more</strong></em> (més de 24 dB)."
+msgstr ""
+
+#: guifi.radio.add.php:67 guifi.radio.update.php:58
+msgid "Azimuth de l'antena d'aquesta ràdio, en graus. Rang de valors: 0 - 360."
+msgstr ""
+
+#: guifi.radio.add.php:73 guifi.radio.update.php:64
+#, php-format
+msgid ""
+"Connector de la ràdio on està connectada l'antena. El significat\n"
+"\t\t\tdels valors depèn del model de dispositiu. Possibles valors: "
+"<em><strong>%s</strong></em>\n"
+"\t\t\t(Principal, Dret, Intern), <em><strong>%s</strong></em> (Auxiliar, "
+"Esquerra, Extern)."
+msgstr ""
+
+#: guifi.radio.add.php:81
+msgid ""
+"A més, segons el camp <strong>mode</strong> d'aquest mètode hi ha un\n"
+"seguit de camps extra que complementen la informació sobre la ràdio que\n"
+"s'està afegint. Aquests altres camps estan separats a una segona taula,\n"
+"especificant sobre quin tipus de ràdio s'utilitzen."
+msgstr ""
+
+#: guifi.radio.add.php:108 guifi.radio.add.php:137 guifi.radio.update.php:99
+#: guifi.radio.update.php:128
+msgid "<abbr title=\"Service Set Identifier\">SSID</abbr> de la ràdio."
+msgstr ""
+
+#: guifi.radio.add.php:109 guifi.radio.add.php:138 guifi.radio.update.php:100
+#: guifi.radio.update.php:129
+msgid "<em>Generat a partir del nom del dispositiu</em>"
+msgstr ""
+
+#: guifi.radio.add.php:114 guifi.radio.add.php:143 guifi.radio.update.php:105
+#: guifi.radio.update.php:134
+#, php-format
+msgid "<a href=\"%s\">Protocol</a> que utilitza aquesta ràdio."
+msgstr ""
+
+#: guifi.radio.add.php:120 guifi.radio.add.php:149 guifi.radio.update.php:111
+#: guifi.radio.update.php:140
+#, php-format
+msgid ""
+"<a href=\"%s\">Canal de radiofreqüència</a> que\n"
+"\t\t\tutilitza aquesta ràdio. Aquest valor depèn del protocol de la ràdio."
+msgstr ""
+
+#: guifi.radio.add.php:122 guifi.radio.add.php:151 guifi.radio.update.php:113
+#: guifi.radio.update.php:142
+msgid "Automàtic"
+msgstr ""
+
+#: guifi.radio.add.php:127 guifi.radio.update.php:118
+msgid ""
+"Si la ràdio accepta clients o no. Possibles valors: <em><strong>Yes</"
+"strong></em>\n"
+"\t\t\t(Sí), <em><strong>No</strong></em> (No)."
+msgstr ""
+
+#: guifi.radio.add.php:157
+#, php-format
+msgid ""
+"A l'afegir una ràdio a un dispositiu de guifi.net, automàticament es\n"
+"creen noves <a href=\"%s\">interfícies</a> per aquesta ràdio."
+msgstr ""
+
+#: guifi.radio.add.php:159
+#, php-format
+msgid ""
+"El tipus i número d'interfícies dependrà del mode de funcionament de\n"
+"la pròpia ràdio. En qualsevol cas, aquestes interfícies afegides\n"
+"automàticament es poden tractar mitjançant el grup de mètodes d'<a href=\"%s"
+"\">interfície</a>."
+msgstr ""
+
+#: guifi.radio.add.php:181
+msgid ""
+"Posició de la ràdio afegida en relació a altres ràdios del mateix dispositiu"
+msgstr ""
+
+#: guifi.radio.add.php:186
+msgid "Interfícies afegides automàticament a aquesta ràdio."
+msgstr ""
+
+#: guifi.radio.add.php:193
+#, php-format
+msgid "Tipus d'<a href=\"%s\">interfície</a> afegida."
+msgstr ""
+
+#: guifi.radio.add.php:202
+msgid ""
+"Informació sobre les <strong>N</strong> xarxes IPv4 que s'hagin pogut afegir."
+msgstr ""
+
+#: guifi.radio.add.php:211
+#, php-format
+msgid ""
+"Tipus\n"
+"\t\t\t\td'adreçament IPv4. Possibles valors: <em><strong>%d</strong></em>\n"
+"\t\t\t\t(Adreces públiques), <em><strong>%d</strong></em> (Adreces troncals)."
+msgstr ""
+
+#: guifi.radio.nearest.php:1
+msgid "guifi.radio.nearest"
+msgstr ""
+
+#: guifi.radio.nearest.php:3
+msgid ""
+"Cerca les ràdios en mode <em><strong>ap</strong></em> més properes a un node "
+"del mapa.</strong>"
+msgstr ""
+
+#: guifi.radio.nearest.php:27
+msgid ""
+"Identificador del node al qual volem buscar les ràdios més\n"
+"\t\t\tproperes per establir-hi un enllaç."
+msgstr ""
+
+#: guifi.radio.nearest.php:34
+msgid "Distància mínima a la qual han d'estar les ràdios retornades."
+msgstr ""
+
+#: guifi.radio.nearest.php:40
+msgid "Distància màxima a la qual ha d'estar les ràdios retornades."
+msgstr ""
+
+#: guifi.radio.nearest.php:66
+msgid ""
+"Matriu d'informació amb totes les possibles ràdios. Com a màxim retornarà 20 "
+"ràdios diferents."
+msgstr ""
+
+#: guifi.radio.nearest.php:73
+msgid "ID del dispositiu on és la ràdio."
+msgstr ""
+
+#: guifi.radio.nearest.php:82
+msgid "Posició dins del dispositiu que ocupa la ràdio."
+msgstr ""
+
+#: guifi.radio.nearest.php:91
+msgid "SSID de la ràdio."
+msgstr ""
+
+#: guifi.radio.nearest.php:100
+msgid "Distància (en km) entre el node i la ràdio."
+msgstr ""
+
+#: guifi.radio.remove.php:1
+msgid "guifi.radio.remove"
+msgstr ""
+
+#: guifi.radio.remove.php:2
+msgid "Esborra un ràdio d'un dispositiu guifi.net de la xarxa."
+msgstr ""
+
+#: guifi.radio.remove.php:6
+msgid ""
+"Aquesta acció no té marxa enrere, i un radio esborrada deixarà de\n"
+"mostrar-se a la pàgina web de guifi.net."
+msgstr ""
+
+#: guifi.radio.remove.php:8
+msgid ""
+"Es perdran totes les configuracions IP i els enllaços associats a aquesta "
+"ràdio!"
+msgstr ""
+
+#: guifi.radio.remove.php:33
+#, php-format
+msgid "<a href=\"%s\">ID del dispositiu</a> on està situada la ràdio."
+msgstr ""
+
+#: guifi.radio.remove.php:39
+msgid ""
+"Dins el dispositiu, a quina posició està ubicada la ràdio que es vol "
+"esborrar."
+msgstr ""
+
+#: guifi.radio.update.php:1
+msgid "guifi.radio.update"
+msgstr ""
+
+#: guifi.radio.update.php:26
+msgid "Dispositiu on està situada aquesta ràdio."
+msgstr ""
+
+#: guifi.radio.update.php:32
+msgid ""
+"Posició de la ràdio per actualitzar en relació a altres ràdios del mateix "
+"dispositiu."
+msgstr ""
+
+#: guifi.radio.update.php:72
+msgid ""
+"A més, segons el camp <strong>mode</strong> que tingui aquesta hi ha\n"
+"un seguit de camps extra que complementen la informació sobre la ràdio\n"
+"que s'està editant. Aquests altres camps estan separats a una segona\n"
+"taula, especificant sobre quin tipus de ràdio s'utilitzen."
+msgstr ""
+
+#: guifi.working.calls.php:1
+msgid "Crides a l'API"
+msgstr ""
+
+#: guifi.working.calls.php:3
+msgid "L'API de guifi.net funciona a través del protocol HTTP."
+msgstr ""
+
+#: guifi.working.calls.php:5
+msgid ""
+"En concret, actualment l'API només suporta el mètode GET del protocol HTTP "
+"com a entrada de dades."
+msgstr ""
+
+#: guifi.working.calls.php:7
+msgid ""
+"Per tant, una possible crida a l'API de guifi.net s'efectuaria mitjançant "
+"l'URL:"
+msgstr ""
+
+#: guifi.working.codes.php:1
+msgid "Codis de resposta"
+msgstr ""
+
+#: guifi.working.codes.php:3
+msgid ""
+"Tota crida que es faci a l'API de guifi.net obté un codi de resposta,\n"
+"tal i com s'explica a <a href=\"\">respostes de l'API</a>."
+msgstr ""
+
+#: guifi.working.codes.php:6
+msgid "Aquests codis de resposta estan conformats pels següents camps:"
+msgstr ""
+
+#: guifi.working.codes.php:25
+msgid "Identificador del codi de resposta."
+msgstr ""
+
+#: guifi.working.codes.php:30
+msgid ""
+"Cadena de caràcters explicativa del codi de resposta (i unívoca al codi de "
+"resposta)."
+msgstr ""
+
+#: guifi.working.codes.php:35
+msgid ""
+"A continuació hi ha un llistat amb els possibles valors que poden tenir "
+"aquests codis."
+msgstr ""
+
+#: guifi.working.codes.php:44 guifi.working.errors.php:55
+msgid "Codi"
+msgstr ""
+
+#: guifi.working.codes.php:45 guifi.working.errors.php:56
+msgid "Cadena de caràcters explicativa"
+msgstr ""
+
+#: guifi.working.errors.php:1
+msgid "Codis d'error"
+msgstr ""
+
+#: guifi.working.errors.php:3
+msgid ""
+"A l'utilitzar l'API de guifi.net és possible que hi hagi crides mal\n"
+"formulades, que l'API no entén, o que no es poden realitzar."
+msgstr ""
+
+#: guifi.working.errors.php:6
+#, php-format
+msgid ""
+"Per saber si s'està en una d'aquestes crides, l'API retorna un camp\n"
+"de dades especial, <em><strong>errors</strong></em>, tal com s'explica a\n"
+"<a href=\"%s\">respostes de l'API</a>."
+msgstr ""
+
+#: guifi.working.errors.php:10
+msgid "Aquests errors estan conformats pels següents camps:"
+msgstr ""
+
+#: guifi.working.errors.php:29
+msgid "Identificador del codi d'error."
+msgstr ""
+
+#: guifi.working.errors.php:34
+msgid ""
+"Cadena de caràcters explicativa del codi d'error (i unívoca al codi d'error)."
+msgstr ""
+
+#: guifi.working.errors.php:39
+msgid ""
+"Cadena de caràcters opcional, per definir més concretament\n"
+"\t\t\tl'error. Un mateix codi d'error pot venir amb diferents valors al\n"
+"\t\t\tcamp extra."
+msgstr ""
+
+#: guifi.working.errors.php:46
+msgid ""
+"A continuació hi ha un llistat amb els possibles valors que poden tenir "
+"aquests errors."
+msgstr ""
+
+#: guifi.working.responses.php:1
+msgid "Respostes de l'API"
+msgstr ""
+
+#: guifi.working.responses.php:3
+msgid ""
+"Les respostes de l'API de guifi.net vénen donades també pel protocol HTTP."
+msgstr ""
+
+#: guifi.working.responses.php:5
+#, php-format
+msgid ""
+"La resposta de l'API està al contingut de la resposta HTTP, i ve\n"
+"formatat. Actualment, l'únic format implementat de la resposta és\n"
+"mitjançant <a href=\"%s\">JSON</a>."
+msgstr ""
+
+#: guifi.working.responses.php:9
+msgid ""
+"Els camps de resposta definits per la resposta de l'API de guifi.net són els "
+"següents:"
+msgstr ""
+
+#: guifi.working.responses.php:28
+msgid "Nom del mètode al qual s'està responent."
+msgstr ""
+
+#: guifi.working.responses.php:33
+#, php-format
+msgid "<a href=\"%s\">Codi de resposta</a> de l'API."
+msgstr ""
+
+#: guifi.working.responses.php:38
+#, php-format
+msgid ""
+"Resposta que es retorna sobre el mètode que s'utilitza. Correspon\n"
+"\t\t\tal <em><strong>retorn</strong></em> de cada <a href=\"%s\">mètode</a>."
+msgstr ""
+
+#: guifi.working.responses.php:44
+#, php-format
+msgid "<a href=\"%s\">Codi d'error</a> en la crida a un mètode de l'API."
+msgstr ""
+
+#: guifi.working.responses.php:49
+msgid ""
+"Per tant, una possible resposta de l'API de guifi.net (responent a la crida "
+"anterior) seria:"
+msgstr ""
+
+#: guifi.zone.add.php:1
+msgid "guifi.zone.add"
+msgstr ""
+
+#: guifi.zone.add.php:2
+msgid "Afegeix una nova zona a la xarxa."
+msgstr ""
+
+#: guifi.zone.add.php:26
+msgid "Nom de la zona a crear."
+msgstr ""
+
+#: guifi.zone.add.php:32
+msgid "Abreviació de la zona a crear."
+msgstr ""
+
+#: guifi.zone.add.php:38 guifi.zone.update.php:44
+#, php-format
+msgid ""
+"Mode de la zona. Possibles valors: <em><strong>%s</strong></em>\n"
+"\t\t\t(Infraestructura) i <em><strong>%s</strong></em> (Ad-hoc)."
+msgstr ""
+
+#: guifi.zone.add.php:45 guifi.zone.update.php:51
+msgid "Text explicatiu per mostrar a la zona."
+msgstr ""
+
+#: guifi.zone.add.php:51
+msgid "ID de la zona pare de la nova zona a crear."
+msgstr ""
+
+#: guifi.zone.add.php:57
+msgid "Fus horari de la zona a crear."
+msgstr ""
+
+#: guifi.zone.add.php:63 guifi.zone.update.php:69
+msgid ""
+"ID del servidor de gràfiques que recull les dades de disponibilitat de la "
+"zona."
+msgstr ""
+
+#: guifi.zone.add.php:69 guifi.zone.update.php:75
+msgid "ID del servidor proxy per defecte de la zona."
+msgstr ""
+
+#: guifi.zone.add.php:75 guifi.zone.update.php:81
+msgid ""
+"Adreces IP dels servidors DNS de la zona, separats per comes (<strong>,</"
+"strong>)."
+msgstr ""
+
+#: guifi.zone.add.php:81 guifi.zone.update.php:87
+msgid ""
+"Adreces IP dels servidors de temps (NTP) de la zona, separats per comes "
+"(<strong>,</strong>)."
+msgstr ""
+
+#: guifi.zone.add.php:87
+msgid "Identificador de zona OSPF de la zona a crear."
+msgstr ""
+
+#: guifi.zone.add.php:93
+msgid "Adreça web relacionada amb la zona a crear."
+msgstr ""
+
+#: guifi.zone.add.php:99 guifi.zone.update.php:105
+msgid "Adreça electrònica de notificació de canvis de la zona."
+msgstr ""
+
+#: guifi.zone.add.php:105 guifi.zone.update.php:111
+msgid ""
+"Coordenada de longitud, en graus decimals, del límit inferior esquerre (SO) "
+"de la zona."
+msgstr ""
+
+#: guifi.zone.add.php:111 guifi.zone.update.php:117
+msgid ""
+"Coordenada de latitud, en graus decimals, del límit inferior esquerre (SO) "
+"de la zona."
+msgstr ""
+
+#: guifi.zone.add.php:117 guifi.zone.update.php:123
+msgid ""
+"Coordenada de longitud, en graus decimals, del límit superior dret (NE) de "
+"la zona."
+msgstr ""
+
+#: guifi.zone.add.php:123 guifi.zone.update.php:129
+msgid ""
+"Coordenada de latitud, en graus decimals, del límit superior dret (NE) de la "
+"zona."
+msgstr ""
+
+#: guifi.zone.add.php:149
+msgid "ID de la zona afegida."
+msgstr ""
+
+#: guifi.zone.nearest.php:1
+msgid "guifi.zone.nearest"
+msgstr ""
+
+#: guifi.zone.nearest.php:3
+msgid "Cerca la zona més propera a un punt del mapa."
+msgstr ""
+
+#: guifi.zone.nearest.php:27
+msgid ""
+"Coordenada de longitud, en graus decimals, del punt pel qual volem esbrinar "
+"la zona més propera."
+msgstr ""
+
+#: guifi.zone.nearest.php:33
+msgid ""
+"Coordenada de latitud, en graus decimals, del punt pel qual volem esbrinar "
+"la zona més propera."
+msgstr ""
+
+#: guifi.zone.nearest.php:59
+msgid "Informació de la zona més propera al punt especificat."
+msgstr ""
+
+#: guifi.zone.nearest.php:66 guifi.zone.nearest.php:89
+msgid "ID de la zona."
+msgstr ""
+
+#: guifi.zone.nearest.php:75 guifi.zone.nearest.php:98
+#: guifi.zone.update.php:32
+msgid "Nom de la zona."
+msgstr ""
+
+#: guifi.zone.nearest.php:82
+msgid ""
+"Matriu d'informació amb totes les possibles zones que també inclouen el punt "
+"especificat."
+msgstr ""
+
+#: guifi.zone.remove.php:1
+msgid "guifi.zone.remove"
+msgstr ""
+
+#: guifi.zone.remove.php:3
+msgid "Esborra una zona de la xarxa."
+msgstr ""
+
+#: guifi.zone.remove.php:7
+msgid ""
+"Aquesta acció no té marxa enrere, i una zona esborrada deixarà de\n"
+"mostrar-se a la pàgina web de guifi.net."
+msgstr ""
+
+#: guifi.zone.remove.php:33
+msgid "ID de la zona a esborrar."
+msgstr ""
+
+#: guifi.zone.update.php:1
+msgid "guifi.zone.update"
+msgstr ""
+
+#: guifi.zone.update.php:2
+msgid "Actualitza una zona a la xarxa."
+msgstr ""
+
+#: guifi.zone.update.php:26
+msgid "ID de la zona a editar."
+msgstr ""
+
+#: guifi.zone.update.php:38
+msgid "Abreviació de la zona."
+msgstr ""
+
+#: guifi.zone.update.php:57
+msgid "ID de la zona pare de la zona a editar."
+msgstr ""
+
+#: guifi.zone.update.php:63
+msgid "Fus horari de la zona."
+msgstr ""
+
+#: guifi.zone.update.php:93
+msgid "Identificador de zona OSPF de la zona."
+msgstr ""
+
+#: guifi.zone.update.php:99
+msgid "Adreça web relacionada amb la zona."
+msgstr ""
+
+#: index.php:32 index.php:49
+msgid "Documentació de l'API de guifi.net"
+msgstr ""
+
+#: index.php:51
+msgid "Taula de continguts"
+msgstr ""
+
+#: index.php:54
+msgid "Descripció general"
+msgstr ""
+
+#: index.php:57
+msgid ""
+"L'API de guifi.net consisteix en un grup de mètodes per poder crear, editar "
+"o esborrar els diversos objectes que conformen la xarxa lliure, oberta i "
+"neutral."
+msgstr ""
+
+#: index.php:60
+msgid ""
+"Els diversos mètodes estan classificats en 8 grans <a href=\"#methods"
+"\">grups de mètodes</a>, cadascun referent a la seva àrea."
+msgstr ""
+
+#: index.php:63
+msgid "Aquests grups són:"
+msgstr ""
+
+#: index.php:67
+msgid "Auth"
+msgstr ""
+
+#: index.php:67
+msgid ""
+"per autenticar-se com a usuari de guifi.net i poder utilitzar els permisos "
+"d'aquest usuari"
+msgstr ""
+
+#: index.php:68
+msgid "Zone"
+msgstr ""
+
+#: index.php:68
+msgid "per poder gestionar les zones dins de guifi.net"
+msgstr ""
+
+#: index.php:69
+msgid "Node"
+msgstr ""
+
+#: index.php:69
+msgid "per poder gestionar els nodes dins de guifi.net"
+msgstr ""
+
+#: index.php:70
+msgid "Device"
+msgstr ""
+
+#: index.php:70
+msgid "per poder gestionar els dispositius (o trastos) dins de guifi.net"
+msgstr ""
+
+#: index.php:71
+msgid "Radio"
+msgstr ""
+
+#: index.php:71
+msgid "per poder gestionar les ràdios dins de guifi.net"
+msgstr ""
+
+#: index.php:72
+msgid "Interface"
+msgstr ""
+
+#: index.php:72
+msgid "per poder gestionar les interfícies de les ràdios dins de guifi.net"
+msgstr ""
+
+#: index.php:73
+msgid "Link"
+msgstr ""
+
+#: index.php:73
+msgid "per poder gestionar els enllaços entre nodes dins de guifi.net"
+msgstr ""
+
+#: index.php:74
+msgid "Misc"
+msgstr ""
+
+#: index.php:74
+msgid ""
+"per poder agafar informació sobre diversos tipus de dades dins de guifi.net"
+msgstr ""
+
+#: index.php:78
+msgid ""
+"Tots els mètodes descrits en aquests grups tenen fins a dos subapartats, els "
+"paràmetres i el retorn."
+msgstr ""
+
+#: index.php:81
+msgid ""
+"Els <strong>paràmetres</strong> és la informació bàsica que servirà per "
+"operar amb l'aplicació de guifi.net,\n"
+"\t\t\t\tmentre que el <strong>retorn</strong> és la informació que ens "
+"retornarà l'aplicació un cop executada l'operació."
+msgstr ""
+
+#: index.php:85
+msgid ""
+"Els paràmetres que estiguin marcats en vermell i amb un asterisc al davant"
+msgstr ""
+
+#: index.php:86
+msgid "són obligatoris, mentre que els altres són opcionals."
+msgstr ""
+
+#: index.php:89
+msgid "Funcionament"
+msgstr ""
+
+#: index.php:99
+msgid "Mètodes"
+msgstr ""
+
+#: index.php:101
+msgid ""
+"A continuació hi ha detallats els diferents grups de mètodes existents a "
+"l'API de guifi.net."
+msgstr ""
+
+#: index.php:104
+msgid "guifi.auth"
+msgstr ""
+
+#: index.php:106
+msgid ""
+"Aquest grup de mètodes serveix per controlar l'<strong>autenticació contra "
+"guifi.net</strong>, i així poder gestionar correctament els permisos a "
+"utilitzar per altres mètodes."
+msgstr ""
+
+#: index.php:109
+msgid ""
+"Totes les crides a l'API de guifi.net han de començar amb un d'aquests "
+"mètodes, que permetran després executar els altres mètodes correctament."
+msgstr ""
+
+#: index.php:114
+msgid "guifi.zone"
+msgstr ""
+
+#: index.php:116
+msgid ""
+"Aquest grup de mètodes serveix per controlar les zones dins de guifi.net."
+msgstr ""
+
+#: index.php:128
+msgid "guifi.node"
+msgstr ""
+
+#: index.php:137
+msgid "guifi.device"
+msgstr ""
+
+#: index.php:140
+msgid ""
+"Aquest grup de mètodes serveix per controlar els dispositius (o trastos) que "
+"hi ha dins de guifi.net."
+msgstr ""
+
+#: index.php:143
+#, php-format
+msgid ""
+"Cada dispositiu està associat a un <a href=\"%s\">node</a>, i hi ha diversos "
+"tipus de dispositius."
+msgstr ""
+
+#: index.php:153
+msgid "guifi.radio"
+msgstr ""
+
+#: index.php:164
+msgid "guifi.interface"
+msgstr ""
+
+#: index.php:171
+msgid "guifi.link"
+msgstr ""
+
+#: index.php:180
+msgid "guifi.misc"
+msgstr ""
+
+#: index.php:193
+msgid "Autenticació"
+msgstr ""
+
+#: index.php:198
+msgid "Llibreries"
+msgstr ""
+
+#: index.php:200
+#, php-format
+msgid ""
+"El codi font de l'API de guifi.net és lliure, i es pot trobar al <a href=\"%s"
+"\">Trac de guifi.net</a>."
+msgstr ""
+
+#: index.php:202
+msgid ""
+"A més a més, s'ofereixen als programadors que vulguin fer servir l'API de "
+"guifi.net un seguit de llibreries per poder-hi treballar més còmodament des "
+"de bon principi."
+msgstr ""
+
+#: index.php:205
+msgid ""
+"Els llenguatges de programació disponibles per aquestes llibreries són els "
+"següents:"
+msgstr ""
+
+#: index.php:212
+msgid ""
+"T'animem a programar les teves pròpies llibreries en el llenguatge de "
+"programació que prefereixis, i a alliberar-ne el codi font perquè tothom en "
+"pugui fer ús!"
+msgstr ""

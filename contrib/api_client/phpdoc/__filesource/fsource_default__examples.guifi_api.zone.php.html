@@ -1,0 +1,171 @@
+<html>
+<head>
+<title>File Source for examples.guifi_api.zone.php</title>
+<link rel="stylesheet" type="text/css" href="../media/style.css">
+</head>
+<body>
+
+<table border="0" cellspacing="0" cellpadding="0" height="48" width="100%">
+  <tr>
+    <td class="header_top">default</td>
+  </tr>
+  <tr><td class="header_line"><img src="../media/empty.png" width="1" height="1" border="0" alt=""  /></td></tr>
+  <tr>
+    <td class="header_menu">
+        
+                                    
+                              		  [ <a href="../classtrees_default.html" class="menu">class tree: default</a> ]
+		  [ <a href="../elementindex_default.html" class="menu">index: default</a> ]
+		  	    [ <a href="../elementindex.html" class="menu">all elements</a> ]
+    </td>
+  </tr>
+  <tr><td class="header_line"><img src="../media/empty.png" width="1" height="1" border="0" alt=""  /></td></tr>
+</table>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="200" class="menu">
+      <b>Packages:</b><br />
+              <a href="../li_default.html">default</a><br />
+            <br /><br />
+                  
+      
+                </td>
+    <td>
+      <table cellpadding="10" cellspacing="0" width="100%" border="0"><tr><td valign="top">
+
+<h1 align="center">Source for file examples.guifi_api.zone.php</h1>
+<p>Documentation is available at <a href="../default/_examples.guifi_api.zone.php.html">examples.guifi_api.zone.php</a></p>
+<div class="src-code">
+<ol><li><div class="src-line"><a name="a1"></a><span class="src-php">&lt;?php</span></div></li>
+<li><div class="src-line"><a name="a2"></a><span class="src-comm">//&nbsp;The&nbsp;source&nbsp;code&nbsp;packaged&nbsp;with&nbsp;this&nbsp;file&nbsp;is&nbsp;Free&nbsp;Software,&nbsp;Copyright&nbsp;(C)&nbsp;2005&nbsp;by</span></div></li>
+<li><div class="src-line"><a name="a3"></a><span class="src-comm">//&nbsp;Eduard&nbsp;Duran&nbsp;&lt;eduard.duran&nbsp;at&nbsp;iglu.cat&gt;.</span></div></li>
+<li><div class="src-line"><a name="a4"></a><span class="src-comm">//&nbsp;It's&nbsp;licensed&nbsp;under&nbsp;the&nbsp;AFFERO&nbsp;GENERAL&nbsp;PUBLIC&nbsp;LICENSE&nbsp;unless&nbsp;stated&nbsp;otherwise.</span></div></li>
+<li><div class="src-line"><a name="a5"></a><span class="src-comm">//&nbsp;You&nbsp;can&nbsp;get&nbsp;copies&nbsp;of&nbsp;the&nbsp;licenses&nbsp;here:</span></div></li>
+<li><div class="src-line"><a name="a6"></a><span class="src-comm">//&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;http://www.affero.org/oagpl.html</span></div></li>
+<li><div class="src-line"><a name="a7"></a><span class="src-comm">//&nbsp;AFFERO&nbsp;GENERAL&nbsp;PUBLIC&nbsp;LICENSE&nbsp;is&nbsp;also&nbsp;included&nbsp;in&nbsp;the&nbsp;file&nbsp;called&nbsp;&quot;LICENSE.txt&quot;.</span></div></li>
+<li><div class="src-line"><a name="a8"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a9"></a>require&nbsp;<span class="src-sym">(&nbsp;</span><span class="src-str">'guifi_api.php'&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a10"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a11"></a><span class="src-doc">/**</span></div></li>
+<li><div class="src-line"><a name="a12"></a><span class="src-doc">&nbsp;*&nbsp;Configuration&nbsp;of&nbsp;authentication&nbsp;against&nbsp;guifi.net</span></div></li>
+<li><div class="src-line"><a name="a13"></a><span class="src-doc">&nbsp;*/</span></div></li>
+<li><div class="src-line"><a name="a14"></a><span class="src-var">$username&nbsp;</span>=&nbsp;<span class="src-str">&quot;&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a15"></a><span class="src-var">$password&nbsp;</span>=&nbsp;<span class="src-str">&quot;&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a16"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a17"></a><span class="src-doc">/**</span></div></li>
+<li><div class="src-line"><a name="a18"></a><span class="src-doc">&nbsp;*&nbsp;Code&nbsp;from&nbsp;here!</span></div></li>
+<li><div class="src-line"><a name="a19"></a><span class="src-doc">&nbsp;*/</span></div></li>
+<li><div class="src-line"><a name="a20"></a><span class="src-var">$gapi&nbsp;</span>=&nbsp;<span class="src-key">new&nbsp;</span><span class="src-id"><a href="../default/guifiAPI.html">guifiAPI</a></span><span class="src-sym">(&nbsp;</span><span class="src-var">$username</span><span class="src-sym">,&nbsp;</span><span class="src-var">$password&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a21"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a22"></a><span class="src-var">$action&nbsp;</span>=&nbsp;<span class="src-var">$_GET</span><span class="src-sym">[</span><span class="src-str">'action'</span><span class="src-sym">]</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a23"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a24"></a><span class="src-key">switch</span><span class="src-sym">(&nbsp;</span><span class="src-var">$action&nbsp;</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a25"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">case&nbsp;</span><span class="src-str">'add'</span>:</div></li>
+<li><div class="src-line"><a name="a26"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-comm">//&nbsp;All&nbsp;possible&nbsp;parameters&nbsp;to&nbsp;add&nbsp;a&nbsp;zone</span></div></li>
+<li><div class="src-line"><a name="a27"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$title&nbsp;</span>=&nbsp;<span class="src-str">&quot;Sant&nbsp;Jaume&nbsp;de&nbsp;Frontanyà&quot;</span><span class="src-sym">;&nbsp;</span><span class="src-comm">//&nbsp;Nom&nbsp;de&nbsp;la&nbsp;zona</span></div></li>
+<li><div class="src-line"><a name="a28"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$master&nbsp;</span>=&nbsp;<span class="src-num">4176</span><span class="src-sym">;&nbsp;</span><span class="src-comm">//&nbsp;Zona&nbsp;pare</span></div></li>
+<li><div class="src-line"><a name="a29"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$min_lat&nbsp;</span>=&nbsp;<span class="src-str">'42.183122730364815'</span><span class="src-sym">;&nbsp;</span><span class="src-comm">//&nbsp;Latitud&nbsp;de&nbsp;l'escaire&nbsp;SO&nbsp;de&nbsp;la&nbsp;zona</span></div></li>
+<li><div class="src-line"><a name="a30"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$min_lon&nbsp;</span>=&nbsp;<span class="src-str">'2.0180511474609375'</span><span class="src-sym">;&nbsp;</span><span class="src-comm">//&nbsp;Longitud&nbsp;de&nbsp;l'escaire&nbsp;SO&nbsp;de&nbsp;la&nbsp;zona</span></div></li>
+<li><div class="src-line"><a name="a31"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$max_lat&nbsp;</span>=&nbsp;<span class="src-str">'42.19139028706819'</span><span class="src-sym">;&nbsp;</span><span class="src-comm">//&nbsp;Latitud&nbsp;de&nbsp;l'escaire&nbsp;NE&nbsp;de&nbsp;la&nbsp;zona</span></div></li>
+<li><div class="src-line"><a name="a32"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$max_lon&nbsp;</span>=&nbsp;<span class="src-str">'2.0276641845703125'</span><span class="src-sym">;&nbsp;</span><span class="src-comm">//&nbsp;Longitud&nbsp;de&nbsp;l'escaire&nbsp;NE&nbsp;de&nbsp;la&nbsp;zona</span></div></li>
+<li><div class="src-line"><a name="a33"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a34"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a35"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone&nbsp;</span>=&nbsp;<span class="src-key">array</span><span class="src-sym">(</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a36"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'nick'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-str">&quot;StJaumeFrontanyà&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a37"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'zone_mode'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-str">'infrastructure'</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a38"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'body'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-str">&quot;Sant&nbsp;Jaume&nbsp;de&nbsp;Frontanyà&nbsp;és&nbsp;un&nbsp;municipi&nbsp;de&nbsp;la&nbsp;comarca&nbsp;del&nbsp;Berguedà.&lt;br&nbsp;/&gt;&lt;br&nbsp;/&gt;El&nbsp;seu&nbsp;terme&nbsp;és&nbsp;muntanyenc&nbsp;i&nbsp;escassament&nbsp;poblat,&nbsp;amb&nbsp;boscos&nbsp;de&nbsp;pins&nbsp;i&nbsp;pastures&nbsp;per&nbsp;a&nbsp;la&nbsp;ramaderia&nbsp;que&nbsp;juntament&nbsp;amb&nbsp;l'agricultura&nbsp;de&nbsp;cereals&nbsp;i&nbsp;el&nbsp;turisme&nbsp;és&nbsp;la&nbsp;base&nbsp;de&nbsp;la&nbsp;seva&nbsp;economia.&nbsp;Regat&nbsp;per&nbsp;afluents&nbsp;de&nbsp;la&nbsp;reira&nbsp;de&nbsp;Merlès.&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a39"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'graph_server'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-num">14428</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a40"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'proxy_server'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-num">15903</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a41"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'dns_servers'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-str">'10.145.2.34,10.145.2.66'</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a42"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'ntp_servers'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-str">'10.145.8.226'</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a43"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'ospf_zone'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-num">5</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a44"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'homepage'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-str">'http://www.santjaumedefrontanya.net'</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a45"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'notification'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-str">&quot;name@example.com&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a46"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a47"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$added&nbsp;</span>=&nbsp;<span class="src-var">$gapi</span><span class="src-sym">-&gt;</span><span class="src-id">addZone</span><span class="src-sym">(&nbsp;</span><span class="src-var">$title</span><span class="src-sym">,&nbsp;</span><span class="src-var">$master</span><span class="src-sym">,&nbsp;</span><span class="src-var">$min_lat</span><span class="src-sym">,&nbsp;</span><span class="src-var">$min_lon</span><span class="src-sym">,&nbsp;</span><span class="src-var">$max_lat</span><span class="src-sym">,&nbsp;</span><span class="src-var">$max_lon</span><span class="src-sym">,&nbsp;</span><span class="src-var">$zone&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a48"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-var">$added&nbsp;</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a49"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;</span><span class="src-str">Zone&nbsp;created&nbsp;correctly!!&lt;br&nbsp;/&gt;\n&lt;br&nbsp;/&gt;\nThe&nbsp;identificator&nbsp;of&nbsp;the&nbsp;new&nbsp;zone&nbsp;is:&nbsp;zone_id&nbsp;=&nbsp;&lt;strong&gt;<span class="src-var">$added</span><span class="src-sym">-&gt;</span><span class="src-id">zone_id</span>&lt;/strong&gt;</span><span class="src-str">&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a50"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}&nbsp;</span><span class="src-key">else&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a51"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;There&nbsp;was&nbsp;an&nbsp;error&nbsp;adding&nbsp;the&nbsp;zone.&lt;br&nbsp;/&gt;\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a52"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-var">$gapi</span><span class="src-sym">-&gt;</span><span class="src-id">getErrorsStr</span><span class="src-sym">(</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a53"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a54"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">break</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a55"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">case&nbsp;</span><span class="src-str">'update'</span>:</div></li>
+<li><div class="src-line"><a name="a56"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone_id&nbsp;</span>=&nbsp;<span class="src-num">27181</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a57"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a58"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone&nbsp;</span>=&nbsp;<span class="src-key">array</span><span class="src-sym">(</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a59"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'title'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-str">&quot;Sant&nbsp;Jaume&nbsp;de&nbsp;Frontanyà&nbsp;-&nbsp;Autèntic&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a60"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'nick'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-str">&quot;StJaumeFrontanyàAutentic&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a61"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'zone_mode'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-str">'ad-hoc'</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a62"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'body'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-str">&quot;Sant&nbsp;Jaume&nbsp;de&nbsp;Frontanyà&nbsp;és&nbsp;un&nbsp;municipi&nbsp;de&nbsp;la&nbsp;comarca&nbsp;del&nbsp;Berguedà.&lt;br&nbsp;/&gt;&lt;br&nbsp;/&gt;El&nbsp;seu&nbsp;terme&nbsp;és&nbsp;muntanyenc&nbsp;i&nbsp;escassament&nbsp;poblat,&nbsp;amb&nbsp;boscos&nbsp;de&nbsp;pins&nbsp;i&nbsp;pastures&nbsp;per&nbsp;a&nbsp;la&nbsp;ramaderia&nbsp;que&nbsp;juntament&nbsp;amb&nbsp;l'agricultura&nbsp;de&nbsp;cereals&nbsp;i&nbsp;el&nbsp;turisme&nbsp;és&nbsp;la&nbsp;base&nbsp;de&nbsp;la&nbsp;seva&nbsp;economia.&nbsp;Regat&nbsp;per&nbsp;afluents&nbsp;de&nbsp;la&nbsp;reira&nbsp;de&nbsp;Merlès.&nbsp;Ara&nbsp;a&nbsp;més&nbsp;a&nbsp;més&nbsp;és&nbsp;ad-hoc&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a63"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'graph_server'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-str">&quot;&quot;</span><span class="src-sym">;&nbsp;</span><span class="src-comm">//&nbsp;Get&nbsp;from&nbsp;parents</span></div></li>
+<li><div class="src-line"><a name="a64"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'proxy_server'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-str">''</span><span class="src-sym">;&nbsp;</span><span class="src-comm">//&nbsp;Get&nbsp;from&nbsp;parents</span></div></li>
+<li><div class="src-line"><a name="a65"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'dns_servers'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-str">''</span><span class="src-sym">;&nbsp;</span><span class="src-comm">//&nbsp;Get&nbsp;from&nbsp;parents</span></div></li>
+<li><div class="src-line"><a name="a66"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'ntp_servers'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-str">''</span><span class="src-sym">;&nbsp;</span><span class="src-comm">//&nbsp;Get&nbsp;from&nbsp;parents</span></div></li>
+<li><div class="src-line"><a name="a67"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'ospf_zone'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-num">0</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a68"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone</span><span class="src-sym">[</span><span class="src-str">'homepage'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-str">'http://www.santjaumedefrontanya.net/novaweb'</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a69"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a70"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$updated&nbsp;</span>=&nbsp;<span class="src-var">$gapi</span><span class="src-sym">-&gt;</span><span class="src-id">updateZone</span><span class="src-sym">(&nbsp;</span><span class="src-var">$zone_id</span><span class="src-sym">,&nbsp;</span><span class="src-var">$zone&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a71"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-var">$updated&nbsp;</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a72"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;</span><span class="src-str">Zone&nbsp;&lt;strong&gt;<span class="src-var">$zone_id</span>&lt;/strong&gt;&nbsp;was&nbsp;updated&nbsp;correctly.&lt;br&nbsp;/&gt;\n&lt;br&nbsp;/&gt;\n</span><span class="src-str">&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a73"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}&nbsp;</span><span class="src-key">else&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a74"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;There&nbsp;was&nbsp;an&nbsp;error&nbsp;updating&nbsp;the&nbsp;zone.&lt;br&nbsp;/&gt;\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a75"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-var">$gapi</span><span class="src-sym">-&gt;</span><span class="src-id">getErrorsStr</span><span class="src-sym">(</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a76"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a77"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">break</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a78"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">case&nbsp;</span><span class="src-str">'delete'</span>:</div></li>
+<li><div class="src-line"><a name="a79"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone_id&nbsp;</span>=&nbsp;<span class="src-num">27181</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a80"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$removed&nbsp;</span>=&nbsp;<span class="src-var">$gapi</span><span class="src-sym">-&gt;</span><span class="src-id">removeZone</span><span class="src-sym">(&nbsp;</span><span class="src-var">$zone_id&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a81"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-var">$removed&nbsp;</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a82"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;</span><span class="src-str">Zone&nbsp;&lt;strong&gt;<span class="src-var">$zone_id</span>&lt;/strong&gt;&nbsp;removed&nbsp;correctly.&lt;br&nbsp;/&gt;\n&lt;br&nbsp;/&gt;\n</span><span class="src-str">&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a83"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}&nbsp;</span><span class="src-key">else&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a84"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;There&nbsp;was&nbsp;an&nbsp;error&nbsp;deleting&nbsp;the&nbsp;zone.&lt;br&nbsp;/&gt;\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a85"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-var">$gapi</span><span class="src-sym">-&gt;</span><span class="src-id">getErrorsStr</span><span class="src-sym">(</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a86"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a87"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">break</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a88"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">case&nbsp;</span><span class="src-str">'nearest'</span>:</div></li>
+<li><div class="src-line"><a name="a89"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$lat&nbsp;</span>=&nbsp;<span class="src-str">&quot;41.5787648&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a90"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$lon&nbsp;</span>=&nbsp;<span class="src-str">&quot;1.6171926&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a91"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$nearest&nbsp;</span>=&nbsp;<span class="src-var">$gapi</span><span class="src-sym">-&gt;</span><span class="src-id">nearestZone</span><span class="src-sym">(&nbsp;</span><span class="src-var">$lat</span><span class="src-sym">,&nbsp;</span><span class="src-var">$lon&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a92"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-var">$nearest&nbsp;</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a93"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-var">$nearest</span><span class="src-sym">-&gt;</span><span class="src-id">nearest&nbsp;</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a94"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone&nbsp;</span>=&nbsp;<span class="src-var">$nearest</span><span class="src-sym">-&gt;</span><span class="src-id">nearest</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a95"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;Found&nbsp;nearest&nbsp;zone:&lt;br&nbsp;/&gt;\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a96"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;</span><span class="src-str">&amp;nbsp;&amp;nbsp;Title:&nbsp;&lt;strong&gt;<span class="src-var">$zone</span><span class="src-sym">-&gt;</span><span class="src-id">title</span>&lt;/strong&gt;&lt;br&nbsp;/&gt;\n</span><span class="src-str">&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a97"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;</span><span class="src-str">&amp;nbsp;&amp;nbsp;Zone&nbsp;ID:&nbsp;&lt;strong&gt;<span class="src-var">$zone</span><span class="src-sym">-&gt;</span><span class="src-id">zone_id</span>&lt;/strong&gt;&lt;br&nbsp;/&gt;\n</span><span class="src-str">&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a98"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a99"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-var">$nearest</span><span class="src-sym">-&gt;</span><span class="src-id">candidates&nbsp;</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a100"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$candidates&nbsp;</span>=&nbsp;<span class="src-var">$nearest</span><span class="src-sym">-&gt;</span><span class="src-id">candidates</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a101"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;&lt;br&nbsp;/&gt;\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a102"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;Found&nbsp;candidate&nbsp;zones:\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a103"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">'&lt;ul&gt;'&nbsp;</span>.&nbsp;<span class="src-str">&quot;\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a104"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">foreach</span><span class="src-sym">(&nbsp;</span><span class="src-var">$candidates&nbsp;</span><span class="src-key">as&nbsp;</span><span class="src-var">$zone&nbsp;</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a105"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;&lt;li&gt;\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a106"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;</span><span class="src-str">&amp;nbsp;&amp;nbsp;Title:&nbsp;&lt;strong&gt;<span class="src-var">$zone</span><span class="src-sym">-&gt;</span><span class="src-id">title</span>&lt;/strong&gt;&lt;br&nbsp;/&gt;\n</span><span class="src-str">&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a107"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;</span><span class="src-str">&amp;nbsp;&amp;nbsp;Zone&nbsp;ID:&nbsp;&lt;strong&gt;<span class="src-var">$zone</span><span class="src-sym">-&gt;</span><span class="src-id">zone_id</span>&lt;/strong&gt;\n</span><span class="src-str">&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a108"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;&lt;/li&gt;\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a109"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a110"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;&lt;/ul&gt;\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a111"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a112"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}&nbsp;</span><span class="src-key">else&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a113"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;There&nbsp;was&nbsp;an&nbsp;error&nbsp;getting&nbsp;the&nbsp;nearest&nbsp;zone.&lt;br&nbsp;/&gt;\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a114"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-var">$gapi</span><span class="src-sym">-&gt;</span><span class="src-id">getErrorsStr</span><span class="src-sym">(</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a115"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a116"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">break</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a117"></a><span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a118"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a119"></a><span class="src-php">?&gt;</span></div></li>
+</ol>
+</div>
+        <div class="credit">
+		    <hr />
+		    Documentation generated on Sun, 10 Jan 2010 21:02:49 +0100 by <a href="http://www.phpdoc.org">phpDocumentor 1.4.3</a>
+	      </div>
+      </td></tr></table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

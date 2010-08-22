@@ -1,0 +1,34 @@
+v1.0
+
+Use on a clean drupal6 and guifi.net module installation.
+Just create some Zones, sub-zones, Nodes and networks for test.
+
+1 Portada
+2 World                                                   *** Networks: 10.0.0.0/8 and 172.16.0.0/12
+  3 |----Catalunya                                        *** Networks: 10.138.0.0/15 and 172.16.0.0/16
+           5 |----Osona                                   *** Networks: 10.138.0.0/16 and 172.16.0.0/20
+                   9 |----Vic                             *** Networks: 10.138.0.0/23 and 172.16.0.0/24
+                        17 |----VicPlaçaMajor (node)
+                        18 |----VicZonaNord (node)
+                   10 |----Torelló                        *** Networks: 10.138.2.0/23 and 172.16.1.0/24
+                        19 |----TorellóEstació (node)
+                        20 |----TorellóDiposits (node)
+                   11 |----Seva                           *** Networks: 10.138.4.0/23 and 172.16.2.0/24
+                        21 |----SevaCentre
+           6 |----Lluçanès                                *** Networks: 10.138.16.0/20 and 172.16.16.0/20
+                   12 |----Prats de Lluçanès              *** Networks: 10.138.16.0/23 and 172.16.16.0/24
+                   13 |----Lluçà                          *** Networks: 10.138.18.0/23 and 172.16.17.0/24
+  
+  4 |----Andorra                                          *** Networks: 10.140.0.0/15 and 172.32.0.0/16
+           7 |----Parròquia d'Andorra la Vella            *** Networks: 10.140.0.0/16 and 172.32.0.0/20
+                   14 |----Andorra la Vella               *** Networks: 10.140.0.0/23 and 172.32.0.0/24
+                        22 |----AndorraCentre(node)
+                        23 |----AndorraEst (node)
+                   15 |----Sant Julià de Llòria           *** Networks: 10.140.2.0/23 and 172.32.1.0/24
+           8 |----Parròquia de Canillo                    *** Networks: 10.141.0.0/16 and 172.32.16.0/20
+                   16 |----Canillo                        *** Networks: 10.141.0.0/23 and 172.32.16.0/24 
+                        24 |----CanilloPoliEsportiu (node)
+
+
+
+ 

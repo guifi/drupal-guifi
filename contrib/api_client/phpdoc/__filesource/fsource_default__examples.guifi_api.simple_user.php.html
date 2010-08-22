@@ -1,0 +1,280 @@
+<html>
+<head>
+<title>File Source for examples.guifi_api.simple_user.php</title>
+<link rel="stylesheet" type="text/css" href="../media/style.css">
+</head>
+<body>
+
+<table border="0" cellspacing="0" cellpadding="0" height="48" width="100%">
+  <tr>
+    <td class="header_top">default</td>
+  </tr>
+  <tr><td class="header_line"><img src="../media/empty.png" width="1" height="1" border="0" alt=""  /></td></tr>
+  <tr>
+    <td class="header_menu">
+        
+                                    
+                              		  [ <a href="../classtrees_default.html" class="menu">class tree: default</a> ]
+		  [ <a href="../elementindex_default.html" class="menu">index: default</a> ]
+		  	    [ <a href="../elementindex.html" class="menu">all elements</a> ]
+    </td>
+  </tr>
+  <tr><td class="header_line"><img src="../media/empty.png" width="1" height="1" border="0" alt=""  /></td></tr>
+</table>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="200" class="menu">
+      <b>Packages:</b><br />
+              <a href="../li_default.html">default</a><br />
+            <br /><br />
+                  
+      
+                </td>
+    <td>
+      <table cellpadding="10" cellspacing="0" width="100%" border="0"><tr><td valign="top">
+
+<h1 align="center">Source for file examples.guifi_api.simple_user.php</h1>
+<p>Documentation is available at <a href="../default/_examples.guifi_api.simple_user.php.html">examples.guifi_api.simple_user.php</a></p>
+<div class="src-code">
+<ol><li><div class="src-line"><a name="a1"></a><span class="src-php">&lt;?php</span></div></li>
+<li><div class="src-line"><a name="a2"></a><span class="src-comm">//&nbsp;The&nbsp;source&nbsp;code&nbsp;packaged&nbsp;with&nbsp;this&nbsp;file&nbsp;is&nbsp;Free&nbsp;Software,&nbsp;Copyright&nbsp;(C)&nbsp;2005&nbsp;by</span></div></li>
+<li><div class="src-line"><a name="a3"></a><span class="src-comm">//&nbsp;Eduard&nbsp;Duran&nbsp;&lt;eduard.duran&nbsp;at&nbsp;iglu.cat&gt;.</span></div></li>
+<li><div class="src-line"><a name="a4"></a><span class="src-comm">//&nbsp;It's&nbsp;licensed&nbsp;under&nbsp;the&nbsp;AFFERO&nbsp;GENERAL&nbsp;PUBLIC&nbsp;LICENSE&nbsp;unless&nbsp;stated&nbsp;otherwise.</span></div></li>
+<li><div class="src-line"><a name="a5"></a><span class="src-comm">//&nbsp;You&nbsp;can&nbsp;get&nbsp;copies&nbsp;of&nbsp;the&nbsp;licenses&nbsp;here:</span></div></li>
+<li><div class="src-line"><a name="a6"></a><span class="src-comm">//&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;http://www.affero.org/oagpl.html</span></div></li>
+<li><div class="src-line"><a name="a7"></a><span class="src-comm">//&nbsp;AFFERO&nbsp;GENERAL&nbsp;PUBLIC&nbsp;LICENSE&nbsp;is&nbsp;also&nbsp;included&nbsp;in&nbsp;the&nbsp;file&nbsp;called&nbsp;&quot;LICENSE.txt&quot;.</span></div></li>
+<li><div class="src-line"><a name="a8"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a9"></a>require&nbsp;<span class="src-sym">(&nbsp;</span><span class="src-str">'guifi_api.php'&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a10"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a11"></a><span class="src-doc">/**</span></div></li>
+<li><div class="src-line"><a name="a12"></a><span class="src-doc">&nbsp;*&nbsp;Configuration&nbsp;of&nbsp;authentication&nbsp;against&nbsp;guifi.net</span></div></li>
+<li><div class="src-line"><a name="a13"></a><span class="src-doc">&nbsp;*/</span></div></li>
+<li><div class="src-line"><a name="a14"></a><span class="src-var">$username&nbsp;</span>=&nbsp;<span class="src-str">&quot;&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a15"></a><span class="src-var">$password&nbsp;</span>=&nbsp;<span class="src-str">&quot;&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a16"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a17"></a><span class="src-var">$gapi&nbsp;</span>=&nbsp;<span class="src-key">new&nbsp;</span><span class="src-id"><a href="../default/guifiAPI.html">guifiAPI</a></span><span class="src-sym">(&nbsp;</span><span class="src-var">$username</span><span class="src-sym">,&nbsp;</span><span class="src-var">$password&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a18"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a19"></a><span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-sym">!</span><span class="src-key">empty</span><span class="src-sym">(&nbsp;</span><span class="src-var">$_GET</span><span class="src-sym">[</span><span class="src-str">'a'</span><span class="src-sym">]&nbsp;</span><span class="src-sym">)&nbsp;)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a20"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-var">$_GET</span><span class="src-sym">[</span><span class="src-str">'a'</span><span class="src-sym">]&nbsp;</span>==&nbsp;<span class="src-str">'getZone'&nbsp;</span>&amp;&amp;&nbsp;<span class="src-sym">!</span><span class="src-key">empty</span><span class="src-sym">(&nbsp;</span><span class="src-var">$_GET</span><span class="src-sym">[</span><span class="src-str">'lat'</span><span class="src-sym">]&nbsp;</span><span class="src-sym">)&nbsp;</span>&amp;&amp;&nbsp;<span class="src-sym">!</span><span class="src-key">empty</span><span class="src-sym">(&nbsp;</span><span class="src-var">$_GET</span><span class="src-sym">[</span><span class="src-str">'lon'</span><span class="src-sym">]&nbsp;</span><span class="src-sym">)&nbsp;)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a21"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$lat&nbsp;</span>=&nbsp;<span class="src-var">$_GET</span><span class="src-sym">[</span><span class="src-str">'lat'</span><span class="src-sym">]</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a22"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$lon&nbsp;</span>=&nbsp;<span class="src-var">$_GET</span><span class="src-sym">[</span><span class="src-str">'lon'</span><span class="src-sym">]</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a23"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a24"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zones&nbsp;</span>=&nbsp;<span class="src-var">$gapi</span><span class="src-sym">-&gt;</span><span class="src-id">nearestZone</span><span class="src-sym">(&nbsp;</span><span class="src-var">$lat</span><span class="src-sym">,&nbsp;</span><span class="src-var">$lon&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a25"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-var">$zones&nbsp;</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a26"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-var">$zones</span><span class="src-sym">-&gt;</span><span class="src-id">nearest&nbsp;</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a27"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$nearest&nbsp;</span>=&nbsp;<span class="src-var">$zones</span><span class="src-sym">-&gt;</span><span class="src-id">nearest</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a28"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$candidates&nbsp;</span>=&nbsp;<span class="src-var">$zones</span><span class="src-sym">-&gt;</span><span class="src-id">candidates</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a29"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a30"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">'&lt;select&nbsp;id=&quot;ipt-zone&quot;&nbsp;name=&quot;zone_id&quot;&gt;'&nbsp;</span>.&nbsp;<span class="src-str">&quot;\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a31"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a32"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">foreach</span><span class="src-sym">(&nbsp;</span><span class="src-var">$candidates&nbsp;</span><span class="src-key">as&nbsp;</span><span class="src-var">$candidate&nbsp;</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a33"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">'&lt;option&nbsp;value=&quot;'&nbsp;</span>.&nbsp;<span class="src-var">$candidate</span><span class="src-sym">-&gt;</span><span class="src-id">zone_id&nbsp;</span>.&nbsp;<span class="src-str">'&quot;'&nbsp;</span>.&nbsp;<span class="src-sym">(&nbsp;</span><span class="src-var">$candidate</span><span class="src-sym">-&gt;</span><span class="src-id">zone_id&nbsp;</span>==&nbsp;<span class="src-var">$nearest</span><span class="src-sym">-&gt;</span><span class="src-id">zone_id&nbsp;</span>?&nbsp;<span class="src-str">'&nbsp;selected=&quot;selected&quot;'&nbsp;</span>:&nbsp;<span class="src-str">''&nbsp;</span><span class="src-sym">)&nbsp;</span>.&nbsp;<span class="src-str">'&gt;'&nbsp;</span>.&nbsp;<a href="http://www.php.net/htmlspecialchars">htmlspecialchars</a><span class="src-sym">(&nbsp;</span><span class="src-var">$candidate</span><span class="src-sym">-&gt;</span><span class="src-id">title&nbsp;</span><span class="src-sym">)&nbsp;</span>.&nbsp;<span class="src-str">'&lt;/option&gt;'</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a34"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a35"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a36"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">'&lt;/select&gt;'</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a37"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}&nbsp;</span><span class="src-key">else&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a38"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;No&nbsp;s'ha&nbsp;pogut&nbsp;trobar&nbsp;cap&nbsp;zona.&nbsp;És&nbsp;possible&nbsp;que&nbsp;no&nbsp;existeixi.&lt;br&nbsp;/&gt;&quot;&nbsp;</span>.&nbsp;<span class="src-str">&quot;\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a39"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;Si&nbsp;saps&nbsp;quina&nbsp;zona&nbsp;és,&nbsp;introdueix&nbsp;manualment&nbsp;l'identificador&nbsp;de&nbsp;la&nbsp;zona:&lt;br&nbsp;/&gt;\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a40"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">'&lt;input&nbsp;type=&quot;text&quot;&nbsp;name=&quot;zone&quot;&nbsp;id=&quot;ipt-zone&quot;&nbsp;/&gt;'&nbsp;</span>.&nbsp;<span class="src-str">&quot;\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a41"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a42"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}&nbsp;</span><span class="src-key">else&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a43"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">&quot;No&nbsp;s'ha&nbsp;pogut&nbsp;trobar&nbsp;cap&nbsp;zona.&nbsp;Introdueix&nbsp;manualment&nbsp;l'identificador&nbsp;de&nbsp;la&nbsp;zona:&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a44"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">'&lt;input&nbsp;type=&quot;text&quot;&nbsp;name=&quot;zone&quot;&nbsp;id=&quot;ipt-zone&quot;&nbsp;/&gt;'&nbsp;</span>.&nbsp;<span class="src-str">&quot;\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a45"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a46"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">die</span><span class="src-sym">(</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a47"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a48"></a><span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a49"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a50"></a><span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-sym">!</span><span class="src-key">empty</span><span class="src-sym">(&nbsp;</span><span class="src-var">$_GET</span><span class="src-sym">[</span><span class="src-str">'m'</span><span class="src-sym">]&nbsp;</span><span class="src-sym">)&nbsp;)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a51"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$messages</span><span class="src-sym">[</span><span class="src-num">1</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-str">&quot;Hi&nbsp;ha&nbsp;hagut&nbsp;un&nbsp;error&nbsp;al&nbsp;crear&nbsp;el&nbsp;teu&nbsp;node.&nbsp;Revisa&nbsp;bé&nbsp;les&nbsp;dades&nbsp;introduïdes!&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a52"></a>&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a53"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">if</span><span class="src-sym">(&nbsp;</span>isset<span class="src-sym">(</span><span class="src-var">$messages</span><span class="src-sym">[</span><span class="src-var">$_GET</span><span class="src-sym">[</span><span class="src-str">'m'</span><span class="src-sym">]]</span><span class="src-sym">))&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a54"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$message&nbsp;</span>=&nbsp;<span class="src-var">$messages</span><span class="src-sym">[</span><span class="src-var">$_GET</span><span class="src-sym">[</span><span class="src-str">'m'</span><span class="src-sym">]]</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a55"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a56"></a><span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a57"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a58"></a><span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-sym">!</span><span class="src-key">empty</span><span class="src-sym">(&nbsp;</span><span class="src-var">$_POST&nbsp;</span><span class="src-sym">)&nbsp;)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a59"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$username&nbsp;</span>=&nbsp;<span class="src-var">$_POST</span><span class="src-sym">[</span><span class="src-str">'username'</span><span class="src-sym">]</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a60"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$password&nbsp;</span>=&nbsp;<span class="src-var">$_POST</span><span class="src-sym">[</span><span class="src-str">'password'</span><span class="src-sym">]</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a61"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$title&nbsp;</span>=&nbsp;<span class="src-var">$_POST</span><span class="src-sym">[</span><span class="src-str">'title'</span><span class="src-sym">]</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a62"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$zone_id&nbsp;</span>=&nbsp;<span class="src-var">$_POST</span><span class="src-sym">[</span><span class="src-str">'zone_id'</span><span class="src-sym">]</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a63"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$lat&nbsp;</span>=&nbsp;<span class="src-var">$_POST</span><span class="src-sym">[</span><span class="src-str">'lat'</span><span class="src-sym">]</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a64"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$lon&nbsp;</span>=&nbsp;<span class="src-var">$_POST</span><span class="src-sym">[</span><span class="src-str">'lon'</span><span class="src-sym">]</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a65"></a>&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a66"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$gapi&nbsp;</span>=&nbsp;<span class="src-key">new&nbsp;</span><span class="src-id"><a href="../default/guifiAPI.html">guifiAPI</a></span><span class="src-sym">(&nbsp;</span><span class="src-var">$username</span><span class="src-sym">,&nbsp;</span><span class="src-var">$password&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a67"></a>&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a68"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$node&nbsp;</span>=&nbsp;<span class="src-var">$gapi</span><span class="src-sym">-&gt;</span><span class="src-id">addNode</span><span class="src-sym">(&nbsp;</span><span class="src-var">$title</span><span class="src-sym">,&nbsp;</span><span class="src-var">$zone_id</span><span class="src-sym">,&nbsp;</span><span class="src-var">$lat</span><span class="src-sym">,&nbsp;</span><span class="src-var">$lon&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a69"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-sym">!</span><span class="src-key">empty</span><span class="src-sym">(&nbsp;</span><span class="src-var">$node</span><span class="src-sym">-&gt;</span><span class="src-id">node_id&nbsp;</span><span class="src-sym">)&nbsp;)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a70"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://www.php.net/header">header</a><span class="src-sym">(&nbsp;</span><span class="src-str">&quot;</span><span class="src-str">Location:&nbsp;examples.guifi_api.simple_user.step2.php?node_id=<span class="src-var">$node</span><span class="src-sym">-&gt;</span><span class="src-id">node_id</span></span><span class="src-str">&quot;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a71"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">die</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a72"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}&nbsp;</span><span class="src-key">else&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a73"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$message&nbsp;</span>=&nbsp;<span class="src-str">&quot;No&nbsp;s'ha&nbsp;pogut&nbsp;crear&nbsp;el&nbsp;teu&nbsp;node.&nbsp;Revisa&nbsp;bé&nbsp;les&nbsp;dades&nbsp;introduïdes!&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a74"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a75"></a><span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a76"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a77"></a><span class="src-php">?&gt;</span></div></li>
+<li><div class="src-line"><a name="a78"></a>&lt;!DOCTYPE&nbsp;html&nbsp;PUBLIC&nbsp;&quot;-//W3C//DTD&nbsp;HTML&nbsp;4.01&nbsp;Transitional//EN&quot;&nbsp;&quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;</div></li>
+<li><div class="src-line"><a name="a79"></a>&lt;html&gt;</div></li>
+<li><div class="src-line"><a name="a80"></a>&lt;head&gt;</div></li>
+<li><div class="src-line"><a name="a81"></a>&lt;meta&nbsp;http-equiv=&quot;Content-Type&quot;&nbsp;content=&quot;text/html;&nbsp;charset=UTF-8&quot;&gt;</div></li>
+<li><div class="src-line"><a name="a82"></a>&lt;title&gt;Client&nbsp;PHP&nbsp;per&nbsp;l'API&nbsp;de&nbsp;guifi.net&lt;/title&gt;</div></li>
+<li><div class="src-line"><a name="a83"></a>&lt;script&nbsp;src=&quot;http://jqueryjs.googlecode.com/files/jquery-1.3.2.min.js&quot;&gt;&lt;/script&gt;</div></li>
+<li><div class="src-line"><a name="a84"></a>&lt;link&nbsp;rel=&quot;stylesheet&quot;&nbsp;type=&quot;text/css&quot;&nbsp;href=&quot;style.css&quot;&nbsp;/&gt;</div></li>
+<li><div class="src-line"><a name="a85"></a>&lt;/head&gt;</div></li>
+<li><div class="src-line"><a name="a86"></a>&lt;body&gt;</div></li>
+<li><div class="src-line"><a name="a87"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a88"></a>&lt;div&nbsp;id=&quot;container&quot;&gt;</div></li>
+<li><div class="src-line"><a name="a89"></a>&lt;div&nbsp;id=&quot;content&quot;&gt;</div></li>
+<li><div class="src-line"><a name="a90"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a91"></a>&lt;h1&gt;Benvingut&nbsp;usuari!&lt;/h1&gt;</div></li>
+<li><div class="src-line"><a name="a92"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a93"></a><span class="src-php">&lt;?php&nbsp;</span></div></li>
+<li><div class="src-line"><a name="a94"></a><span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-sym">!</span><span class="src-key">empty</span><span class="src-sym">(</span><span class="src-var">$message</span><span class="src-sym">))&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a95"></a>&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">'&lt;div&nbsp;class=&quot;alert&quot;&gt;'</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a96"></a>&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">'&lt;h6&gt;Error&lt;/h6&gt;'</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a97"></a>&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-var">$message</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a98"></a>&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">'&lt;/div&gt;'</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a99"></a><span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a100"></a><span class="src-php">?&gt;</span></div></li>
+<li><div class="src-line"><a name="a101"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a102"></a>&lt;p&gt;A&nbsp;través&nbsp;d'aquest&nbsp;formulari&nbsp;podràs&nbsp;crear&nbsp;el&nbsp;teu&nbsp;node&nbsp;molt&nbsp;fàcilment!&lt;/p&gt;</div></li>
+<li><div class="src-line"><a name="a103"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a104"></a>&lt;p&gt;Senzillament,&nbsp;vés&nbsp;omplint&nbsp;els&nbsp;senzills&nbsp;camps&nbsp;que&nbsp;se't&nbsp;demanen&nbsp;a</div></li>
+<li><div class="src-line"><a name="a105"></a>continuació!&lt;/p&gt;</div></li>
+<li><div class="src-line"><a name="a106"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a107"></a>&lt;form&nbsp;action=&quot;examples.guifi_api.simple_user.php&quot;&nbsp;method=&quot;post&quot;&gt;</div></li>
+<li><div class="src-line"><a name="a108"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a109"></a>&lt;fieldset&gt;&lt;legend&gt;Autenticació&lt;/legend&gt;</div></li>
+<li><div class="src-line"><a name="a110"></a>&lt;p&gt;Primer&nbsp;de&nbsp;tot,&nbsp;hem&nbsp;de&nbsp;saber&nbsp;quin&nbsp;nom&nbsp;d'usuari&nbsp;i&nbsp;contrasenya&nbsp;tens</div></li>
+<li><div class="src-line"><a name="a111"></a>registrat&nbsp;a&nbsp;guifi.net&lt;/p&gt;</div></li>
+<li><div class="src-line"><a name="a112"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a113"></a>&lt;dl&gt;</div></li>
+<li><div class="src-line"><a name="a114"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;dt&gt;&lt;label&nbsp;for=&quot;ipt-username&quot;&gt;Nom&nbsp;d'usuari:&lt;/label&gt;&lt;/dt&gt;</div></li>
+<li><div class="src-line"><a name="a115"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;dd&gt;&lt;input&nbsp;type=&quot;text&quot;&nbsp;name=&quot;username&quot;&nbsp;id=&quot;ipt-username&quot;&nbsp;/&gt;&lt;/dd&gt;</div></li>
+<li><div class="src-line"><a name="a116"></a>&lt;/dl&gt;</div></li>
+<li><div class="src-line"><a name="a117"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a118"></a>&lt;dl&gt;</div></li>
+<li><div class="src-line"><a name="a119"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;dt&gt;&lt;label&nbsp;for=&quot;ipt-password&quot;&gt;Contrasenya:&lt;/label&gt;&lt;/dt&gt;</div></li>
+<li><div class="src-line"><a name="a120"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;dd&gt;&lt;input&nbsp;type=&quot;password&quot;&nbsp;name=&quot;password&quot;&nbsp;id=&quot;ipt-password&quot;&nbsp;/&gt;&lt;/dd&gt;</div></li>
+<li><div class="src-line"><a name="a121"></a>&lt;/dl&gt;</div></li>
+<li><div class="src-line"><a name="a122"></a>&lt;/fieldset&gt;</div></li>
+<li><div class="src-line"><a name="a123"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a124"></a>&lt;fieldset&gt;&lt;legend&gt;El&nbsp;teu&nbsp;node&lt;/legend&gt;</div></li>
+<li><div class="src-line"><a name="a125"></a>&lt;p&gt;Ara&nbsp;explica'ns&nbsp;un&nbsp;parell&nbsp;de&nbsp;coses&nbsp;sobre&nbsp;el&nbsp;teu&nbsp;node.&lt;/p&gt;</div></li>
+<li><div class="src-line"><a name="a126"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a127"></a>&lt;dl&gt;</div></li>
+<li><div class="src-line"><a name="a128"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;dt&gt;&lt;label&gt;A&nbsp;quin&nbsp;punt&nbsp;del&nbsp;mapa&nbsp;està&nbsp;situat?&lt;/label&gt;&lt;/dt&gt;</div></li>
+<li><div class="src-line"><a name="a129"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;dd&gt;</div></li>
+<li><div class="src-line"><a name="a130"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;div&nbsp;id=&quot;map&quot;&nbsp;style=&quot;width:&nbsp;70%;&nbsp;height:&nbsp;400px;&nbsp;margin:&nbsp;0&nbsp;auto&quot;&gt;&lt;/div&gt;</div></li>
+<li><div class="src-line"><a name="a131"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;input&nbsp;type=&quot;hidden&quot;&nbsp;id=&quot;ipt-lat&quot;&nbsp;name=&quot;lat&quot;&nbsp;/&gt;&nbsp;&lt;input&nbsp;type=&quot;hidden&quot;</div></li>
+<li><div class="src-line"><a name="a132"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id=&quot;ipt-lon&quot;&nbsp;name=&quot;lon&quot;&nbsp;/&gt;&lt;/dd&gt;</div></li>
+<li><div class="src-line"><a name="a133"></a>&lt;/dl&gt;</div></li>
+<li><div class="src-line"><a name="a134"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a135"></a>&lt;dl&gt;</div></li>
+<li><div class="src-line"><a name="a136"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;dt&gt;&lt;label&gt;A&nbsp;quina&nbsp;zona&nbsp;de&nbsp;guifi.net&nbsp;et&nbsp;trobes?&lt;/label&gt;&lt;/dt&gt;</div></li>
+<li><div class="src-line"><a name="a137"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;dd&nbsp;id=&quot;zone&quot;&gt;&lt;em&gt;Primer&nbsp;clica&nbsp;sobre&nbsp;el&nbsp;mapa&nbsp;per&nbsp;saber&nbsp;on&nbsp;està&nbsp;situat</div></li>
+<li><div class="src-line"><a name="a138"></a>&nbsp;&nbsp;&nbsp;&nbsp;el&nbsp;node.&lt;/em&gt;&lt;/dd&gt;</div></li>
+<li><div class="src-line"><a name="a139"></a>&lt;/dl&gt;</div></li>
+<li><div class="src-line"><a name="a140"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a141"></a>&lt;dl&gt;</div></li>
+<li><div class="src-line"><a name="a142"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;dt&gt;&lt;label&nbsp;for=&quot;ipt-title&quot;&gt;Quin&nbsp;nom&nbsp;vols&nbsp;donar-li&nbsp;al&nbsp;teu&nbsp;node?&lt;/label&gt;&lt;br&nbsp;/&gt;</div></li>
+<li><div class="src-line"><a name="a143"></a>&nbsp;&nbsp;&nbsp;&nbsp;(&lt;small&gt;Per&nbsp;exemple,&nbsp;si&nbsp;vius&nbsp;al&nbsp;carrer&nbsp;Sant&nbsp;Miquel&nbsp;34,&nbsp;un&nbsp;bon&nbsp;nom&nbsp;seria</div></li>
+<li><div class="src-line"><a name="a144"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;em&gt;&lt;span&nbsp;id=&quot;zone-nickname&quot;&gt;NomPoblacio&lt;/span&gt;StMiquel34&lt;/em&gt;&lt;/small&gt;)&lt;/dt&gt;</div></li>
+<li><div class="src-line"><a name="a145"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;dd&gt;&lt;input&nbsp;type=&quot;text&quot;&nbsp;name=&quot;title&quot;&nbsp;id=&quot;ipt-title&quot;&nbsp;/&gt;&lt;/dd&gt;</div></li>
+<li><div class="src-line"><a name="a146"></a>&lt;/dl&gt;</div></li>
+<li><div class="src-line"><a name="a147"></a>&lt;/fieldset&gt;</div></li>
+<li><div class="src-line"><a name="a148"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a149"></a>&lt;h5&gt;Aquí&nbsp;s'acaba&nbsp;el&nbsp;primer&nbsp;pas!&lt;/h5&gt;</div></li>
+<li><div class="src-line"><a name="a150"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a151"></a>&lt;p&gt;Ara&nbsp;només&nbsp;has&nbsp;d'enviar&nbsp;les&nbsp;dades,&nbsp;i&nbsp;el&nbsp;teu&nbsp;node&nbsp;ja&nbsp;s'haurà&nbsp;creat.&lt;/p&gt;</div></li>
+<li><div class="src-line"><a name="a152"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a153"></a>&lt;p&gt;A&nbsp;continuació,&nbsp;només&nbsp;et&nbsp;caldrà&nbsp;saber&nbsp;&lt;strong&gt;a&nbsp;quin&nbsp;node&nbsp;et&nbsp;connectes&lt;/strong&gt;,</div></li>
+<li><div class="src-line"><a name="a154"></a>i&nbsp;ja&nbsp;podràs&nbsp;configurar&nbsp;la&nbsp;teva&nbsp;antena!&lt;/p&gt;</div></li>
+<li><div class="src-line"><a name="a155"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a156"></a>&lt;p&nbsp;class=&quot;submit&quot;&gt;</div></li>
+<li><div class="src-line"><a name="a157"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;input&nbsp;type=&quot;submit&quot;&nbsp;name=&quot;create_node&quot;&nbsp;value=&quot;Crea&nbsp;el&nbsp;node&quot;&nbsp;/&gt;</div></li>
+<li><div class="src-line"><a name="a158"></a>&lt;/p&gt;</div></li>
+<li><div class="src-line"><a name="a159"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a160"></a>&lt;/form&gt;</div></li>
+<li><div class="src-line"><a name="a161"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a162"></a>&lt;/div&gt;</div></li>
+<li><div class="src-line"><a name="a163"></a>&lt;/div&gt;</div></li>
+<li><div class="src-line"><a name="a164"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a165"></a>&lt;script</div></li>
+<li><div class="src-line"><a name="a166"></a>&nbsp;&nbsp;&nbsp;&nbsp;src=&quot;http://maps.google.com/maps?file=api&amp;amp;v=2&amp;amp;key=ABQIAAAAr3qx5ND13lr9SgNvfMaXFRQfurk9f5l92xDxpL8LRqlGozpssRQ37VNTwe_pc8OOYwLhYa-lhKZg4w&quot;</div></li>
+<li><div class="src-line"><a name="a167"></a>&nbsp;&nbsp;&nbsp;&nbsp;type=&quot;text/javascript&quot;&gt;&lt;/script&gt;</div></li>
+<li><div class="src-line"><a name="a168"></a>&lt;script&nbsp;type=&quot;text/javascript&quot;&gt;</div></li>
+<li><div class="src-line"><a name="a169"></a>//&lt;![CDATA[</div></li>
+<li><div class="src-line"><a name="a170"></a>var&nbsp;supernodes&nbsp;=&nbsp;null;</div></li>
+<li><div class="src-line"><a name="a171"></a>var&nbsp;map&nbsp;=&nbsp;null;</div></li>
+<li><div class="src-line"><a name="a172"></a>var&nbsp;baseIcon&nbsp;=&nbsp;null;</div></li>
+<li><div class="src-line"><a name="a173"></a>var&nbsp;zones&nbsp;=&nbsp;null;</div></li>
+<li><div class="src-line"><a name="a174"></a>var&nbsp;gmarker&nbsp;=&nbsp;null;</div></li>
+<li><div class="src-line"><a name="a175"></a>var&nbsp;clickEvent;</div></li>
+<li><div class="src-line"><a name="a176"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a177"></a>function&nbsp;load()&nbsp;{</div></li>
+<li><div class="src-line"><a name="a178"></a>&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(GBrowserIsCompatible())&nbsp;{</div></li>
+<li><div class="src-line"><a name="a179"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;initMap();</div></li>
+<li><div class="src-line"><a name="a180"></a>&nbsp;&nbsp;&nbsp;&nbsp;}</div></li>
+<li><div class="src-line"><a name="a181"></a>}</div></li>
+<li><div class="src-line"><a name="a182"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a183"></a>function&nbsp;initMap()&nbsp;{</div></li>
+<li><div class="src-line"><a name="a184"></a>&nbsp;&nbsp;&nbsp;&nbsp;map&nbsp;=&nbsp;new&nbsp;GMap2(document.getElementById(&quot;map&quot;));</div></li>
+<li><div class="src-line"><a name="a185"></a>&nbsp;&nbsp;&nbsp;&nbsp;map.addControl(new&nbsp;GSmallMapControl());</div></li>
+<li><div class="src-line"><a name="a186"></a>&nbsp;&nbsp;&nbsp;&nbsp;map.addControl(new&nbsp;GMapTypeControl());</div></li>
+<li><div class="src-line"><a name="a187"></a>&nbsp;&nbsp;&nbsp;&nbsp;map.addMapType(G_PHYSICAL_MAP);</div></li>
+<li><div class="src-line"><a name="a188"></a>&nbsp;&nbsp;&nbsp;&nbsp;map.enableScrollWheelZoom();</div></li>
+<li><div class="src-line"><a name="a189"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a190"></a>&nbsp;&nbsp;&nbsp;&nbsp;map.setCenter(new&nbsp;GLatLng(41.583930,&nbsp;1.619050),&nbsp;7);</div></li>
+<li><div class="src-line"><a name="a191"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a192"></a>&nbsp;&nbsp;&nbsp;&nbsp;clickEvent&nbsp;=&nbsp;GEvent.addListener(map,&nbsp;&quot;click&quot;,&nbsp;function(marker,&nbsp;point)&nbsp;{</div></li>
+<li><div class="src-line"><a name="a193"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(gmarker)&nbsp;{</div></li>
+<li><div class="src-line"><a name="a194"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;map.removeOverlay(gmarker);</div></li>
+<li><div class="src-line"><a name="a195"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div></li>
+<li><div class="src-line"><a name="a196"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gmarker&nbsp;=&nbsp;new&nbsp;GMarker(point);</div></li>
+<li><div class="src-line"><a name="a197"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a198"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;(map.getZoom()&nbsp;&gt;&nbsp;12)&nbsp;{</div></li>
+<li><div class="src-line"><a name="a199"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;map.addOverlay(gmarker);</div></li>
+<li><div class="src-line"><a name="a200"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(&quot;#ipt-lat&quot;).val(point.lat());</div></li>
+<li><div class="src-line"><a name="a201"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$(&quot;#ipt-lon&quot;).val(point.lng());</div></li>
+<li><div class="src-line"><a name="a202"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a203"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;map.setCenter(point);</div></li>
+<li><div class="src-line"><a name="a204"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;loadZone();</div></li>
+<li><div class="src-line"><a name="a205"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;else&nbsp;{</div></li>
+<li><div class="src-line"><a name="a206"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;map.setCenter(point,&nbsp;map.getZoom()&nbsp;+&nbsp;3);&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a207"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</div></li>
+<li><div class="src-line"><a name="a208"></a>&nbsp;&nbsp;&nbsp;&nbsp;});</div></li>
+<li><div class="src-line"><a name="a209"></a>}</div></li>
+<li><div class="src-line"><a name="a210"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a211"></a>function&nbsp;loadZone()&nbsp;{</div></li>
+<li><div class="src-line"><a name="a212"></a>&nbsp;&nbsp;&nbsp;&nbsp;$('#zone').html('&lt;img&nbsp;src=&quot;loader.gif&quot;&nbsp;alt=&quot;Carregant...&quot;&nbsp;/&gt;');</div></li>
+<li><div class="src-line"><a name="a213"></a>&nbsp;&nbsp;&nbsp;&nbsp;var&nbsp;params&nbsp;=&nbsp;{'a':'getZone',&nbsp;'lat':$(&quot;#ipt-lat&quot;).val(),&nbsp;'lon':&nbsp;$(&quot;#ipt-lon&quot;).val()&nbsp;};</div></li>
+<li><div class="src-line"><a name="a214"></a>&nbsp;&nbsp;&nbsp;&nbsp;$.get('examples.guifi_api.simple_user.php',&nbsp;params,&nbsp;function(data)&nbsp;{</div></li>
+<li><div class="src-line"><a name="a215"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$('#zone').html(data).show();</div></li>
+<li><div class="src-line"><a name="a216"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;);</div></li>
+<li><div class="src-line"><a name="a217"></a>}</div></li>
+<li><div class="src-line"><a name="a218"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a219"></a>$(document).ready(&nbsp;function()&nbsp;{</div></li>
+<li><div class="src-line"><a name="a220"></a>&nbsp;&nbsp;&nbsp;&nbsp;load();</div></li>
+<li><div class="src-line"><a name="a221"></a>});</div></li>
+<li><div class="src-line"><a name="a222"></a>$(window).unload(&nbsp;function&nbsp;()&nbsp;{</div></li>
+<li><div class="src-line"><a name="a223"></a>&nbsp;&nbsp;&nbsp;&nbsp;GUnload();</div></li>
+<li><div class="src-line"><a name="a224"></a>});</div></li>
+<li><div class="src-line"><a name="a225"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a226"></a>&lt;/script&gt;</div></li>
+<li><div class="src-line"><a name="a227"></a>&lt;/body&gt;</div></li>
+<li><div class="src-line"><a name="a228"></a>&lt;/html&gt;</div></li>
+</ol>
+</div>
+        <div class="credit">
+		    <hr />
+		    Documentation generated on Sun, 10 Jan 2010 21:02:49 +0100 by <a href="http://www.phpdoc.org">phpDocumentor 1.4.3</a>
+	      </div>
+      </td></tr></table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,242 @@
+<html>
+<head>
+<title>File Source for examples.guifi_api.simple_user.step2.php</title>
+<link rel="stylesheet" type="text/css" href="../media/style.css">
+</head>
+<body>
+
+<table border="0" cellspacing="0" cellpadding="0" height="48" width="100%">
+  <tr>
+    <td class="header_top">default</td>
+  </tr>
+  <tr><td class="header_line"><img src="../media/empty.png" width="1" height="1" border="0" alt=""  /></td></tr>
+  <tr>
+    <td class="header_menu">
+        
+                                    
+                              		  [ <a href="../classtrees_default.html" class="menu">class tree: default</a> ]
+		  [ <a href="../elementindex_default.html" class="menu">index: default</a> ]
+		  	    [ <a href="../elementindex.html" class="menu">all elements</a> ]
+    </td>
+  </tr>
+  <tr><td class="header_line"><img src="../media/empty.png" width="1" height="1" border="0" alt=""  /></td></tr>
+</table>
+
+<table width="100%" border="0" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="200" class="menu">
+      <b>Packages:</b><br />
+              <a href="../li_default.html">default</a><br />
+            <br /><br />
+                  
+      
+                </td>
+    <td>
+      <table cellpadding="10" cellspacing="0" width="100%" border="0"><tr><td valign="top">
+
+<h1 align="center">Source for file examples.guifi_api.simple_user.step2.php</h1>
+<p>Documentation is available at <a href="../default/_examples.guifi_api.simple_user.step2.php.html">examples.guifi_api.simple_user.step2.php</a></p>
+<div class="src-code">
+<ol><li><div class="src-line"><a name="a1"></a><span class="src-php">&lt;?php</span></div></li>
+<li><div class="src-line"><a name="a2"></a><span class="src-comm">//&nbsp;The&nbsp;source&nbsp;code&nbsp;packaged&nbsp;with&nbsp;this&nbsp;file&nbsp;is&nbsp;Free&nbsp;Software,&nbsp;Copyright&nbsp;(C)&nbsp;2005&nbsp;by</span></div></li>
+<li><div class="src-line"><a name="a3"></a><span class="src-comm">//&nbsp;Eduard&nbsp;Duran&nbsp;&lt;eduard.duran&nbsp;at&nbsp;iglu.cat&gt;.</span></div></li>
+<li><div class="src-line"><a name="a4"></a><span class="src-comm">//&nbsp;It's&nbsp;licensed&nbsp;under&nbsp;the&nbsp;AFFERO&nbsp;GENERAL&nbsp;PUBLIC&nbsp;LICENSE&nbsp;unless&nbsp;stated&nbsp;otherwise.</span></div></li>
+<li><div class="src-line"><a name="a5"></a><span class="src-comm">//&nbsp;You&nbsp;can&nbsp;get&nbsp;copies&nbsp;of&nbsp;the&nbsp;licenses&nbsp;here:</span></div></li>
+<li><div class="src-line"><a name="a6"></a><span class="src-comm">//&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;http://www.affero.org/oagpl.html</span></div></li>
+<li><div class="src-line"><a name="a7"></a><span class="src-comm">//&nbsp;AFFERO&nbsp;GENERAL&nbsp;PUBLIC&nbsp;LICENSE&nbsp;is&nbsp;also&nbsp;included&nbsp;in&nbsp;the&nbsp;file&nbsp;called&nbsp;&quot;LICENSE.txt&quot;.</span></div></li>
+<li><div class="src-line"><a name="a8"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a9"></a>require&nbsp;<span class="src-sym">(&nbsp;</span><span class="src-str">'guifi_api.php'&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a10"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a11"></a><span class="src-doc">/**</span></div></li>
+<li><div class="src-line"><a name="a12"></a><span class="src-doc">&nbsp;*&nbsp;Configuration&nbsp;of&nbsp;authentication&nbsp;against&nbsp;guifi.net</span></div></li>
+<li><div class="src-line"><a name="a13"></a><span class="src-doc">&nbsp;*/</span></div></li>
+<li><div class="src-line"><a name="a14"></a><span class="src-var">$username&nbsp;</span>=&nbsp;<span class="src-str">&quot;&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a15"></a><span class="src-var">$password&nbsp;</span>=&nbsp;<span class="src-str">&quot;&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a16"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a17"></a><span class="src-var">$gapi&nbsp;</span>=&nbsp;<span class="src-key">new&nbsp;</span><span class="src-id"><a href="../default/guifiAPI.html">guifiAPI</a></span><span class="src-sym">(&nbsp;</span><span class="src-var">$username</span><span class="src-sym">,&nbsp;</span><span class="src-var">$password&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a18"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a19"></a><span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-sym">!</span><span class="src-key">empty</span><span class="src-sym">(&nbsp;</span><span class="src-var">$_GET</span><span class="src-sym">[</span><span class="src-str">'node_id'</span><span class="src-sym">]&nbsp;</span><span class="src-sym">)&nbsp;)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a20"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$node_id&nbsp;</span>=&nbsp;<span class="src-var">$_GET</span><span class="src-sym">[</span><span class="src-str">'node_id'</span><span class="src-sym">]</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a21"></a><span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a22"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a23"></a><span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-key">empty</span><span class="src-sym">(&nbsp;</span><span class="src-var">$node_id&nbsp;</span><span class="src-sym">)&nbsp;)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a24"></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://www.php.net/header">header</a><span class="src-sym">(&nbsp;</span><span class="src-str">&quot;Location:&nbsp;examples.guifi_api.simple_user.php?m=1&quot;&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a25"></a><span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a26"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a27"></a><span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-var">$_POST&nbsp;</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a28"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$username&nbsp;</span>=&nbsp;<span class="src-var">$_POST</span><span class="src-sym">[</span><span class="src-str">'username'</span><span class="src-sym">]</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a29"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$password&nbsp;</span>=&nbsp;<span class="src-var">$_POST</span><span class="src-sym">[</span><span class="src-str">'password'</span><span class="src-sym">]</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a30"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$to_radio&nbsp;</span>=&nbsp;<a href="http://www.php.net/explode">explode</a><span class="src-sym">(&nbsp;</span><span class="src-str">':'</span><span class="src-sym">,&nbsp;</span><span class="src-var">$_POST</span><span class="src-sym">[</span><span class="src-str">'radio_to'</span><span class="src-sym">]&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a31"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$to_device_id&nbsp;</span>=&nbsp;<span class="src-var">$to_radio</span><span class="src-sym">[</span><span class="src-num">0</span><span class="src-sym">]</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a32"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$to_radiodev_counter&nbsp;</span>=&nbsp;<span class="src-var">$to_radio</span><span class="src-sym">[</span><span class="src-num">1</span><span class="src-sym">]</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a33"></a>&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a34"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$gapi&nbsp;</span>=&nbsp;<span class="src-key">new&nbsp;</span><span class="src-id"><a href="../default/guifiAPI.html">guifiAPI</a></span><span class="src-sym">(&nbsp;</span><span class="src-var">$username</span><span class="src-sym">,&nbsp;</span><span class="src-var">$password&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a35"></a>&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a36"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-doc">/**</span></div></li>
+<li><div class="src-line"><a name="a37"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*&nbsp;CREATE&nbsp;THE&nbsp;DEVICE</span></div></li>
+<li><div class="src-line"><a name="a38"></a><span class="src-doc">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;*/</span></div></li>
+<li><div class="src-line"><a name="a39"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$type&nbsp;</span>=&nbsp;<span class="src-str">'radio'</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a40"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$mac&nbsp;</span>=&nbsp;<span class="src-var">$_POST</span><span class="src-sym">[</span><span class="src-str">'mac'</span><span class="src-sym">]</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a41"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a42"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$device&nbsp;</span>=&nbsp;<span class="src-key">array</span><span class="src-sym">(</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a43"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$device</span><span class="src-sym">[</span><span class="src-str">'model_id'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-num">25</span><span class="src-sym">;&nbsp;</span><span class="src-comm">//&nbsp;NanoStation2</span></div></li>
+<li><div class="src-line"><a name="a44"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$device</span><span class="src-sym">[</span><span class="src-str">'firmware'</span><span class="src-sym">]&nbsp;</span>=&nbsp;<span class="src-str">&quot;AirOsv30&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a45"></a>&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a46"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$added&nbsp;</span>=&nbsp;<span class="src-var">$gapi</span><span class="src-sym">-&gt;</span><span class="src-id">addDevice</span><span class="src-sym">(</span><span class="src-var">$node_id</span><span class="src-sym">,&nbsp;</span><span class="src-var">$type</span><span class="src-sym">,&nbsp;</span><span class="src-var">$mac</span><span class="src-sym">,&nbsp;</span><span class="src-var">$device</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a47"></a>&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a48"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-var">$added&nbsp;</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a49"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$device_id&nbsp;</span>=&nbsp;<span class="src-var">$added</span><span class="src-sym">-&gt;</span><span class="src-id">device_id</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a50"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a51"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$added&nbsp;</span>=&nbsp;<span class="src-var">$gapi</span><span class="src-sym">-&gt;</span><span class="src-id">addRadio</span><span class="src-sym">(&nbsp;</span><span class="src-str">'client'</span><span class="src-sym">,&nbsp;</span><span class="src-var">$device_id&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a52"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-var">$added&nbsp;</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a53"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$from_radiodev_counter&nbsp;</span>=&nbsp;<span class="src-var">$added</span><span class="src-sym">-&gt;</span><span class="src-id">radiodev_counter</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a54"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a55"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$added&nbsp;</span>=&nbsp;<span class="src-var">$gapi</span><span class="src-sym">-&gt;</span><span class="src-id">addLink</span><span class="src-sym">(&nbsp;</span><span class="src-var">$device_id</span><span class="src-sym">,&nbsp;</span><span class="src-var">$from_radiodev_counter</span><span class="src-sym">,&nbsp;</span><span class="src-var">$to_device_id</span><span class="src-sym">,&nbsp;</span><span class="src-var">$to_radiodev_counter&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a56"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-var">$added&nbsp;</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a57"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="http://www.php.net/header">header</a><span class="src-sym">(&nbsp;</span><span class="src-str">&quot;</span><span class="src-str">Location:&nbsp;examples.guifi_api.simple_user.step3.php?node_id=<span class="src-var">$node_id</span>&amp;device_id=<span class="src-var">$device_id</span></span><span class="src-str">&quot;&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a58"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">die</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a59"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}&nbsp;</span><span class="src-key">else&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a60"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$message&nbsp;</span>=&nbsp;<span class="src-str">&quot;No&nbsp;s'ha&nbsp;pogut&nbsp;afegir&nbsp;l'enllaç,&nbsp;error&nbsp;de&nbsp;l'API:&nbsp;&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a61"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$message&nbsp;</span>.=&nbsp;<span class="src-var">$gapi</span><span class="src-sym">-&gt;</span><span class="src-id">getErrorsStr</span><span class="src-sym">(</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a62"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a63"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}&nbsp;</span><span class="src-key">else&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a64"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$message&nbsp;</span>=&nbsp;<span class="src-str">&quot;No&nbsp;s'ha&nbsp;pogut&nbsp;afegir&nbsp;la&nbsp;ràdio,&nbsp;error&nbsp;de&nbsp;l'API:&nbsp;&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a65"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$message&nbsp;</span>.=&nbsp;<span class="src-var">$gapi</span><span class="src-sym">-&gt;</span><span class="src-id">getErrorsStr</span><span class="src-sym">(</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a66"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a67"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a68"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}&nbsp;</span><span class="src-key">else&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a69"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$message&nbsp;</span>=&nbsp;<span class="src-str">&quot;No&nbsp;s'ha&nbsp;pogut&nbsp;afegir&nbsp;el&nbsp;dispositiu,&nbsp;error&nbsp;de&nbsp;l'API:&nbsp;&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a70"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$message&nbsp;</span>.=&nbsp;<span class="src-var">$gapi</span><span class="src-sym">-&gt;</span><span class="src-id">getErrorsStr</span><span class="src-sym">(</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a71"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a72"></a><span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a73"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a74"></a><span class="src-var">$nearest&nbsp;</span>=&nbsp;<span class="src-var">$gapi</span><span class="src-sym">-&gt;</span><span class="src-id">nearestRadio</span><span class="src-sym">(&nbsp;</span><span class="src-var">$node_id&nbsp;</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a75"></a><span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-var">$nearest&nbsp;</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a76"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-var">$nearest</span><span class="src-sym">-&gt;</span><span class="src-id">radios&nbsp;</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a77"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$radios&nbsp;</span>=&nbsp;<span class="src-var">$nearest</span><span class="src-sym">-&gt;</span><span class="src-id">radios</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a78"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a79"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$radio_select&nbsp;</span>=&nbsp;<span class="src-str">'&lt;select&nbsp;name=&quot;radio_to&quot;&gt;'</span>.&nbsp;<span class="src-str">&quot;\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a80"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a81"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-key">foreach</span><span class="src-sym">(&nbsp;</span><span class="src-var">$radios&nbsp;</span><span class="src-key">as&nbsp;</span><span class="src-var">$radio&nbsp;</span><span class="src-sym">)&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a82"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$radio_select&nbsp;</span>.=&nbsp;<span class="src-str">'&lt;option&nbsp;value=&quot;'</span>.<span class="src-var">$radio</span><span class="src-sym">-&gt;</span><span class="src-id">device_id&nbsp;</span>.&nbsp;<span class="src-str">':'&nbsp;</span>.&nbsp;<span class="src-var">$radio</span><span class="src-sym">-&gt;</span><span class="src-id">radiodev_counter&nbsp;</span>.&nbsp;<span class="src-str">'&quot;&gt;'</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a83"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$radio_select&nbsp;</span>.=&nbsp;<span class="src-str">&quot;</span><span class="src-str"><span class="src-var">$radio</span><span class="src-sym">-&gt;</span><span class="src-id">ssid</span>&nbsp;(<span class="src-var">$radio</span><span class="src-sym">-&gt;</span><span class="src-id">distance</span>&nbsp;km)</span><span class="src-str">&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a84"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$radio_select&nbsp;</span>.=&nbsp;<span class="src-str">&quot;&lt;/option&gt;\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a85"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a86"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a87"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$radio_select&nbsp;</span>.=&nbsp;<span class="src-str">&quot;&lt;/select&gt;\n&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a88"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</div></li>
+<li><div class="src-line"><a name="a89"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}&nbsp;</span><span class="src-key">else&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a90"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$radio_select&nbsp;</span>=&nbsp;<span class="src-str">&quot;No&nbsp;s'han&nbsp;pogut&nbsp;trobar&nbsp;ràdios&nbsp;aprop,&nbsp;segurament&nbsp;no&nbsp;tinguis&nbsp;cap&nbsp;node&nbsp;guifi.net&nbsp;aprop&nbsp;on&nbsp;et&nbsp;puguis&nbsp;connectar&nbsp;:(&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a91"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a92"></a><span class="src-sym">}&nbsp;</span><span class="src-key">else&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a93"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$radio_select&nbsp;</span>=&nbsp;<span class="src-str">&quot;No&nbsp;s'han&nbsp;pogut&nbsp;trobar&nbsp;ràdios,&nbsp;error&nbsp;de&nbsp;l'API:&nbsp;&quot;</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a94"></a>&nbsp;&nbsp;&nbsp;&nbsp;<span class="src-var">$radio_select&nbsp;</span>.=&nbsp;<span class="src-var">$gapi</span><span class="src-sym">-&gt;</span><span class="src-id">getErrorsStr</span><span class="src-sym">(</span><span class="src-sym">)</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a95"></a><span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a96"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a97"></a><span class="src-php">?&gt;</span></div></li>
+<li><div class="src-line"><a name="a98"></a>&lt;!DOCTYPE&nbsp;html&nbsp;PUBLIC&nbsp;&quot;-//W3C//DTD&nbsp;HTML&nbsp;4.01&nbsp;Transitional//EN&quot;&nbsp;&quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;</div></li>
+<li><div class="src-line"><a name="a99"></a>&lt;html&gt;</div></li>
+<li><div class="src-line"><a name="a100"></a>&lt;head&gt;</div></li>
+<li><div class="src-line"><a name="a101"></a>&lt;meta&nbsp;http-equiv=&quot;Content-Type&quot;&nbsp;content=&quot;text/html;&nbsp;charset=UTF-8&quot;&gt;</div></li>
+<li><div class="src-line"><a name="a102"></a>&lt;title&gt;Client&nbsp;PHP&nbsp;per&nbsp;l'API&nbsp;de&nbsp;guifi.net&lt;/title&gt;</div></li>
+<li><div class="src-line"><a name="a103"></a>&lt;script&nbsp;src=&quot;http://jqueryjs.googlecode.com/files/jquery-1.3.2.min.js&quot;&gt;&lt;/script&gt;</div></li>
+<li><div class="src-line"><a name="a104"></a>&lt;link&nbsp;rel=&quot;stylesheet&quot;&nbsp;type=&quot;text/css&quot;&nbsp;href=&quot;style.css&quot;&nbsp;/&gt;</div></li>
+<li><div class="src-line"><a name="a105"></a>&lt;/head&gt;</div></li>
+<li><div class="src-line"><a name="a106"></a>&lt;body&gt;</div></li>
+<li><div class="src-line"><a name="a107"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a108"></a>&lt;div&nbsp;id=&quot;container&quot;&gt;</div></li>
+<li><div class="src-line"><a name="a109"></a>&lt;div&nbsp;id=&quot;content&quot;&gt;</div></li>
+<li><div class="src-line"><a name="a110"></a>&lt;h1&gt;Molt&nbsp;bé!&lt;/h1&gt;</div></li>
+<li><div class="src-line"><a name="a111"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a112"></a><span class="src-php">&lt;?php&nbsp;</span></div></li>
+<li><div class="src-line"><a name="a113"></a><span class="src-key">if</span><span class="src-sym">(&nbsp;</span><span class="src-sym">!</span><span class="src-key">empty</span><span class="src-sym">(</span><span class="src-var">$message</span><span class="src-sym">))&nbsp;</span><span class="src-sym">{</span></div></li>
+<li><div class="src-line"><a name="a114"></a>&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">'&lt;div&nbsp;class=&quot;alert&quot;&gt;'</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a115"></a>&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">'&lt;h6&gt;Error&lt;/h6&gt;'</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a116"></a>&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-var">$message</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a117"></a>&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-str">'&lt;/div&gt;'</span><span class="src-sym">;</span></div></li>
+<li><div class="src-line"><a name="a118"></a><span class="src-sym">}</span></div></li>
+<li><div class="src-line"><a name="a119"></a><span class="src-php">?&gt;</span></div></li>
+<li><div class="src-line"><a name="a120"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a121"></a>&lt;p&gt;Has&nbsp;aconseguit&nbsp;crear&nbsp;el&nbsp;teu&nbsp;node.&nbsp;El&nbsp;podràs&nbsp;veure&nbsp;a&nbsp;la&nbsp;pàgina</div></li>
+<li><div class="src-line"><a name="a122"></a>següent:&lt;/p&gt;</div></li>
+<li><div class="src-line"><a name="a123"></a>&lt;p&gt;&lt;a&nbsp;href=&quot;http://guifi.net/node/<span class="src-php">&lt;?php</span></div></li>
+<li><div class="src-line"><a name="a124"></a>echo&nbsp;<span class="src-var">$node_id</span><span class="src-php">?&gt;</span>&quot;&gt;http://guifi.net/node/<span class="src-php">&lt;?php</span></div></li>
+<li><div class="src-line"><a name="a125"></a>echo&nbsp;<span class="src-var">$node_id</span><span class="src-php">?&gt;</span>&lt;/a&gt;&lt;/p&gt;</div></li>
+<li><div class="src-line"><a name="a126"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a127"></a>&lt;p&gt;Ara&nbsp;només&nbsp;et&nbsp;queda&nbsp;un&nbsp;petit&nbsp;pas&nbsp;per&nbsp;acabar&nbsp;de&nbsp;configurar&nbsp;la&nbsp;teva</div></li>
+<li><div class="src-line"><a name="a128"></a>antena:&nbsp;escollir&nbsp;allà&nbsp;on&nbsp;et&nbsp;connectes!&lt;/p&gt;</div></li>
+<li><div class="src-line"><a name="a129"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a130"></a>&lt;form&nbsp;action=&quot;examples.guifi_api.simple_user.step2.php?node_id=<span class="src-php">&lt;?php&nbsp;</span>echo&nbsp;<span class="src-var">$node_id&nbsp;</span><span class="src-php">?&gt;</span>&quot;&nbsp;method=&quot;post&quot;&gt;</div></li>
+<li><div class="src-line"><a name="a131"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a132"></a>&lt;fieldset&gt;&lt;legend&gt;Autenticació&lt;/legend&gt;</div></li>
+<li><div class="src-line"><a name="a133"></a>&lt;p&gt;Primer&nbsp;de&nbsp;tot,&nbsp;hem&nbsp;de&nbsp;saber&nbsp;quin&nbsp;nom&nbsp;d'usuari&nbsp;i&nbsp;contrasenya&nbsp;tens</div></li>
+<li><div class="src-line"><a name="a134"></a>registrat&nbsp;a&nbsp;guifi.net&lt;/p&gt;</div></li>
+<li><div class="src-line"><a name="a135"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a136"></a>&lt;dl&gt;</div></li>
+<li><div class="src-line"><a name="a137"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;dt&gt;&lt;label&nbsp;for=&quot;ipt-username&quot;&gt;Nom&nbsp;d'usuari:&lt;/label&gt;&lt;/dt&gt;</div></li>
+<li><div class="src-line"><a name="a138"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;dd&gt;&lt;input&nbsp;type=&quot;text&quot;&nbsp;name=&quot;username&quot;&nbsp;id=&quot;ipt-username&quot;&nbsp;/&gt;&lt;/dd&gt;</div></li>
+<li><div class="src-line"><a name="a139"></a>&lt;/dl&gt;</div></li>
+<li><div class="src-line"><a name="a140"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a141"></a>&lt;dl&gt;</div></li>
+<li><div class="src-line"><a name="a142"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;dt&gt;&lt;label&nbsp;for=&quot;ipt-password&quot;&gt;Contrasenya:&lt;/label&gt;&lt;/dt&gt;</div></li>
+<li><div class="src-line"><a name="a143"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;dd&gt;&lt;input&nbsp;type=&quot;password&quot;&nbsp;name=&quot;password&quot;&nbsp;id=&quot;ipt-password&quot;&nbsp;/&gt;&lt;/dd&gt;</div></li>
+<li><div class="src-line"><a name="a144"></a>&lt;/dl&gt;</div></li>
+<li><div class="src-line"><a name="a145"></a>&lt;/fieldset&gt;</div></li>
+<li><div class="src-line"><a name="a146"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a147"></a>&lt;fieldset&gt;&lt;legend&gt;La&nbsp;teva&nbsp;antena&lt;/legend&gt;</div></li>
+<li><div class="src-line"><a name="a148"></a>&lt;p&gt;Necessitem&nbsp;saber&nbsp;només&nbsp;una&nbsp;cosa&nbsp;de&nbsp;la&nbsp;teva&nbsp;antena:&nbsp;la&nbsp;seva&nbsp;adreça&nbsp;MAC.&lt;/p&gt;</div></li>
+<li><div class="src-line"><a name="a149"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a150"></a>&lt;dl&gt;</div></li>
+<li><div class="src-line"><a name="a151"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;dt&gt;&lt;label&nbsp;for=&quot;ipt-mac&quot;&gt;Adreça&nbsp;MAC:&lt;/label&gt;&lt;/dt&gt;</div></li>
+<li><div class="src-line"><a name="a152"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;dd&gt;&lt;input&nbsp;type=&quot;text&quot;&nbsp;name=&quot;mac&quot;&nbsp;id=&quot;ipt-mac&quot;&nbsp;/&gt;&lt;/dd&gt;</div></li>
+<li><div class="src-line"><a name="a153"></a>&lt;/dl&gt;</div></li>
+<li><div class="src-line"><a name="a154"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a155"></a>&lt;/fieldset&gt;</div></li>
+<li><div class="src-line"><a name="a156"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a157"></a>&lt;fieldset&gt;&lt;legend&gt;El&nbsp;node&nbsp;on&nbsp;et&nbsp;connectes&lt;/legend&gt;</div></li>
+<li><div class="src-line"><a name="a158"></a>&lt;p&gt;Hem&nbsp;escollit&nbsp;per&nbsp;tu&nbsp;un&nbsp;seguit&nbsp;de&nbsp;nodes&nbsp;on&nbsp;és&nbsp;possible&nbsp;que&nbsp;et&nbsp;puguis</div></li>
+<li><div class="src-line"><a name="a159"></a>connectar,&nbsp;fins&nbsp;a&nbsp;50.&lt;/p&gt;</div></li>
+<li><div class="src-line"><a name="a160"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a161"></a>&lt;p&gt;Si&nbsp;no&nbsp;trobes&nbsp;el&nbsp;teu&nbsp;en&nbsp;aquesta&nbsp;llista,&nbsp;és&nbsp;difícil&nbsp;que&nbsp;et&nbsp;puguis</div></li>
+<li><div class="src-line"><a name="a162"></a>connectar&nbsp;a&nbsp;cap&nbsp;altre&nbsp;node.&lt;/p&gt;</div></li>
+<li><div class="src-line"><a name="a163"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a164"></a>&lt;p&gt;Selecciona&nbsp;el&nbsp;nom&nbsp;del&nbsp;node&nbsp;on&nbsp;et&nbsp;connectes:&lt;/p&gt;</div></li>
+<li><div class="src-line"><a name="a165"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a166"></a>&lt;dl&gt;</div></li>
+<li><div class="src-line"><a name="a167"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;dt&gt;&lt;label&nbsp;for=&quot;ipt-node&quot;&gt;Node&nbsp;on&nbsp;et&nbsp;connectes:&lt;/label&gt;&lt;/dt&gt;</div></li>
+<li><div class="src-line"><a name="a168"></a>&nbsp;&nbsp;&nbsp;&nbsp;&lt;dd&gt;<span class="src-php">&lt;?php</span></div></li>
+<li><div class="src-line"><a name="a169"></a>&nbsp;&nbsp;&nbsp;&nbsp;echo&nbsp;<span class="src-var">$radio_select</span><span class="src-php">?&gt;</span>&lt;/dd&gt;</div></li>
+<li><div class="src-line"><a name="a170"></a>&lt;/dl&gt;</div></li>
+<li><div class="src-line"><a name="a171"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a172"></a>&lt;/fieldset&gt;</div></li>
+<li><div class="src-line"><a name="a173"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a174"></a>&lt;h5&gt;Aquí&nbsp;s'acaba&nbsp;el&nbsp;segon&nbsp;pas!&lt;/h5&gt;</div></li>
+<li><div class="src-line"><a name="a175"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a176"></a>&lt;p&gt;Ara&nbsp;només&nbsp;has&nbsp;d'enviar&nbsp;les&nbsp;dades,&nbsp;i&nbsp;es&nbsp;crearà&nbsp;un&nbsp;enllaç&nbsp;cap&nbsp;el&nbsp;node</div></li>
+<li><div class="src-line"><a name="a177"></a>que&nbsp;has&nbsp;seleccionat.&lt;/p&gt;</div></li>
+<li><div class="src-line"><a name="a178"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a179"></a>&lt;p&gt;A&nbsp;continuació,&nbsp;només&nbsp;et&nbsp;caldrà&nbsp;&lt;strong&gt;configurar&nbsp;la&nbsp;teva&nbsp;antena&lt;/strong&gt;,</div></li>
+<li><div class="src-line"><a name="a180"></a>i&nbsp;ja&nbsp;estaràs&nbsp;connectat&nbsp;a&nbsp;guifi.net!&lt;/p&gt;</div></li>
+<li><div class="src-line"><a name="a181"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a182"></a>&lt;p&nbsp;class=&quot;submit&quot;&gt;&lt;input&nbsp;type=&quot;submit&quot;&nbsp;name=&quot;create_link&quot;</div></li>
+<li><div class="src-line"><a name="a183"></a>&nbsp;&nbsp;&nbsp;&nbsp;value=&quot;Crea&nbsp;l'enllaç&quot;&nbsp;/&gt;&lt;/p&gt;</div></li>
+<li><div class="src-line"><a name="a184"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a185"></a>&lt;/form&gt;</div></li>
+<li><div class="src-line"><a name="a186"></a>&nbsp;</div></li>
+<li><div class="src-line"><a name="a187"></a>&lt;/div&gt;</div></li>
+<li><div class="src-line"><a name="a188"></a>&lt;/div&gt;</div></li>
+<li><div class="src-line"><a name="a189"></a>&lt;/body&gt;</div></li>
+<li><div class="src-line"><a name="a190"></a>&lt;/html&gt;</div></li>
+</ol>
+</div>
+        <div class="credit">
+		    <hr />
+		    Documentation generated on Sun, 10 Jan 2010 21:02:49 +0100 by <a href="http://www.phpdoc.org">phpDocumentor 1.4.3</a>
+	      </div>
+      </td></tr></table>
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>
