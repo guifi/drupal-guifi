@@ -552,7 +552,7 @@ function guifi_node_update($node) {
   // Refresh maps?
   $pn = db_fetch_object(db_query(
     'SELECT l.*
-    FROM {guifi_location}
+    FROM {guifi_location} l
     WHERE l.id=%d',
     $node->nid));
   if (($pn->lat != $node->lat) || ($pn->lon != $node->lon) || ($pn->status_flag != $node->status_flag)) {

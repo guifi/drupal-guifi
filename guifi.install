@@ -232,14 +232,14 @@ function guifi_schema() {
          'lastname' => array('type' => 'varchar', 'length' => '60', 'not NULL' => TRUE, 'default' => ''),
          'username' => array('type' => 'varchar', 'length' => '40', 'not NULL' => TRUE, 'default' => ''),
          'password' => array('type' => 'varchar', 'length' => '128', 'not NULL' => TRUE, 'default' => ''),
-         'email' => array('type' => 'varchar', 'length' => '64', 'not NULL' => FALSE),
-         'content_filters' => array('type' => 'text', 'size' => 'big', 'not NULL' => FALSE, 'default' => NULL),
-         'status' => array('type' => 'varchar', 'length' => 25, 'not NULL' => TRUE, 'default' => 'new', 'COMMENT' => 'pending/approved/rejected'),
+         'notification' => array('type' => 'varchar', 'length' => '1024', 'not NULL' => FALSE),
          'extra' => array('type' => 'text', 'size' => 'big', 'not NULL' => FALSE),
          'user_created' => array('type' => 'int', 'not NULL' => TRUE, 'default' => 0, 'disp-width' => '10'),
          'user_changed' => array('type' => 'int', 'not NULL' => TRUE, 'default' => 0, 'disp-width' => '10'),
          'timestamp_created' => array('type' => 'int', 'not NULL' => TRUE, 'default' => 0, 'disp-width' => '10'),
-         'timestamp_changed' => array('type' => 'int', 'not NULL' => TRUE, 'default' => 0, 'disp-width' => '10')),
+         'timestamp_changed' => array('type' => 'int', 'not NULL' => TRUE, 'default' => 0, 'disp-width' => '10'),
+         'status' => array('type' => 'varchar', 'length' => 25, 'not NULL' => TRUE, 'default' => 'new', 'COMMENT' => 'pending/approved/rejected'),
+         'content_filters' => array('type' => 'text', 'size' => 'big', 'not NULL' => FALSE, 'default' => NULL)),
     'primary key' => array('id'),
     'unique keys' => array(
          'username' => array('username')),
@@ -250,7 +250,9 @@ function guifi_schema() {
          'id' => array('COMMENT' => 'primary key 1st column, numbers the sequential order of each address into the same interface', 'type' => 'int', 'not NULL' => TRUE, 'disp-width' => '11'),
          'interface_id' => array('COMMENT' => 'primary key 2nd column and foreign key to guifi_interfaces(id)', 'type' => 'int', 'not NULL' => TRUE, 'default' => 0, 'disp-width' => '11'),
          'ipv4' => array('type' => 'varchar', 'length' => '16', 'not NULL' => FALSE),
-         'netmask' => array('type' => 'varchar', 'length' => '16', 'not NULL' => TRUE, 'default' => '255.255.255.0')),
+         'netmask' => array('type' => 'varchar', 'length' => '16', 'not NULL' => TRUE, 'default' => '255.255.255.0'),
+         'ipv4_type' => array('type' => 'int', 'not NULL' => TRUE, 'default' => 0, 'disp-width' => '11'),
+         'zone_id' => array('type' => 'int', 'not NULL' => TRUE, 'default' => 0, 'disp-width' => '11')),
     'primary key' => array('interface_id', 'id'),
     'unique keys' => array(
          'ipv4' => array('ipv4')),
@@ -458,7 +460,7 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('12', 'firmware', 'Freifunk-OLSR', 'OpenWRT-Freifunk-v1.6.16 with OLSR', 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|WHR-HP-G54, WHR-G54S');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('13', 'firmware', 'AirOsv30', 'Ubiquti AirOs 3.0', 'NanoStation2|NanoStation5|LiteStation2|LiteStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5')");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('14', 'firmware', 'RouterOSv4.0+', 'RouterOS 4.0 to 4.6 from Mikrotik', 'Supertrasto RB532 guifi.net|Supertrasto RB133C guifi.net|Supertrasto RB133 guifi.net|Supertrasto RB112 guifi.net|Supertrasto RB153 guifi.net|Supertrasto guifiBUS guifi.net|Supertrasto RB600 guifi.net|Supertrasto RB411 guifi.net|Supertrasto RB333 guifi.net|Supertrasto RB433 guifi.net|Supertrasto RB800 guifi.net');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('15', 'firmware', 'AirOsv52', 'Ubiquti AirOs 5.2',AirMaxM2 Rocket/Nano/Loco|AirMaxM5 Rocket/Nano/Loco|AirMaxM2 Bullet/PwBrg/AirGrd/NanoBr|AirMaxM5 Bullet/PwBrg/AirGrd/NanoBr');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('15', 'firmware', 'AirOsv52', 'Ubiquti AirOs 5.2', 'AirMaxM2 Rocket/Nano/Loco|AirMaxM5 Rocket/Nano/Loco|AirMaxM2 Bullet/PwBrg/AirGrd/NanoBr|AirMaxM5 Bullet/PwBrg/AirGrd/NanoBr');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('16', 'firmware', 'RouterOSv4.7+', 'RouterOS 4.7 or newer from Mikrotik', 'Supertrasto RB532 guifi.net|Supertrasto RB133C guifi.net|Supertrasto RB133 guifi.net|Supertrasto RB112 guifi.net|Supertrasto RB153 guifi.net|Supertrasto guifiBUS guifi.net|Supertrasto RB600 guifi.net|Supertrasto RB411 guifi.net|Supertrasto RB333 guifi.net|Supertrasto RB433 guifi.net|Supertrasto RB800 guifi.net');");
 
   // --

@@ -82,9 +82,10 @@ function _ipcalc($ip,$mask) {
     bintoIP(substr($octets['ip']['binary'],0,$return["maskbits"]).str_repeat("0",32-$return["maskbits"]));
   $return['broadcast'] =
     bintoIP(substr($octets['ip']['binary'],0,$return["maskbits"]).str_repeat("1",32-$return["maskbits"]));
+  $maskfix = $return["maskbits"]-1;
   $return['netstart'] =
-    bintoIP(substr($octets['ip']['binary'],0,$return["maskbits"]).str_repeat("0",32-$return["maskbits"]-1)."1");
-  $return['netend']  = bintoIP(substr($octets['ip']['binary'],0,$return["maskbits"]).str_repeat("1",32-$return["maskbits"]-1)."0");
+    bintoIP(substr($octets['ip']['binary'],0,$return["maskbits"]).str_repeat("0",32-$maskfix)."1");
+  $return['netend']  = bintoIP(substr($octets['ip']['binary'],0,$return["maskbits"]).str_repeat("1",32-$maskfix)."0");
   $return['wildcard']  = preg_replace(array("/1/","/0/"),array("a","b"),$octets['mask']['binary']);
   $return['wildcard']  = bintoIP(preg_replace(array("/a/","/b/"),array("0","1"),$return['wildcard']));
   $return['hosts'] = ip2long($return['netend']) - ip2long($return['netstart']) + 1;

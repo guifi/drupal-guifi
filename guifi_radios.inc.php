@@ -2,7 +2,7 @@
 
 /* Radio edit forms & functions */
 /* guifi_radio_form(): Main radio form (Common parameters)*/
-function guifi_radio_form(&$edit,$form_weight) {
+function guifi_radio_form($edit, $form_weight) {
   global $hotspot;
   global $bridge;
   global $user;

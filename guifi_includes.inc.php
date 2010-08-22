@@ -907,7 +907,7 @@ function guifi_ipcalc_get_ips(
 function guifi_ipcalc_get_ips_recurse($var,&$ips) {
   foreach ($var as $k => $value) {
     if ($k == 'ipv4') {
-      $ip_dec = ip2long($value);
+      $ip_dec = ip2long((string)$value);
       if ( ($ip_dec) and (!isset($ips[$ip_dec])) ) {
         $ips[$ip_dec] = guifi_ipcalc_get_maskbits($var['netmask']);
       }
