@@ -1050,12 +1050,10 @@ function dump_guifi_domains($cnmlid, $action){
               $hostname->addAttribute('name',strtolower($host->host));
               $hostname->addAttribute('IPv4',$host->ipv4);
               $alias = unserialize($host->aliases);
-                foreach ($alias as $id => $name) {
-                  if ($name) {
+                  if (!empty($alias)) {
                     $cnames = implode(",", $alias);
                     $hostname->addAttribute('CNAME',$cnames);
                   }
-                }
               $options = unserialize($host->options);
               if ($options['NS'] != '0')
                 $hostname->addAttribute('NS','y');

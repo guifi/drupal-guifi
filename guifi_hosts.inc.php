@@ -88,16 +88,16 @@ function guifi_host_form($edit,$form_weight) {
       );
 
       unset ($nsoptions);
-      $checkoptions = substr((string)$host['options'], 0, 2);
-        if ($checkoptions == 'a:') {
-          $check = $host['options'];
-          $nsoptions = unserialize((string)$check);
+      if ($host['options']) {
+        $checkoptions = substr((string)$host['options'], 0, 2);
+          if ($checkoptions == 'a:') {
+            $nsoptions = unserialize((string)$host['options']);
+          } else {
+            $nsoptions = array($host['opt']['options']['NS'],$host['opt']['options']['MX']);
           }
-        if ($host['opt']['options']) {
-          $nsoptions = array($host['opt']['options']['NS'],$host['opt']['options']['MX']);
-        } else {
-           $nsoptions = array( 'NS' => '0', 'MX' => '0' );
-        }
+       } else {
+          $nsoptions = array( 'NS' => '0', 'MX' => '0' );
+       }
       $form['r']['hosts'][$key]['opt']['options'] = array(
         '#type' => 'checkboxes',
         '#title' => t('Options'),
