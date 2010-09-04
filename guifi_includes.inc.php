@@ -1106,8 +1106,8 @@ function guifi_ipcalc_get_subnet_by_nid(
 }
 
 function guifi_ipcalc_find_subnet(
-  $base_ip,              // base addres to start from
-  $mask_range,           // range too look (up to/total size)
+  $base_ip,              // base address to start from
+  $mask_range,           // range to look (up to/total size)
   $mask_allocated,       // size of free space to look for within the total range
   $ips_allocated = NULL) // sorted array with the currently used ips
 {

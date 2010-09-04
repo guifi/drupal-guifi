@@ -47,7 +47,7 @@ function guifi_UTM2pixel ( $coords, $x, $y ) {
 }
 
 /*
- * Convert coordinates from Longitude, Latitude and Elevation  to XYZ.
+ * Convert coordinates from Longitude, Latitude and Elevation to XYZ.
  */
 function guifi_lonlat2XYZ ( $datum, $lon, $lat, $h = 0 ) {
   $lon = deg2rad($lon);

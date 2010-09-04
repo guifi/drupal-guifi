@@ -2,7 +2,7 @@
 /*
  * Created on 1/08/2008 by rroca
  *
- * functions for tracroute tools
+ * functions for traceroute tools
  */
 
 function guifi_live_ping($device_id) {

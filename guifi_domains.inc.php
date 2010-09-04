@@ -142,7 +142,7 @@ function guifi_domain_form($form_state, $params = array()) {
     $form_state['values']['hosts']['0']['counter']= '0';
     $form_state['values']['hosts']['0']['host'] = 'ns1';
     $form_state['values']['hosts']['0']['ipv4'] = $params['ipv4'];
-    $form_state['values']['hosts']['0']['options'] = array( 'NS' => 'NS', 'MX' => '0' );
+    $form_state['values']['hosts']['0']['opt']['options'] = array( 'NS' => 'NS', 'MX' => '0' );
   }
 
   drupal_set_breadcrumb(guifi_node_ariadna($form_state['values']['sid']));
@@ -281,7 +281,7 @@ function guifi_domain_form($form_state, $params = array()) {
     '#title' => t("Default Domain IP Address"),
     '#default_value' => $form_state['values']['defipv4'],
     '#element_validate' => array('guifi_ipv4_validate'),
-    '#description' => t("Ex: domain.net without hostname resolve this IP Address, tends to be the same address as hostname: www.<br> leave it blank if not needed, additionally yo can create an host name ' * ' to resolve all undefined hostnames for this domain"),
+    '#description' => t("Ex: domain.net without hostname resolve this IP Address, tends to be the same address as hostname: www.<br> leave it blank if not needed."),
     '#required' => FALSE,
   );
 
@@ -364,7 +364,7 @@ function guifi_domain_form_validate($form,&$form_state) {
   $hostquery = db_query("
       SELECT host
       FROM {guifi_dns_hosts}
-      WHERE id = %s ", 
+      WHERE id = %d", 
       $form_state['values']['id']); 
 
   $hostname = array();
@@ -417,16 +417,25 @@ function guifi_domain_save($edit, $verbose = TRUE, $notify = TRUE) {
   if (is_array($edit['hosts']))
     ksort($edit['hosts']);
   $rc = 0;
-  if ($edit['hosts']) foreach ($edit['hosts'] as $counter => $host) {
-    $keys['id'] = $ndomain['id'];
-    $keys['counter']=$counter;
-    $host['id'] = $ndomain['id'];
-    $host['counter'] = $rc;
-    foreach ($host['aliases'] as $key => $name)
-      if (empty($name))
-        unset($host['aliases'][$key]);
-    if($host['aliases'])
-      $host['aliases'] =  serialize($host['aliases']);
+
+  if ($edit['hosts'])
+    foreach ($edit['hosts'] as $counter => $host) {
+      $keys['id'] = $ndomain['id'];
+      $keys['counter']=$counter;
+      $host['id'] = $ndomain['id'];
+      $host['counter'] = $rc;
+
+      if ($host['aliases']) {
+        foreach ($host['aliases'] as $key => $name) {
+          if (empty($name)) {
+            unset($host['aliases'][$key]);
+          }
+        }
+        $host['aliases'] =  serialize($host['aliases']);
+      } else {
+        unset($host['aliases']); 
+      }
+
     $host['options'] =  serialize($host['opt']['options']);   
     // save the host
     $nhost = _guifi_db_sql('guifi_dns_hosts',$keys,$host,$log,$to_mail);

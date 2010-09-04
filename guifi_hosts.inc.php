@@ -1,7 +1,7 @@
 <?php
 
 /* guifi_host_form(): Main host form (Common parameters)*/
-function guifi_host_form(&$edit,$form_weight) {
+function guifi_host_form($edit,$form_weight) {
 
   global $user;
 
@@ -34,95 +34,101 @@ function guifi_host_form(&$edit,$form_weight) {
   $form['r']['hosts'] = array('#tree' => TRUE);
 
   $rc = 0;
-  print_r($domain);
   
-  if (!empty($edit['hosts'])) foreach ($edit['hosts'] as $key => $host) {
-    $form['r']['hosts'][$key] = guifi_host_host_form($host,$key,$form_weight);
-    $form['r']['hosts'][$key]['aliases'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Aliases'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-    '#description' => t('Host aliases. Save or press "Preview" to get more entries'),
-    '#weight' => $form_weight++,
-    );
-    // after rebuild forms, check serialized values.
-    $checkalias = substr($host['aliases'], 0, 2);
-      if ($checkalias == 'a:') {
-        $alias = unserialize($host['aliases']);
-      } else {
-        $alias = $host['aliases'];
-      }
-   $cname_description = t('Enter the host alias. ex: www<br> Must put a DOT "<strong>.</strong>" at the end of the domain name if the alias points to an external domain. ex: "outsidehost.dyndns.org<strong>.</strong>"');
-   
-    if (count($alias)) {
-      foreach ($alias as $delta => $value)
-        if (!empty($value))
-          $form['r']['hosts'][$key]['aliases'][] = array(
-            '#type' => 'textfield',
-            '#title' => t('CNAME'),
-            '#size' => 48,
-            '#maxlength' => 48,
-            '#description' => $cname_description,
-            '#default_value' => $value,
-          );     
-        for ($i = 0; $i < 1; $i++)
-          $form['r']['hosts'][$key]['aliases'][] = array(
-            '#type' => 'textfield',
-            '#size' => 48,
-            '#maxlength' => 48,
-            '#description' => $cname_description,
-          );
-    }  
-    $form['r']['hosts'][$key]['opt'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Advanced settings'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
-      '#weight' => $form_weight++,
-    );
+  if (!empty($edit['hosts']))
+    foreach ($edit['hosts'] as $key => $host) {
+      $form['r']['hosts'][$key] = guifi_host_host_form($host,$key,$form_weight);
+      $form['r']['hosts'][$key]['aliases'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Aliases'),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+        '#description' => t('Host aliases. Save or press "Preview" to get more entries'),
+        '#weight' => $form_weight++,
+      );
 
-    $checkoptions = substr($host['options'], 0, 2);
-      if ($checkoptions = 'a:') {
-        $check = $host['options'];
-        $nsoptions = unserialize($check);
+      // after rebuild forms, check serialized values.
+      unset ($alias);
+      if (!empty($host['aliases'])) {
+        $checkalias = substr((string)$host['aliases'], 0, 2);
+          if ($checkalias == 'a:') {
+            $alias = unserialize($host['aliases']);
+          } else {
+            $alias = $host['aliases'];
+          }
+       }
+      $cname_description = t('Enter the host alias. ex: www<br> Must put a DOT "<strong>.</strong>" at the end of the domain name if the alias points to an external domain. ex: "outsidehost.dyndns.org<strong>.</strong>"');
+
+      if (count($alias)) {
+        foreach ($alias as $delta => $value)
+          if (!empty($value))
+            $form['r']['hosts'][$key]['aliases'][] = array(
+              '#type' => 'textfield',
+              '#title' => t('CNAME'),
+              '#size' => 48,
+              '#maxlength' => 48,
+              '#description' => $cname_description,
+              '#default_value' => $value,
+            );
+      }
+      for ($i = 0; $i < 1; $i++)
+        $form['r']['hosts'][$key]['aliases'][] = array(
+           '#type' => 'textfield',
+           '#size' => 48,
+           '#maxlength' => 48,
+           '#description' => $cname_description,
+         );
+
+      $form['r']['hosts'][$key]['opt'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Advanced settings'),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+        '#weight' => $form_weight++,
+      );
+
+      unset ($nsoptions);
+      $checkoptions = substr((string)$host['options'], 0, 2);
+        if ($checkoptions == 'a:') {
+          $check = $host['options'];
+          $nsoptions = unserialize((string)$check);
+          }
+        if ($host['opt']['options']) {
+          $nsoptions = array($host['opt']['options']['NS'],$host['opt']['options']['MX']);
+        } else {
+           $nsoptions = array( 'NS' => '0', 'MX' => '0' );
         }
-      if ($host['opt']['options']) {
-        $nsoptions = array($host['opt']['options']['NS'],$host['opt']['options']['MX']);
-        }        
-           
-        
-    $form['r']['hosts'][$key]['opt']['options'] = array(
-      '#type' => 'checkboxes',
-      '#title' => t('Options'),
-      '#default_value' => $nsoptions,
-      '#options' => array('NS' => 'NS','MX' => 'MX')
-    );
-    //
+      $form['r']['hosts'][$key]['opt']['options'] = array(
+        '#type' => 'checkboxes',
+        '#title' => t('Options'),
+        '#default_value' => $nsoptions,
+        '#options' => array('NS' => 'NS','MX' => 'MX')
+      );
 
-    $bw = $form_weight - 1000;
+      $bw = $form_weight - 1000;
 
-    if (!isset($host['deleted'])) {
-      // Only allow delete and move functions if the host has been saved
-      if ($host['new']==FALSE)  {
-        $form['r']['hosts'][$key]['delete'] = array(
-          '#type' => 'image_button',
-          '#src' => drupal_get_path('module', 'guifi').'/icons/drop.png',
-          '#parents' => array('hosts',$key,'delete'),
-          '#attributes' => array('title' => t('Delete host')),
-          '#submit' => array('guifi_host_delete_submit'),
-          '#weight' => $bw++
-    );
+      if (!isset($host['deleted'])) {
+        // Only allow delete and move functions if the host has been saved
+        if ($host['new']==FALSE)  {
+          $form['r']['hosts'][$key]['delete'] = array(
+            '#type' => 'image_button',
+            '#src' => drupal_get_path('module', 'guifi').'/icons/drop.png',
+            '#parents' => array('hosts',$key,'delete'),
+            '#attributes' => array('title' => t('Delete host')),
+            '#submit' => array('guifi_host_delete_submit'),
+            '#weight' => $bw++
+          );
+        }
+        $rc++;
       }
-      $rc++;
-    }
     } // foreach host
 
     // Add host?
+  $newhostname = 'HostName-'.(count($edit['hosts'])+1);
   $form['r']['hosts']['newhost_name'] = array(
     '#type' => 'hidden',
     '#parents' => array('newhost_name'),
-    '#default_value' =>  'hostnameNOU',
+    '#default_value' =>  $newhostname,
   );
   $form['r']['hosts']['AddHost'] = array(
     '#type' => 'image_button',
@@ -179,7 +185,7 @@ function guifi_host_host_form($host, $key, &$form_weight = -200) {
       $f['deletedMsg'] = array(
         '#type' => 'item',
         '#value' => guifi_device_item_delete_msg(
-            "This host and has been deleted, " .
+            "This host has been deleted, " .
             "deletion will cascade to all properties, including interfaces, " .
             "links and ip addresses."),
         '#weight' => $form_weight++
@@ -216,7 +222,7 @@ function guifi_ipv4_validate($element,&$form_state) {
     }
 }
 
-/* guifi_host_validate()): Validate host, called as a hook while validating the form */
+/* guifi_host_validate(): Validate host, called as a hook while validating the form */
 function guifi_host_validate($edir,$form_state) {
   guifi_log(GUIFILOG_TRACE,"function _guifi_host_validate()");
 }
@@ -318,27 +324,31 @@ function guifi_hosts_print_data($id) {
     WHERE id = %d", 
     $id
   );
-
   $domain = db_fetch_object($querydom);
-
-   $queryhosts = db_query("
+  $queryhosts = db_query("
      SELECT *
      FROM {guifi_dns_hosts}
-     WHERE id = '%s'", 
+     WHERE id = '%d'", 
      $domain->id
    );
 
   while ($host = db_fetch_array($queryhosts)) {
     $aliases = unserialize($host['aliases']);
-    $alias = implode(' | ',$aliases);
-    $rows[] = array(
-      strtolower($host[host]).'.'.$domain->name,
-      $alias,
-      $host[ipv4],
-      );
-  }
-  return array_merge($rows);
+    if ($aliases) {
+      $alias = implode(' | ', $aliases);
+    } else {
+      $alias = NULL;
+    }
+      $rows[] = array(
+        strtolower($host[host]).'.'.$domain->name,
+        $alias,
+        $host[ipv4],
+        );
+      }
+
+    return array_merge($rows);
 }
+
  function check_exists($host) {
 
 }

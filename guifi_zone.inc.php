@@ -264,7 +264,7 @@ function guifi_zone_form(&$node, &$param) {
     $form['body_field']['#weight'] = $form_weight++;
   }
 
-  // That's it for non-admin users, they don't need to edit more information
+  // This is for non-admin users, they don't need to edit more information
   if (!user_access('administer guifi zones'))
     return $form;
 
@@ -312,7 +312,7 @@ function guifi_zone_form(&$node, &$param) {
     '#default_value' => $node->homepage,
     '#size' => 60,
     '#maxlength' => 128,
-    '#description' => t('URL of the local community homepage, if exists. Usefull for those who want to use this site just for network administration, but have their own portal.'),
+    '#description' => t('URL of the local community homepage, if exists. Useful for those who want to use this site just for network administration, but have their own portal.'),
     '#weight' => $form_weight++,
   );
   $form['notification'] = array(
@@ -323,7 +323,7 @@ function guifi_zone_form(&$node, &$param) {
     '#size' => 60,
     '#maxlength' => 1024,
     '#element_validate' => array('guifi_emails_validate'),
-    '#description' => t('Mails where changes at the zone will be notified. Usefull for decentralized administration. If more than one, separated by \',\''),
+    '#description' => t('Mails where changes at the zone will be notified. Useful for decentralized administration. If more than one, separated by \',\''),
     '#weight' => $form_weight++,
   );
 
@@ -339,7 +339,7 @@ function guifi_zone_form(&$node, &$param) {
   $proxystr = guifi_service_str($node->proxy_id);
 
   function _service_descr($type) {
-    return t('Select the default %type for to be used at this ' .
+    return t('Select the default %type to be used at this ' .
         'zone.<br />' .
         'You can find the %type by introducing part of the id number, ' .
         'zone name or proxy name. A list with all matching values ' .
@@ -421,7 +421,7 @@ function guifi_zone_form(&$node, &$param) {
     '#size' => 60,
     '#maxlength' => 128,
     '#element_validate' => array('guifi_zone_ospf_validate'),
-    '#description' => t('The id that will be used when creating configuration files for the OSPF routing protocol so all the routhers within the zone will share a dynamic routing table.'),
+    '#description' => t('The id that will be used when creating configuration files for the OSPF routing protocol so all the routers within the zone will share a dynamic routing table.'),
     '#weight' => $form_weight++,
   );
 
@@ -575,7 +575,7 @@ function guifi_zone_hidden_map_fileds($node) {
   return $output;
 }
 
-/** guifi_zone_simple_map(): Print de page show de zone map and nodes without zoom.
+/** guifi_zone_simple_map(): Print the page, show the zone map and nodes without zoom.
  */
 function guifi_zone_simple_map($node) {
   if (guifi_gmap_key()) {
@@ -657,7 +657,7 @@ function guifi_zone_ospf_validate($element, &$form_state) {
 
 function guifi_emails_validate($element, &$form_state) {
   if (empty($element['#value']))
-    form_error($element,t('You should specify at least one notification email address.'));
+    form_error($element,t('You have to specify at least one notification email address.'));
   $emails = guifi_notification_validate($element['#value']);
   if (!$emails)
     form_error($element,
@@ -668,7 +668,7 @@ function guifi_emails_validate($element, &$form_state) {
 
 function guifi_zone_validate($node) {
 
-  // if node master is root, check that there is not another zone as zoot
+  // if node master is root, check that there is not another zone as root
   if ($node->master == 0) {
       $qry = db_query(
            'SELECT id, title, nick
@@ -678,7 +678,7 @@ function guifi_zone_validate($node) {
      {
         if ($node->nid != $rootZone->id)
           form_set_error('master',
-            t('The root zone is already set to "%s". Only one root zone can be present at the database. Delete/change the actual root zone before assigning a new one or choose another partent.',
+            t('The root zone is already set to "%s". Only one root zone can be present at the database. Delete/change the actual root zone before assigning a new one or choose another parent.',
               array('%s' => $rootZone->title)));
      }
   }
@@ -790,7 +790,7 @@ function guifi_zone_delete(&$node) {
     WHERE zone_id=%d",
     $node->nid));
   if ($ql->count) {
-    drupal_set_message(t('FATAL ERROR: Can\'t delete a zone whith nodes. Database broken. Contact your system administrator'),'error');
+    drupal_set_message(t('FATAL ERROR: Can\'t delete a zone with nodes. Database broken. Contact your system administrator'),'error');
     $delete = FALSE;
   }
 
@@ -935,7 +935,7 @@ function guifi_zone_get_service($id, $type ,$path = FALSE) {
   return $ret;
 }
 
-/** guifi_zone_node_totals(): summary of a zone
+/** guifi_zone_totals(): summary of a zone
 **/
 function guifi_zone_totals($zones) {
 
@@ -1216,8 +1216,6 @@ function guifi_zone_view($node, $teaser = FALSE, $page = FALSE, $block = FALSE) 
 /** Miscellaneous utilities related to zones
 **/
 
-/** guifi_zones_listbox(): Creates a list of the zones
-**/
 
 function guifi_zones_listbox_recurse($id, $indent, $listbox, $children, $exclude) {
   if ($children[$id]) {
@@ -1232,6 +1230,8 @@ function guifi_zones_listbox_recurse($id, $indent, $listbox, $children, $exclude
   return $listbox;
 }
 
+/** guifi_zones_listbox(): Creates a list of the zones
+**/
 function guifi_zones_listbox($exclude = 0) {
   $result = db_query(
     'SELECT z.id, z.title, z.master, z.weight ' .

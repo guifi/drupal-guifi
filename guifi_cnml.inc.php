@@ -22,7 +22,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
      $output .= '<p>'.t('You must specify which data do you want to export, the following options are available:').'</p>';
      $output .= '<ol><li>'. l(t('Zones'), "guifi/cnml/".$cnmlid."/zones", array('title' => t('export zone and zone childs in CNML format')) ).'</li>';
      $output .= '<li>'. l(t('Zones and nodes'), "guifi/cnml/".$cnmlid."/nodes", array('title' => t('export zones and nodes in CNML format (short)')) ).'</li>';
-     $output .= '<li>'. l(t('Detailed'), "guifi/cnml/".$cnmlid."/detail", array('title' => t('export zones, nodes  and devices in CNML format (long)')) ).'</li></ol>';
+     $output .= '<li>'. l(t('Detailed'), "guifi/cnml/".$cnmlid."/detail", array('title' => t('export zones, nodes and devices in CNML format (long)')) ).'</li></ol>';
      $output .= '<p>'.t('The <b>C</b>ommunity <b>N</b>etwork <b>M</b>arkup <b>L</b>anguage (<a href="'.base_path().'node/3521">CNML</a>) is a XML format to interchange network information between services or servers.').'</p>';
      $output .= '<p>'.t('<b>IMPORTANT LEGAL NOTE:</b> This network information is under the <a href="http://guifi.net/ComunsSensefils/">Comuns Sensefils</a> license, and therefore, available for any other network under the same licensing. If is not your case, you should ask for permission before using it.</a>').'</p>';
      $output .= "</div>";

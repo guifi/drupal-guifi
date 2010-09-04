@@ -1192,7 +1192,7 @@ function guifi_help($section) {
     case 'node/add#guifi-node':
       return t("Create a node. A node is a physical location (will be dynamically drawed on the maps using lat/lon coordinates) where there are network devices, servers, etc.<br />Every node have to assigned to a guifi zone.");
     case 'node/add#guifi-zone':
-      return t("Create a community, area or zone. A typical zone hierarchy can be related to the territory (Country/Region/City...) but not have to, i.e. a single city can have many groups or communities with distinct IP addressing policies.<br />Every zone will have it's own page so it can be used as the homepage of that community.<br />The zones must belong at least to the root zone, but can also belong to other zones, so in that way a hierarchy is created.<br />Every zone have its own properties like maps or ip ranges and every node will have to be assigned to an existing zone, and will inherit the zone properties like his IP address and drawn in the corresponding map.<br />If zone properties are leaved blank, will inherit the parent zone properties.");
+      return t("Create a community, area or zone. A typical zone hierarchy can be related to the territory (Country/Region/City...) but not have to, i.e. a single city can have many groups or communities with distinct IP addressing policies.<br />Every zone will have its own page so it can be used as the homepage of that community.<br />The zones must belong at least to the root zone, but can also belong to other zones, so in that way a hierarchy is created.<br />Every zone have its own properties like maps or ip ranges and every node will have to be assigned to an existing zone, and will inherit the zone properties like its IP address and will be drawn in the corresponding map.<br />If zone properties are leaved blank, will inherit the parent zone properties.");
     case 'node/add#guifi-service':
       return t("Create a service. A service is any resource available on the network that should be listed in the content directory of the site, like a web server, internet proxy,ntp, instant messaging, voip gateway, etc... .");
   }
@@ -1223,7 +1223,7 @@ function guifi_admin_settings() {
   $form['guifi_license'] = array(
     '#type' => 'textarea',
     '#title' => t('License agreement'),
-    '#default_value' => variable_get("guifi_license", t("By creating this node, you accept the <a href=\"http://guifi.net/WirelessWCL_EN\">Wireless commons license.</a><br />Note that this database is inteded for supporting a real network, will assign ip addresses and show the network information in various formats, so might be <b>not</b> the right place for submitting ficticious data or just have fun. If you want to run tests or do some self training, be sure you are doing it at some of the <a href=\"http://proves.guifi.net\">test sites</a>.<br />Your access to this site might be banned or your data might be deleted if inappropiate use is detected.<br />You will be allways responsible of the information you give, agree to make it publicly available and you will be able to modify or delete it, network administrators can also update or delete your data.<br />If you want to promote your role within the community you can ask for it contacting the current administrators and they will grant the privileges that you qualify for.")),
+    '#default_value' => variable_get("guifi_license", t("By creating this node, you accept the <a href=\"http://guifi.net/WirelessWCL_EN\">Wireless commons license.</a><br />Note that this database is intended for supporting a real network. It will assign ip addresses and show the network information in various formats, so might be <b>not</b> the right place for submitting ficticious data or just have fun. If you want to run tests or do some self training, be sure you are doing it at some of the <a href=\"http://proves.guifi.net\">test sites</a>.<br />Your access to this site might be banned or your data might be deleted if inappropiate use is detected.<br />You will be always responsible of the information you give, agree to make it publicly available and you will be able to modify or delete it, network administrators can also update or delete your data.<br />If you want to promote your role within the community you can ask for it contacting the current administrators and they will grant the privileges that you qualify for.")),
     '#cols' => 60,
     '#rows' => 10,
     '#description' => t("Agreement &#038; help message when creating new nodes, users will not be able to create nodes unless they accept this message."),
@@ -1276,7 +1276,7 @@ function guifi_admin_settings() {
     '#default_value' => variable_get("guifi_pagelimit", 50),
     '#size' => 3,
     '#maxlength' => 3,
-    '#description' => t("Number of rows to be displayed as default on every paged report..."),
+    '#description' => t("Number of rows to be displayed as default on every page report..."),
     '#weight' => $form_weight++,
   );
   $form['guifi_contact'] = array(
@@ -1341,7 +1341,7 @@ function guifi_admin_settings() {
     '#required' => FALSE,
     '#default_value' => variable_get("guifi_loglevel", 0),
     '#options' => array(0 => 'None', 1 => 'Basic', 2 => 'Trace', 3 => 'Full'),
-    '#description' => t('Trace log level to screen:<ol><li><em>None</em>, normal operation</li><li><em>Basic</em>, general messages</li><li><em>Trace</em> provides follow-up of functions being executed, for developers</li><li><em>Full</em> dumps variable values, very long, for fine debug</li></ol>Change the log level to figure out whats happening.'),
+    '#description' => t('Trace log level to screen:<ol><li><em>None</em>, normal operation</li><li><em>Basic</em>, general messages</li><li><em>Trace</em>, provides follow-up of functions being executed (for developers)</li><li><em>Full</em>, dumps variable values (very long, for fine debug)</li></ol>Change the log level to figure out whats happening.'),
     '#weight' => $form_weight++,
   );
   $form['guifi_gmap_key'] = array(
@@ -1393,7 +1393,7 @@ function guifi_admin_settings() {
     '#default_value' => variable_get("guifi_thousand", '.'),
     '#size' => 1,
     '#maxlength' => 1,
-    '#description' => t("Thousands separatos for formatting numbers"),
+    '#description' => t("Thousands separator for formatting numbers"),
     '#weight' => $form_weight++,
   );
 
@@ -1852,7 +1852,7 @@ function guifi_purge($verbose = FALSE) {
         array('id' => $r->id),
         $to_mail);
 
-    $subject = t('The device %name has been DELETED by purgue process because was orphan of node.',
+    $subject = t('The device %name has been DELETED by purge process because was orphan of node.',
       array('%name' => $r->nick));
     drupal_set_message($subject);
     guifi_notify($to_mail,
@@ -2115,7 +2115,7 @@ function theme_guifi_menu_page($blocks) {
   }
   else {
     $link = 'guifi/menu/compact/on';
-    $output .= l(t('Hide descriptions'), $link . $suffix, array('title' => t('Compress layout by hiding descriptions.')));
+    $output .= l(t('Hide descriptions'), $link . $suffix, array('title' => t('Compact layout by hiding descriptions.')));
   }
   $output .= '</div>';
 

@@ -55,7 +55,7 @@ function guifi_schema() {
   );
 
   $schema['guifi_networks'] = array(
-    'comment' => 'allocates ipv4 adddress ranges to zones',
+    'comment' => 'allocates ipv4 address ranges to zones',
     'fields' => array(
          'id' => array('type' => 'serial', 'size' => 'small', 'unsigned' => TRUE, 'not null' => TRUE),
          'base' => array('type' => 'varchar', 'length' => '255', 'not null' => TRUE, 'default' => ''),
@@ -121,7 +121,6 @@ function guifi_schema() {
          'comment' => array('type' => 'text', 'size' => 'big', 'not null' => FALSE),
          'flag' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => 'Planned'),
          'extra' => array('type' => 'text', 'size' => 'big', 'not null' => FALSE, 'comment' => 'store variable data depending on guifi_devices(type)'),
-         'url_mrtg_server' => array('type' => 'varchar', 'length' => '255', 'not null' => FALSE),
          'graph_server' => array('type' => 'int',  'size' => 'medium' , 'not null' => TRUE, 'default' => 0, 'comment' => 'FK to guifi_services (SNPGraphs)'),
          'last_online' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'comment' => 'Last time that this device has been seen online'),
          'last_flag' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => 'N/A', 'comment' => 'N/A, Online, Offline...'),

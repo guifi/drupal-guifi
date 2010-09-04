@@ -34,6 +34,10 @@
     guifi_stats_chart05($statsid);
     return;
     break;
+  case 'chart06': //pie zones':
+    guifi_stats_chart06();
+    return;
+    break;
   case 'feeds': //total working nodes http://guifi.net/guifi/stats/nodes/0
     $ret=guifi_stats_feeds($statsid);
     echo $ret;
@@ -116,7 +120,7 @@ function guifi_stats_nodes() {
       }
       $output .= '<div id="plot" style="width: 500px; border-style:none; margin:5px;"><img src="/guifi/stats/chart0'.$vid.'/'.$v.$vz.'"></div>';
       break;
-    case ($vid>='1' && $vid<=9):
+    case ($vid>=1 && $vid<=9):
       $output .= '<div id="plot" style="width: 500px; border-style:none; margin:5px;"><img src="/guifi/stats/chart0'.$vid.'/0'.$vz.'"></div>';
       break;
     default:
@@ -145,6 +149,7 @@ function guifi_stats_nodes() {
     $output .= '<br><a href="javascript:guifi_stats_chart05(3)">'.t("5.3 Nodes per month, avr. 3m.").'</a>';
     $output .= '<br><a href="javascript:guifi_stats_chart05(6)">'.t("5.6 Nodes per month, avr. 6m.").'</a>';
     $output .= '<br><a href="javascript:guifi_stats_chart05(12)">'.t("5.12 Nodes per month, avr. 12m.").'</a>';
+    $output .= '<br><a href="javascript:guifi_stats_chart06()">'.t("6 Areas").'</a>';
     $output .= '</div>';
     $output .= '<div style="height:300px">&nbsp;</div>';
     $output .= '<div style="width:700px;">';
@@ -188,6 +193,9 @@ function guifi_stats_chart() {
         $v='12';
       }
       guifi_stats_chart05($v);
+      break;
+    case '6':
+      guifi_stats_chart06();
       break;
     default:
       guifi_stats_chart01();
@@ -560,7 +568,7 @@ function guifi_stats_chart04(){
       $year=$year-1;
       $month=12+$month;
     }
-    $datemin=mktime(0,0,0,$month,1,$year);
+    $datemin=mktime(0,0,0,$month,1,$year-1);
     
     if(isset($_GET['zone'])){
       $zone_id=$_GET['zone'];
@@ -826,6 +834,117 @@ function fmediacalc($tot,&$datos,&$n,$nmonths){
   }
   //return($datos[$n]);
   return($v/$nmonths);
+}
+
+//create gif pie zones
+function guifi_stats_chart06(){
+    include drupal_get_path('module','guifi').'/contrib/phplot/phplot.php';
+    $gDirTTFfonts=drupal_get_path('module','guifi').'/contrib/fonts/';  
+    if(isset($_GET['width'])){
+      $gwidth=$_GET['width'];
+    }else{
+      $gwidth=500;
+    }
+    if(isset($_GET['height'])){
+      $gheight=$_GET['height'];
+    }else{
+      $gheight=450;
+    }
+    $today=getdate();
+    $year=$today[year];
+    $month=$today[mon];
+    $month=$month-12;
+    $n=0;
+    $tot=0;
+    if($month<1){
+      $year=$year-1;
+      $month=12+$month;
+    }
+    $datemin=mktime(0,0,0,$month,1,$year-1);
+    
+    if(isset($_GET['zone'])){
+      $zone_id=$_GET['zone'];
+      if($zone_id=="0") $zone_id="3671";
+    }else{
+      $zone_id="3671";
+    }
+    
+    $azone=array();
+    $avalue=array();
+    $azone[$zone_id]=array($zone_id);
+    $achilds=array_keys(guifi_zone_childs_tree($zone_id,1));
+    foreach ($achilds as $key => $child) {
+      if ($child != $zone_id){
+        $azone[$child]=array();
+        $avalue[$child]=0;
+        $aschilds=guifi_zone_childs($child);
+        foreach ($aschilds as $skey => $schild) {
+          array_push($azone[$child],$schild);
+        }
+      }
+    }
+    $vsql="select COUNT(*) as num, zone_id
+      from {guifi_location}
+      where timestamp_created >= ".$datemin." and status_flag='Working' ";
+    if($zone_id!="0"){
+      $achilds=guifi_zone_childs($zone_id);
+      $v="";
+      foreach ($achilds as $key => $child) {
+        if($v=="")
+          $v .= "zone_id=".$child;
+        else
+          $v .= " or zone_id=".$child;
+      }
+      $vsql .= "AND (".$v.") ";
+    }
+    $vsql .= "GROUP BY zone_id ";
+    
+    $result=db_query($vsql);        
+    while ($record=db_fetch_object($result)){
+      foreach ($azone as $key => $grupzone) {
+        if (in_array($record->zone_id,$grupzone)){
+          $avalue[$key]=$avalue[$key]+$record->num;
+        }
+      }
+    };
+    foreach ($avalue as $key => $value) {
+      if($value!=0){
+        $data[]=array(guifi_get_zone_name($key),$value);
+        $tot=$tot+$value;
+      }
+    }
+
+    $shapes = array( 'none');
+    $plot = new PHPlot($gwidth,$gheight);
+    $plot->SetPlotAreaWorld(0, 0, NULL, NULL);
+    $plot->SetImageBorderType('plain');
+    $plot->SetFileFormat('png');
+    $plot->SetPlotType("pie"); 
+    $plot->SetDataType("text-data-single");
+    $plot->SetDataValues($data);
+    $plot->SetDataColors(array('red', 'green', 'blue', 'yellow', 'cyan',
+                        'magenta', 'brown', 'lavender', 'pink',
+                        'gray', 'orange'));
+    $plot->SetTTFPath($gDirTTFfonts);
+    $plot->SetFontTTF('title', 'Vera.ttf', 12);
+    $plot->SetFontTTF('legend', 'Vera.ttf', 7);
+    if(isset($_GET['title'])){
+        $plot->SetTitle("guifi.net      \n".t($_GET['title']));
+    }else{
+      if($zone_id=="0")
+        $plot->SetTitle("guifi.net      \n".t('Last year'));
+      else
+        $plot->SetTitle("guifi.net    \n".t('zone').": ".guifi_get_zone_name($zone_id)."\n".t('Last year'));
+    }
+
+    $plot->SetShading(1);
+    $plot->SetLabelScalePosition(0.45);
+    $plot->SetLegendStyle("left","left");
+    $plot->SetLegendPixels(0, 0);
+    foreach ($data as $row)
+      $plot->SetLegend(implode(': ', $row));
+    $plot->SetIsInline(TRUE);
+    $plot->DrawGraph();
 }
 
 //stats feeds

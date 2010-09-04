@@ -251,7 +251,7 @@ function guifi_user_form($form_state, $params = array()) {
         'If username results duplicated, add more words ' .
         '(i.e. middle initial).<br />' .
         'Please enter real data, if fake information is entered, ' .
-        'administrators might <strong>remove</strong> this user')
+        'administrators might <strong>remove</strong> this user.')
   );
   $f['lastname'] = array(
     '#type' => 'textfield',

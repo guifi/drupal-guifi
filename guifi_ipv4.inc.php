@@ -120,7 +120,7 @@ function guifi_ipv4_form($form_state, $params = array()) {
 				  $mask,
 					$network_type,
 					$ips_allocated,
-					$allocate,   // never allocate the obatined range at guifi_networks
+					$allocate,   // never allocate the obtained range at guifi_networks
 					TRUE);   // verbose output
 
 			  if ($net) {
@@ -128,7 +128,7 @@ function guifi_ipv4_form($form_state, $params = array()) {
 				  $form_state['values']['base']=$net;
 				  $form_state['values']['mask']=$mask;
 			  } else
-				  drupal_set_message(t('Was not possible to find %type space for %mask',
+				  drupal_set_message(t('It was not possible to find %type space for %mask',
 					  array('%type' => $network_type,
 						  '%mask' => $mask)),
 				  'error');

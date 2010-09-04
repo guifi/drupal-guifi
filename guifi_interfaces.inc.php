@@ -86,7 +86,7 @@ function guifi_interfaces_form(&$interface,$ptree) {
       $f['interface']['msg'] = array(
         '#type' => 'item',
         '#title' => t('New interface'),
-        '#description' => t('Save to database to add links or allocate subtenworks')
+        '#description' => t('Save to database to add links or allocate subnetworks')
       );
     }
   }
@@ -345,7 +345,7 @@ function guifi_interfaces_add_cable_public_link_submit(&$form,&$form_state) {
   $item = _ipcalc($base_ip['ipv4'],$base_ip['netmask']);
   $ip= guifi_ipcalc_find_ip($item['netid'],$base_ip['netmask'],$ips_allocated);
 
-  // no IP was given, so raise a message amd don't create the link'
+  // no IP was given, so raise a message and don't create the link'
   if (empty($ip)) {
     drupal_set_message(t('Unable to assign a free ip, link not created, ' .
         'contact the administrator.'));
