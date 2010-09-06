@@ -289,7 +289,7 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
        $key['id']));
     $log .= t('Domain %id-%name at node %nname deleted.',array('%id' => $key['id'],'%name' => $item->dname,'%nname' => $item->nname));
     // cascade to dns_hosts
-    $qc = db_query('SELECT id FROM {guifi_dns_hosts} WHERE id=%s',$key['id']);
+    $qc = db_query('SELECT id, counter FROM {guifi_dns_hosts} WHERE id=%d',$key['id']);
     while ($host = db_fetch_array($qc))
       $log .= '<br />'._guifi_db_delete('guifi_dns_hosts',$host,$to_mail,$depth);
   break;

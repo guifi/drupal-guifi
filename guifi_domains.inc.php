@@ -138,8 +138,9 @@ function guifi_domain_form($form_state, $params = array()) {
     $form_state['values']['ipv4'] = $params['ipv4'];
     $form_state['values']['scope'] = $params['scope'];
     $form_state['values']['management'] = $params['management'];
-    $form_state['values']['hosts']['0']['new']=TRUE;
-    $form_state['values']['hosts']['0']['counter']= '0';
+    $form_state['values']['allow'] = 'slave'; 
+    $form_state['values']['hosts']['0']['new'] = TRUE;
+    $form_state['values']['hosts']['0']['counter'] = '0';
     $form_state['values']['hosts']['0']['host'] = 'ns1';
     $form_state['values']['hosts']['0']['ipv4'] = $params['ipv4'];
     $form_state['values']['hosts']['0']['opt']['options'] = array( 'NS' => 'NS', 'MX' => '0' );
@@ -248,14 +249,18 @@ function guifi_domain_form($form_state, $params = array()) {
     '#title' => t('Management'),
     '#default_value' => $form_state['values']['management'],
     '#options' => array('automatic' => 'automatic', 'manual' => 'manual'),
-    '#description' =>  t('TO DO'),
+    '#description' =>  t('Choose <b>Automatic</b> if you want to use your domain management with the utility for servers "DNSServices"<br \>'
+                                  .'Choose <b>Manual</b>, if you just want to keep track of your domains / hosts here but want to do the management in your server manually.'),
   );
   $form['main']['allow'] = array(
     '#type' => 'radios',
+    '#required' => TRUE,
     '#title' => t('Transfer Options'),
     '#default_value' => $form_state['values']['allow'],
-    '#options' => array('slave' => t('Allow to be enslaved (Recommended)'), 'forward' => t('Allow Forward')),
-    '#description' =>  t('TO DO'),
+    '#options' => array('slave' => t('Allow to be enslaved (Recommended)'), 'forward' => t('Allow Forward'), 'disabled' => t('Disabled')),
+    '#description' =>  t('<b>Ensalved</b>, Allow other DNS servers on the network have an exact copy of the domain, so, if the original DNS does not work, can access to the hosts.'
+                                   .'<br \><b>Forward</b>, Allow other DNS servers on the network to forward the request to the master server transparently saving bandwidth.'
+                                   .'<br \><b>Disabled</b>, If you select this option, the management of your domain may not be transferred in any way, your domain will not be visible to other network servers.'),
   );
 
   if ($form_state['values']['scope'] == 'external') {

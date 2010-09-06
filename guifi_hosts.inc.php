@@ -88,16 +88,14 @@ function guifi_host_form($edit,$form_weight) {
       );
 
       unset ($nsoptions);
-      if ($host['options']) {
+      if (!empty($host['options'])) {
         $checkoptions = substr((string)$host['options'], 0, 2);
-          if ($checkoptions == 'a:') {
+          if ($checkoptions == 'a:')
             $nsoptions = unserialize((string)$host['options']);
-          } else {
-            $nsoptions = array($host['opt']['options']['NS'],$host['opt']['options']['MX']);
-          }
        } else {
-          $nsoptions = array( 'NS' => '0', 'MX' => '0' );
+            $nsoptions = array($host['opt']['options']['NS'],$host['opt']['options']['MX']);
        }
+
       $form['r']['hosts'][$key]['opt']['options'] = array(
         '#type' => 'checkboxes',
         '#title' => t('Options'),
@@ -162,9 +160,16 @@ function guifi_host_host_form($host, $key, &$form_weight = -200) {
       '#weight' => $form_weight++,
     );
 
+     if (($host['host'] == 'ns1' ) AND ($host['counter'] == '0')) {
+        $access = FALSE;
+     } else {
+         $access = TRUE;
+     }
+
     $f[] = array(
       '#type' => 'textfield',
-      '#title' => t('Default Host Name'),
+      '#access' => $access,
+      '#title' => t('Host Name'),
       '#parents' => array('hosts',$key,'host'),
       '#default_value' => $host['host'],
       '#element_validate' => array('guifi_hostname_validate'),
@@ -294,14 +299,13 @@ function guifi_host_add_host_submit(&$form, &$form_state) {
     $host=array();
     $host['new']=TRUE;
     $host['host']=$edit['newhost_name'];
-    $host['rc'] = $rc;
+    $host['counter'] = $rc;
     $host['unfold'] = TRUE;
     $form_state['rebuild'] = TRUE;
     $form_state['values']['hosts'][] = $host;
 
     drupal_set_message(t(' %host added',
        array('%host' => $host['host'])));
-
     return;
 }
 
