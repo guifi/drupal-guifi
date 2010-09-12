@@ -62,15 +62,21 @@ function guifi_domain_access($op, $id) {
 
   $node = node_load(array('nid' => $domain['sid']));
 
-  switch($op) {
- //   case 'create':
-//      return user_access("administer guifi dns");
-    case 'update':
-    return TRUE;
-//      if (user_access('administer guifi dns'))
-//        return TRUE;
-//      return FALSE;
+  if ($op == 'create') {
+    if ((user_access('administer guifi dns')) || (user_access('create guifi dns'))) {
+      return TRUE;
+    } else {
+      return FALSE;
+    }
   }
+  if ($op == 'update' or $op == 'delete') {
+    if ((user_access('administer guifi dns')) || (user_access('edit own guifi dns'))) {
+      return TRUE;
+    } else {
+      return FALSE;
+    }
+  }
+
 }
 
 /*
@@ -138,7 +144,7 @@ function guifi_domain_form($form_state, $params = array()) {
     $form_state['values']['ipv4'] = $params['ipv4'];
     $form_state['values']['scope'] = $params['scope'];
     $form_state['values']['management'] = $params['management'];
-    $form_state['values']['allow'] = 'slave'; 
+    $form_state['values']['allow'] = 'disabled'; 
     $form_state['values']['hosts']['0']['new'] = TRUE;
     $form_state['values']['hosts']['0']['counter'] = '0';
     $form_state['values']['hosts']['0']['host'] = 'ns1';
@@ -598,10 +604,10 @@ function guifi_domain_add() {
  */
 function guifi_domain_create_form($form_state, $node) {
 
-  if (!guifi_node_access('create',$node->nid)) {
+  if (!guifi_domain_access('create',$node->sid)) {
     $form['text_add'] = array(
       '#type' => 'item',
-      '#value' => t('You are not allowed to update this domain.'),
+      '#value' => t('You are not allowed to create a domain on this service.'),
       '#weight' => 0
    );
    return $form;

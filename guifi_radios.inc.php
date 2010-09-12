@@ -14,7 +14,8 @@ function guifi_radio_form($edit, $form_weight) {
     SELECT mid, model, f.nom manufacturer
     FROM guifi_model m, guifi_manufacturer f
     WHERE f.fid = m.fid
-      AND supported='Yes'");
+    AND supported='Yes'
+    ORDER BY manufacturer ASC");
   while ($model = db_fetch_array($querymid)) {
      $models_array[$model["mid"]] = $model["manufacturer"] .", " .$model["model"];
   }

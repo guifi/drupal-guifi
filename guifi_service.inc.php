@@ -780,7 +780,7 @@ function guifi_service_view($node, $teaser = FALSE, $page = FALSE, $block = FALS
       $form = drupal_get_form('guifi_domain_create_form',$node);
       $id = $node->id;
       $rows = array();
-      $header = array( '<h2>'.t('Domain').'</h2>', array('data' => t('type'),'style' => 'text-align: left;'),array('data' => t('Scope')),array('data' => t('Edit')),array('data' => t('Delete')));
+      $header = array( '<h2>'.t('Domain').'</h2>', array('data' => t('type'),'style' => 'text-align: left;'), array('data' => t('Scope')));
       $query = db_query("SELECT d.id FROM {guifi_dns_domains} d WHERE sid=%d",$id);
         while ($d = db_fetch_object($query)) {
           $domain = guifi_domain_load($d->id);

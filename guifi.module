@@ -1207,11 +1207,13 @@ function guifi_perm() {
     'administer guifi networks',
     'create guifi zones',
     'create guifi nodes',
+    'create guifi dns',
     'administer guifi users',
     'manage guifi users',
     'edit own guifi zones',
     'edit own guifi nodes',
-    'administer guifi dns'
+    'administer guifi dns',
+    'edit own guifi dns'
   );
 }
 
