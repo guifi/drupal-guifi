@@ -568,7 +568,7 @@ function guifi_stats_chart04(){
       $year=$year-1;
       $month=12+$month;
     }
-    $datemin=mktime(0,0,0,$month,1,$year-1);
+    $datemin=mktime(0,0,0,$month,1,$year);
     
     if(isset($_GET['zone'])){
       $zone_id=$_GET['zone'];
@@ -860,7 +860,7 @@ function guifi_stats_chart06(){
       $year=$year-1;
       $month=12+$month;
     }
-    $datemin=mktime(0,0,0,$month,1,$year-1);
+    $datemin=mktime(0,0,0,$month,1,$year);
     
     if(isset($_GET['zone'])){
       $zone_id=$_GET['zone'];
