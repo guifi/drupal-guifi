@@ -37,9 +37,12 @@ function xz()
 	
     var newNode = new GLatLng(document.getElementById("edit-lat").value, 
 			 document.getElementById("edit-lon").value);
-    
+
+    if (newNode != '(0, 0)') {
+      map.setCenter(newNode, 16);
+    } else {
     map.setCenter(new GLatLng(41.974175, 2.238118), 2);
-    
+    }
     GEvent.addListener(map, "click", function(marker, point) {
 	     map.clearOverlays();    
    	     var marcador = new GMarker(point);
