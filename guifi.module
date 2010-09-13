@@ -599,7 +599,8 @@ function guifi_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_LOCAL_TASK
   );
-       //if ($node->service_type == 'Proxy') {
+// TODO:
+/*
   $items['node/%guifi_service/view/proxyusers'] = array(
     'title' => 'users',
     'page callback' => 'guifi_users_node_list',
@@ -608,6 +609,7 @@ function guifi_menu() {
     'access arguments' => array('create guifi nodes'),
     'type' => MENU_LOCAL_TASK
   );
+*/
 
 //  TODO: To be deleted in the future to avoid include in the robots.txt
 // exclusion lists. In the future, will be /guifi/export/<service>/<export_type>
@@ -1872,57 +1874,105 @@ function guifi_purge($verbose = FALSE) {
   }
 
   // deleting orphan radios
-  $q = db_query('DELETE r FROM {guifi_radios} r  LEFT JOIN {guifi_devices} d ON r.id=d.id WHERE d.id IS NULL;');
+
+  $q = db_query('SELECT r.id FROM {guifi_radios} r  LEFT JOIN {guifi_devices} d ON r.id=d.id WHERE d.id IS NULL;');
+  $rdel = 0;
+  while ($r = db_fetch_object($q) ) {
+_guifi_db_delete('guifi_devices', array('id' => $r->id));
+    $subject = t('The Radio id: %id has been DELETED by purge process because was orphan of device.',
+      array('%id' => $r->id));
+    drupal_set_message($subject);
+    $rdel++;
+  }
 
   if ($verbose) {
     $tradios = microtime(TRUE);
-    drupal_set_message(t('orphan radios purged in %secs',
-      array('%secs' => number_format($tradios-$tdevices, 4)
+    drupal_set_message(t('%radio orphan radios purged in %secs',
+      array('%radio' => $rdel,
+        '%secs' => number_format($tradios-$tdevices, 4)
         )));
   }
 
 
   // deleting orphan interfaces
-  $q = db_query('DELETE i FROM {guifi_interfaces} i LEFT JOIN {guifi_devices} d ON i.id=d.interface_id WHERE d.id IS NULL;');
-
+  $q = db_query('SELECT i.id FROM {guifi_interfaces} i LEFT JOIN {guifi_devices} d ON i.device_id=d.id WHERE d.id IS NULL;');
+  $idel = 0;
+  while ($r = db_fetch_object($q) ) {
+_guifi_db_delete('guifi_interfaces', array('id' => $r->id));
+    $subject = t('The Interface id: %id has been DELETED by purge process because was orphan of device/radio.',
+      array('%id' => $r->id));
+    drupal_set_message($subject);
+    $idel++;
+  }
   if ($verbose) {
     $tint = microtime(TRUE);
-    drupal_set_message(t('orphan interfaces purged in %secs',
-      array('%secs' => number_format($tint-$tradios, 4)
+    drupal_set_message(t('%interface orphan interfaces purged in %secs',
+      array('%interface' => $idel,
+        '%secs' => number_format($tint-$tradios, 4)
         )));
   }
 
 
 
   // deleting orphan ip addresses
-  $q = db_query('DELETE a FROM {guifi_ipv4} a LEFT JOIN {guifi_interfaces} i ON a.interface_id=i.id WHERE i.id IS NULL;');
-
+  $q = db_query('SELECT a.id, a.interface_id FROM {guifi_ipv4} a LEFT JOIN {guifi_interfaces} i ON a.interface_id=i.id WHERE i.id IS NULL;');
+  $ipdel = 0;
+  while ($r = db_fetch_object($q) ) {
+_guifi_db_delete('guifi_ipv4', array('id' => $r->id, 'interface_id' => $r->interface_id));
+    $subject = t('The IPV4 address: %address has been DELETED by purge process because was orphan of device/radio.',
+      array('%address' => $r->ipv4));
+    drupal_set_message($subject);
+    $ipdel++;
+  }
   if ($verbose) {
     $tipv4 = microtime(TRUE);
-    drupal_set_message(t('orphan ipv4 purged in %secs',
-      array('%secs' => number_format($tipv4-$tint, 4)
-        )));
-  }
-
-  // deleting orphan links
-  $q = db_query('DELETE l FROM {guifi_links} l LEFT JOIN {guifi_devices} d ON l.device_id=d.id WHERE d.id IS NULL;');
-
-  if ($verbose) {
-    $tlink = microtime(TRUE);
-    drupal_set_message(t('orphan links purged in %secs',
-      array('%secs' => number_format($tlink-$tipv4, 4)
+    drupal_set_message(t('%ipv4 orphan ipv4 purged in %secs',
+      array('%ipv4' => $ipdel,
+        '%secs' => number_format($tipv4-$tint, 4)
         )));
   }
 
   // deleting links with no pair
-  $q = db_query('DELETE l FROM {guifi_links} l LEFT JOIN {guifi_links} l2 ON l.id=l2.id AND l.device_id != l2.device_id WHERE l2.id IS NULL;');
-
+  $q = db_query('SELECT l.id, l.device_id 
+FROM {guifi_links} l
+LEFT JOIN {guifi_links} l2 ON l2.id = l.id
+LEFT JOIN {guifi_devices} d ON l.device_id = d.id
+LEFT JOIN {guifi_devices} d2 ON l2.device_id = d2.id
+WHERE l.device_id != l2.device_id AND (d.id IS NULL OR d2.id IS NULL);');
+  $lpdel = 0;
+  while ($r = db_fetch_object($q) ) {
+_guifi_db_delete('guifi_links', array('id' => $r->id, 'device_id' => $r->device_id));
+    $subject = t('The UNPAIRED link id: %link has been DELETED by purge process because was orphan of device id %device.',
+      array('%link' => $r->id, '%device' => $r->device_id));
+    drupal_set_message($subject);
+    $lpdel++;
+  }
   if ($verbose) {
     $tlink2 = microtime(TRUE);
-    drupal_set_message(t('unpaired links purged in %secs',
-      array('%secs' => number_format($tlink2-$tlink, 4)
+    drupal_set_message(t('%link unpaired link purged in %secs',
+      array('%link' => $lpdel,
+        '%secs' => number_format($tlink2-$tipv4, 4)
         )));
   }
+
+  // deleting orphan links
+  $q = db_query('SELECT l.id, l.device_id FROM {guifi_links} l LEFT JOIN {guifi_devices} d ON l.device_id=d.id WHERE d.id IS NULL;');
+  $ldel = 0;
+  while ($r = db_fetch_object($q) ) {
+_guifi_db_delete('guifi_links', array('id' => $r->id, 'device_id' => $r->device_id));
+    $subject = t('The link id: %link has been DELETED by purge process because was orphan of device id %device.',
+      array('%link' => $r->id, '%device' => $r->device_id));
+    drupal_set_message($subject);
+    $ldel++;
+  }
+  if ($verbose) {
+    $tlink = microtime(TRUE);
+    drupal_set_message(t('%link orphan link purged in %secs',
+      array('%link' => $ldel,
+        '%secs' =>  number_format($tlink-$tlink2, 4)
+        )));
+  }
+
 
   // delete orphan users
   $q =db_query('SELECT
@@ -1930,7 +1980,7 @@ function guifi_purge($verbose = FALSE) {
                 FROM {guifi_users} u
                   LEFT JOIN {guifi_location} n ON u.nid=n.id
                 WHERE n.id IS NULL');
-  $ndel = 0;
+  $udel = 0;
   while ($r = db_fetch_object($q) ) {
     $to_mail = '';
     $log = _guifi_db_delete('guifi_users',
@@ -1942,13 +1992,13 @@ function guifi_purge($verbose = FALSE) {
     guifi_notify($to_mail,
       $subject,
       $log, $verbose);
-    $ndel++;
+    $udel++;
   }
 
   if ($verbose) {
     $tdevices = microtime(TRUE);
-    drupal_set_message(t('%ndev orphan users purged in %secs',
-      array('%ndev' => $ndel,
+    drupal_set_message(t('%user orphan users purged in %secs',
+      array('%user' => $udel,
         '%secs' => number_format($tdevices-$tstart, 4)
         )));
   }

@@ -963,10 +963,12 @@ function guifi_users_node_list_form($form_state, $params = array()) {
       '#title'=> t('There are no users to list at').' '.$node->title
     );
     if ((user_access('administer guifi users')) or (user_access('manage guifi users')) or ($node->uid == $owner))
-      $f['addUser'] = array(
-        '#type' => 'submit',
-        '#value' => t('Add user')
-      );
+      if ($node->type == 'guifi_node') {
+        $f['addUser'] = array(
+          '#type' => 'submit',
+          '#value' => t('Add user')
+        );
+     }
   return $f;
 }
 

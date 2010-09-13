@@ -291,6 +291,8 @@ function guifi_service_form($node, $param) {
       );
       if ($node->service_type == 'ADSL')
         break;
+      if (empty($node->var['fed']))
+        $node->var['fed'] = array('IN' => '0', 'OUT' => '0' );
       $f['var']['fed'] = array(
         '#type' => 'checkboxes',
         '#title' => t('Proxy federation'),

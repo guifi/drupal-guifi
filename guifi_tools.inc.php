@@ -174,7 +174,7 @@ function guifi_tools_mac_search_form_submit($form, &$form_state) {
    return;
 }
 
-function guifi_tools_ip_rangesearch($params) {
+function guifi_tools_ip_rangesearch($params = NULL) {
 
   $output .=  drupal_get_form('guifi_tools_ip_rangesearch_form',$params);
 
