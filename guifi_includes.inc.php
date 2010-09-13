@@ -1017,7 +1017,7 @@ function guifi_ipcalc_get_subnet_by_nid(
                                )));
 
           $to_mail = explode(',',$rzone->notification);
-          $to_mail[] = explode(',',$zone->notification);
+          $to_mail = explode(',',$zone->notification);
 
           $nnet = array(
             'new' => TRUE,

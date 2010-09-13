@@ -16,12 +16,12 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 //  exit(0);
 
   $insert = FALSE;
-
-  guifi_log(GUIFILOG_TRACE,
-    sprintf('guifi_sql(table: %s, keys='.implode(',',$key).')',
-      $table,key),
-    $idata);
-
+  if (!empty($key)) {
+    guifi_log(GUIFILOG_TRACE,
+      sprintf("guifi_sql(table: %s, keys=".implode(',',$key).")",
+                  $table,key),
+                  $idata);
+  }
   if (is_object($idata)) {
     foreach ($idata as $k => $v) {
       $data[$k] = $v;
@@ -256,7 +256,7 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
 
   $log = str_repeat('- ',$depth);
   $depth++;
-
+  $to_mail = array();
   guifi_log(GUIFILOG_TRACE,sprintf('function _guifi_db_delete(%s,%s)',$table,var_export($key, TRUE)));
   if (!in_array($user->mail,$to_mail))
     $to_mail[] = $user->mail;
