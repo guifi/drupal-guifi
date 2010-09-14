@@ -38,6 +38,10 @@
     guifi_stats_chart06();
     return;
     break;
+  case 'chart07': //Areas with the highest annual increase:
+    guifi_stats_chart07();
+    return;
+    break;
   case 'feeds': //total working nodes http://guifi.net/guifi/stats/nodes/0
     $ret=guifi_stats_feeds($statsid);
     echo $ret;
@@ -149,7 +153,8 @@ function guifi_stats_nodes() {
     $output .= '<br><a href="javascript:guifi_stats_chart05(3)">'.t("5.3 Nodes per month, avr. 3m.").'</a>';
     $output .= '<br><a href="javascript:guifi_stats_chart05(6)">'.t("5.6 Nodes per month, avr. 6m.").'</a>';
     $output .= '<br><a href="javascript:guifi_stats_chart05(12)">'.t("5.12 Nodes per month, avr. 12m.").'</a>';
-    $output .= '<br><a href="javascript:guifi_stats_chart06()">'.t("6 Areas").'</a>';
+    $output .= '<br><a href="javascript:guifi_stats_chart06()">'.t("6 Zones").'</a>';
+    $output .= '<br><a href="javascript:guifi_stats_chart07()">'.t("7 Largest annual increase").'</a>';
     $output .= '</div>';
     $output .= '<div style="height:300px">&nbsp;</div>';
     $output .= '<div style="width:700px;">';
@@ -196,6 +201,9 @@ function guifi_stats_chart() {
       break;
     case '6':
       guifi_stats_chart06();
+      break;
+    case '7':
+      guifi_stats_chart07();
       break;
     default:
       guifi_stats_chart01();
@@ -946,6 +954,135 @@ function guifi_stats_chart06(){
     $plot->SetIsInline(TRUE);
     $plot->DrawGraph();
 }
+
+//Largest annual increase
+function guifi_stats_chart07(){
+    include drupal_get_path('module','guifi').'/contrib/phplot/phplot.php';
+    $gDirTTFfonts=drupal_get_path('module','guifi').'/contrib/fonts/';  
+    if(isset($_GET['width'])){
+      $gwidth=$_GET['width'];
+    }else{
+      $gwidth=500;
+    }
+    if(isset($_GET['height'])){
+      $gheight=$_GET['height'];
+    }else{
+      $gheight=450;
+    }
+    $today=getdate();
+    $year=$today[year];
+    $month=$today[mon];
+    $month=$month-12;
+    $n=0;
+    $tot=0;
+    if($month<1){
+      $year=$year-1;
+      $month=12+$month;
+    }
+    $datemin=mktime(0,0,0,$month,1,$year);
+    
+    if(isset($_GET['zone'])){
+      $zone_id=$_GET['zone'];
+      if($zone_id=="0") $zone_id="0"; //"3671";
+    }else{
+      $zone_id="0";
+    }
+    
+    $avalue=array();
+    $adata=array();
+    for($i=0;$i<10;$i++){
+      $adata[]=array(0,0);
+    }
+    $vsql="select sum(if(timestamp_created >= ".$datemin.",1,0)) as num, count(*) as total, zone_id
+      from {guifi_location}
+      where status_flag='Working' ";
+    if($zone_id!="0"){
+      $achilds=guifi_zone_childs($zone_id);
+      $v="";
+      foreach ($achilds as $key => $child) {
+        if($v=="")
+          $v .= "zone_id=".$child;
+        else
+          $v .= " or zone_id=".$child;
+      }
+      $vsql .= "AND (".$v.") ";
+    }
+    $vsql .= "GROUP BY zone_id ";
+    
+    $result=db_query($vsql);        
+    while ($record=db_fetch_object($result)){
+      if($record->total>=20){
+        $vn=$record->num/$record->total*100;
+        $vmin=0;
+        for($i=1;$i<10;$i++){
+          if($adata[$vmin][1]>$adata[$i][1]){
+            $vmin=$i;
+          }
+        }
+        if($vn>$adata[$vmin][1]){
+          $adata[$vmin][0]=$record->zone_id;
+          $adata[$vmin][1]=$vn;
+        }
+      }
+    }
+    
+    for($i=0;$i<10;$i++){
+      if($adata[$i][1]!=0){
+        $avalue[$adata[$i][0]]=$adata[$i][1];
+      }
+    }
+    arsort($avalue);
+    foreach ($avalue as $key => $value) {
+      if($value!=0){
+        $data[]=array(substr(guifi_get_zone_name($key),0,20)."   ",$value);
+      }
+    }
+
+
+
+    $shapes = array( 'none');
+    $plot = new PHPlot($gwidth,$gheight);
+    $plot->SetPlotAreaWorld(0, 0, NULL, NULL);
+    $plot->SetFileFormat('png');
+    $plot->SetDataType("text-data");
+    $plot->SetDataValues($data);
+    $plot->SetPlotType("bars"); 
+    $plot->SetXTickIncrement(1);
+    $plot->SetSkipBottomTick(TRUE);
+    $plot->SetSkipLeftTick(TRUE);
+    $plot->SetTickLength(0);
+    //$plot->SetXTickPos('none');
+    $plot->SetYDataLabelPos('plotin');
+    $plot->SetYLabelType('data', 0);
+    $plot->SetTickColor('grey');
+    $plot->SetTTFPath($gDirTTFfonts);
+    $plot->SetFontTTF('title', 'Vera.ttf', 12);
+    $plot->SetFontTTF('x_label', 'Vera.ttf', 8);
+    if(isset($_GET['title'])){
+        $plot->SetTitle("guifi.net      \n".t($_GET['title']));
+    }else{
+      if($zone_id=="0")
+        $plot->SetTitle("guifi.net      \n".t('Largest annual increase'));
+      else
+        $plot->SetTitle("guifi.net    ".t('zone').": ".guifi_get_zone_name($zone_id)."\n".t('Largest annual increase'));
+    }
+    //$plot->SetXTitle(t('Zones'));
+    $plot->SetYTitle(t('% increase'));
+    $plot->SetXDataLabelPos('plotdown');
+    //$plot->SetXLabelAngle(45);
+    $plot->SetXDataLabelAngle(75);
+    $plot->SetGridColor('red');
+    $plot->SetPlotBorderType('left');
+    $plot->SetDataColors(array('orange'));
+    $plot->SetTextColor('DimGrey');
+    $plot->SetTitleColor('DimGrey');
+    $plot->SetLightGridColor('grey');
+    $plot->SetBackgroundColor('white');
+    $plot->SetTransparentColor('white');
+    $plot->SetIsInline(TRUE);
+    $plot->DrawGraph();
+}
+
 
 //stats feeds
 function guifi_stats_feeds($pnum){

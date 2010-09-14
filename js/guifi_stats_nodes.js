@@ -30,3 +30,12 @@ function guifi_stats_chart05(nmonths){    //Nodes per month, average of 6 months
       document.getElementById("plot").innerHTML='<img src="/guifi/stats/chart05/'+nmonths+'?zone='+v+'">';
 }
 
+function guifi_stats_chart06(){    //pie areas
+      v=document.getElementById("edit-zone-id").value;
+      document.getElementById("plot").innerHTML='<img src="/guifi/stats/chart06/0?zone='+v+'">';
+}
+function guifi_stats_chart07(){    //Areas with the highest annual increase
+      v=document.getElementById("edit-zone-id").value;
+      document.getElementById("plot").innerHTML='<img src="/guifi/stats/chart07/0?zone='+v+'">';
+}
+
