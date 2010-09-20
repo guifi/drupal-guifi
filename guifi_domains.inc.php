@@ -604,7 +604,7 @@ function guifi_domain_add() {
  */
 function guifi_domain_create_form($form_state, $node) {
 
-  if (!guifi_domain_access('create',$node->sid)) {
+  if (guifi_domain_access('create',$node->sid)) {
     $form['text_add'] = array(
       '#type' => 'item',
       '#value' => t('You are not allowed to create a domain on this service.'),
