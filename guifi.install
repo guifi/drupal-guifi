@@ -301,6 +301,7 @@ function guifi_schema() {
       'sid' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE),
       'name' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => ''),
       'type' => array('type' => 'varchar', 'length' => '16', 'not null' => TRUE, 'default' => ''),
+      'public' => array('type' => 'varchar', 'length' => '5', 'not null' => TRUE, 'default' => 'yes'),
       'ipv4' => array('type' => 'varchar', 'length' => '16', 'not null' => TRUE, 'default' => ''),
       'defipv4' => array('type' => 'varchar', 'length' => '16', 'not null' => TRUE, 'default' => ''),
       'mname' => array('type' => 'varchar', 'length' => '32', 'not null' => TRUE, 'default' => ''),
@@ -1167,5 +1168,11 @@ function guifi_update_768() {
 function guifi_update_808() {
   $items = array();
   $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('26', 'service', 'LDAP', 'LDAP Server');");
+  return $items;
+}
+
+function guifi_update_849() {
+  $items = array();
+  $items[] = update_sql("ALTER TABLE {guifi_dns_domains} ADD public VARCHAR( 5 ) NOT NULL DEFAULT 'yes' AFTER type;");
   return $items;
 }

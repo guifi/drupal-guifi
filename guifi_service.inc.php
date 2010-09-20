@@ -583,7 +583,7 @@ function theme_guifi_service_data($node, $links = TRUE) {
   if ($node->device_id > 0) {
     $device = db_fetch_object(db_query('SELECT nick FROM {guifi_devices} WHERE id = %d', $node->device_id));
     $url = url('guifi/device/'.$node->device_id);
-    $rows[] = array(t('device &#038; status'),'<a href='.$url.'>'.$device->nick.'</a>',
+    $rows[] = array(t('device & status'),'<a href='.$url.'>'.$device->nick.'</a>',
               array('data' => t($node->status_flag),'class' => $node->status_flag));
   }
 

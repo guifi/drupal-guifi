@@ -256,7 +256,15 @@ function guifi_domain_form($form_state, $params = array()) {
     '#default_value' => $form_state['values']['management'],
     '#options' => array('automatic' => 'automatic', 'manual' => 'manual'),
     '#description' =>  t('Choose <b>Automatic</b> if you want to use your domain management with the utility for servers "DNSServices"<br \>'
-                                  .'Choose <b>Manual</b>, if you just want to keep track of your domains / hosts here but want to do the management in your server manually.'),
+                                  .'Choose <b>Manual</b>, if you just want to keep track of your domain/hosts here but want to do the management in your server manually.'),
+  );
+  $form['main']['public'] = array(
+    '#type' => 'select',
+    '#title' => t('Public domain'),
+    '#default_value' => $form_state['values']['public'],
+    '#options' => array('yes' => 'Yes', 'no' => 'No'),
+    '#description' =>  t('Choose <b>Yes</b> if you want your domain/subdomain can be delegated subdomains from other users. (Ex: DELEGATED.yourdomain.net.<br/>'
+                                  .'Choose <b>No</b> if your domain/subdomain is private and you do not want to allow delegates subdomains.'),
   );
   $form['main']['allow'] = array(
     '#type' => 'radios',
@@ -604,6 +612,7 @@ function guifi_domain_add() {
  */
 function guifi_domain_create_form($form_state, $node) {
 
+  $ip = guifi_main_ip($node->device_id);
   if (guifi_domain_access('create',$node->sid)) {
     $form['text_add'] = array(
       '#type' => 'item',
@@ -612,7 +621,15 @@ function guifi_domain_create_form($form_state, $node) {
    );
    return $form;
   }
-
+  if (empty($ip['ipv4'])) {
+    $device = db_fetch_object(db_query('SELECT nick FROM {guifi_devices} WHERE id = %d', $node->device_id));
+    $url = url('guifi/device/'.$node->device_id);
+    $form['text'] = array(
+      '#type' => 'item',
+      '#value' => t('The server <a href='.$url.'>'.$device->nick.'</a> does not have an IPv4 address, can not create a domain.')
+     );
+    return $form;
+} 
   $form['domain_type'] = array(
     '#type' => 'select',
     '#title' => t('Select new domain type'),
@@ -631,7 +648,6 @@ function guifi_domain_create_form($form_state, $node) {
   );
 
   if ($form_state['values']['domain_type'] === 'master') {
-    $ip = guifi_main_ip($node->device_id);
     $form['domain_type_form']['sid'] = array(
       '#type' => 'hidden',
       '#value' => $node->id
@@ -699,6 +715,7 @@ function guifi_domain_create_form($form_state, $node) {
       SELECT *
       FROM {guifi_dns_domains}
       WHERE type = 'master'
+      AND public = 'yes'
       ORDER BY name"
     );
     $values = array();
@@ -797,7 +814,7 @@ function guifi_domain_print($domain = NULL) {
     $output .= theme('box', $title, $table);
     if (arg(4) == 'data') break;
   case 'hosts':
-    $header = array(t('HostName'),t('Alias'),t('Ip Address'));
+    $header = array(t('HostName'),t('Alias'),t('Ip Address'),t('Namserver'),t('MailServer'));
     $table = theme('table', $header, guifi_hosts_print_data($domain[id]));
     $output .= theme('box', t('Hostnames'), $table);
     break;

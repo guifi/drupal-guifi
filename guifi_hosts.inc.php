@@ -338,15 +338,31 @@ function guifi_hosts_print_data($id) {
 
   while ($host = db_fetch_array($queryhosts)) {
     $aliases = unserialize($host['aliases']);
+    $options = unserialize($host['options']);
     if ($aliases) {
       $alias = implode(' | ', $aliases);
     } else {
       $alias = NULL;
     }
+    if ($options) {
+      if ($options['NS'] === 'NS')
+         $nameserver = 'yes';
+      else
+         $nameserver = 'no';
+      if ($options['MX'] === 'MX')
+         $mailserver = 'yes';
+      else
+         $mailserver = 'no';
+    } else {
+         $nameserver = 'no';
+         $mailserver = 'no';
+    }
       $rows[] = array(
         strtolower($host[host]).'.'.$domain->name,
         $alias,
         $host[ipv4],
+        $nameserver,
+        $mailserver
         );
       }
 
