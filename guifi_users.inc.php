@@ -270,8 +270,7 @@ function guifi_user_form($form_state, $params = array()) {
       '#description' => t('The resulting username.')
     );
 
-  if ((user_access('administer guifi users')) or
-      (user_access('manage guifi users'))) {
+  if (user_access('administer guifi users')) {
     $f['status'] = array(
       '#type' => 'select',
       '#title' => t('Status'),
@@ -356,8 +355,7 @@ function guifi_user_form($form_state, $params = array()) {
    '#tree' => TRUE,
   );
 
-  if ((user_access('administer guifi users'))
-      or (user_access('manage guifi users'))) {
+  if (user_access('administer guifi users')) {
 
     $f['services']['proxystr'] = array(
       '#type' => 'textfield',
@@ -937,7 +935,24 @@ function guifi_users_node_list_form($form_state, $params = array()) {
 
     $service = node_load(array('nid' => $guser->services['proxy']));
 
-    $options[$guser->id] = $realname.' ('.$guser->username.')'.' - '.
+    if (user_access('administer guifi users') or $node->uid == $owner) {
+      $realname2 = $realname;
+      $username2 = $guser->username;
+    } else {
+      $realname2 = ereg_replace("_", " ", $realname);
+       if(strlen($realname2) > 3) {
+         $realname2 = substr($realname,0,3);
+           $realname2 .= "..";
+       }
+      $username2 = $guser->username;
+      if(strlen($username2) > 3) {
+        $username2 = substr($guser->username,0,3);
+          $username2 .= "..";
+      }
+    }
+
+      $options[$guser->id] = $realname2.' ('.$username2.')'.
+
       l($service->nick,'node/'.$service->id,array('attributes' => array('title' => $service->title))).' - '.
       $guser->status.'<br />'.
       theme_guifi_contacts($guser, FALSE);
@@ -952,7 +967,7 @@ function guifi_users_node_list_form($form_state, $params = array()) {
       '#options' => $options,
       '#default_value' => $default_user
     );
-    if ((user_access('administer guifi users')) or (user_access('manage guifi users')) or ($node->uid == $owner))
+    if (user_access('administer guifi users') or $node->uid == $owner)
       $f['editUser'] = array(
         '#type' => 'submit',
         '#value' => t('Edit selected user')
@@ -962,7 +977,7 @@ function guifi_users_node_list_form($form_state, $params = array()) {
       '#type'=> 'item',
       '#title'=> t('There are no users to list at').' '.$node->title
     );
-    if ((user_access('administer guifi users')) or (user_access('manage guifi users')) or ($node->uid == $owner))
+    if (user_access('administer guifi users')  or $node->uid == $owner)
       if ($node->type == 'guifi_node') {
         $f['addUser'] = array(
           '#type' => 'submit',

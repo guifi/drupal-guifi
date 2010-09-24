@@ -362,7 +362,7 @@ function guifi_domain_form_validate($form,&$form_state) {
       $form_state['values']['id'],$form_state['values']['scope']);
 
     while (db_fetch_object($query)) {
-      form_set_error('name', t('Domain Name already in use.'));
+      form_set_error('name', t('Domain Name already in use in scope: %scope.',array('%scope' => $form_state['values']['scope'])));
     }
   }
 
@@ -380,38 +380,52 @@ function guifi_domain_form_validate($form,&$form_state) {
       form_set_error('ipv4', t('Server <strong> %nick </strong> does not have an IP address. Please, check it.', array('%nick' => $device->nick)));
   }
 
-  $hostquery = db_query("
-      SELECT host
-      FROM {guifi_dns_hosts}
-      WHERE id = %d", 
-      $form_state['values']['id']); 
-
-  $hostname = array();
-  do {
-    $hostname[] = $host['host'];
-  } while ($host = db_fetch_array($hostquery));
-  if (count(array_unique($hostname)) < count($hostname)) {
- 
-    $hosts_array = array();
-    foreach ($form_state['values']['hosts'] as $id => $host) {
-      if (array_key_exists($host['host'], $hosts_array)) {
-        $form_state['values']['hosts'][$id]['duplicate'] = 1;
-        $form_state['values']['hosts'][$hosts_array[$host['host']]]['duplicate'] = 1;
-      }
-      $hosts_array[$host['host']] = $id;
-    }
-    foreach($form_state['values']['hosts'] as $id => $host) {
-      if (!empty($host['duplicate'])) {
-        form_set_error('hosts]['.$id.'][host', t('Error! Hostname: <strong> %host </strong> duplicated!', array('%host' => $host['host'], '%id' => $id)));  
-      }
-    }
-    unset($host['duplicate']);
+  $hostsd = array();
+  if (count($form_state['values']['hosts'])){
+    foreach ($form_state['values']['hosts']  as $host_id => $hosts) {
+      $host=$hosts['host'];
+       if (in_array($host,$hostsd)) {
+         form_set_error('hosts]['.$host_id.'][host', t('Error!! Hostname: <strong>%host</strong> duplicated.', array('%host' => $hosts['host'])));
+           break;
+       } 
+      $aliasd = array();
+       foreach($hosts['aliases'] as $aliasa_id => $aliasa){
+         if (!empty($aliasa)) {
+           if (empty($hosts['ipv4'])) {
+             $checkdot = substr($aliasa, -1);
+             $dot = '.';
+             if (strcmp($checkdot,$dot) !== 0) {
+               form_set_error(array('hosts]['.$host_id.'][aliases]['.$aliasa_id.''), t('Error!! Hostname <strong>%host</strong> don\'t have and IPv4 and contain aliases, must put a DOT "<strong>.</strong>" at the end of the alias domain name if the alias points to an external domain. ex: " outsidehost.dyndns.org<strong>.</strong> ".', array('%host' => $hosts['host'])));
+             }
+           }
+         }
+         if (in_array($aliasa,$aliasd)) {
+           form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id.'', t('Error!! Alias: <strong>%alias</strong> duplicated.', array('%alias' => $aliasa)));
+           break;
+         }
+         $aliasd[] = $aliasa;
+         foreach($form_state['values']['hosts'] as $host_id2 => $hosts2) {
+           if (!empty($hosts2['host']) && (!empty($aliasa))) {
+             if($hosts2['host'] != $host){
+               if(in_array($aliasa,$hosts2['aliases'])){
+                 form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id.'', t('Error!! Alias: <strong>%alias</strong> duplicated.', array('%alias' => $aliasa)));
+                 break;
+               }
+             }
+             if($hosts2['host'] == $aliasa){
+                 form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id.'',  t('Error!! Alias or Hostname: <strong>%aliashost</strong> alredy exists as hostname or alias!!', array('%aliashost' => $aliasa)));
+             }
+           }
+         }
+       }
+       $hostsd[] = $host;
+     }
   }
+
   foreach($form_state['values']['hosts'] as $id => $host) {
     if (ereg('[^a-z0-9.]', $host['host']))
       form_set_error('hosts]['.$id.'][host', t('Error! Hostname: <strong> %hostname </strong> can only contain lowercase letters, numbers and dots.', array('%hostname' => $host['host'])));
   }
-
 }
 
 /* guifi_domain_edit_save(): Save changes/insert domains */

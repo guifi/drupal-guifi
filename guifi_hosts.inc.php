@@ -172,7 +172,6 @@ function guifi_host_host_form($host, $key, &$form_weight = -200) {
       '#title' => t('Host Name'),
       '#parents' => array('hosts',$key,'host'),
       '#default_value' => $host['host'],
-      '#element_validate' => array('guifi_hostname_validate'),
       '#weight' => $form_weight++,
     );
               
@@ -225,54 +224,6 @@ function guifi_ipv4_validate($element,&$form_state) {
             form_error($element, t('Invalid %ipv4 address',array('%ipv4' => $value)));
         }
     }
-}
-
-/* guifi_host_validate(): Validate host, called as a hook while validating the form */
-function guifi_host_validate($edir,$form_state) {
-  guifi_log(GUIFILOG_TRACE,"function _guifi_host_validate()");
-}
-
-function guifi_hostname_validate($element,$form_state) {
-  guifi_log(GUIFILOG_TRACE,"function _guifi_hostname_validate()");
-    if ($form_state['clicked_button']['#value'] == t('Reset'))
-    return;
-/*
-  $did = $form_state['values']['id'];
-  $querydom = db_query("
-    SELECT *
-    FROM {guifi_dns_domains}
-    WHERE id = %d",
-    $did
-  );
-
-  $domain = db_fetch_object($querydom);
-
-   $queryhosts = db_query("
-     SELECT *
-     FROM {guifi_dns_hosts}
-     WHERE id = '%s'",
-     $domain->id
-   );
-
-  while ($host = db_fetch_array($queryhosts)) {
-    $aliases = unserialize($host['aliases']);
-    foreach ($aliases as $id->$host) {
-      $value = $element['#value'];
-        if ($value == $id->$host) {
-          form_error($element, t('Incorrect hostname. Alias exists'));
-        }
-    }
-
-   $hostname = (array)$host['host'];
-    foreach ($hostname as $id->$host) {
-      $value = $element['#value'];
-        print $id->$host;
-        if ($value == $hostname) {
-          form_error($element, t('Incorrect hostname.'));
-        }
-    }
-  }
-*/
 }
 
 /* Add  a host to the device */
