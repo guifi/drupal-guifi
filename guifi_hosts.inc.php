@@ -27,7 +27,7 @@ function guifi_host_form($edit,$form_weight) {
     '#tree' => FALSE,
     '#prefix' => '<img src="/'.
       drupal_get_path('module', 'guifi').
-     '/icons/wifi.png"> '.t("Host Name's for this domain"),
+     '/icons/home.png"> '.t("Host Name's for this domain"),
     '#weight' => $form_weight++,
   );
 
@@ -104,12 +104,17 @@ function guifi_host_form($edit,$form_weight) {
       );
 
       $bw = $form_weight - 1000;
-
+     if (($host['host'] == 'ns1' ) AND ($host['counter'] == '0')) {
+        $access = FALSE;
+     } else {
+         $access = TRUE;
+     }
       if (!isset($host['deleted'])) {
         // Only allow delete and move functions if the host has been saved
         if ($host['new']==FALSE)  {
           $form['r']['hosts'][$key]['delete'] = array(
             '#type' => 'image_button',
+            '#access' => $access,
             '#src' => drupal_get_path('module', 'guifi').'/icons/drop.png',
             '#parents' => array('hosts',$key,'delete'),
             '#attributes' => array('title' => t('Delete host')),
@@ -265,8 +270,8 @@ function guifi_host_delete_submit($form, &$form_state) {
   $host_id = $form_state['clicked_button']['#parents'][1];
   $form_state['values']['hosts'][$host_id]['deleted'] = TRUE;
   $form_state['values']['hosts'][$host_id]['unfold'] = TRUE;
-  drupal_set_message(t('Hostname %hostname has been deleted.',
-    array('%hostname' => $host_id)));
+  drupal_set_message(t('Hostname <strong>%hostname</strong> has been deleted.',
+    array('%hostname' => $form_state['values']['hosts'][$host_id]['host'])));
   $form_state['rebuild'] = TRUE;
   return;
 }

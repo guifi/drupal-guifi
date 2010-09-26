@@ -394,26 +394,28 @@ function guifi_domain_form_validate($form,&$form_state) {
            if (empty($hosts['ipv4'])) {
              $checkdot = substr($aliasa, -1);
              $dot = '.';
-             if (strcmp($checkdot,$dot) !== 0) {
-               form_set_error(array('hosts]['.$host_id.'][aliases]['.$aliasa_id.''), t('Error!! Hostname <strong>%host</strong> don\'t have and IPv4 and contain aliases, must put a DOT "<strong>.</strong>" at the end of the alias domain name if the alias points to an external domain. ex: " outsidehost.dyndns.org<strong>.</strong> ".', array('%host' => $hosts['host'])));
+             if ( strcmp($checkdot,$dot) != 0 ) {
+               form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error!! Hostname <strong>%host</strong> don\'t have and IPv4 and contain aliases, must put a DOT "<strong>.</strong>" at the end of the alias domain name if the alias points to an external domain. ex: " outsidehost.dyndns.org<strong>.</strong> ".', array('%host' => $hosts['host'])));
              }
            }
          }
-         if (in_array($aliasa,$aliasd)) {
-           form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id.'', t('Error!! Alias: <strong>%alias</strong> duplicated.', array('%alias' => $aliasa)));
-           break;
+         if (!empty($aliasa)) {
+           if (in_array($aliasa,$aliasd)) {
+             form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error!! Alias: <strong>%alias</strong> duplicated.', array('%alias' => $aliasa)));
+             break;
+           }
          }
          $aliasd[] = $aliasa;
          foreach($form_state['values']['hosts'] as $host_id2 => $hosts2) {
            if (!empty($hosts2['host']) && (!empty($aliasa))) {
              if($hosts2['host'] != $host){
                if(in_array($aliasa,$hosts2['aliases'])){
-                 form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id.'', t('Error!! Alias: <strong>%alias</strong> duplicated.', array('%alias' => $aliasa)));
+                 form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error!! Alias: <strong>%alias</strong> duplicated.', array('%alias' => $aliasa)));
                  break;
                }
              }
              if($hosts2['host'] == $aliasa){
-                 form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id.'',  t('Error!! Alias or Hostname: <strong>%aliashost</strong> alredy exists as hostname or alias!!', array('%aliashost' => $aliasa)));
+                 form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id,  t('Error!! Alias or Hostname: <strong>%aliashost</strong> alredy exists as hostname or alias!!', array('%aliashost' => $aliasa)));
              }
            }
          }
