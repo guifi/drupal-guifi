@@ -788,12 +788,27 @@ function guifi_users_queue($zone) {
       $edit_user_form = $u['status'];
     }
 
+     if ((user_access('administer guifi users')) or ($node->uid == $owner)) {
+      $rn3 = $u['lastname'].", ".$u['firstname'];
+      $u3 = $u['username'];
+     } else {
+      $rn3 = ereg_replace("_", " ", $u['lastname'].", ".$u['firstname']);
+      if(strlen($rn3) > 3) {
+       $rn3 = substr($u['lastname'].", ".$u['firstname'],0,3);
+       $rn3 .= "..";
+      }
+      $u3 = $u['username'];
+      if(strlen($u3) > 3) {
+       $u3 = substr($u['username'],0,5);
+       $u3 .= "..";
+      }
+     }
     $rows[] = array(
       array('data'=>
         $edit_user_icon.
-        l($u['username'],'node/'.$u['nid'].'/view/users',
+        l($u3,'node/'.$u['nid'].'/view/users',
           array('attributes' => array(
-            'title' => $u['lastname'].", ".$u['firstname'],
+            'title' => $rn3,
             'target' => '_blank')
           )) .
           "\n<br />".

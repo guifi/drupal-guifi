@@ -47,8 +47,8 @@ function unsolclic_airos($dev) {
       $rate_max= '11M';
       $txpower= '2';
       $ack= '45';
-      $extant = 'disabled'
-      $mcastrate= '11'
+      $extant = 'disabled';
+      $mcastrate= '11';
     break;
     case "26": //NanoStation5
       $net_mode= 'a';
@@ -56,8 +56,8 @@ function unsolclic_airos($dev) {
       $rate_max= '54M';
       $txpower= '19';
       $ack= '25';
-      $extant = 'disabled'
-      $mcastrate= '54'
+      $extant = 'disabled';
+      $mcastrate= '54';
     break;
     case "34": //NanoStation Loco2
       $net_mode= 'b';
@@ -65,8 +65,8 @@ function unsolclic_airos($dev) {
       $rate_max= '11M';
       $txpower= '5';
       $ack= '44';
-      $extant = 'enabled'
-      $mcastrate= '11'
+      $extant = 'enabled';
+      $mcastrate= '11';
     break;
     case "35": //NanoStation Loco5
       $net_mode= 'a';
@@ -74,8 +74,8 @@ function unsolclic_airos($dev) {
       $rate_max= '54M';
       $txpower= '5';
       $ack= '25';
-      $extant= 'disabled'
-      $mcastrate= '54'
+      $extant= 'disabled';
+      $mcastrate= '54';
 
   }
 
