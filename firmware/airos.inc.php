@@ -10,16 +10,10 @@ function unsolclic_airos($dev) {
   $dns[] .=$primary_dns;
   $dns[] .=$secondary_dns;
 
-  $ap_macs = array();
-     foreach ($dev->radios[0]['interfaces'] as $interface_id => $interface) 
+   foreach ($dev->radios[0]['interfaces'] as $interface_id => $interface) 
      foreach ($interface['ipv4'] as $ipv4_id => $ipv4) 
-     if (isset($ipv4['links'])) foreach ($ipv4['links'] as $key => $link) {
-       if ($link['link_type'] == 'ap/client') {
-       $ap_macs[] = $link['interface']['mac'];
-       
-  $gateway = $link['interface']['ipv4']['ipv4'];
-   }
-  }
+       if (isset($ipv4['links'])) foreach ($ipv4['links'] as $key => $link)
+         $gateway = $link['interface']['ipv4']['ipv4'];
 
   $apssid = guifi_get_ap_ssid($link['interface']['device_id'],$link['interface']['radiodev_counter']);
    
@@ -45,7 +39,7 @@ function unsolclic_airos($dev) {
       $net_mode= 'b';
       $lnet_mode= 'B Only (2,4Ghz 11MB)';
       $rate_max= '11M';
-      $txpower= '2';
+      $txpower= '6';
       $ack= '45';
       $extant = 'disabled';
       $mcastrate= '11';
@@ -54,7 +48,7 @@ function unsolclic_airos($dev) {
       $net_mode= 'a';
       $lnet_mode= 'A (5Ghz)';
       $rate_max= '54M';
-      $txpower= '19';
+      $txpower= '6';
       $ack= '25';
       $extant = 'disabled';
       $mcastrate= '54';
@@ -63,7 +57,7 @@ function unsolclic_airos($dev) {
       $net_mode= 'b';
       $lnet_mode= 'B Only (2,4Ghz 11MB)';
       $rate_max= '11M';
-      $txpower= '5';
+      $txpower= '6';
       $ack= '44';
       $extant = 'enabled';
       $mcastrate= '11';
@@ -72,7 +66,7 @@ function unsolclic_airos($dev) {
       $net_mode= 'a';
       $lnet_mode= 'A (5Ghz)';
       $rate_max= '54M';
-      $txpower= '5';
+      $txpower= '6';
       $ack= '25';
       $extant= 'disabled';
       $mcastrate= '54';

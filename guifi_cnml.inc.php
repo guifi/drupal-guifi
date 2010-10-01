@@ -347,6 +347,16 @@ function guifi_cnml($cnmlid,$action = 'help') {
                    break;
                    }
                }
+                else if  (in_array($model_name,
+                   array('GuifiStation2',
+                            'GuifiStation5'
+                            ))) {
+                   switch ($device->variable['firmware']) {
+                     case 'GuifiStationOS1.0':
+                       $radioXML->addAttribute('snmp_name','ath0');
+                   break;
+                   }
+               }
             }
             switch ($radio->mode) {
               case 'ap': $nodesummary->ap++; break;
