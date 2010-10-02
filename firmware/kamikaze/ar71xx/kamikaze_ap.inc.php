@@ -101,7 +101,7 @@ uci set network.wds_'.$hostname.'.netmask='.$ipv4['netmask'].'
     $mode = 'apwds';
     $ssid = $radio[ssid];
     $channel = atheros_channel($radio);
-   if ($channel < 14)
+   if ($channel <= 14)
       $band = '11b';
     else
       $band = '11a';
