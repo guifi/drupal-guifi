@@ -62,6 +62,10 @@ function guifi_unsolclic($dev, $format = 'html') {
 //    unsolclic_airos52($dev);
 //      exit;
 //      break;
+    case 'GuifiStationOS1.0':
+      unsolclic_guifistationos($dev);
+      exit;
+      break;
   }
 
   $unsolclic='unsolclic_'.$dev->variable['firmware'];

@@ -194,7 +194,7 @@ function guifi_schema() {
     'fields' => array(
          'id' => array('type' => 'serial',  'size' => 'small', 'not null' => TRUE),
          'type' => array('type' => 'varchar', 'length' => '15', 'not null' => TRUE),
-         'text' => array('type' => 'varchar', 'length' => '15', 'not null' => TRUE),
+         'text' => array('type' => 'varchar', 'length' => '24', 'not null' => TRUE),
          'description' => array('type' => 'text', 'size' => 'big', 'not null' => TRUE),
          'relations' => array('type' => 'text', 'size' => 'big', 'not null' => FALSE)),
     'primary key' => array('type', 'id'),
