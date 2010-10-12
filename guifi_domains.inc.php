@@ -350,8 +350,8 @@ function guifi_domain_form_validate($form,&$form_state) {
   guifi_log(GUIFILOG_TRACE,'function guifi_domain_form_validate()',$form_state);
 
   if (isset($form['main']['name'])) {
-    if (ereg('[^a-z0-9.]', $form_state['values']['name']))
-      form_set_error('name', t('Error: <strong> %name </strong> - Domain Name can only contain lowercase letters, numbers and dots.', array('%name' => $form_state['values']['name'])));
+    if (ereg('[^a-z0-9.-]', $form_state['values']['name']))
+      form_set_error('name', t('Error: <strong> %name </strong> - Domain Name can only contain lowercase letters, numbers, dashes and dots.', array('%name' => $form_state['values']['name'])));
 
     $query = db_query("
       SELECT name
@@ -410,8 +410,8 @@ function guifi_domain_form_validate($form,&$form_state) {
   $mxpriord = array();
   if (count($form_state['values']['hosts'])){
     foreach ($form_state['values']['hosts']  as $host_id => $hosts) {
-      if (ereg('[^a-z0-9.]', $hosts['host']))
-        form_set_error('hosts]['.$id.'][host', t('Error! Hostname: <strong> %hostname </strong> can only contain lowercase letters, numbers and dots.', array('%hostname' => $host['host'])));
+      if (ereg('[^a-z0-9.-]', $hosts['host']))
+        form_set_error('hosts]['.$id.'][host', t('Error! Hostname: <strong> %hostname </strong> can only contain lowercase letters, numbers, dashes and dots.', array('%hostname' => $host['host'])));
 
       $host = $hosts['host'];
       if (in_array($host,$hostsd)) {
@@ -421,8 +421,8 @@ function guifi_domain_form_validate($form,&$form_state) {
       $hostsd[] = $host;
       $aliasd = array();
       foreach($hosts['aliases'] as $aliasa_id => $aliasa){
-        if (ereg('[^a-z0-9.]', $aliasa))
-          form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error! Alias: <strong> %alias </strong> can only contain lowercase letters, numbers and dots.', array('%alias' => $aliasa)));
+        if (ereg('[^a-z0-9.-]', $aliasa))
+          form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error! Alias: <strong> %alias </strong> can only contain lowercase letters, numbers, dashes and dots.', array('%alias' => $aliasa)));
 
         if (!empty($aliasa)) {
           if (empty($hosts['ipv4'])) {
