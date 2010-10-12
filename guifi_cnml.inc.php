@@ -1067,8 +1067,10 @@ function dump_guifi_domains($cnmlid, $action){
               $options = unserialize($host->options);
               if ($options['NS'] != '0')
                 $hostname->addAttribute('NS','y');
-              if ($options['MX'] != '0')
+              if ($options['MX'] != '0') {
                 $hostname->addAttribute('MX','y');
+                $hostname->addAttribute('Priority',$options['mxprior']);
+              }
             }
         }
         while ($record=db_fetch_object($qryslavemas)){
