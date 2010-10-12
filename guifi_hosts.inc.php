@@ -79,15 +79,30 @@ function guifi_host_form($edit,$form_weight) {
            '#description' => $cname_description,
          );
 
+     if (($host['host'] == 'ns1' ) AND ($host['counter'] == '0')) {
+        $access = FALSE;
+        $options = array('MX' => 'MX');
+        $optionsdesc = t('Select these options only if this feature has made by this host.
+                                   <br><b>NS</b>: Selected as default on host \'ns1\'. This is your primary NameServer forced, cannot uncheck it.
+                                   <br><b>MX</b>: Choose this option if this host has to perform tasks of <b>MailHost</b> server. Select, then Save and edit again to set priority on a new field.');
+      } else {
+        $access = TRUE;
+        $options = array('NS' => 'NS','MX' => 'MX');
+        $optionsdesc = t('Select these options only if this feature has made by this host.
+                                   <br><b>NS</b>: Choose this option if this host has to perform tasks of <b>NameServer</b>.
+                                   <br><b>MX</b>: Choose this option if this host has to perform tasks of <b>MailHost</b> server. Select, then Save and edit again to set priority on a new field.');
+      }
+
+      unset ($nsoptions);
+
       $form['r']['hosts'][$key]['opt'] = array(
         '#type' => 'fieldset',
         '#title' => t('Advanced settings'),
         '#collapsible' => TRUE,
         '#collapsed' => TRUE,
+        '#description' => $optionsdesc,
         '#weight' => $form_weight++,
       );
-
-      unset ($nsoptions);
       if (!empty($host['options'])) {
         $checkoptions = substr((string)$host['options'], 0, 2);
           if ($checkoptions == 'a:')
@@ -100,15 +115,21 @@ function guifi_host_form($edit,$form_weight) {
         '#type' => 'checkboxes',
         '#title' => t('Options'),
         '#default_value' => $nsoptions,
-        '#options' => array('NS' => 'NS','MX' => 'MX')
+        '#options' => $options,
       );
 
+      if  ($nsoptions['MX'] === 'MX') {
+        $mxprior = $nsoptions['mxprior'] ? $nsoptions['mxprior'] : 10;
+        $form['r']['hosts'][$key]['opt']['mxprior'] = array(
+          '#type' => 'textfield',
+          '#title' => t('MX Priority'),
+          '#size' => 3,
+          '#maxlength' => 3,
+          '#default_value' => $mxprior,
+          '#description' => t('One can have several mail servers, with priorities of 10, 20 and so on. A mail server attempting to deliver to example.org would first try the highest priority MX (the record with the lowest priority number), then the second highest, etc, until the mail can be properly delivered. Must be a multiple of 10 and can not be repeated.'),
+        );
+      }
       $bw = $form_weight - 1000;
-     if (($host['host'] == 'ns1' ) AND ($host['counter'] == '0')) {
-        $access = FALSE;
-     } else {
-         $access = TRUE;
-     }
       if (!isset($host['deleted'])) {
         // Only allow delete and move functions if the host has been saved
         if ($host['new']==FALSE)  {
@@ -305,10 +326,13 @@ function guifi_hosts_print_data($id) {
          $nameserver = 'yes';
       else
          $nameserver = 'no';
-      if ($options['MX'] === 'MX')
+      if ($options['MX'] === 'MX') {
          $mailserver = 'yes';
-      else
+         $priority = $options['mxprior'];
+      } else {
          $mailserver = 'no';
+         $priority = '';
+      }
     } else {
          $nameserver = 'no';
          $mailserver = 'no';
@@ -318,7 +342,8 @@ function guifi_hosts_print_data($id) {
         $alias,
         $host[ipv4],
         $nameserver,
-        $mailserver
+        $mailserver,
+        $priority
         );
       }
 
