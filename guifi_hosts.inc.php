@@ -338,20 +338,16 @@ function guifi_hosts_print_data($id) {
          $mailserver = 'no';
     }
       $rows[] = array(
-        strtolower($host[host]).'.'.$domain->name,
+        strtolower($host['host']).'.'.$domain->name,
         $alias,
-        $host[ipv4],
+        $host['ipv4'],
         $nameserver,
         $mailserver,
         $priority
         );
       }
-
-    return array_merge($rows);
-}
-
- function check_exists($host) {
-
+    if ($rows) 
+      return array_merge($rows);
 }
 
 ?>
