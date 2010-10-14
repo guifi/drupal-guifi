@@ -107,9 +107,13 @@ function guifi_host_form($edit,$form_weight) {
         $checkoptions = substr((string)$host['options'], 0, 2);
           if ($checkoptions == 'a:')
             $nsoptions = unserialize((string)$host['options']);
+            $nsmx = unserialize((string)$host['options']);
        } else {
             $nsoptions = array($host['opt']['options']['NS'],$host['opt']['options']['MX']);
-       }
+             if  ($host['opt']['options']['MX'] === 'MX') {
+               $nsmx['mxprior']= $host['opt']['mxprior'];
+            }
+         }
 
       $form['r']['hosts'][$key]['opt']['options'] = array(
         '#type' => 'checkboxes',
@@ -118,8 +122,14 @@ function guifi_host_form($edit,$form_weight) {
         '#options' => $options,
       );
 
-      if  ($nsoptions['MX'] === 'MX') {
-        $mxprior = $nsoptions['mxprior'] ? $nsoptions['mxprior'] : 10;
+      if  ($host['opt']['options']['MX'] === 'MX') {
+        $mxprior = $nsmx['mxprior'] ? $nsmx['mxprior'] : 10;
+}
+      if ( $nsoptions['MX'] === 'MX') {
+        $mxprior = $nsmx['mxprior'] ? $nsmx['mxprior'] : 10;
+
+}
+      if  (($host['opt']['options']['MX'] === 'MX') OR ( $nsoptions['MX'] === 'MX')) {
         $form['r']['hosts'][$key]['opt']['mxprior'] = array(
           '#type' => 'textfield',
           '#title' => t('MX Priority'),

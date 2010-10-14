@@ -423,7 +423,7 @@ function guifi_domain_form_validate($form,&$form_state) {
       }
 
       if (ereg('[^a-z0-9.-]', $hosts['host']))
-        form_set_error('hosts]['.$host_id.'][host', t('Error! Hostname: <strong> %hostname </strong> can only contain lowercase letters, numbers, dashes and dots.', array('%hostname' => $host['host'])));
+        form_set_error('hosts]['.$host_id.'][host', t('Error! Hostname: <strong> %hostname </strong> can only contain lowercase letters, numbers, dashes and dots.', array('%hostname' => $hosts['host'])));
 
       $host = $hosts['host'];
       if (in_array($host,$hostsd)) {
@@ -493,7 +493,7 @@ function guifi_domain_form_validate($form,&$form_state) {
       }
       if (empty($hosts['ipv4'])) {
         if (empty($hosts['aliases']['0'])) {
-          form_set_error('hosts]['.$host_id.'][host', t('Error!! IP ADDRES and ALIAS ara empty for hostname: <b>%hostname</b>', array('%hostname' => $hosts['host'])));
+          form_set_error('hosts]['.$host_id.'][host', t('Error!! IP ADDRESS and ALIAS are empty for hostname: <b>%hostname</b>', array('%hostname' => $hosts['host'])));
         } 
       }
 
