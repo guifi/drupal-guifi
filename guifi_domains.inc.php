@@ -434,16 +434,18 @@ function guifi_domain_form_validate($form,&$form_state) {
       $aliasd = array();
       foreach($hosts['aliases'] as $aliasa_id => $aliasa){
 
-      $qrydomain = db_query("
-        SELECT name
-        FROM {guifi_dns_domains}
-        WHERE mname = '%s'", $form_state['values']['name']);
-      while ($hostdom = db_fetch_array($qrydomain)) {
-        $hostdomx = strstr($hostdom['name'], '.', true);
-        if ($hostdomx == $aliasa) {
-          form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Alias Error! There is already a delegate domain with this name: <b>%alias</b>.', array('%alias' => $aliasa)));
+        $qrydomain = db_query("
+           SELECT name
+           FROM {guifi_dns_domains}
+           WHERE mname = '%s'", $form_state['values']['name']);
+        while ($hostdom = db_fetch_array($qrydomain)) {
+          $hostdomx = strstr($hostdom['name'], '.', true);
+          if (!empty($aliasa) {
+            if ($hostdomx == $aliasa) {
+              form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Alias Error! There is already a delegate domain with this name: <b>%alias</b>.', array('%alias' => $aliasa)));
+            }
+          }
         }
-      }
 
         if (ereg('[^a-z0-9.-]', $aliasa))
           form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error! Alias: <strong> %alias </strong> can only contain lowercase letters, numbers, dashes and dots.', array('%alias' => $aliasa)));
