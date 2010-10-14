@@ -440,7 +440,7 @@ function guifi_domain_form_validate($form,&$form_state) {
            WHERE mname = '%s'", $form_state['values']['name']);
         while ($hostdom = db_fetch_array($qrydomain)) {
           $hostdomx = strstr($hostdom['name'], '.', true);
-          if (!empty($aliasa) {
+          if (!empty($aliasa)) {
             if ($hostdomx == $aliasa) {
               form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Alias Error! There is already a delegate domain with this name: <b>%alias</b>.', array('%alias' => $aliasa)));
             }
