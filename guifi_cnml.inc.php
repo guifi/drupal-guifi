@@ -328,10 +328,18 @@ function guifi_cnml($cnmlid,$action = 'help') {
                    }
               }
                 else if  (in_array($model_name,
-                     array('Meraki/Fonera' , 'RouterStation', 'Avila GW2348-4', 'Asus WL-500xx', 'Alix1', 'Alix2', 'Alix3'))) {
+                     array('Meraki/Fonera' , 'Avila GW2348-4', 'Asus WL-500xx', 'Alix1', 'Alix2', 'Alix3'))) {
                  switch ($device->variable['firmware']) {
                  case 'kamikaze':
                    $radioXML->addAttribute('snmp_name','ath0');
+                 break;
+                   }
+              }
+                 else if  (in_array($model_name,
+                     array('RouterStation'))) {
+                 switch ($device->variable['firmware']) {
+                 case 'kamikaze':
+                   $radioXML->addAttribute('snmp_name','br-wlanLan');
                  break;
                    }
               }

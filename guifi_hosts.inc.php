@@ -57,7 +57,7 @@ function guifi_host_form($edit,$form_weight) {
             $alias = $host['aliases'];
           }
        }
-      $cname_description = t('Enter the host alias. ex: www<br> Must put a DOT "<strong>.</strong>" at the end of the domain name if the alias points to an external domain. ex: "outsidehost.dyndns.org<strong>.</strong>"');
+      $cname_description = t('Enter the host alias. ex: www<br> Must put a DOT "<strong>.</strong>" at the end of the domain name if the alias points to an external domain. ex: "externalhost.dyndns.org<strong>.</strong>". <strong>ONLY ONE</strong> external domain alias allowed');
 
       if (count($alias)) {
         foreach ($alias as $delta => $value)
@@ -186,10 +186,15 @@ function guifi_host_host_form($host, $key, &$form_weight = -200) {
       array('hosts',$key)
     );
 
+    if (empty($host['ipv4'])) {
+      $lsa = ' ';
+    } else {
+      $lsa = ' ··· '.t('IPv4:').' '.$host['ipv4'];
+    }
+
     $f = array(
       '#type' => 'fieldset',
-      '#title' => t('HostName:').' '.$host['host'].' - '.
-                  t('IPv4:').' '.$host['ipv4'],
+      '#title' => t('Host:').' '.$host['host'].$lsa,
       '#collapsible' => TRUE,
       '#collapsed' => !(isset($host['unfold'])),
       '#tree'=> TRUE,

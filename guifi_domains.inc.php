@@ -303,7 +303,15 @@ function guifi_domain_form($form_state, $params = array()) {
     '#description' => t("Ex: domain.net without hostname resolve this IP Address, tends to be the same address as hostname: www.<br> leave it blank if not needed."),
     '#required' => FALSE,
   );
-
+/*
+  $form['main']['externalmx'] = array(
+    '#type' => 'textfield',
+    '#title' => t("External Mailservers MX "),
+    '#default_value' => $form_state['values']['externalmx'],
+    '#description' => t("Escriut aqui els servidors de correu si son externs, si no ho son, deixa-ho en blanc."),
+    '#required' => FALSE,
+  );
+*/
   $form['main']['notification'] = array(
     '#type' => 'textfield',
     '#size' => 60,
@@ -315,14 +323,14 @@ function guifi_domain_form($form_state, $params = array()) {
     '#description' =>  t('Mailid where changes on the domain will be notified, if many, separated by \',\'<br />used for network administration.')
   );
 
-   if ($form_state['values']['management'] == 'automatic') {
-  if (function_exists('guifi_host_form')){
-    $form = array_merge($form,
-      call_user_func('guifi_host_form',
+  if ($form_state['values']['management'] == 'automatic') {
+    if (function_exists('guifi_host_form')){
+      $form = array_merge($form,
+        call_user_func('guifi_host_form',
         $form_state['values'],
         $form_weight));
+    }
   }
-}
   // Comments
   $form_weight = 200;
 
@@ -366,26 +374,48 @@ function guifi_domain_form_validate($form,&$form_state) {
     }
   }
 
-  $dlgdomain = $form_state['values']['name'];
-  $hostname = strstr($dlgdomain, '.', true);
+  $qrydomainname = db_query("
+        SELECT name
+        FROM {guifi_dns_domains}
+        WHERE id = '%d'", $form_state['values']['id']);
+  $domainname = array();
+  $domainname = db_fetch_array($qrydomainname); 
+  $qrydomaindlg = db_query("
+        SELECT *
+        FROM {guifi_dns_domains}
+        WHERE mname = '%s'", $domainname['name']);
+  $dlgdomainname = array();
+  $dlgdomainname = db_fetch_array($qrydomaindlg); 
+  if (($form_state['values']['name'] != $domainname['name']) AND ($domainname['name'] == $dlgdomainname['mname'])) {
+     form_set_error('name', t('Error! has canviat el nom al domini/subdomini: <strong>%name</strong> i aquest conté delegacions de domini com per exemple <strong>%dlgdomain</strong>.', array('%name' => $hosts['host'], '%dlgdomain' => $dlgdomainname['name'])));
+  }
 
+  $fulldomain = $form_state['values']['name'];
+  $domain = strstr($fulldomain, '.', true);
+  $master = strstr($fulldomain, '.');
+  $masterdomain = substr($master, 1);
+  $qrymasterdomain = db_query("
+        SELECT *
+        FROM {guifi_dns_domains}
+        WHERE name = '%s'", $masterdomain);
+  $did = array();
+  $did= db_fetch_array($qrymasterdomain);
   $queryhosts = db_query("
-      SELECT *
-      FROM {guifi_dns_hosts}
-      WHERE id <> %d",
-      $form_state['values']['id']);
+       SELECT *
+       FROM {guifi_dns_hosts}
+       WHERE id = '%d'", $did['id']);
 
   while ($hosts = db_fetch_array($queryhosts)) {
     $hostx = $hosts['host'];
-    if ($hostx == $hostname) {
-      form_set_error('name', t('Subdomain name <b>%hostname</b> already in use as <b>HOSTNAME</b> from master domain : <b>%domain</b>'
+    if ($hostx == $domain) {
+      form_set_error('name', t('Subdomain name <strong>%hostname</strong> already in use as <strong>HOSTNAME</strong> from master domain : <strong>%domain</strong>'
                                              .'<br>Delete hostame first if you want use this name as delegated domain.', array('%hostname' => $hostname,'%domain' => $form_state['values']['mname'])));
     }
     $aliases = unserialize($hosts['aliases']);
     if ($aliases) {
       foreach ($aliases as $alias) {
-        if ($alias == $hostname) {
-          form_set_error('name', t('Subdomain name <b>%alias</b> already in use as <b>ALIAS</b> from hostname: <b>%hostname</b>  on master domain : <b>%domain</b>'
+        if ($alias == $domain) {
+          form_set_error('name', t('Subdomain name <strong>%alias</strong> already in use as <strong>ALIAS</strong> from hostname: <strong>%hostname</strong>  on master domain : <strong>%domain</strong>'
                                              .'<br>Delete alias first if you want use this name as delegated domain.', array('%alias' => $alias, '%hostname' => $hosts['host'], '%domain' => $form_state['values']['mname'])));
         }
       }
@@ -403,14 +433,14 @@ function guifi_domain_form_validate($form,&$form_state) {
       FROM {guifi_devices}
       WHERE id = '%d'", $dev->device_id);  
     $device = db_fetch_object($devqry);
-      form_set_error('ipv4', t('Server <strong> %nick </strong> does not have an IP address. Please, check it.', array('%nick' => $device->nick)));
+      form_set_error('ipv4', t('Server <strong>%nick</strong> does not have an IP address. Please, check it.', array('%nick' => $device->nick)));
   }
 
   $hostsd = array();
   $mxpriord = array();
   if (count($form_state['values']['hosts'])){
     foreach ($form_state['values']['hosts']  as $host_id => $hosts) {
-
+      $counter = 0;
       $qrydomain = db_query("
         SELECT name
         FROM {guifi_dns_domains}
@@ -418,17 +448,21 @@ function guifi_domain_form_validate($form,&$form_state) {
       while ($hostdom = db_fetch_array($qrydomain)) {
         $hostdomx = strstr($hostdom['name'], '.', true);
         if ($hostdomx == $hosts['host']) {
-          form_set_error('hosts]['.$host_id.'][host', t('Hostname Error! There is already a delegate domain with this name: <b>%hostname</b>.', array('%hostname' => $hosts['host'])));
+          form_set_error('hosts]['.$host_id.'][host', t('Hostname Error! There is already a delegate domain with this name: <strong>%hostname</strong>.', array('%hostname' => $hosts['host'])));
         }
       }
 
       if (ereg('[^a-z0-9.-]', $hosts['host']))
-        form_set_error('hosts]['.$host_id.'][host', t('Error! Hostname: <strong> %hostname </strong> can only contain lowercase letters, numbers, dashes and dots.', array('%hostname' => $hosts['host'])));
+        form_set_error('hosts]['.$host_id.'][host', t('Error! Hostname: <strong>%hostname</strong> can only contain lowercase letters, numbers, dashes and dots.', array('%hostname' => $hosts['host'])));
+
+      $checkdot = substr($hosts['host'], -1);
+      $dot = '.';
+      if ( strcmp($checkdot,$dot) == 0 )
+        form_set_error('hosts]['.$host_id.'][host', t('Error! Hostname: <strong>%hostname</strong> cannot canotain dot at the end of the name.', array('%hostname' => $hosts['host'])));
 
       $host = $hosts['host'];
       if (in_array($host,$hostsd)) {
         form_set_error('hosts]['.$host_id.'][host', t('Error!! Hostname: <strong>%host</strong> duplicated.', array('%host' => $hosts['host'])));
-        break;
       }
       $hostsd[] = $host;
       $aliasd = array();
@@ -442,31 +476,40 @@ function guifi_domain_form_validate($form,&$form_state) {
           $hostdomx = strstr($hostdom['name'], '.', true);
           if (!empty($aliasa)) {
             if ($hostdomx == $aliasa) {
-              form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Alias Error! There is already a delegate domain with this name: <b>%alias</b>.', array('%alias' => $aliasa)));
+              form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Alias Error! There is already a delegate domain with this name: <strong>%alias</strong>.', array('%alias' => $aliasa)));
             }
           }
         }
 
         if (ereg('[^a-z0-9.-]', $aliasa))
-          form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error! Alias: <strong> %alias </strong> can only contain lowercase letters, numbers, dashes and dots.', array('%alias' => $aliasa)));
+          form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error! Alias: <strong>%alias</strong> can only contain lowercase letters, numbers, dashes and dots.', array('%alias' => $aliasa)));
 
         if (!empty($aliasa)) {
-          if (empty($hosts['ipv4'])) {
-            $checkdot = substr($aliasa, -1);
-            $dot = '.';
-            if ( strcmp($checkdot,$dot) != 0 ) {
-              form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error!! Hostname <strong>%host</strong> don\'t have and IPv4 and contain aliases, must put a DOT "<strong>.</strong>" at the end of the alias domain name if the alias points to an external domain. ex: " outsidehost.dyndns.org<strong>.</strong> ".', array('%host' => $hosts['host'])));
-            }
-            $aliasdomain = strstr($aliasa, '.');
-            $dotdomain = '.'.$dlgdomain.'.';
-            if ( $aliasdomain == $dotdomain ) {
-              form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error!! Can\'t use your own Domain/Subdomain as external domain.'));
-            }
+          $checkdot = substr($aliasa, -1);
+          $dot = '.';
+          if ( strcmp($checkdot,$dot) == 0 ) {
+            $count = count(explode(".", $aliasa));
+            if ( $count <= 3) 
+              form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error! Alias: <strong>%alias</strong> This is no a valid host name, You should write something like this: <strong>%aliasdomain.xx.</strong> for an external aliases', array('%alias' => $aliasa)));
           }
-        }
-        if (!empty($aliasa)) {
+          if (( strcmp($checkdot,$dot) != 0 ) AND (empty($hosts['ipv4']))) {
+            form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error!! Hostname <strong>%host</strong> does not have an IP address and contains aliases, must put a DOT "<strong>.</strong>" at the end of the alias domain name if the alias points to an external domain. ex: " externalhost.dyndns.org<strong>.</strong> ".<strong>ONLY ONE</strong> external domain alias allowed', array('%host' => $hosts['host'])));
+          }
+          if (( strcmp($checkdot,$dot) == 0 ) AND (!empty($hosts['ipv4']))) {
+            form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error!! Hostname <strong>%host</strong> have an IP address and contains aliases that point to an external domain, you should decide one thing or another but not both at once ', array('%host' => $hosts['host'])));           }
+          if (( strcmp($checkdot,$dot) == 0 ) AND (empty($hosts['ipv4']))) {
+            if ($counter >= 1) {
+              form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error!! Hostname <strong>%host</strong> has more that one alias pointing to an external domainmain. You can define only one alias in that case.', array('%host' => $hosts['host'])));
+            }
+            $counter++;
+          }
+          $aliasdomain = strstr($aliasa, '.');
+          $dotdomain = '.'.$dlgdomain.'.';
+          if ( $aliasdomain == $dotdomain ) {
+            form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error!! Can\'t use your own Domain/Subdomain as external domain.'));
+          }
           if (in_array($aliasa,$aliasd)) {
-            form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error!! Alias: <strong>%alias</strong> duplicated.', array('%alias' => $aliasa)));             break;
+            form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error!! Alias: <strong>%alias</strong> duplicated.', array('%alias' => $aliasa)));
           }
         }
         $aliasd[] = $aliasa;
@@ -475,7 +518,6 @@ function guifi_domain_form_validate($form,&$form_state) {
             if($hosts2['host'] != $host){
               if(in_array($aliasa,$hosts2['aliases'])){
                 form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error!! Alias: <strong>%alias</strong> duplicated.', array('%alias' => $aliasa)));
-                break;
               }             }
             if($hosts2['host'] == $aliasa){
                 form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id,  t('Error!! Alias or Hostname: <strong>%aliashost</strong> alredy exists as hostname or alias!!', array('%aliashost' => $aliasa)));
@@ -487,13 +529,12 @@ function guifi_domain_form_validate($form,&$form_state) {
         $mxprior = $hosts['opt']['mxprior'];
         if (in_array($mxprior,$mxpriord)) {
           form_set_error('hosts]['.$host_id.'][opt][mxprior', t('Error!! MX Priority: <strong>%mxprior</strong> duplicated.', array('%mxprior' => $hosts['opt']['mxprior'])));
-          break;
         }
         $mxpriord[] = $mxprior;
       }
       if (empty($hosts['ipv4'])) {
         if (empty($hosts['aliases']['0'])) {
-          form_set_error('hosts]['.$host_id.'][host', t('Error!! IP ADDRESS and ALIAS are empty for hostname: <b>%hostname</b>', array('%hostname' => $hosts['host'])));
+          form_set_error('hosts]['.$host_id.'][host', t('Error!! IP ADDRESS and ALIAS are empty for hostname: <strong>%hostname</strong>', array('%hostname' => $hosts['host'])));
         } 
       }
 
@@ -501,10 +542,10 @@ function guifi_domain_form_validate($form,&$form_state) {
         $priority = $form_state['values']['hosts'][$host_id]['opt']['mxprior'];
         $number = $priority / '10';
         $result = strstr($number, '.');
-          if ($result == true) {
-            form_set_error('hosts]['.$host_id.'][opt][mxprior', t('NOOO es multiple xDD'));
-          }
-       } 
+        if ($result == true) {
+            form_set_error('hosts]['.$host_id.'][opt][mxprior', t('Entered MX value is not multple than 10.'));
+        }
+      }
     }
   }
 }
