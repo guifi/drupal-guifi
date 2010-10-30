@@ -1048,6 +1048,7 @@ function dump_guifi_domains($cnmlid, $action){
       $domain->addAttribute('IPv4',$record->ipv4);
       $domain->addAttribute('nameserver','ns1');
       $domain->addAttribute('domain_ip',$record->defipv4);
+      $domain->addAttribute('externalMX',$record->externalmx);
       if ($record->allow == 'slave')
         $domain->addAttribute('allow-transfer','any');
       else
@@ -1095,22 +1096,25 @@ function dump_guifi_domains($cnmlid, $action){
         }
   $scope = 'external';
   $qrydname=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid = '%s' AND scope ='%s' AND management = 'automatic'", $cnmlid, $scope);
+  $qryservice=db_query("SELECT notification FROM {guifi_services} WHERE id = '%s'", $cnmlid);
   $domainname = db_fetch_object($qrydname);
   $qrymaster=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid = '%s' AND scope ='%s' AND management = 'automatic'", $cnmlid, $scope);
   $qryslavemas=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid != '%s' AND scope ='%s' AND mname != '%s' AND allow = 'slave'", $cnmlid,$scope,$domainname->name);
   $qryslavefor=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid != '%s' AND scope ='%s' AND mname != '%s' AND allow = 'forward'", $cnmlid,$scope,$domainname->name);
   $scopex = $classXML->addChild($scope);
+  $notification= db_fetch_object($qryservice);
     while ($record = db_fetch_object($qrymaster)){
       $domain = $scopex->addChild('master');
       $domain->addAttribute('zone',$record->name);
       $domain->addAttribute('IPv4',$record->ipv4);
       $domain->addAttribute('nameserver','ns1');
       $domain->addAttribute('domain_ip',$record->defipv4);
+      $domain->addAttribute('externalMX',$record->externalmx);
       if ($record->allow == 'slave')
         $domain->addAttribute('allow-transfer','any');
       else
         $domain->addAttribute('allow-transfer','none');
-      $domain->addAttribute('contact',$record->notification);
+      $domain->addAttribute('contact',$notification->notification);
       $domain->addAttribute('domain_id',$record->id);
       $domain->addAttribute('service_id',$record->sid);
       $qrydelegation=db_query("SELECT * FROM {guifi_dns_domains} WHERE mname = '%s' AND scope = '%s'", $record->name,$scope);

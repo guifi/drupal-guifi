@@ -7,7 +7,7 @@ function guifi_host_form($edit,$form_weight) {
 
   guifi_log(GUIFILOG_TRACE,'function guifi_host_form()',$edit);
 
-  $collapse = TRUE;
+  $collapse = FALSE;
   
   $msg = (count($edit['hosts'])) ?
     format_plural(count($edit['hosts']),'1 host','@count hosts') :
@@ -230,9 +230,7 @@ function guifi_host_host_form($host, $key, &$form_weight = -200) {
       $f['deletedMsg'] = array(
         '#type' => 'item',
         '#value' => guifi_device_item_delete_msg(
-            "This host has been deleted, " .
-            "deletion will cascade to all properties, including interfaces, " .
-            "links and ip addresses."),
+            "This host has been deleted"),
         '#weight' => $form_weight++
       );
       $f['deleted'] = array(

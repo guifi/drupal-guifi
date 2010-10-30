@@ -308,6 +308,7 @@ function guifi_schema() {
       'scope' => array('type' => 'varchar', 'length' => '16', 'not null' => TRUE, 'default' => ''),
       'management' => array('type' => 'varchar', 'length' => '16', 'not null' => TRUE, 'default' => ''),
       'allow' => array('type' => 'varchar', 'length' => '24', 'not null' => TRUE, 'default' => ''),
+      'externalmx' => array('type' => 'varchar', 'length' => '128', 'not null' => TRUE, 'default' => ''),
       'notification' => array('type' => 'varchar', 'length' => '1024', 'not null' => TRUE, 'default' => ''),
       'comment' => array('type' => 'text', 'size' => 'big', 'not null' => FALSE),
       'user_created' => array('type' => 'int', 'not null' => TRUE),
@@ -1192,5 +1193,11 @@ function guifi_update_851() {
 function guifi_update_852() {
    $items = array();
    $items[] = update_sql("UPDATE {guifi_types} SET text = 'GuifiStationOS1.0' , description = 'GuifiStationOS v1.0 from Setup Informatica' WHERE id = '17' AND type = 'firmware'");
+  return $items;
+}
+
+function guifi_update_873() {
+   $items = array();
+   $items[] = update_sql("ALTER TABLE {guifi_dns_domains} ADD externalmx VARCHAR( 128 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL AFTER allow"); 
   return $items;
 }

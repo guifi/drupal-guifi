@@ -248,36 +248,63 @@ function guifi_domain_form($form_state, $params = array()) {
     '#required' => TRUE,
     '#default_value' => $form_state['values']['name'],
     '#description' =>  t('The Domain Name'),
+    '#weight' => $form_weight++,
   );
 
-  $form['main']['management'] = array(
+  $form['main']['notification'] = array(
+    '#type' => 'textfield',
+    '#size' => 60,
+    '#maxlength' => 1024,
+    '#title' => t('contact'),
+    '#required' => TRUE,
+    '#element_validate' => array('guifi_emails_validate'),
+    '#default_value' => $form_state['values']['notification'],
+    '#description' =>  t('Mails where changes on the domain will be notified, if many, separated by \',\'')
+                                  .'<br />'
+                                  .t('used for network administration.'),
+    '#weight' => $form_weight++,
+  );
+
+  $form['main']['settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Advanced domain name settings'),
+    '#weight' => $form_weight++,
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['main']['settings']['management'] = array(
     '#type' => 'select',
     '#title' => t('Management'),
     '#default_value' => $form_state['values']['management'],
     '#options' => array('automatic' => 'automatic', 'manual' => 'manual'),
-    '#description' =>  t('Choose <b>Automatic</b> if you want to use your domain management with the utility for servers "DNSServices"<br \>'
-                                  .'Choose <b>Manual</b>, if you just want to keep track of your domain/hosts here but want to do the management in your server manually.'),
+    '#description' =>  t('Choose <strong>Automatic</strong> if you want to use your domain management with the utility for servers "DNSServices"')
+                                  .'<br \>'
+                                  .t('Choose <strong>Manual</strong>, if you just want to keep track of your domain/hosts here but want to do the management in your server manually.'),
   );
-  $form['main']['public'] = array(
+  $form['main']['settings']['public'] = array(
     '#type' => 'select',
     '#title' => t('Public domain'),
     '#default_value' => $form_state['values']['public'],
     '#options' => array('yes' => 'Yes', 'no' => 'No'),
-    '#description' =>  t('Choose <b>Yes</b> if you want your domain/subdomain can be delegated subdomains from other users. (Ex: DELEGATED.yourdomain.net.<br/>'
-                                  .'Choose <b>No</b> if your domain/subdomain is private and you do not want to allow delegates subdomains.'),
+    '#description' =>  t('Choose <strong>Yes</strong> if you want your domain/subdomain can be delegated subdomains from other users. (Ex: DELEGATED.yourdomain.net.')
+                                  .'<br/>'
+                                  .t('Choose <strong>No</strong> if your domain/subdomain is private and you do not want to allow delegates subdomains.'),
   );
-  $form['main']['allow'] = array(
+  $form['main']['settings']['allow'] = array(
     '#type' => 'radios',
     '#required' => TRUE,
     '#title' => t('Transfer Options'),
     '#default_value' => $form_state['values']['allow'],
     '#options' => array('slave' => t('Allow to be enslaved (Recommended)'), 'forward' => t('Allow Forward'), 'disabled' => t('Disabled')),
-    '#description' =>  t('<b>Ensalved</b>, Allow other DNS servers on the network have an exact copy of the domain, so, if the original DNS does not work, can access to the hosts.'
-                                   .'<br \><b>Forward</b>, Allow other DNS servers on the network to forward the request to the master server transparently saving bandwidth.'
-                                   .'<br \><b>Disabled</b>, If you select this option, the management of your domain may not be transferred in any way, your domain will not be visible to other network servers.'),
+    '#description' =>  t('<strong>Ensalved</strong>, Allow other DNS servers on the network have an exact copy of the domain, so, if the original DNS does not work, can access to the hosts.')
+                                   .'<br \>'
+                                   .t('<strong>Forward</strong>, Allow other DNS servers on the network to forward the request to the master server transparently saving bandwidth.')
+                                   .'<br \>'
+                                   .t('<strong>Disabled</strong>, If you select this option, the management of your domain may not be transferred in any way, your domain will not be visible to other network servers.'),
   );
 
-  if ($form_state['values']['scope'] == 'external') {
+  if ($form_state['values']['settings']['scope'] == 'external') {
     $form['main']['ipv4'] = array(
     '#type' => 'textfield',
     '#title' => t('Nameserver IP Address'),
@@ -288,39 +315,32 @@ function guifi_domain_form($form_state, $params = array()) {
     '#element_validate' => array('guifi_ipv4_validate'),
   );
   } else {
-    $form['main']['ipv4'] = array(
+    $form['main']['settings']['ipv4'] = array(
       '#type' => 'hidden',
       '#title' => t('Nameserver IP Address'),
       '#default_value'=> $form_state['values']['ipv4'],
     );
   }
 
-  $form['main']['defipv4'] = array(
+  $form['main']['settings']['defipv4'] = array(
     '#type' => 'textfield',
     '#title' => t("Default Domain IP Address"),
     '#default_value' => $form_state['values']['defipv4'],
     '#element_validate' => array('guifi_ipv4_validate'),
-    '#description' => t("Ex: domain.net without hostname resolve this IP Address, tends to be the same address as hostname: www.<br> leave it blank if not needed."),
+    '#description' => t("Ex: domain.net without hostname resolve this IP Address, tends to be the same address as hostname: www.")
+                                ."<br />"
+                                .t("leave it blank if not needed."),
     '#required' => FALSE,
   );
-/*
-  $form['main']['externalmx'] = array(
+
+  $form['main']['settings']['externalmx'] = array(
     '#type' => 'textfield',
     '#title' => t("External Mailservers MX "),
     '#default_value' => $form_state['values']['externalmx'],
-    '#description' => t("Escriut aqui els servidors de correu si son externs, si no ho son, deixa-ho en blanc."),
+    '#description' => t("Separated by ','. Put them here only if the mail servers are external, if they are not, leave it blank.")
+                                ."<br />"
+                                .t("Internal MailServers should be configured in the advanced options of the hosts."),
     '#required' => FALSE,
-  );
-*/
-  $form['main']['notification'] = array(
-    '#type' => 'textfield',
-    '#size' => 60,
-    '#maxlength' => 1024,
-    '#title' => t('contact'),
-    '#required' => TRUE,
-    '#element_validate' => array('guifi_emails_validate'),
-    '#default_value' => $form_state['values']['notification'],
-    '#description' =>  t('Mailid where changes on the domain will be notified, if many, separated by \',\'<br />used for network administration.')
   );
 
   if ($form_state['values']['management'] == 'automatic') {
@@ -387,7 +407,7 @@ function guifi_domain_form_validate($form,&$form_state) {
   $dlgdomainname = array();
   $dlgdomainname = db_fetch_array($qrydomaindlg); 
   if (($form_state['values']['name'] != $domainname['name']) AND ($domainname['name'] == $dlgdomainname['mname'])) {
-     form_set_error('name', t('Error! has canviat el nom al domini/subdomini: <strong>%name</strong> i aquest conté delegacions de domini com per exemple <strong>%dlgdomain</strong>.', array('%name' => $hosts['host'], '%dlgdomain' => $dlgdomainname['name'])));
+     form_set_error('name', t('Error!  you renamed the domain / subdomain: <strong>%name</strong> This domain contains delegations, such <strong>%dlgdomain</strong>.', array('%name' => $domainname['name'], '%dlgdomain' => $dlgdomainname['name'])));
   }
 
   $fulldomain = $form_state['values']['name'];
@@ -408,15 +428,17 @@ function guifi_domain_form_validate($form,&$form_state) {
   while ($hosts = db_fetch_array($queryhosts)) {
     $hostx = $hosts['host'];
     if ($hostx == $domain) {
-      form_set_error('name', t('Subdomain name <strong>%hostname</strong> already in use as <strong>HOSTNAME</strong> from master domain : <strong>%domain</strong>'
-                                             .'<br>Delete hostame first if you want use this name as delegated domain.', array('%hostname' => $hostname,'%domain' => $form_state['values']['mname'])));
+      form_set_error('name', t('Subdomain name <strong>%hostname</strong> already in use as <strong>HOSTNAME</strong> from master domain : <strong>%domain</strong>')
+                                          .'<br />'
+                                          .t(' Delete hostame first if you want use this name as delegated domain.', array('%hostname' => $hostname,'%domain' => $form_state['values']['mname'])));
     }
     $aliases = unserialize($hosts['aliases']);
     if ($aliases) {
       foreach ($aliases as $alias) {
         if ($alias == $domain) {
-          form_set_error('name', t('Subdomain name <strong>%alias</strong> already in use as <strong>ALIAS</strong> from hostname: <strong>%hostname</strong>  on master domain : <strong>%domain</strong>'
-                                             .'<br>Delete alias first if you want use this name as delegated domain.', array('%alias' => $alias, '%hostname' => $hosts['host'], '%domain' => $form_state['values']['mname'])));
+          form_set_error('name', t('Subdomain name <strong>%alias</strong> already in use as <strong>ALIAS</strong> from hostname: <strong>%hostname</strong>  on master domain : <strong>%domain</strong>')
+                                             .'<br />'
+                                             .t('Delete alias first if you want use this name as delegated domain.', array('%alias' => $alias, '%hostname' => $hosts['host'], '%domain' => $form_state['values']['mname'])));
         }
       }
     }
@@ -508,7 +530,7 @@ function guifi_domain_form_validate($form,&$form_state) {
           if ( $aliasdomain == $dotdomain ) {
             form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error!! Can\'t use your own Domain/Subdomain as external domain.'));
           }
-          if (in_array($aliasa,$aliasd)) {
+          if (( strcmp($checkdot,$dot) == 0 ) AND (in_array($aliasa,$aliasd))) {
             form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error!! Alias: <strong>%alias</strong> duplicated.', array('%alias' => $aliasa)));
           }
         }
@@ -516,7 +538,9 @@ function guifi_domain_form_validate($form,&$form_state) {
         foreach($form_state['values']['hosts'] as $host_id2 => $hosts2) {
           if (!empty($hosts2['host']) && (!empty($aliasa))) {
             if($hosts2['host'] != $host){
-              if(in_array($aliasa,$hosts2['aliases'])){
+          $checkdot = substr($aliasa, -1);
+          $dot = '.';
+            if (( strcmp($checkdot,$dot) != 0 ) AND (in_array($aliasa,$hosts2['aliases']))){
                 form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error!! Alias: <strong>%alias</strong> duplicated.', array('%alias' => $aliasa)));
               }             }
             if($hosts2['host'] == $aliasa){
@@ -680,7 +704,7 @@ function guifi_domain_delete_confirm($form_state,$params) {
     '#type' => 'item',
     '#title' => t('Are you sure you want to delete this domain?'),
     '#value' => $params['name'],
-    '#description' => t('WARNING: This action cannot be undone. The domain and it\'s related information will be <strong>permanently deleted</strong>, that includes:<ul><li>The domain</li><li>The related hosts</li></ul>If you are really sure that you want to delete this information, press "Confirm delete".'),
+    '#description' => t('WARNING: This action cannot be undone. The domain and it\'s related information will be <strong>permanently deleted</strong>, that includes:<ul><li>The domain</li><li>The related hosts</li><li>The related delegations</li></ul>If you are really sure that you want to delete this information, press "Confirm delete".'),
     '#weight' => 0,
   );
   $form['submit'] = array(
@@ -970,8 +994,8 @@ function guifi_domain_print($domain = NULL) {
 
 function guifi_domain_item_delete_msg($msg) {
   return t($msg).'<br />'.
-    t('Press "<b>Save</b>" to confirm deletion or ' .
-      '"<b>Reset</b>" to discard changes and ' .
+    t('Press "<strong>Save</strong>" to confirm deletion or ' .
+      '"<strong>Reset</strong>" to discard changes and ' .
       'recover the values from the database.');
 }
 
