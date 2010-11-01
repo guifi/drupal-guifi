@@ -290,17 +290,17 @@ function guifi_cnml($cnmlid,$action = 'help') {
               } else if  (in_array($model_name,
                 // TODO, for mikrotiks would be better to use fid instead of model name?
                      array(
-                       'Supertrasto RB532 guifi.net' ,
-                       'Supertrasto RB133C guifi.net' ,
-                       'Supertrasto RB133 guifi.net' ,
-                       'Supertrasto RB112 guifi.net' ,
-                       'Supertrasto RB153 guifi.net' ,
-                       'Supertrasto RB600 guifi.net' ,
-                       'Supertrasto RB800 guifi.net' ,
-                       'Supertrasto RB333 guifi.net' ,
-                       'Supertrasto RB411 guifi.net',
-                       'Supertrasto RB412 guifi.net',
-                       'Supertrasto RB433 guifi.net'))) {
+                       'Routerboard 532' ,
+                       'Routerboard 133C' ,
+                       'Routerboard 133' ,
+                       'Routerboard 112' ,
+                       'Routerboard 153' ,
+                       'Routerboard 600' ,
+                       'Routerboard 800' ,
+                       'Routerboard 333' ,
+                       'Routerboard 411',
+                       'Routerboard 412',
+                       'Routerboard 433'))) {
                  switch ($device->variable['firmware']) {
                  case 'kamikaze':
                    $radioXML->addAttribute('snmp_name','ath0');

@@ -33,7 +33,7 @@ switch( $action ) {
 		$device['comment'] = "Aquest dispositiu servirà per extendre la troncal";
 		$device['status'] = 'Planned';
 		$device['graph_server'] = 15902;
-		$device['model_id'] = 27; // Supertrasto RB600 guifi.net
+		$device['model_id'] = 27; // Routerboard 600
 		$device['firmware'] = "RouterOSv3.x";
 		
 		$added = $gapi->addDevice($node_id, $type, $mac, $device );

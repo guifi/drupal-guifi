@@ -160,27 +160,27 @@ dispositius (o trastos) suportats per guifi.net.")?></p>
 		<tr>
 			<td>19</td>
 			<td>8</td>
-			<td>Supertrasto RB532 guifi.net</td>
+			<td>Routerboard 532</td>
 		</tr>
 		<tr>
 			<td>20</td>
 			<td>8</td>
-			<td>Supertrasto RB133C guifi.net</td>
+			<td>Routerboard 133C</td>
 		</tr>
 		<tr>
 			<td>21</td>
 			<td>8</td>
-			<td>Supertrasto RB133 guifi.net</td>
+			<td>Routerboard 133</td>
 		</tr>
 		<tr>
 			<td>22</td>
 			<td>8</td>
-			<td>Supertrasto RB112 guifi.net</td>
+			<td>Routerboard 112</td>
 		</tr>
 		<tr>
 			<td>23</td>
 			<td>8</td>
-			<td>Supertrasto RB153 guifi.net</td>
+			<td>Routerboard 153</td>
 		</tr>
 		<tr>
 			<td>24</td>
@@ -200,17 +200,17 @@ dispositius (o trastos) suportats per guifi.net.")?></p>
 		<tr>
 			<td>27</td>
 			<td>8</td>
-			<td>Supertrasto RB600 guifi.net</td>
+			<td>Routerboard 600</td>
 		</tr>
 		<tr>
 			<td>28</td>
 			<td>8</td>
-			<td>Supertrasto RB333 guifi.net</td>
+			<td>Routerboard 333</td>
 		</tr>
 		<tr>
 			<td>29</td>
 			<td>8</td>
-			<td>Supertrasto RB411 guifi.net</td>
+			<td>Routerboard 411</td>
 		</tr>
 		<tr>
 			<td>30</td>
@@ -220,7 +220,7 @@ dispositius (o trastos) suportats per guifi.net.")?></p>
 		<tr>
 			<td>31</td>
 			<td>8</td>
-			<td>Supertrasto RB433 guifi.net</td>
+			<td>Routerboard 433</td>
 		</tr>
 		<tr>
 			<td>32</td>
