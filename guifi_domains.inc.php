@@ -406,6 +406,8 @@ function guifi_domain_form_validate($form,&$form_state) {
         WHERE mname = '%s'", $domainname['name']);
   $dlgdomainname = array();
   $dlgdomainname = db_fetch_array($qrydomaindlg); 
+
+if (!empty($domainname['name'])) 
   if (($form_state['values']['name'] != $domainname['name']) AND ($domainname['name'] == $dlgdomainname['mname'])) {
      form_set_error('name', t('Error!  you renamed the domain / subdomain: <strong>%name</strong> This domain contains delegations, such <strong>%dlgdomain</strong>.', array('%name' => $domainname['name'], '%dlgdomain' => $dlgdomainname['name'])));
   }
