@@ -538,7 +538,7 @@ function guifi_user_form_validate($form, &$form_state) {
         'for service %servicename. Use middle initial, 2nd lastname or a prefix ' .
         'with the proxy to get a unique username.',
         array('%username' => $edit['username'],
-          '%nodename' => guifi_get_nodename($edit['nid']),
+          '%nodename' => guifi_get_nodename($proxy_id->nid),
           '%servicename' => $proxy_name->nick
         ))
       );
