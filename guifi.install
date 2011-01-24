@@ -448,12 +448,12 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('1', 'firmware', 'n/a', 'not available', NULL);");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('2', 'firmware', 'Alchemy', 'Alchemy from sveasoft', 'WRT54Gv1-4|WRT54GSv1-2');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('3', 'firmware', 'Talisman', 'Talisman from sveasoft', 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('4', 'firmware', 'DD-WRT', 'DD-WRT from BrainSlayer', 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Asus WL-500xx|WHR-HP-G54, WHR-G54S|NanoStation2|NanoStation5|LiteStation2|LiteStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|Avila GW2348-4');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('4', 'firmware', 'DD-WRT', 'DD-WRT from BrainSlayer', 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Asus WL-500xx|WHR-HP-G54, WHR-G54S|NanoStation2|NanoStation5|LiteStation2|LiteStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Avila GW2348-4');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('5', 'firmware', 'DD-guifi', 'DD-guifi from Miquel Martos', 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|WHR-HP-G54, WHR-G54S');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('6', 'firmware', 'RouterOSv2.9', 'RouterOS 2.9 from Mikrotik', 'Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('7', 'firmware', 'whiterussian', 'OpenWRT-whiterussian', 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Wrap|Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('8', 'firmware', 'kamikaze', 'OpenWRT kamikaze',
-   'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Meraki/Fonera|Wrap|Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|NanoStation2|NanoStation5|LiteStation2|LiteStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|Avila GW2348-4|Asus WL-500xx|Alix1|Alix2|Alix3');");
+   'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Meraki/Fonera|Wrap|Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|NanoStation2|NanoStation5|LiteStation2|LiteStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Avila GW2348-4|Asus WL-500xx|Alix1|Alix2|Alix3');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('9', 'firmware', 'Freifunk-BATMAN', 'OpenWRT-Freifunk-v1.6.16 with B.A.T.M.A.N', 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|WHR-HP-G54, WHR-G54S');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('10', 'firmware', 'RouterOSv3.x', 'RouterOS 3.x from Mikrotik', 'Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|Routerboard 600|Routerboard 411|Routerboard 333|Routerboard 433');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('11', 'firmware', 'AirOsv221', 'Ubiquti AirOs 2.2.1', 'NanoStation2|NanoStation5|LiteStation2|LiteStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5')");
@@ -463,6 +463,7 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('15', 'firmware', 'AirOsv52', 'Ubiquti AirOs 5.2', 'AirMaxM2 Rocket/Nano/Loco|AirMaxM5 Rocket/Nano/Loco|AirMaxM2 Bullet/PwBrg/AirGrd/NanoBr|AirMaxM5 Bullet/PwBrg/AirGrd/NanoBr');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('16', 'firmware', 'RouterOSv4.7+', 'RouterOS 4.7 or newer from Mikrotik', 'Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|Routerboard 600|Routerboard 411|Routerboard 333|Routerboard 433|Routerboard 800');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('17', 'firmware', 'GuifiStationOS1.0', 'GuifiStationOS v1.0 from Setup Informatica', 'GuifiStation2|GuifiStation5');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('18', 'firmware', 'gsffirm', 'Firmware de GràciaSenseFils MANET', 'Alix2|Alix3|WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Asus WL-500xx|WHR-HP-G54, WHR-G54S|NanoStation2|NanoStation5|LiteStation2|LiteStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Meraki/Fonera');");
 
   // --
   // -- antenna types
@@ -755,7 +756,8 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_model} VALUES (48, 10, 'AirMaxM5 Bullet/PwBrg/AirGrd/NanoBr', 'Extern', 1, 100, '802.11a', 'Yes', 'No', 'si', 'Si', 'Si', NULL, '1', 'Si', 'Si', NULL, 'Si', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers', 'Yes');");
   db_query("INSERT INTO {guifi_model} VALUES (49, 15, 'GuifiStation2', 'Extern', 1, 100, '802.11bg', 'Yes', 'No', 'si', 'Si', 'Si', NULL, '1', 'Si', 'Si', NULL, 'Si', 'Si', 'eth0|ath0', 'http://tienda.setupinformatica.com/wac/detalle.php?codigo=CPEGS2', 'Permet Firmwares de tercers', 'Yes');");
   db_query("INSERT INTO {guifi_model} VALUES (50, 15, 'GuifiStation5', 'Extern', 1, 100, '802.11a', 'Yes', 'No', 'si', 'Si', 'Si', NULL, '1', 'Si', 'Si', NULL, 'Si', 'Si', 'eth0|ath0', 'http://tienda.setupinformatica.com/wac/detalle.php?codigo=CPEGS5', 'Permet Firmwares de tercers', 'Yes');");
-
+  db_query("INSERT INTO {guifi_model} VALUES (51, 10, 'RouterStationPro', 'Extern', 4, 400, '802.11abg', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'Wan', 'http://ubnt.com/rspro', 'Permet Firmwares de tercers', 'Yes');");
+  
   // --
   // -- user status types
   // --
@@ -1222,3 +1224,14 @@ function guifi_update_874() {
    $items[] = update_sql("UPDATE {guifi_types} SET `relations` = 'Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|Routerboard 600|Routerboard 411|Routerboard 333|Routerboard 433|Routerboard 800' WHERE id = 16 AND type = 'firmware'");
   return $items;
 }
+
+function guifi_update_891() {
+   $items = array();
+   $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('18', 'firmware', 'gsffirm', 'Firmware de GràciaSenseFils MANET', 'Alix2|Alix3|WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Asus WL-500xx|WHR-HP-G54, WHR-G54S|NanoStation2|NanoStation5|LiteStation2|LiteStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Meraki/Fonera');");
+   $items[] = update_sql("INSERT INTO {guifi_model} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES 
+                                        (51, 10, 'RouterStationPro', 'Extern', 4, 400, '802.11abg', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'Wan', 'http://ubnt.com/rspro', 'Permet Firmwares de tercers', 'Yes');"); 
+   $items[] = update_sql("UPDATE {guifi_types} SET relations = 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Asus WL-500xx|WHR-HP-G54, WHR-G54S|NanoStation2|NanoStation5|LiteStation2|LiteStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Avila GW2348-4' WHERE id = 4 AND type = 'firmware'");
+   $items[] = update_sql("UPDATE {guifi_types} SET relations = 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Meraki/Fonera|Wrap|Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|NanoStation2|NanoStation5|LiteStation2|LiteStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Avila GW2348-4|Asus WL-500xx|Alix1|Alix2|Alix3' WHERE id = 8 AND type = 'firmware'"); 
+  return $items;
+}
+

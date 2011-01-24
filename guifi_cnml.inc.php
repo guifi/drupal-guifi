@@ -286,6 +286,9 @@ function guifi_cnml($cnmlid,$action = 'help') {
                   $radioXML->addAttribute('snmp_name','br-lan');
                  }
                  break;
+               case 'gsffirm':
+                  $radioXML->addAttribute('snmp_name','wifi0');
+                 break;
                case 'Freifunk-OLSR':
                case 'Freifunk-BATMAN':
                  $radioXML->addAttribute('snmp_name','eth1');
@@ -331,6 +334,9 @@ function guifi_cnml($cnmlid,$action = 'help') {
                  case 'AirOsv221':
                    $radioXML->addAttribute('snmp_name','wifi0');
                  break;
+                 case 'gsffirm':
+                   $radioXML->addAttribute('snmp_name','wifi0');
+                 break;
                    }
               }
                 else if  (in_array($model_name,
@@ -339,13 +345,20 @@ function guifi_cnml($cnmlid,$action = 'help') {
                  case 'kamikaze':
                    $radioXML->addAttribute('snmp_name','ath0');
                  break;
+                 case 'gsffirm':
+                   $radioXML->addAttribute('snmp_name','wifi0');
+                 break;
                    }
               }
                  else if  (in_array($model_name,
-                     array('RouterStation'))) {
+                     array('RouterStation',
+                              'RouterStationPro'))) {
                  switch ($device->variable['firmware']) {
                  case 'kamikaze':
                    $radioXML->addAttribute('snmp_name','br-wlanLan');
+                 break;
+                 case 'gsffirm':
+                   $radioXML->addAttribute('snmp_name','wifi0');
                  break;
                    }
               }
