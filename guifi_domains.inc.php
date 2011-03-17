@@ -149,6 +149,7 @@ function guifi_domain_form($form_state, $params = array()) {
     $form_state['values']['hosts']['0']['counter'] = '0';
     $form_state['values']['hosts']['0']['host'] = 'ns1';
     $form_state['values']['hosts']['0']['ipv4'] = $params['ipv4'];
+    $form_state['values']['hosts']['0']['ipv6'] = $params['ipv6'];
     $form_state['values']['hosts']['0']['opt']['options'] = array( 'NS' => 'NS', 'MX' => '0' );
   }
 
@@ -324,10 +325,20 @@ function guifi_domain_form($form_state, $params = array()) {
 
   $form['main']['settings']['defipv4'] = array(
     '#type' => 'textfield',
-    '#title' => t("Default Domain IP Address"),
+    '#title' => t("Default Domain IPv4 Address"),
     '#default_value' => $form_state['values']['defipv4'],
     '#element_validate' => array('guifi_ipv4_validate'),
-    '#description' => t("Ex: domain.net without hostname resolve this IP Address, tends to be the same address as hostname: www.")
+    '#description' => t("Ex: domain.net without hostname resolve this IPv4 Address, tends to be the same address as hostname: www.")
+                                ."<br />"
+                                .t("leave it blank if not needed."),
+    '#required' => FALSE,
+  );
+  $form['main']['settings']['defipv6'] = array(
+    '#type' => 'textfield',
+    '#title' => t("Default Domain IPv6 Address"),
+    '#default_value' => $form_state['values']['defipv6'],
+    '#element_validate' => array('guifi_ipv6_validate'),
+    '#description' => t("Ex: domain.net without hostname resolve this IPv6 Address, tends to be the same address as hostname: www.")
                                 ."<br />"
                                 .t("leave it blank if not needed."),
     '#required' => FALSE,
@@ -457,7 +468,7 @@ if (!empty($domainname['name']))
       FROM {guifi_devices}
       WHERE id = '%d'", $dev->device_id);  
     $device = db_fetch_object($devqry);
-      form_set_error('ipv4', t('Server <strong>%nick</strong> does not have an IP address. Please, check it.', array('%nick' => $device->nick)));
+      form_set_error('ipv4', t('Server <strong>%nick</strong> does not have an IPv4 address. Please, check it.', array('%nick' => $device->nick)));
   }
 
   $hostsd = array();
@@ -516,12 +527,12 @@ if (!empty($domainname['name']))
             if ( $count <= 3) 
               form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error! Alias: <strong>%alias</strong> This is no a valid host name, You should write something like this: <strong>%aliasdomain.xx.</strong> for an external aliases', array('%alias' => $aliasa)));
           }
-          if (( strcmp($checkdot,$dot) != 0 ) AND (empty($hosts['ipv4']))) {
+          if (( strcmp($checkdot,$dot) != 0 ) && (empty($hosts['ipv4']) && empty($hosts['ipv6']))) {
             form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error!! Hostname <strong>%host</strong> does not have an IP address and contains aliases, must put a DOT "<strong>.</strong>" at the end of the alias domain name if the alias points to an external domain. ex: " externalhost.dyndns.org<strong>.</strong> ".<strong>ONLY ONE</strong> external domain alias allowed', array('%host' => $hosts['host'])));
           }
-          if (( strcmp($checkdot,$dot) == 0 ) AND (!empty($hosts['ipv4']))) {
+          if (( strcmp($checkdot,$dot) == 0 ) && (!empty($hosts['ipv4']) && !empty($hosts['ipv6']))) {
             form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error!! Hostname <strong>%host</strong> have an IP address and contains aliases that point to an external domain, you should decide one thing or another but not both at once ', array('%host' => $hosts['host'])));           }
-          if (( strcmp($checkdot,$dot) == 0 ) AND (empty($hosts['ipv4']))) {
+          if (( strcmp($checkdot,$dot) == 0 ) && (empty($hosts['ipv4']) && empty($hosts['ipv6']))) {
             if ($counter >= 1) {
               form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error!! Hostname <strong>%host</strong> has more that one alias pointing to an external domainmain. You can define only one alias in that case.', array('%host' => $hosts['host'])));
             }
@@ -558,9 +569,9 @@ if (!empty($domainname['name']))
         }
         $mxpriord[] = $mxprior;
       }
-      if (empty($hosts['ipv4'])) {
+      if (empty($hosts['ipv4']) && empty($hosts['ipv6'])) {
         if (empty($hosts['aliases']['0'])) {
-          form_set_error('hosts]['.$host_id.'][host', t('Error!! IP ADDRESS and ALIAS are empty for hostname: <strong>%hostname</strong>', array('%hostname' => $hosts['host'])));
+          form_set_error('hosts]['.$host_id.'][host', t('Error!! empty IPv4/6 ADDRESS and ALIAS for hostname: <strong>%hostname</strong>', array('%hostname' => $hosts['host'])));
         } 
       }
 
@@ -980,7 +991,7 @@ function guifi_domain_print($domain = NULL) {
     $output .= theme('box', $title, $table);
     if (arg(4) == 'data') break;
   case 'hosts':
-    $header = array(t('HostName'),t('Alias'),t('Ip Address'),t('Namserver'),t('MailServer'),t('MX Priority'));
+    $header = array(t('HostName'),t('Alias'),t('IPv4 Address'),t('IPv6 Address'),t('Namserver'),t('MailServer'),t('MX Priority'));
     $table = theme('table', $header, guifi_hosts_print_data($domain[id]));
     $output .= theme('box', t('Hostnames'), $table);
     break;

@@ -304,6 +304,7 @@ function guifi_schema() {
       'public' => array('type' => 'varchar', 'length' => '5', 'not null' => TRUE, 'default' => 'yes'),
       'ipv4' => array('type' => 'varchar', 'length' => '16', 'not null' => TRUE, 'default' => ''),
       'defipv4' => array('type' => 'varchar', 'length' => '16', 'not null' => TRUE, 'default' => ''),
+      'defipv6' => array('type' => 'varchar', 'length' => '128', 'not null' => TRUE, 'default' => ''),
       'mname' => array('type' => 'varchar', 'length' => '32', 'not null' => TRUE, 'default' => ''),
       'scope' => array('type' => 'varchar', 'length' => '16', 'not null' => TRUE, 'default' => ''),
       'management' => array('type' => 'varchar', 'length' => '16', 'not null' => TRUE, 'default' => ''),
@@ -325,6 +326,7 @@ function guifi_schema() {
       'counter' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE),
       'host' => array('type' => 'varchar', 'length' => '128', 'not null' => TRUE, 'default' => ''),
       'ipv4' => array('type' => 'varchar', 'length' => '16', 'not null' => TRUE, 'default' => ''),
+      'ipv6' => array('type' => 'varchar', 'length' => '128', 'not null' => TRUE, 'default' => ''),
       'aliases' => array('type' => 'varchar', 'length' => '1024', 'not null' => TRUE, 'default' => ''),
       'options' => array('type' => 'varchar', 'length' => '1024', 'not null' => TRUE, 'default' => ''),
       'user_created' => array('type' => 'int', 'not null' => TRUE),
@@ -1235,3 +1237,9 @@ function guifi_update_891() {
   return $items;
 }
 
+function guifi_update_893() {
+  $items = array();
+  $items[] = update_sql("ALTER TABLE {guifi_dns_domains} ADD defipv6 VARCHAR( 128 ) NOT NULL AFTER defipv4;");
+  $items[] = update_sql("ALTER TABLE {guifi_dns_hosts} ADD ipv6 VARCHAR( 128 ) NOT NULL AFTER ipv4;");
+  return $items;
+}

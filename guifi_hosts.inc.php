@@ -187,14 +187,18 @@ function guifi_host_host_form($host, $key, &$form_weight = -200) {
     );
 
     if (empty($host['ipv4'])) {
-      $lsa = ' ';
+      $lsav4 = ' ';
     } else {
-      $lsa = ' ··· '.t('IPv4:').' '.$host['ipv4'];
+      $lsav4 = ' ··· '.t('IPv4:').' '.$host['ipv4'];
     }
-
+    if (empty($host['ipv6'])) {
+      $lsav6 = ' ';
+    } else {
+      $lsav6 = ' ··· '.t('IPv6:').' '.$host['ipv6'];
+    }
     $f = array(
       '#type' => 'fieldset',
-      '#title' => t('Host:').' '.$host['host'].$lsa,
+      '#title' => t('Host:').' '.$host['host'].$lsav4.$lsav6,
       '#collapsible' => TRUE,
       '#collapsed' => !(isset($host['unfold'])),
       '#tree'=> TRUE,
@@ -218,10 +222,19 @@ function guifi_host_host_form($host, $key, &$form_weight = -200) {
               
     $f[] = array(
       '#type' => 'textfield',
-      '#title' => t("IP Address"),
+      '#title' => t("IPv4 Address"),
       '#parents' => array('hosts',$key,'ipv4'),
       '#default_value' => $host['ipv4'],
       '#element_validate' => array('guifi_ipv4_validate'),
+      '#description' => t('Leave it blank if you want to use an alias to an external domain.<br> ex: hostname is an alias of hostname.dyndns.org.'),
+      '#weight' => $form_weight++,
+    );
+    $f[] = array(
+      '#type' => 'textfield',
+      '#title' => t("IPv6 Address"),
+      '#parents' => array('hosts',$key,'ipv6'),
+      '#default_value' => $host['ipv6'],
+      '#element_validate' => array('guifi_ipv6_validate'),
       '#description' => t('Leave it blank if you want to use an alias to an external domain.<br> ex: hostname is an alias of hostname.dyndns.org.'),
       '#weight' => $form_weight++,
     );
@@ -261,6 +274,22 @@ function guifi_ipv4_validate($element,&$form_state) {
         return $element;
         } else {
             form_error($element, t('Invalid %ipv4 address',array('%ipv4' => $value)));
+        }
+    }
+}
+
+function guifi_ipv6_validate($element,&$form_state) {
+  guifi_log(GUIFILOG_TRACE,"function _guifi_host_ipv4_validate()");
+
+    if ($form_state['clicked_button']['#value'] == t('Reset'))
+    return;
+    
+    if ($element['#value']) {
+    $value = $element['#value'];
+      if(filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+        return $element;
+        } else {
+            form_error($element, t('Invalid %ipv6 address',array('%ipv6' => $value)));
         }
     }
 }
@@ -354,6 +383,7 @@ function guifi_hosts_print_data($id) {
         strtolower($host['host']).'.'.$domain->name,
         $alias,
         $host['ipv4'],
+        $host['ipv6'],
         $nameserver,
         $mailserver,
         $priority

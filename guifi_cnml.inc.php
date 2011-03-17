@@ -1067,6 +1067,7 @@ function dump_guifi_domains($cnmlid, $action){
       $domain->addAttribute('IPv4',$record->ipv4);
       $domain->addAttribute('nameserver','ns1');
       $domain->addAttribute('domain_ip',$record->defipv4);
+      $domain->addAttribute('domain_ip_v6',$record->defipv6);
       $domain->addAttribute('externalMX',$record->externalmx);
       if ($record->allow == 'slave')
         $domain->addAttribute('allow-transfer','any');
@@ -1089,6 +1090,7 @@ function dump_guifi_domains($cnmlid, $action){
               $hostname = $domain->addChild('host');
               $hostname->addAttribute('name',strtolower($host->host));
               $hostname->addAttribute('IPv4',$host->ipv4);
+              $hostname->addAttribute('IPv6',$host->ipv6);
               $alias = unserialize($host->aliases);
                   if (!empty($alias)) {
                     $cnames = implode(",", $alias);
@@ -1128,6 +1130,7 @@ function dump_guifi_domains($cnmlid, $action){
       $domain->addAttribute('IPv4',$record->ipv4);
       $domain->addAttribute('nameserver','ns1');
       $domain->addAttribute('domain_ip',$record->defipv4);
+      $domain->addAttribute('domain_ip_v6',$record->defipv6);
       $domain->addAttribute('externalMX',$record->externalmx);
       if ($record->allow == 'slave')
         $domain->addAttribute('allow-transfer','any');
@@ -1150,6 +1153,7 @@ function dump_guifi_domains($cnmlid, $action){
               $hostname = $domain->addChild('host');
               $hostname->addAttribute('name',strtolower($host->host));
               $hostname->addAttribute('IPv4',$host->ipv4);
+              $hostname->addAttribute('IPv6',$host->ipv6);
               $alias = unserialize($host->aliases);
                 foreach ($alias as $id => $name) {
                   if ($name) {
