@@ -96,7 +96,7 @@ dispositius (o trastos) suportats per guifi.net.")?></p>
 			<td>Talisman from sveasoft</td>
 		</tr>
 		<tr>
-			<td>DD-WRT</td>
+			<td>DD-WRTv23</td>
 			<td>DD-WRT from BrainSlayer</td>
 		</tr>
 		<tr>

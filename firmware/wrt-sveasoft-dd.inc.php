@@ -15,7 +15,7 @@ function guifi_unsolclic_startup($dev, $version, $rc_startup) {
   _outln_comment(' unsolclic: '.$version);
   _outln_comment(' radio:     '.$dev->id.'-'.$dev->nick);
   _outln_comment();
-  if ($dev->variable[firmware] == 'DD-WRT' AND $dev->radios[0][mode] == 'ap') {
+  if ($dev->variable[firmware] == 'DD-WRTv23' AND $dev->radios[0][mode] == 'ap') {
   _out('/bin/sleep 5');
 // Write the config for bird, for compatibility with Alchemy and area support
   _out('/bin/kill -9 \`/bin/ps |/bin/grep bird|/usr/bin/cut -c1-5|/usr/bin/head -n 1\`;');
@@ -36,7 +36,7 @@ function guifi_unsolclic_startup($dev, $version, $rc_startup) {
 
   _outln_comment();
   print $rc_startup;
-  if ($dev->variable['firmware'] == 'DD-WRT') {
+  if ($dev->variable['firmware'] == 'DD-WRTv23') {
   _out('/bin/sleep 3');
   _out('bird -c /tmp/bird/bird.conf');
   _out('/usr/sbin/wl shortslot_override 0');
@@ -123,7 +123,7 @@ function guifi_unsolclic_ospf($dev,$zone) {
   _outln_nvram('dr_wan_rx','1 2');
   _outln_nvram('dr_wan_tx','1 2');
   _outln_nvram('wk_mode','ospf');
-  if (($dev->variable['firmware'] == 'DD-WRT') or ($dev->variable['firmware'] == 'DD-guifi')) {
+  if (($dev->variable['firmware'] == 'DD-WRTv23') or ($dev->variable['firmware'] == 'DD-guifi')) {
     _outln_nvram('routing_lan','on');
     _outln_nvram('routing_wan','on');
     _outln_nvram('routing_ospf','on');
@@ -261,7 +261,7 @@ function guifi_unsolclic_dhcp($dev) {
     _out(implode(" ",$dhcp_statics[$statics]),'"');
   }
 
-  if (($dev->variable['firmware'] == 'DD-WRT') or ($dev->variable['firmware'] == 'DD-guifi')){
+  if (($dev->variable['firmware'] == 'DD-WRTv23') or ($dev->variable['firmware'] == 'DD-guifi')){
         $staticText = "";
         foreach ($dhcp_statics as $static) {
         $staticText .= $static[1]."=".$static[2]."=".$static[0]." ";
@@ -311,7 +311,7 @@ function guifi_unsolclic_network_vars($dev,$zone) {
        _outln_nvram('wan_proto','static');
        _outln_nvram('wan_ipaddr',$wan->ipv4);
        _outln_nvram('wan_netmask',$wan->netmask);
-       if (($dev->variable['firmware'] == 'DD-WRT') or ($dev->variable['firmware'] == 'DD-guifi')){
+       if (($dev->variable['firmware'] == 'DD-WRTv23') or ($dev->variable['firmware'] == 'DD-guifi')){
 	  _outln_nvram('fullswitch','1');
           _outln_nvram('wan_dns',guifi_get_dns($zone,3)); 
        }
@@ -368,7 +368,7 @@ function guifi_unsolclic_network_vars($dev,$zone) {
    _outln_nvram('boot_wait','on');
    _outln_comment(t('This is just a fake key. You must install a trusted key if you like to have you router managed externally'));
    _outln_nvram('sshd_authorized_keys','ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAIEAwWNX4942fQExw4Hph2M/sxOAWVE9PB1I4JnNyhoWuF9vid0XcU34kwWqBBlI+LjDErCQyaR4ysFgDX61V4kUuCKwBOMp+UGxhL648VTv5Qji/YwvIzt7nguUOZ5AGPISqsC0717hc0Aja1mvHkQqg9aXKznmszmyKZGhcm2+SU8= root@bandoler.guifi.net');
-   // For DD-WRT
+   // For DD-WRTv23
    _outln_nvram('http_enable','1');
    _outln_nvram('https_enable','1');
 
@@ -416,7 +416,7 @@ function guifi_unsolclic_network_vars($dev,$zone) {
          _outln_nvram('wl_ssid','guifi.net-'.guifi_get_ap_ssid($link['interface']['device_id'],$link['interface']['radiodev_counter']));
        }
 
-       if (($dev->variable['firmware'] == 'DD-WRT') or ($dev->variable['firmware'] == 'DD-guifi')) {
+       if (($dev->variable['firmware'] == 'DD-WRTv23') or ($dev->variable['firmware'] == 'DD-guifi')) {
          _outln_nvram('wl_mode','sta');
          _outln_nvram('wl0_mode','sta');
          _outln_nvram('wl_ssid','guifi.net-'.guifi_get_ap_ssid($link['interface']['device_id'],$link['interface']['radiodev_counter']));
@@ -519,7 +519,7 @@ function guifi_unsolclic_vlan_vars($dev,&$rc_startup) {
     case "1": //* WRT54Gv1-4 *//
     case "15"://* WHR-HP-G54, WHR-G54S (BUFFALO) *//
     case "17"://* WRT54GSv1-2 *//
-     if (($dev->variable['firmware'] == 'DD-WRT') or ($dev->variable['firmware'] == 'DD-guifi')) {
+     if (($dev->variable['firmware'] == 'DD-WRTv23') or ($dev->variable['firmware'] == 'DD-guifi')) {
     _outln_nvram('vlan2hwname','et0');
     _outln_nvram('vlan3hwname','et0');
     _outln_nvram('vlan4hwname','et0');
@@ -571,7 +571,7 @@ function guifi_unsolclic_wds_vars($dev) {
 
   _outln_comment('');
   _outln_comment(t('WDS Links for').' '.$dev->nick);
-	  if (($dev->variable['firmware'] == 'DD-WRT') or ($dev->variable['firmware'] == 'DD-guifi'))
+	  if (($dev->variable['firmware'] == 'DD-WRTv23') or ($dev->variable['firmware'] == 'DD-guifi'))
 	    $ifcount = 2; else $ifcount = 1;
   foreach ($wds_links as $key => $wds) {
     $hostname = guifi_get_hostname($wds['device_id']);
@@ -580,7 +580,7 @@ function guifi_unsolclic_wds_vars($dev) {
     if (preg_match("/(Working|Testing|Building)/",$wds['flag'])) {
       $ifcount++;
       _outln_nvram('wl_wds'.($key+1).'_enable','1');
-	  if (($dev->variable['firmware'] == 'DD-WRT') or ($dev->variable['firmware'] == 'DD-guifi'))
+	  if (($dev->variable['firmware'] == 'DD-WRTv23') or ($dev->variable['firmware'] == 'DD-guifi'))
       _outln_nvram('wl_wds'.($key+1).'_if','wds0.4915'.$ifcount);
 	  else
       _outln_nvram('wl_wds'.($key+1).'_if','wds0.'.$ifcount);
@@ -613,6 +613,17 @@ function guifi_unsolclic_wds_vars($dev) {
 } // wds_vars function
   _outln_comment();
   _outln_comment('unsolclic version: '.$version);
+  if ($dev->variable[firmware] == 'DD-WRTv23') {
+  _outln_comment(t("######################################################"));
+  _outln_comment(t("WARNING! this unsolclic is for use only on DD-WRT v23beta2 firmware's."));
+  _outln_comment(t("DD-WRT V23sp2 or V24 contains some changes in the user authentification method"));
+  _outln_comment(t("V23beta2 uses plain-text password and V23sp2 and v24 need the password crypted!!"));
+  _outln_comment(t("You can lost full acces to device, your are advised!!!!"));
+  _outln_comment(t("Some parts of unsolclic for v23Beta2 work on V23sp2/v24 firmware's, if you want try it, replace"));
+  _outln_comment(t("the password line: nvram set http_passwd=\"guifi\" to nvram set http_passwd=\"\" "));
+  _outln_comment(t("######################################################"));
+  _outln_comment();
+}
   _outln_comment(t("open a telnet/ssh session on your device and run the script below."));
   _outln_comment(t("Note: Use Status/Wireless survey to verify that you have the"));
   _outln_comment(t("antenna plugged in the right connector. The right antena is probably"));

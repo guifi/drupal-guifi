@@ -450,7 +450,7 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('1', 'firmware', 'n/a', 'not available', NULL);");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('2', 'firmware', 'Alchemy', 'Alchemy from sveasoft', 'WRT54Gv1-4|WRT54GSv1-2');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('3', 'firmware', 'Talisman', 'Talisman from sveasoft', 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('4', 'firmware', 'DD-WRT', 'DD-WRT from BrainSlayer', 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Asus WL-500xx|WHR-HP-G54, WHR-G54S|NanoStation2|NanoStation5|LiteStation2|LiteStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Avila GW2348-4');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('4', 'firmware', 'DD-WRTv23', 'DD-WRTv23Beta2 from BrainSlayer', 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Asus WL-500xx|WHR-HP-G54, WHR-G54S|NanoStation2|NanoStation5|LiteStation2|LiteStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Avila GW2348-4');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('5', 'firmware', 'DD-guifi', 'DD-guifi from Miquel Martos', 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|WHR-HP-G54, WHR-G54S');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('6', 'firmware', 'RouterOSv2.9', 'RouterOS 2.9 from Mikrotik', 'Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('7', 'firmware', 'whiterussian', 'OpenWRT-whiterussian', 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Wrap|Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153');");
@@ -634,8 +634,8 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('1', 'routing', 'n/a', 'None', '');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('2', 'routing', 'Static', 'Static routing', '');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('3', 'routing', 'Gateway', 'Gateway to AP', '');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('4', 'routing', 'OSPF', 'OSPF', 'Alchemy|Talisman|DD-WRT|DD-guifi|RouterOSv2.9|RouterOSv3.x');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('5', 'routing', 'BGP', 'BGP', 'Alchemy|Talisman|DD-WRT|DD-guifi|RouterOSv2.9|RouterOSv3.x');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('4', 'routing', 'OSPF', 'OSPF', 'Alchemy|Talisman|DD-WRTv23|DD-guifi|RouterOSv2.9|RouterOSv3.x');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('5', 'routing', 'BGP', 'BGP', 'Alchemy|Talisman|DD-WRTv23|DD-guifi|RouterOSv2.9|RouterOSv3.x');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('6', 'routing', 'OLSR', 'OLSR', '');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('7', 'routing', 'OLSR-NG', 'OLSR-NG', '');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('8', 'routing', 'BATMAN', 'BATMAN', '');");
@@ -1243,3 +1243,11 @@ function guifi_update_893() {
   $items[] = update_sql("ALTER TABLE {guifi_dns_hosts} ADD ipv6 VARCHAR( 128 ) NOT NULL AFTER ipv4;");
   return $items;
 }
+
+function guifi_update_894() {
+  $items = array();
+  $items[] = update_sql("UPDATE {guifi_types} SET text = 'DD-WRTv23' , description = 'DD-WRTv23Beta2 from BrainSlayer WHERE id = '4' AND type = 'firmware'");
+  return $items;
+}
+
+?>

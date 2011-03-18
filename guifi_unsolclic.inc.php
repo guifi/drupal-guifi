@@ -47,7 +47,7 @@ function guifi_unsolclic($dev, $format = 'html') {
       exit;
       break;
     case 'DD-guifi':
-    case 'DD-WRT':
+    case 'DD-WRTv23':
     case 'Alchemy':
     case 'Talisman':
       unsolclic_wrt($dev);
