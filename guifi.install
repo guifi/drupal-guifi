@@ -1250,4 +1250,10 @@ function guifi_update_894() {
   return $items;
 }
 
+function guifi_update_895() {
+  $items = array();
+  $items[] = update_sql("UPDATE {guifi_devices} SET extra = REPLACE(extra,'s:6:\"DD-WRT\"', 's:9:\"DD-WRTv23\"')");
+  return $items;
+}
+
 ?>
