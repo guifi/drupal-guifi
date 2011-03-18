@@ -614,13 +614,14 @@ function guifi_unsolclic_wds_vars($dev) {
   _outln_comment();
   _outln_comment('unsolclic version: '.$version);
   if ($dev->variable[firmware] == 'DD-WRTv23') {
+  _outln_comment();
   _outln_comment(t("######################################################"));
   _outln_comment(t("WARNING! this unsolclic is for use only on DD-WRT v23beta2 firmware's."));
   _outln_comment(t("DD-WRT V23sp2 or V24 contains some changes in the user authentification method"));
-  _outln_comment(t("V23beta2 uses plain-text password and V23sp2 and v24 need the password crypted!!"));
-  _outln_comment(t("You can lost full acces to device, your are advised!!!!"));
-  _outln_comment(t("Some parts of unsolclic for v23Beta2 work on V23sp2/v24 firmware's, if you want try it, replace"));
-  _outln_comment(t("the password line: nvram set http_passwd=\"guifi\" to nvram set http_passwd=\"\" "));
+  _outln_comment(t("V23beta2 uses plain-text password and V23sp2 and v24 need the password to be crypted!!"));
+  _outln_comment(t("You may lose access to your device, you will be warned."));
+  _outln_comment(t("Some parts of unsolclic v23Beta2 can be reused in V23sp2/v24 if you want to test, replace"));
+  _outln_comment(t("the password line: nvram set http_passwd=\"guifi\" to nvram set http_passwd=\"\" before"));
   _outln_comment(t("######################################################"));
   _outln_comment();
 }
