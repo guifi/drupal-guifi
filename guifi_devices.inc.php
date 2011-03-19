@@ -525,6 +525,15 @@ function guifi_device_form($form_state, $params = array()) {
     '#default_value' => $form_state['values']['notification'],
     '#description' =>  t('Mailid where changes on the device will be notified, if many, separated by \',\'<br />used for network administration.')
   );
+
+  $form['main']['logserver'] = array(
+    '#type' => 'textfield',
+    '#size' => 60,
+    '#maxlength' => 60,
+    '#title' => t('Log Server'),
+    '#description' =>  t('Put your syslog server IP')
+  );
+
   if (user_access('administer guifi zones')
        and $form_state['values']['type'] == 'radio') {
     $form['main']['graph_server'] = array(

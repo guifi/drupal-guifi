@@ -122,7 +122,8 @@ function guifi_schema() {
          'flag' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => 'Planned'),
          'extra' => array('type' => 'text', 'size' => 'big', 'not null' => FALSE, 'comment' => 'store variable data depending on guifi_devices(type)'),
          'graph_server' => array('type' => 'int',  'size' => 'medium' , 'not null' => TRUE, 'default' => 0, 'comment' => 'FK to guifi_services (SNPGraphs)'),
-         'last_online' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'comment' => 'Last time that this device has been seen online'),
+	 'logserver' => array('type' => 'varchar','lenght' => '60', 'not null' => TRUE, 'comment' => 'Ip Server Logs'), 
+	 'last_online' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'comment' => 'Last time that this device has been seen online'),
          'last_flag' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => 'N/A', 'comment' => 'N/A, Online, Offline...'),
          'ly_availability' => array('type' => 'numeric', 'precision' => '11', 'scale' => '2', 'not null' => FALSE, 'default' => NULL),
          'last_stats' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'comment' => 'Last time that this device has been loaded with statistics'),
@@ -421,6 +422,8 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('24', 'service', 'Streaming', 'Videoconferènia i/o Streaming');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('25', 'service', 'VPN', 'Virtual Private Network');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('26', 'service', 'LDAP', 'LDAP Server');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('27', 'service', 'LogServer', 'Ip log Server');");
+
 
   // --
   // -- status flag types
@@ -1253,6 +1256,13 @@ function guifi_update_894() {
 function guifi_update_895() {
   $items = array();
   $items[] = update_sql("UPDATE {guifi_devices} SET extra = REPLACE(extra,'s:6:\"DD-WRT\"', 's:9:\"DD-WRTv23\"')");
+  return $items;
+}
+
+function guifi_update_896() {
+  $items = array();
+  $items[] = update_sql("ALTER TABLE {guifi_devices} ADD logserver VARCHAR( 60 ) NOT NULL AFTER graph_server;");
+  $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('27', 'service', 'LogServer', 'Ip logs server');");
   return $items;
 }
 
