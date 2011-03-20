@@ -1249,7 +1249,7 @@ function guifi_update_893() {
 
 function guifi_update_894() {
   $items = array();
-  $items[] = update_sql("UPDATE {guifi_types} SET text = 'DD-WRTv23' , description = 'DD-WRTv23Beta2 from BrainSlayer WHERE id = '4' AND type = 'firmware'");
+  $items[] = update_sql("UPDATE {guifi_types} SET text = 'DD-WRTv23' , description = 'DD-WRTv23Beta2 from BrainSlayer' WHERE id = '4' AND type = 'firmware'");
   return $items;
 }
 
