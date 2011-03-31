@@ -160,6 +160,7 @@ function guifi_schema() {
          'id' => array('type' => 'serial', 'size' => 'medium', 'not null' => TRUE),
          'device_id' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, 'comment' => 'foreign key to guifi_devices(id)'),
          'radiodev_counter' => array('type' => 'int', 'size' => 'tiny', 'not null' => FALSE, 'comment' => 'if not NULL, foreign key to guifi_radios(radiodev_counter)'),
+         'etherdev_counter' => array('type' => 'int', 'size' => 'tiny', 'not null' => FALSE, 'comment' => 'if not NULL, foreign key to guifi_radios(etherdev_counter)'),
          'interface_type' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE),
          'mac' => array('type' => 'varchar', 'length' => '20', 'not null' => TRUE, 'default' => '00:00:00:00:00:00')),
     'primary key' => array('device_id', 'id'),
@@ -171,6 +172,7 @@ function guifi_schema() {
     'fields' => array(
          'id' => array('type' => 'serial', 'size' => 'medium', 'not null' => TRUE,'comment' => 'primary key 1st column and foreign key to guifi_devices(id)'),
          'radiodev_counter' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0, 'comment' => 'primary key 2nd column'),
+         'etherdev_counter' => array('type' => 'int', 'size' => 'tiny', 'not null' => FALSE, 'comment' => ''),
          'nid' => array('comment' => 'foreign key to guifi_location(id)', 'type' => 'int', 'not null' => TRUE),
          'model_id' => array('type' => 'int', 'size' => 'small', 'not null' => TRUE),
          'ssid' => array('type' => 'varchar', 'length' => '128', 'not null' => TRUE, 'default' => ''),
@@ -274,6 +276,7 @@ function guifi_schema() {
          'model' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => ''),
          'tipus' => array('type' => 'varchar', 'length' => '10', 'not null' => FALSE, 'comment' => 'Extern, PCI, PCMCIA'),
          'radiodev_max' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 1),
+         'etherdev_max' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 1),
          'potencia_max' => array('type' => 'int', 'size' => 'tiny', 'not null' => FALSE),
          'modes' => array('type' => 'varchar', 'length' => '20', 'not null' => TRUE, 'default' => '802.11bg', 'comment' => '802.11bg,802.11b,802.11a,802.11abg,WiMax,802.11n'),
          'AP' => array('type' => 'varchar', 'length' => '5', 'not null' => FALSE, 'comment' => 'Si, No'),
@@ -1264,6 +1267,14 @@ function guifi_update_896() {
   $items[] = update_sql("ALTER TABLE {guifi_devices} ADD logserver VARCHAR( 60 ) NOT NULL AFTER graph_server;");
   $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('27', 'service', 'LogServer', 'Ip logs server');");
   return $items;
+}
+
+function guifi_update_900() {
+ $items = array();
+ $items[] = update_sql("ALTER TABLE {guifi_model} ADD etherdev_max tinyint(2) NOT NULL DEFAULT 1 AFTER radiodev_max");
+ $items[] = update_sql("ALTER TABLE {guifi_interfaces} ADD etherdev_counter tinyint(2) AFTER radiodev_counter");
+ $items [] = update_sql("ALTER TABLE {guifi_radios} ADD etherdev_counter tinyint(2) AFTER radiodev_counter");
+ $items[] = update_sql("INSERT INTO {guifi_model} SET fid=8,model='rb750/rb750G',tipus='Extern',radiodev_max=0,etherdev_max=5,modes='',antenes=0,router='Yes',firewall='Yes',Qos='Yes',snmp='Yes',interfaces='ether1|ether2|ether3|ether4|ether5';");
 }
 
 ?>
