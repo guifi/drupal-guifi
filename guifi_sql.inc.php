@@ -31,6 +31,7 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
     $data = &$idata;
   }
 
+
   // delete?
   if ($data['deleted']) {
     $log .= _guifi_db_delete($table,$key,$to_mail);
@@ -55,6 +56,10 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
   // processing insert triggers to fill new ids etc...
   if ($insert) {
     switch ($table) {
+	  case 'guifi_model':
+	    $next_id = db_fetch_array(db_query("SELECT max(mid)+1 mid FROM {$table} "));
+	    $data['mid'] = $next_id['mid'];
+            break;
 	  case 'budget_funds':
 	    $data['timestamp_created'] = time();
 	  case 'budget_items':
@@ -173,7 +178,7 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 
    // check what's being changed
    $sqlqc = 'SELECT '.implode(',',array_keys($data)).
-           ' FROM {'.$table.
+           ' FROM {'.$table.'}'.
            ' WHERE '.implode(' AND ',$where_data);
    $ck = 0;
    $qc = db_query($sqlqc);

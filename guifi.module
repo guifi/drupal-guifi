@@ -256,6 +256,7 @@ function guifi_menu() {
     'weight' => 8,
     'file' => 'guifi_routingmap.inc.php'
   );
+
   $items['guifi/routingmap/%/%'] = array(
     'title' => 'Routing Map',
     'page callback' => 'guifi_routingmap',
@@ -315,6 +316,22 @@ function guifi_menu() {
     'access arguments' => array('access devel information'),
     'weight' => 100,
   );
+  $items['guifi/menu/devel/device'] = array(
+    'title' => 'Device Models',
+    'description' => 'A full list of devices we use in the network, add, edit or delete it.',
+    'page callback' => 'guifi_devel_devices',
+    'access arguments' => array('guifi module developer'),
+    'weight' => 8,
+    'file' => 'guifi_devel.inc.php'
+  );
+  $items['guifi/menu/devel/device/%/%'] = array(
+    'title' => 'Device Models',
+    'page callback' => 'guifi_devel_devices',
+    'page arguments' => array(4, 5),
+    'access arguments' => array('guifi module developer'),
+    'file' => 'guifi_devel.inc.php'
+  );
+
   $items['guifi/menu/devel/counters'] = array(
     'title' => 'counters',
     'description' => 'get statistics/counters from the network',
@@ -1209,6 +1226,7 @@ function guifi_perm() {
     'administer guifi networks',
     'administer guifi users',
     'administer guifi dns',
+    'guifi module developer',
     'create guifi zones',
     'create guifi nodes',
     'create guifi dns',

@@ -67,7 +67,7 @@ function guifi_notify_send($send = TRUE) {
     else {
       watchdog('guifi',
         'Unable to notify %name',
-        array('%name' => $to));
+        array('%name' => $to),WATCHDOG_ERROR);
       $errors = TRUE;
     }
 
@@ -199,7 +199,7 @@ function guifi_cron_loadCNMLstats($graph_server,$verbose=FALSE) {
     watchdog('guifi','Loaded statistics from %name, %ndevices updated',
         array(
           '%name' => guifi_service_str($graph_server),
-          '%ndevices' => $u));//    $stats =  stream_get_contents($handle);
+          '%ndevices' => $u), WATCHDOG_NOTICE);//    $stats =  stream_get_contents($handle);
     fclose($handle);
     $output .= '<pre>'.$stats.'</pre>';
   } else

@@ -122,7 +122,7 @@ function guifi_schema() {
          'flag' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => 'Planned'),
          'extra' => array('type' => 'text', 'size' => 'big', 'not null' => FALSE, 'comment' => 'store variable data depending on guifi_devices(type)'),
          'graph_server' => array('type' => 'int',  'size' => 'medium' , 'not null' => TRUE, 'default' => 0, 'comment' => 'FK to guifi_services (SNPGraphs)'),
-	 'logserver' => array('type' => 'varchar','lenght' => '60', 'not null' => TRUE, 'comment' => 'Ip Server Logs'), 
+	 'logserver' => array('type' => 'varchar','length' => '60', 'not null' => TRUE, 'comment' => 'Ip Server Logs'), 
 	 'last_online' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'comment' => 'Last time that this device has been seen online'),
          'last_flag' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => 'N/A', 'comment' => 'N/A, Online, Offline...'),
          'ly_availability' => array('type' => 'numeric', 'precision' => '11', 'scale' => '2', 'not null' => FALSE, 'default' => NULL),
