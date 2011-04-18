@@ -18,7 +18,6 @@ function guifi_devel_devices($devid , $op) {
     guifi_devel_devices_delete($devid);
   }
   $rows = array();
-  $url = guifi_img_icon('add.png').'';
   $value = t('Add a new device model');
   $output  = '<from>';
   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/device/add\'"/>';
@@ -44,7 +43,8 @@ function guifi_devel_devices($devid , $op) {
   }
 
   $output .= theme('table',$headers,$rows);
-  return $output;
+  print theme('page',$output, FALSE);
+  return;
 }
 
 // Device Models Form
@@ -239,22 +239,21 @@ function guifi_devel_firmware($firmid , $op) {
     guifi_devel_firmware_delete($firmid);
   }
 
- $rows = array();
-  $url = guifi_img_icon('add.png').'';
+  $rows = array();
   $value = t('Add a new firmware');
   $output  = '<from>';
   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/firmware/add\'"/>';
   $output .= '</form>';
 
-  $headers = array(t('ID Firmware'), t('Name'), t('Description'), t('Relations'), t('Edit'), t('Delete'));
+  $headers = array(t('ID'), t('Name'), t('Description'), t('Relations'), t('Edit'), t('Delete'));
 
   $sql= db_query("SELECT id, text, description, relations FROM {guifi_types} WHERE type='firmware'");
 
 
   while ($firmware = db_fetch_object($sql)) {
-   // $query = db_query('SELECT * FROM {guifi_manufacturer} WHERE fid = %d', $dev->fid);
-   // $manufacturer = db_fetch_object($query);
-    $rows[] = array($firmware->id, $firmware->text, $firmware->description, $firmware->relations, l(guifi_img_icon('edit.png'),'guifi/menu/devel/firmware/'.$firmware->id.'/edit',
+  $relations = explode('|',$firmware->relations);
+  $relations2 = implode(' | ',$relations);
+    $rows[] = array($firmware->id, $firmware->text, $firmware->description, $relations2, l(guifi_img_icon('edit.png'),'guifi/menu/devel/firmware/'.$firmware->id.'/edit',
             array(
               'html' => TRUE,
               'title' => t('edit firmware'),
@@ -267,7 +266,8 @@ function guifi_devel_firmware($firmid , $op) {
   }
 
   $output .= theme('table',$headers,$rows);
-  return $output;
+  print theme('page',$output, FALSE);
+  return;
 }
 
 // Firmwares Form

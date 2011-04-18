@@ -526,7 +526,7 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
   foreach ($key as $k => $value) {
     if ($where_str != '')
       $where_str .= ' AND ';
-       if ( $table === 'guifi_types')
+       if ( $table == 'guifi_types')
          $where_str .= $k.' = \''.$value.'\'';
        else
          $where_str .= $k.' = '.$value;
@@ -546,7 +546,7 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
   foreach ($key as $k => $value) {
     if ($where_str != '')
       $where_str .= ' AND ';
-       if ( $table === 'guifi_types')
+       if ( $table == 'guifi_types')
          $where_str .= $k.' = \''.$value.'\'';
        else
          $where_str .= $k.' = '.$value;
