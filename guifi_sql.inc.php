@@ -60,6 +60,10 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 	    $next_id = db_fetch_array(db_query("SELECT max(mid)+1 mid FROM {$table} "));
 	    $data['mid'] = $next_id['mid'];
             break;
+	  case 'guifi_types':
+	    $next_id = db_fetch_array(db_query("SELECT max(id)+1 id FROM {$table}WHERE type = '%s'",$data['type']));
+	    $data['id'] = $next_id['id'];
+            break;
 	  case 'budget_funds':
 	    $data['timestamp_created'] = time();
 	  case 'budget_items':
@@ -174,7 +178,10 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
      if (is_null($value))
        $where_data[$k] = $k.' is NULL';
      else
-       $where_data[$k] = $k.'='.$value;
+       if ( $table == 'guifi_types')
+         $where_data[$k] = $k.' = \''.$value.'\'';
+       else
+         $where_data[$k] = $k.' = '.$value;
 
    // check what's being changed
    $sqlqc = 'SELECT '.implode(',',array_keys($data)).
@@ -519,7 +526,10 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
   foreach ($key as $k => $value) {
     if ($where_str != '')
       $where_str .= ' AND ';
-    $where_str .= $k.' = '.$value;
+       if ( $table === 'guifi_types')
+         $where_str .= $k.' = \''.$value.'\'';
+       else
+         $where_str .= $k.' = '.$value;
   }
   $count = db_fetch_array(db_query("
     SELECT count(*) c
@@ -536,7 +546,10 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
   foreach ($key as $k => $value) {
     if ($where_str != '')
       $where_str .= ' AND ';
-    $where_str .= $k.' = '.$value;
+       if ( $table === 'guifi_types')
+         $where_str .= $k.' = \''.$value.'\'';
+       else
+         $where_str .= $k.' = '.$value;
   }
   $delete_str = 'DELETE FROM {'.$table.'} WHERE '.$where_str;
   $log .= '<br />'.$delete_str;

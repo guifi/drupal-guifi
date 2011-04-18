@@ -1,5 +1,6 @@
 <?php
 
+// Device Models output
 function guifi_devel_devices($devid , $op) {
 
   switch($devid) {
@@ -46,6 +47,7 @@ function guifi_devel_devices($devid , $op) {
   return $output;
 }
 
+// Device Models Form
 function guifi_devel_devices_form($form_state, $devid) {
 
   $sql = db_query('SELECT * FROM {guifi_model} WHERE mid = %d', $devid);
@@ -213,9 +215,203 @@ function guifi_devel_devices_delete_confirm_submit($form, &$form_state) {
   drupal_set_message($log);
   guifi_notify(
            $to_mail,
-           t('The device model %name has been DELETED by %user.',array('%name' => $model->model, '%user' => $user->name)),
+           t('The device model %name has been DELETED by %user.',array('%name' => $form_state['values']['model'], '%user' => $user->name)),
            $log);
     drupal_goto('guifi/menu/devel/device');
+}
+
+
+// Device Firmwares output
+function guifi_devel_firmware($firmid , $op) {
+
+  switch($firmid) {
+    case 'add':
+     $firmid = 'New';
+     return drupal_get_form('guifi_devel_firmware_form',$firmid);
+  }
+  switch($op) {
+    case 'edit':
+      return drupal_get_form('guifi_devel_firmware_form',$firmid);
+    case 'delete':
+      guifi_log(GUIFILOG_TRACE,'guifi_devel_firmware_delete()',$firmid);
+      return drupal_get_form(
+      'guifi_devel_firmware_delete_confirm', $firmid);
+    guifi_devel_firmware_delete($firmid);
+  }
+
+ $rows = array();
+  $url = guifi_img_icon('add.png').'';
+  $value = t('Add a new firmware');
+  $output  = '<from>';
+  $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/firmware/add\'"/>';
+  $output .= '</form>';
+
+  $headers = array(t('ID Firmware'), t('Name'), t('Description'), t('Relations'), t('Edit'), t('Delete'));
+
+  $sql= db_query("SELECT id, text, description, relations FROM {guifi_types} WHERE type='firmware'");
+
+
+  while ($firmware = db_fetch_object($sql)) {
+   // $query = db_query('SELECT * FROM {guifi_manufacturer} WHERE fid = %d', $dev->fid);
+   // $manufacturer = db_fetch_object($query);
+    $rows[] = array($firmware->id, $firmware->text, $firmware->description, $firmware->relations, l(guifi_img_icon('edit.png'),'guifi/menu/devel/firmware/'.$firmware->id.'/edit',
+            array(
+              'html' => TRUE,
+              'title' => t('edit firmware'),
+              )).'</td><td>'.
+                 l(guifi_img_icon('drop.png'),'guifi/menu/devel/firmware/'.$firmware->id.'/delete',
+            array(
+              'html' => TRUE,
+              'title' => t('delete firmware'),
+              )));
+  }
+
+  $output .= theme('table',$headers,$rows);
+  return $output;
+}
+
+// Firmwares Form
+function guifi_devel_firmware_form($form_state, $firmid) {
+
+  $sql = db_query('SELECT * FROM {guifi_types} WHERE id = %d AND type = \'firmware\'', $firmid);
+  $firmware = db_fetch_object($sql);
+
+  if ($firmid == 'New' ) {
+   $form['new'] = array('#type' => 'hidden', '#value' => TRUE);
+   $form['type'] = array('#type' => 'hidden', '#value' => 'firmware');
+  } else {
+    $form['id'] = array('#type' => 'hidden','#value' => $firmid);
+    $form['type'] = array('#type' => 'hidden', '#value' => $firmware->type);
+}
+
+  $form['text'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Firmware Name'),
+    '#required' => TRUE,
+    '#default_value' => $firmware->text,
+    '#size' => 32,
+    '#maxlength' => 32,
+    '#description' => t('TODO.'),
+    '#prefix' => '<table><tr><td>',
+    '#suffix' => '</td>',
+    '#weight' => 2,
+  );
+  $form['description'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Description'),
+    '#required' => TRUE,
+    '#default_value' => $firmware->description,
+    '#size' => 64,
+    '#maxlength' => 64,
+    '#description' => t('TODO.'),
+    '#prefix' => '<td>',
+    '#suffix' => '</td></tr>',
+    '#weight' => 3,
+  );
+
+  $query = db_query(" SELECT mid, model FROM {guifi_model} " );
+  $relations = explode('|',$firmware->relations);
+  while ($models = db_fetch_array($query)) {
+    $models_array[$models["mid"]] = $models["model"];
+  }
+   foreach ($relations as $relation) {
+     foreach ($models_array as $id =>$mod) {
+       if ($relation == $mod) {
+         $value[$mod] = $id;
+       }
+     }
+  }
+
+  $form['relations'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Device models relations'),
+    '#required' => TRUE,
+    '#default_value' => $value,
+    '#options' => $models_array,
+    '#description' => t('TODO.'),
+    '#prefix' => '<tr><td>',
+    '#suffix' => '</td></tr></table>',
+    '#weight' => 4,
+  );
+
+  $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
+
+  return $form;
+}
+
+
+function guifi_devel_firmware_form_submit($form, &$form_state) {
+  guifi_log(GUIFILOG_TRACE,'function guifi_devel_firmware_form_submit()',$form_state);
+
+  guifi_devel_firmware_save($form_state['values']);
+  drupal_goto('guifi/menu/devel/firmware');
+   return;
+}
+
+function guifi_devel_firmware_save($edit) {
+  global $user;
+
+  $to_mail = $edit->notification;
+  $log ='';
+  $query = db_query(" SELECT mid, model FROM {guifi_model} " );
+  $relations = $edit['relations'];
+  while ($models = db_fetch_array($query)) {
+    $models_array[$models["mid"]] = $models["model"];
+  }
+   if ($relations != '0')
+   foreach ($relations as $relation) {
+     foreach ($models_array as $id =>$mod) {
+       if ($relation == $id) {
+         $value[$id] = $mod;
+       }
+     }
+  }
+
+
+
+
+$edit['relations'] = implode('|',$value);
+  guifi_log(GUIFILOG_TRACE,'function guifi_devel_firmware_save()',$edit);
+
+  _guifi_db_sql('guifi_types',array('id' => $edit['id'],'type' => $edit['type']),$edit,$log,$to_mail);
+drupal_set_message( $edit['relations']);
+  guifi_notify(
+    $to_mail,
+    t('The firmware !firmware has been created / updated by !user.',array('!firmware' => $edit['text'], '!user' => $user->name)),
+    $log);
+}
+
+function guifi_devel_firmware_delete_confirm($form_state,$id) {
+  guifi_log(GUIFILOG_TRACE,'guifi_devel_device_delete_confirm()',$id);
+
+  $form['id'] = array('#type' => 'hidden', '#value' => $id);
+  $qry= db_fetch_object(db_query("SELECT text FROM {guifi_types} WHERE type='firmware' AND id=%d", $id)); 
+  return confirm_form(
+    $form,
+    t('Are you sure you want to delete the firmware " %firmware "?',
+      array('%firmware' => $qry->text)),
+      ' ',
+    t('This action cannot be undone.'),
+    t('Delete'),
+    t('Cancel'));
+}
+
+
+function guifi_devel_firmware_delete_confirm_submit($form, &$form_state) {
+
+  global $user;
+  $depth = 0;
+  if ($form_state['values']['op'] != t('Delete'))
+    return;
+
+  $to_mail = explode(',',$node->notification);
+  $log = _guifi_db_delete('guifi_types',array('id' => $form_state['values']['id'], 'type' => 'firmware'),$to_mail,$depth);
+  drupal_set_message($log);
+  guifi_notify(
+           $to_mail,
+           t('The firmware %name has been DELETED by %user.',array('%name' => $form_state['values']['text'], '%user' => $user->name)),
+           $log);
+    drupal_goto('guifi/menu/devel/firmware');
 }
 
 ?>
