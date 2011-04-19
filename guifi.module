@@ -336,12 +336,27 @@ function guifi_menu() {
     'description' => 'A full list of firmware we use in the devices, add, edit or delete it.',
     'page callback' => 'guifi_devel_firmware',
     'access arguments' => array('guifi module developer'),
-    'weight' => 8,
+    'weight' => 9,
     'file' => 'guifi_devel.inc.php'
   );
   $items['guifi/menu/devel/firmware/%/%'] = array(
     'title' => 'Firmware',
     'page callback' => 'guifi_devel_firmware',
+    'page arguments' => array(4, 5),
+    'access arguments' => array('guifi module developer'),
+    'file' => 'guifi_devel.inc.php'
+  );
+  $items['guifi/menu/devel/manufacturer'] = array(
+    'title' => 'Manufacturers',
+    'description' => 'A full list of manufacturers that made the devices usedon our network, add, edit or delete it.',
+    'page callback' => 'guifi_devel_manufacturer',
+    'access arguments' => array('guifi module developer'),
+    'weight' => 10,
+    'file' => 'guifi_devel.inc.php'
+  );
+  $items['guifi/menu/devel/manufacturer/%/%'] = array(
+    'title' => 'Manufacturers',
+    'page callback' => 'guifi_devel_manufacturer',
     'page arguments' => array(4, 5),
     'access arguments' => array('guifi module developer'),
     'file' => 'guifi_devel.inc.php'

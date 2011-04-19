@@ -191,11 +191,11 @@ function guifi_devel_devices_delete_confirm($form_state,$mid) {
   guifi_log(GUIFILOG_TRACE,'guifi_devl_device_delete_confirm()',$mid);
 
   $form['mid'] = array('#type' => 'hidden', '#value' => $mid);
-
+  $qry= db_fetch_object(db_query("SELECT model FROM {guifi_model} WHERE mid = %d", $mid));
   return confirm_form(
     $form,
     t('Are you sure you want to delete the device model " %model "?',
-      array('%model' => $mid)),
+      array('%model' => $qry->model)),
       ' ',
     t('This action cannot be undone.'),
     t('Delete'),
@@ -384,7 +384,7 @@ function guifi_devel_firmware_delete_confirm($form_state,$id) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_device_delete_confirm()',$id);
 
   $form['id'] = array('#type' => 'hidden', '#value' => $id);
-  $qry= db_fetch_object(db_query("SELECT text FROM {guifi_types} WHERE type='firmware' AND id=%d", $id)); 
+  $qry= db_fetch_object(db_query("SELECT text FROM {guifi_types} WHERE type='firmware' AND id=%d", $id));
   return confirm_form(
     $form,
     t('Are you sure you want to delete the firmware " %firmware "?',
@@ -411,6 +411,151 @@ function guifi_devel_firmware_delete_confirm_submit($form, &$form_state) {
            t('The firmware %name has been DELETED by %user.',array('%name' => $form_state['values']['text'], '%user' => $user->name)),
            $log);
     drupal_goto('guifi/menu/devel/firmware');
+}
+
+// Device Manufacturers output
+function guifi_devel_manufacturer($mid , $op) {
+
+  switch($mid) {
+    case 'add':
+     $mid = 'New';
+     return drupal_get_form('guifi_devel_manufacturer_form',$mid);
+  }
+  switch($op) {
+    case 'edit':
+      return drupal_get_form('guifi_devel_manufacturer_form',$mid);
+    case 'delete':
+      guifi_log(GUIFILOG_TRACE,'guifi_devel_manufacturer_delete()',$mid);
+      return drupal_get_form(
+      'guifi_devel_manufacturer_delete_confirm', $mid);
+    guifi_devel_manufacturer_delete($mid);
+  }
+  $rows = array();
+  $value = t('Add a new device manufacturer');
+  $output  = '<from>';
+  $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/manufacturer/add\'"/>';
+  $output .= '</form>';
+
+  $headers = array(t('ID'), t('Manufacturer'), t('URL'), t('Edit'), t('Delete'));
+
+  $sql = db_query('SELECT * FROM {guifi_manufacturer}');
+
+  while ($mfr = db_fetch_object($sql)) {
+    $rows[] = array($mfr->fid, $mfr->nom, $mfr->url, l(guifi_img_icon('edit.png'),'guifi/menu/devel/manufacturer/'.$mfr->fid.'/edit',
+            array(
+              'html' => TRUE,
+              'title' => t('edit manufacturer'),
+              )).'</td><td>'.
+                 l(guifi_img_icon('drop.png'),'guifi/menu/devel/manufacturer/'.$mfr->fid.'/delete',
+            array(
+              'html' => TRUE,
+              'title' => t('delete manufacturer'),
+              )));
+  }
+
+  $output .= theme('table',$headers,$rows);
+  print theme('page',$output, FALSE);
+  return;
+}
+
+// Device Manufacturers Form
+function guifi_devel_manufacturer_form($form_state, $mid) {
+
+  $sql = db_query('SELECT * FROM {guifi_manufacturer} WHERE fid = %d', $mid);
+  $mfr = db_fetch_object($sql);
+
+  if ($mid == 'New' ) {
+   $form['new'] = array('#type' => 'hidden', '#value' => TRUE);
+  } else {
+    $form['fid'] = array('#type' => 'hidden','#value' => $mid);
+}
+
+  $form['nom'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Manufacturer Name'),
+    '#required' => TRUE,
+    '#default_value' => $mfr->nom,
+    '#size' => 32,
+    '#maxlength' => 32,
+    '#description' => t('Manufacturer name, please, use a clear and short description.'),
+    '#prefix' => '<table><tr><td>',
+    '#suffix' => '</td>',
+    '#weight' => 1,
+  );
+  $form['url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('URL'),
+    '#required' => TRUE,
+    '#default_value' => $mfr->url,
+    '#size' => 40,
+    '#maxlength' => 40,
+    '#description' => t('TODO.'),
+    '#prefix' => '<td>',
+    '#suffix' => '</td></tr></table>',
+    '#weight' => 2,
+  );
+
+  $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
+
+  return $form;
+}
+
+
+function guifi_devel_manufacturer_form_submit($form, &$form_state) {
+  guifi_log(GUIFILOG_TRACE,'function guifi_devel_manufacturer_form_submit()',$form_state);
+
+  guifi_devel_manufacturer_save($form_state['values']);
+  drupal_goto('guifi/menu/devel/manufacturer');
+   return;
+}
+
+function guifi_devel_manufacturer_save($edit) {
+  global $user;
+
+  $to_mail = $edit->notification;
+  $log ='';
+
+  guifi_log(GUIFILOG_TRACE,'function guifi_devel_manufacturer_save()',$edit);
+
+  _guifi_db_sql('guifi_manufacturer',array('fid' => $edit['fid']),$edit,$log,$to_mail);
+
+  guifi_notify(
+    $to_mail,
+    t('The device manufacturer !manufacturer has been created / updated by !user.',array('!manufacturer' => $edit['nom'], '!user' => $user->name)),
+    $log);
+}
+
+function guifi_devel_manufacturer_delete_confirm($form_state,$mid) {
+  guifi_log(GUIFILOG_TRACE,'guifi_devl_device_delete_confirm()',$mid);
+
+  $form['fid'] = array('#type' => 'hidden', '#value' => $mid);
+  $qry= db_fetch_object(db_query("SELECT nom FROM {guifi_manufacturer} WHERE fid = %d", $mid));
+  return confirm_form(
+    $form,
+    t('Are you sure you want to delete the device manufacturer " %manufacturer "?',
+      array('%manufacturer' => $qry->nom)),
+      ' ',
+    t('This action cannot be undone.'),
+    t('Delete'),
+    t('Cancel'));
+}
+
+
+function guifi_devel_manufacturer_delete_confirm_submit($form, &$form_state) {
+
+  global $user;
+  $depth = 0;
+  if ($form_state['values']['op'] != t('Delete'))
+    return;
+
+  $to_mail = explode(',',$node->notification);
+  $log = _guifi_db_delete('guifi_manufacturer',array('fid' => $form_state['values']['fid']),$to_mail,$depth);
+  drupal_set_message($log);
+  guifi_notify(
+           $to_mail,
+           t('The device manufacturer %manufacturer has been DELETED by %user.',array('%manufacturer' => $form_state['values']['nom'], '%user' => $user->name)),
+           $log);
+    drupal_goto('guifi/menu/devel/manufacturer');
 }
 
 ?>
