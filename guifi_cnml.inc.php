@@ -1069,6 +1069,7 @@ function dump_guifi_domains($cnmlid, $action){
       $domain->addAttribute('domain_ip',$record->defipv4);
       $domain->addAttribute('domain_ip_v6',$record->defipv6);
       $domain->addAttribute('externalMX',$record->externalmx);
+      $domain->addAttribute('externalNS',$record->externalns);
       if ($record->allow == 'slave')
         $domain->addAttribute('allow-transfer','any');
       else
@@ -1132,6 +1133,7 @@ function dump_guifi_domains($cnmlid, $action){
       $domain->addAttribute('domain_ip',$record->defipv4);
       $domain->addAttribute('domain_ip_v6',$record->defipv6);
       $domain->addAttribute('externalMX',$record->externalmx);
+      $domain->addAttribute('externalNS',$record->externalns);
       if ($record->allow == 'slave')
         $domain->addAttribute('allow-transfer','any');
       else

@@ -353,6 +353,15 @@ function guifi_domain_form($form_state, $params = array()) {
                                 .t("Internal MailServers should be configured in the advanced options of the hosts."),
     '#required' => FALSE,
   );
+  $form['main']['settings']['externalns'] = array(
+    '#type' => 'textfield',
+    '#title' => t("External Namservers "),
+    '#default_value' => $form_state['values']['externalns'],
+    '#description' => t("Separated by ','. Put external nameserver IP address if you need it, if they are not, leave it blank.")
+                                ."<br />"
+                                .t("Internal domain Nameservers should be configured in the advanced options of the hosts."),
+    '#required' => FALSE,
+  );
 
   if ($form_state['values']['management'] == 'automatic') {
     if (function_exists('guifi_host_form')){
@@ -441,9 +450,9 @@ if (!empty($domainname['name']))
   while ($hosts = db_fetch_array($queryhosts)) {
     $hostx = $hosts['host'];
     if ($hostx == $domain) {
-      form_set_error('name', t('Subdomain name <strong>%hostname</strong> already in use as <strong>HOSTNAME</strong> from master domain : <strong>%domain</strong>')
+      form_set_error('name', t('Subdomain name <strong>%hostname</strong> already in use as <strong>HOSTNAME</strong> from master domain : <strong>%domain</strong>',array('%hostname' => $hostx ,'%domain' => $form_state['values']['mname']))
                                           .'<br />'
-                                          .t(' Delete hostame first if you want use this name as delegated domain.', array('%hostname' => $hostname,'%domain' => $form_state['values']['mname'])));
+                                          .t(' Delete hostame first if you want use this name as delegated domain.'));
     }
     $aliases = unserialize($hosts['aliases']);
     if ($aliases) {
@@ -477,13 +486,13 @@ if (!empty($domainname['name']))
     foreach ($form_state['values']['hosts']  as $host_id => $hosts) {
       $counter = 0;
       $qrydomain = db_query("
-        SELECT name
+        SELECT mname, name
         FROM {guifi_dns_domains}
         WHERE mname = '%s'", $form_state['values']['name']);
       while ($hostdom = db_fetch_array($qrydomain)) {
         $hostdomx = strstr($hostdom['name'], '.', true);
         if ($hostdomx == $hosts['host']) {
-          form_set_error('hosts]['.$host_id.'][host', t('Hostname Error! There is already a delegate domain with this name: <strong>%hostname</strong>.', array('%hostname' => $hosts['host'])));
+          form_set_error('hosts]['.$host_id.'][host', t('Hostname Error! There is already a delegate domain with this name: <strong>%hostname.%mname</strong>.', array('%hostname' => $hosts['host'],'%mname' => $hostdom['mname'])));
         }
       }
 

@@ -314,6 +314,7 @@ function guifi_schema() {
       'management' => array('type' => 'varchar', 'length' => '16', 'not null' => TRUE, 'default' => ''),
       'allow' => array('type' => 'varchar', 'length' => '24', 'not null' => TRUE, 'default' => ''),
       'externalmx' => array('type' => 'varchar', 'length' => '128', 'not null' => TRUE, 'default' => ''),
+      'externalns' => array('type' => 'varchar', 'length' => '128', 'not null' => TRUE, 'default' => ''),
       'notification' => array('type' => 'varchar', 'length' => '1024', 'not null' => TRUE, 'default' => ''),
       'comment' => array('type' => 'text', 'size' => 'big', 'not null' => FALSE),
       'user_created' => array('type' => 'int', 'not null' => TRUE),
@@ -1274,6 +1275,12 @@ function guifi_update_900() {
                                       (52, 8, 'Routerboard 750/750G', 'Extern', '0', '5', '400', '802.11abg', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'None', '0', 'Yes','Yes', 'Yes', 'Yes', 'Yes', 'ether1|ether2|ether3|ether4|ether5', 'http://www.routerboard.com/pricelist.php?showProduct=90', 'Permet Firmwares de tercers', 'Yes');");
  $items[] = update_sql("UPDATE {guifi_types} SET `relations` = 'Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|Routerboard 600|Routerboard 411|Routerboard 333|Routerboard 433|Routerboard 800|Routerboard 750/750G' WHERE id = 16 AND type = 'firmware'");
  $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('19', 'firmware', 'RouterOSv5.x', 'RouterOS 5.x or newer from Mikrotik', 'Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|Routerboard 600|Routerboard 411|Routerboard 333|Routerboard 433|Routerboard 800|Routerboard 750/750G');");
+  return $items;
+}
+
+function guifi_update_901() {
+   $items = array();
+   $items[] = update_sql("ALTER TABLE {guifi_dns_domains} ADD externalns VARCHAR( 128 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL AFTER externalmx"); 
   return $items;
 }
 
