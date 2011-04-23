@@ -1192,11 +1192,11 @@ function guifi_zone_view($node, $teaser = FALSE, $page = FALSE, $block = FALSE) 
           array(
             'data' => '<small>'.theme_guifi_zone_data($node, FALSE).'</small>'.
               theme_guifi_contacts($node),
-            'width' => '50%'
+            'width' => '35%'
           ),
           array(
             'data' => guifi_zone_simple_map($node),
-            'width' => '50%'
+            'width' => '65%'
           )
         )
       ),

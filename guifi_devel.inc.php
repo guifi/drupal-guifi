@@ -30,7 +30,10 @@ function guifi_devel_devices($devid , $op) {
   while ($dev = db_fetch_object($sql)) {
     $query = db_query('SELECT * FROM {guifi_manufacturer} WHERE fid = %d', $dev->fid);
     $manufacturer = db_fetch_object($query);
-    $rows[] = array($dev->mid, $manufacturer->nom, $dev->model, l(guifi_img_icon('edit.png'),'guifi/menu/devel/device/'.$dev->mid.'/edit',
+    $rows[] = array($dev->mid,
+                    '<a href="'.$manufacturer->url.'">'.$manufacturer->nom.'</a>',
+                    '<a href="'.$dev->url.'">'.$dev->model.'</a>',
+                    l(guifi_img_icon('edit.png'),'guifi/menu/devel/device/'.$dev->mid.'/edit',
             array(
               'html' => TRUE,
               'title' => t('edit device'),
@@ -119,7 +122,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#description' => t('Select yes if this device can be an Access Point.'),
     '#prefix' => '<table><tr><td>',
     '#suffix' => '</td>',
-    '#weight' => 6,
+    '#weight' => 5,
   );
 
   $form['virtualAP'] = array(
@@ -131,7 +134,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#description' => t('Select yes if this device can be a Hostpot or can create vlans.'),
     '#prefix' => '<td>',
     '#suffix' => '</td>',
-    '#weight' => 7,
+    '#weight' => 6,
   );
 
   $form['client'] = array(
@@ -142,8 +145,20 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#default_value' => $dev->client,
     '#description' => t('Select yes if this device can be a station.'),
     '#prefix' => '<td>',
-    '#suffix' => '</td>',
+    '#suffix' => '</td></tr></table>',
     '#weight' => 7,
+  );
+  $form['url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('URL'),
+    '#required' => TRUE,
+    '#default_value' => $dev->url,
+    '#size' => 64,
+    '#maxlength' => 128,
+    '#description' => t('Url where we can see a specs from device model.'),
+    '#prefix' => '<table><tr><td>',
+    '#suffix' => '</td>',
+    '#weight' => 8,
   );
   $form['supported'] = array(
     '#type' => 'select',
@@ -154,7 +169,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#description' => t('Deprecated devices does not have any support and no appear on the device list select form.'),
     '#prefix' => '<td>',
     '#suffix' => '</td></tr></table>',
-    '#weight' => 8,
+    '#weight' => 9,
   );
 
   $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
@@ -253,7 +268,11 @@ function guifi_devel_firmware($firmid , $op) {
   while ($firmware = db_fetch_object($sql)) {
   $relations = explode('|',$firmware->relations);
   $relations2 = implode(' | ',$relations);
-    $rows[] = array($firmware->id, $firmware->text, $firmware->description, $relations2, l(guifi_img_icon('edit.png'),'guifi/menu/devel/firmware/'.$firmware->id.'/edit',
+    $rows[] = array($firmware->id,
+                    $firmware->text,
+                    $firmware->description,
+                    $relations2,
+                    l(guifi_img_icon('edit.png'),'guifi/menu/devel/firmware/'.$firmware->id.'/edit',
             array(
               'html' => TRUE,
               'title' => t('edit firmware'),
@@ -441,7 +460,10 @@ function guifi_devel_manufacturer($mid , $op) {
   $sql = db_query('SELECT * FROM {guifi_manufacturer}');
 
   while ($mfr = db_fetch_object($sql)) {
-    $rows[] = array($mfr->fid, $mfr->nom, $mfr->url, l(guifi_img_icon('edit.png'),'guifi/menu/devel/manufacturer/'.$mfr->fid.'/edit',
+    $rows[] = array($mfr->fid,
+                    $mfr->nom,
+                    '<a href="'.$mfr->url.'">'.$mfr->url.'</a>',
+                    l(guifi_img_icon('edit.png'),'guifi/menu/devel/manufacturer/'.$mfr->fid.'/edit',
             array(
               'html' => TRUE,
               'title' => t('edit manufacturer'),
