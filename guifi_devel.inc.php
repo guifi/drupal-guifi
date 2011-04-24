@@ -145,20 +145,8 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#default_value' => $dev->client,
     '#description' => t('Select yes if this device can be a station.'),
     '#prefix' => '<td>',
-    '#suffix' => '</td></tr></table>',
-    '#weight' => 7,
-  );
-  $form['url'] = array(
-    '#type' => 'textfield',
-    '#title' => t('URL'),
-    '#required' => TRUE,
-    '#default_value' => $dev->url,
-    '#size' => 64,
-    '#maxlength' => 128,
-    '#description' => t('Url where we can see a specs from device model.'),
-    '#prefix' => '<table><tr><td>',
     '#suffix' => '</td>',
-    '#weight' => 8,
+    '#weight' => 7,
   );
   $form['supported'] = array(
     '#type' => 'select',
@@ -169,7 +157,31 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#description' => t('Deprecated devices does not have any support and no appear on the device list select form.'),
     '#prefix' => '<td>',
     '#suffix' => '</td></tr></table>',
+    '#weight' => 8,
+  );
+  $form['interfaces'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Interfaces'),
+    '#required' => TRUE,
+    '#default_value' => $dev->interfaces,
+    '#size' => 64,
+    '#maxlength' => 128,
+    '#description' => t('Device interface names for this device model. User | to split de the names, ex: wlan1|wlan2|ether1|ether2'),
+    '#prefix' => '<table><tr><td>',
+    '#suffix' => '</td></tr></table>',
     '#weight' => 9,
+  );
+  $form['url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('URL'),
+    '#required' => TRUE,
+    '#default_value' => $dev->url,
+    '#size' => 64,
+    '#maxlength' => 128,
+    '#description' => t('Url where we can see a specs from device model.'),
+    '#prefix' => '<table><tr><td>',
+    '#suffix' => '</td></tr></table>',
+    '#weight' => 10,
   );
 
   $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
