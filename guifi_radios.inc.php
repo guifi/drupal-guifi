@@ -11,7 +11,7 @@ function guifi_radio_form($edit, $form_weight) {
   guifi_log(GUIFILOG_TRACE,'function guifi_radio_form()',$edit);
 
   $querymid = db_query("
-    SELECT mid, model, f.nom manufacturer
+    SELECT mid, model, f.name manufacturer
     FROM guifi_model m, guifi_manufacturer f
     WHERE f.fid = m.fid
     AND supported='Yes'
