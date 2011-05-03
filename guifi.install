@@ -483,6 +483,7 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('17', 'firmware', 'GuifiStationOS1.0', 'GuifiStationOS v1.0 from Setup Informatica', 'GuifiStation2|GuifiStation5');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('18', 'firmware', 'gsffirm', 'Firmware de GràciaSenseFils MANET', 'Alix2|Alix3|WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Asus WL-500xx|WHR-HP-G54, WHR-G54S|NanoStation2|NanoStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Meraki/Fonera');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('19', 'firmware', 'RouterOSv5.x', 'RouterOS 5.x or newer from Mikrotik', 'Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|Routerboard 600|Routerboard 411|Routerboard 333|Routerboard 433|Routerboard 800|Routerboard 750/750G');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('20', 'firmware', 'AirOsv3.6+', 'Ubiquti AirOs 3.6+', 'NanoStation2|NanoStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5')");
   
   // --
   // -- antenna types
