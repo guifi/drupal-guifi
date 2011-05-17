@@ -325,6 +325,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
                      array('NanoStation2' , 'NanoStation5', 'LiteStation2', 'LiteStation5', 'NanoStation Loco2', 'NanoStation Loco5', 'Bullet2', 'Bullet5'))) {
                  switch ($device->variable['firmware']) {
                  case 'kamikaze':
+                 case 'AirOsv3.6+':
                    $radioXML->addAttribute('snmp_name','ath0');
                  break;
                  case 'DD-WRTv23':
@@ -332,8 +333,6 @@ function guifi_cnml($cnmlid,$action = 'help') {
                  break;
                  case 'AirOsv30':
                  case 'AirOsv221':
-                   $radioXML->addAttribute('snmp_name','wifi0');
-                 break;
                  case 'gsffirm':
                    $radioXML->addAttribute('snmp_name','wifi0');
                  break;

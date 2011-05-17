@@ -25,12 +25,15 @@ function guifi_devel_devices($devid , $op) {
 
   $headers = array(t('ID Model'), t('Manufacturer'), t('Model'), t('Edit'), t('Delete'));
 
-  $sql = db_query('SELECT * FROM {guifi_model}');
+  $sql = db_query('SELECT * FROM {guifi_model} ORDER BY mid ASC');
 
   while ($dev = db_fetch_object($sql)) {
     $query = db_query('SELECT * FROM {guifi_manufacturer} WHERE fid = %d', $dev->fid);
     $manufacturer = db_fetch_object($query);
-    $rows[] = array($dev->mid, $manufacturer->nom, $dev->model, l(guifi_img_icon('edit.png'),'guifi/menu/devel/device/'.$dev->mid.'/edit',
+    $rows[] = array($dev->mid,
+                    '<a href="'.$manufacturer->url.'">'.$manufacturer->name.'</a>',
+                    '<a href="'.$dev->url.'">'.$dev->model.'</a>',
+                    l(guifi_img_icon('edit.png'),'guifi/menu/devel/device/'.$dev->mid.'/edit',
             array(
               'html' => TRUE,
               'title' => t('edit device'),
@@ -60,8 +63,18 @@ function guifi_devel_devices_form($form_state, $devid) {
 }
   $query = db_query('SELECT * FROM {guifi_manufacturer}');
   while ($manufacturers = db_fetch_array($query)) {
-     $manuf_array[$manufacturers["fid"]] = $manufacturers["nom"];
+     $manuf_array[$manufacturers["fid"]] = $manufacturers["name"];
   }
+  $form['notification'] = array(
+    '#type' => 'textfield',
+    '#size' => 60,
+    '#maxlength' => 1024,
+    '#title' => t('contact'),
+    '#required' => TRUE,
+    '#element_validate' => array('guifi_emails_validate'),
+    '#default_value' => $dev->notification,
+    '#description' =>  t('Mailid where changes on the device will be notified, if many, separated by \',\'<br />used for network administration.')
+  );
   $form['fid'] = array(
     '#type' => 'select',
     '#title' => t('Manufacturer'),
@@ -119,7 +132,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#description' => t('Select yes if this device can be an Access Point.'),
     '#prefix' => '<table><tr><td>',
     '#suffix' => '</td>',
-    '#weight' => 6,
+    '#weight' => 5,
   );
 
   $form['virtualAP'] = array(
@@ -131,7 +144,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#description' => t('Select yes if this device can be a Hostpot or can create vlans.'),
     '#prefix' => '<td>',
     '#suffix' => '</td>',
-    '#weight' => 7,
+    '#weight' => 6,
   );
 
   $form['client'] = array(
@@ -155,6 +168,30 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#prefix' => '<td>',
     '#suffix' => '</td></tr></table>',
     '#weight' => 8,
+  );
+  $form['interfaces'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Interfaces'),
+    '#required' => TRUE,
+    '#default_value' => $dev->interfaces,
+    '#size' => 64,
+    '#maxlength' => 128,
+    '#description' => t('Device interface names for this device model. User | to split de the names, ex: wlan1|wlan2|ether1|ether2'),
+    '#prefix' => '<table><tr><td>',
+    '#suffix' => '</td></tr></table>',
+    '#weight' => 9,
+  );
+  $form['url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('URL'),
+    '#required' => TRUE,
+    '#default_value' => $dev->url,
+    '#size' => 64,
+    '#maxlength' => 128,
+    '#description' => t('Url where we can see a specs from device model.'),
+    '#prefix' => '<table><tr><td>',
+    '#suffix' => '</td></tr></table>',
+    '#weight' => 10,
   );
 
   $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
@@ -253,7 +290,11 @@ function guifi_devel_firmware($firmid , $op) {
   while ($firmware = db_fetch_object($sql)) {
   $relations = explode('|',$firmware->relations);
   $relations2 = implode(' | ',$relations);
-    $rows[] = array($firmware->id, $firmware->text, $firmware->description, $relations2, l(guifi_img_icon('edit.png'),'guifi/menu/devel/firmware/'.$firmware->id.'/edit',
+    $rows[] = array($firmware->id,
+                    $firmware->text,
+                    $firmware->description,
+                    $relations2,
+                    l(guifi_img_icon('edit.png'),'guifi/menu/devel/firmware/'.$firmware->id.'/edit',
             array(
               'html' => TRUE,
               'title' => t('edit firmware'),
@@ -283,7 +324,6 @@ function guifi_devel_firmware_form($form_state, $firmid) {
     $form['id'] = array('#type' => 'hidden','#value' => $firmid);
     $form['type'] = array('#type' => 'hidden', '#value' => $firmware->type);
 }
-
   $form['text'] = array(
     '#type' => 'textfield',
     '#title' => t('Firmware short name'),
@@ -441,7 +481,10 @@ function guifi_devel_manufacturer($mid , $op) {
   $sql = db_query('SELECT * FROM {guifi_manufacturer}');
 
   while ($mfr = db_fetch_object($sql)) {
-    $rows[] = array($mfr->fid, $mfr->nom, $mfr->url, l(guifi_img_icon('edit.png'),'guifi/menu/devel/manufacturer/'.$mfr->fid.'/edit',
+    $rows[] = array($mfr->fid,
+                    $mfr->name,
+                    '<a href="'.$mfr->url.'">'.$mfr->url.'</a>',
+                    l(guifi_img_icon('edit.png'),'guifi/menu/devel/manufacturer/'.$mfr->fid.'/edit',
             array(
               'html' => TRUE,
               'title' => t('edit manufacturer'),
@@ -469,12 +512,21 @@ function guifi_devel_manufacturer_form($form_state, $mid) {
   } else {
     $form['fid'] = array('#type' => 'hidden','#value' => $mid);
 }
-
-  $form['nom'] = array(
+  $form['notification'] = array(
+    '#type' => 'textfield',
+    '#size' => 60,
+    '#maxlength' => 1024,
+    '#title' => t('contact'),
+    '#required' => TRUE,
+    '#element_validate' => array('guifi_emails_validate'),
+    '#default_value' => $mfr->notification,
+    '#description' =>  t('Mailid where changes on the device will be notified, if many, separated by \',\'<br />used for network administration.')
+  );
+  $form['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Manufacturer Name'),
     '#required' => TRUE,
-    '#default_value' => $mfr->nom,
+    '#default_value' => $mfr->name,
     '#size' => 32,
     '#maxlength' => 32,
     '#description' => t('Manufacturer name, please, use a clear and short description.'),
@@ -521,7 +573,7 @@ function guifi_devel_manufacturer_save($edit) {
 
   guifi_notify(
     $to_mail,
-    t('The device manufacturer !manufacturer has been created / updated by !user.',array('!manufacturer' => $edit['nom'], '!user' => $user->name)),
+    t('The device manufacturer !manufacturer has been created / updated by !user.',array('!manufacturer' => $edit['name'], '!user' => $user->name)),
     $log);
 }
 
@@ -529,11 +581,11 @@ function guifi_devel_manufacturer_delete_confirm($form_state,$mid) {
   guifi_log(GUIFILOG_TRACE,'guifi_devl_device_delete_confirm()',$mid);
 
   $form['fid'] = array('#type' => 'hidden', '#value' => $mid);
-  $qry= db_fetch_object(db_query("SELECT nom FROM {guifi_manufacturer} WHERE fid = %d", $mid));
+  $qry= db_fetch_object(db_query("SELECT name FROM {guifi_manufacturer} WHERE fid = %d", $mid));
   return confirm_form(
     $form,
     t('Are you sure you want to delete the device manufacturer " %manufacturer "?',
-      array('%manufacturer' => $qry->nom)),
+      array('%manufacturer' => $qry->name)),
       ' ',
     t('This action cannot be undone.'),
     t('Delete'),
@@ -553,7 +605,7 @@ function guifi_devel_manufacturer_delete_confirm_submit($form, &$form_state) {
   drupal_set_message($log);
   guifi_notify(
            $to_mail,
-           t('The device manufacturer %manufacturer has been DELETED by %user.',array('%manufacturer' => $form_state['values']['nom'], '%user' => $user->name)),
+           t('The device manufacturer %manufacturer has been DELETED by %user.',array('%manufacturer' => $form_state['values']['name'], '%user' => $user->name)),
            $log);
     drupal_goto('guifi/menu/devel/manufacturer');
 }

@@ -59,10 +59,14 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 	  case 'guifi_model':
 	    $next_id = db_fetch_array(db_query("SELECT max(mid)+1 mid FROM {$table} "));
 	    $data['mid'] = $next_id['mid'];
+	    $data['user_created'] = $user->uid;
+	    $data['timestamp_created'] = time();
             break;
 	  case 'guifi_manufacturer':
 	    $next_id = db_fetch_array(db_query("SELECT max(fid)+1 fid FROM {$table} "));
 	    $data['fid'] = $next_id['fid'];
+	    $data['user_created'] = $user->uid;
+	    $data['timestamp_created'] = time();
             break;
 	  case 'guifi_types':
 	    $next_id = db_fetch_array(db_query("SELECT max(id)+1 id FROM {$table}WHERE type = '%s'",$data['type']));
@@ -130,6 +134,8 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
       case 'guifi_services':
       case 'guifi_dns_hosts':
       case 'guifi_users':
+      case 'guifi_model':
+      case 'guifi_manufacturer':
         $data['user_changed'] = $user->uid;
         $data['timestamp_changed'] = time();
         break;

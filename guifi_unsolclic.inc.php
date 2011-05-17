@@ -55,6 +55,7 @@ function guifi_unsolclic($dev, $format = 'html') {
       break;
     case 'AirOsv221':
     case 'AirOsv30':
+    case 'AirOsv3.6+':
       unsolclic_airos($dev);
       exit;
       break;

@@ -1140,7 +1140,7 @@ function guifi_device_print_data($device) {
   // If radio, print model & firmware
   if ($device['type'] == 'radio') {
     $model = db_fetch_object(db_query("
-      SELECT model, nom
+      SELECT model, name
       FROM {guifi_model} m LEFT JOIN {guifi_manufacturer} f ON m.fid=f.fid
       WHERE m.mid=%d",
       $device['variable']['model_id']));
