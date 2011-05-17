@@ -990,15 +990,18 @@ function guifi_domain_print($domain = NULL) {
   $output = '<div id="guifi">';
 
   $node = node_load(array('nid' => $domain['sid']));
-  $title = t('Servei:').' <a href="'.url('node/'.$node->nid).'">'.$node->nick;
+  $title = t('Servei:').' <a href="'.url('node/'.$node->nid).'">'.$node->nick.'</a>';
 
   drupal_set_breadcrumb(guifi_node_ariadna($node));
 
   switch (arg(4)) {
-  case 'all': case 'data': default:
+  case 'all':
+  case 'data':
+  default:
     $table = theme('table', NULL, guifi_domain_print_data($domain));
     $output .= theme('box', $title, $table);
-    if (arg(4) == 'data') break;
+    if (arg(4) == 'data')
+      break;
   case 'hosts':
     $header = array(t('HostName'),t('Alias'),t('IPv4 Address'),t('IPv6 Address'),t('Namserver'),t('MailServer'),t('MX Priority'));
     $table = theme('table', $header, guifi_hosts_print_data($domain[id]));
