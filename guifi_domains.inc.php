@@ -1002,9 +1002,15 @@ function guifi_domain_print($domain = NULL) {
     $output .= theme('box', $title, $table);
     if (arg(4) == 'data')
       break;
+  case 'delegations':
+    $header = array(t('Delegation'),t('IPv4 Address'),t('Nameserver'));
+    $table = theme('table', $header, guifi_delegations_print_data($domain['name']));
+    $output .= theme('box', t('Delegations'), $table);
+    if (arg(4) == 'delegations')
+      break;
   case 'hosts':
     $header = array(t('HostName'),t('Alias'),t('IPv4 Address'),t('IPv6 Address'),t('Namserver'),t('MailServer'),t('MX Priority'));
-    $table = theme('table', $header, guifi_hosts_print_data($domain[id]));
+    $table = theme('table', $header, guifi_hosts_print_data($domain['id']));
     $output .= theme('box', t('Hostnames'), $table);
     break;
   }
@@ -1015,6 +1021,30 @@ function guifi_domain_print($domain = NULL) {
   $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
   print theme('page',$output, FALSE);
   return;
+}
+
+function guifi_delegations_print_data($domain) {
+
+
+  $query = db_query("SELECT id, name, ipv4 FROM {guifi_dns_domains} WHERE mname = '%s'", $domain);
+
+  while ($delegation = db_fetch_object($query)) {
+
+  $host = db_fetch_object(db_query("
+     SELECT host
+     FROM {guifi_dns_hosts}
+     WHERE id = '%d'",
+     $delegation->id
+   ));
+      $rows[] = array(
+        $delegation->name,
+        $delegation->ipv4,
+        $host->host.'.'.$delegation->name
+        );
+    }
+    if ($rows)
+      return array_merge($rows);
+
 }
 
 function guifi_domain_item_delete_msg($msg) {

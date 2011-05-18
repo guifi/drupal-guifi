@@ -889,6 +889,14 @@ function guifi_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_LOCAL_TASK
   );
+  $items['guifi/domain/%guifi_domain/view/delegations'] = array(
+    'title' => 'delegations',
+    'page callback' => 'guifi_domain_print',
+    'page arguments' => array(2),
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'type' => MENU_LOCAL_TASK
+  );
   // AHAH Calls
   $items['guifi/js/add_wds'] = array(
     'title' => 'Javascript Add WDS',
