@@ -972,8 +972,10 @@ function guifi_domain_create($nid) {
 *****************************************/
 /* guifi_domain_print_data(): outputs a detailed domain information data */
 function guifi_domain_print_data($domain) {
-
-  $rows[] = array($domain['name']);
+  $node = node_load(array('nid' => $domain['sid']));
+  $rows[] = array('<strong>'.t('Service:').' <a href="'.url('node/'.$node->nid).'">'.$node->nick.'</a>');
+  $rows[] = array('<strong>'.t('Domain:').'</strong> '.$domain['name']);
+  $rows[] = array('<strong>'.t('Scope:').'</strong> '.$domain['scope']);
   $rows[] = array(array('data' => theme_guifi_contacts($domain),'colspan' => 0));
 
   return array_merge($rows);
@@ -988,9 +990,7 @@ function guifi_domain_print($domain = NULL) {
   }
 
   $output = '<div id="guifi">';
-
-  $node = node_load(array('nid' => $domain['sid']));
-  $title = t('Servei:').' <a href="'.url('node/'.$node->nid).'">'.$node->nick.'</a>';
+  $title ='';
 
   drupal_set_breadcrumb(guifi_node_ariadna($node));
 
