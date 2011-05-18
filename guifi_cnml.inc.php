@@ -299,17 +299,18 @@ function guifi_cnml($cnmlid,$action = 'help') {
               } else if  (in_array($model_name,
                 // TODO, for mikrotiks would be better to use fid instead of model name?
                      array(
-                       'Routerboard 532' ,
-                       'Routerboard 133C' ,
-                       'Routerboard 133' ,
                        'Routerboard 112' ,
-                       'Routerboard 153' ,
-                       'Routerboard 600' ,
-                       'Routerboard 800' ,
-                       'Routerboard 333' ,
+                       'Routerboard 133' ,
+                       'Routerboard 133C',
+                       'Routerboard 153',
+                       'Routerboard 333',
                        'Routerboard 411',
-                       'Routerboard 412',
-                       'Routerboard 433'))) {
+                       'Routerboard 433',
+                       'Routerboard 532',
+                       'Routerboard 600',
+                       'Routerboard 800' ,
+                       'Supertrasto guifiBUS guifi.net'
+                     ))) {
                  switch ($device->variable['firmware']) {
                  case 'kamikaze':
                    $radioXML->addAttribute('snmp_name','ath0');
@@ -317,6 +318,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
                  case 'RouterOSv3.x':
 		 case 'RouterOSv4.0+':
                  case 'RouterOSv4.7+':
+                 case 'RouterOSv5.x':
                    $radioXML->addAttribute('snmp_name','wlan'.(string) ($id + 1));
                  break;
                    }
