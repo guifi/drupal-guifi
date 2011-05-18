@@ -1004,7 +1004,7 @@ function guifi_domain_print($domain = NULL) {
       break;
   case 'delegations':
     $header = array(t('Delegation'),t('IPv4 Address'),t('Nameserver'));
-    $table = theme('table', $header, guifi_delegations_print_data($domain['name']));
+    $table = theme('table', $header, guifi_delegations_print_data($domain['name'], $domain['scope']));
     $output .= theme('box', t('Delegations'), $table);
     if (arg(4) == 'delegations')
       break;
@@ -1023,28 +1023,25 @@ function guifi_domain_print($domain = NULL) {
   return;
 }
 
-function guifi_delegations_print_data($domain) {
+function guifi_delegations_print_data($domain, $scope) {
 
-
-  $query = db_query("SELECT id, name, ipv4 FROM {guifi_dns_domains} WHERE mname = '%s'", $domain);
+  $query = db_query("SELECT id, name, ipv4 FROM {guifi_dns_domains} WHERE mname = '%s' AND scope = '%s' ", $domain, $scope);
 
   while ($delegation = db_fetch_object($query)) {
-
-  $host = db_fetch_object(db_query("
-     SELECT host
-     FROM {guifi_dns_hosts}
-     WHERE id = '%d'",
-     $delegation->id
-   ));
-      $rows[] = array(
-        $delegation->name,
-        $delegation->ipv4,
-        $host->host.'.'.$delegation->name
-        );
-    }
-    if ($rows)
-      return array_merge($rows);
-
+    $host = db_fetch_object(db_query("
+       SELECT host
+       FROM {guifi_dns_hosts}
+       WHERE id = '%d'",
+       $delegation->id
+     ));
+     $rows[] = array(
+       $delegation->name,
+       $delegation->ipv4,
+       $host->host.'.'.$delegation->name
+      );
+  }
+  if ($rows)
+    return array_merge($rows);
 }
 
 function guifi_domain_item_delete_msg($msg) {
