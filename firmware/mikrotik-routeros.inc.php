@@ -164,15 +164,16 @@ function unsolclic_routeros($dev) {
   _outln(sprintf('/tool graphing interface add'));
 
   // LogServer
-    if (isset($dev->logserver)) {
-    $ipd = guifi_main_ip($dev->id);
+    if (!empty($dev->logserver)) {
+    $ipd = array();
+    $ipd = guifi_main_ip($dev->id);	
     _outln_comment(t('Ip for ServerLogs'));
     _outln('/system logging');
     _outln(':foreach i in [/system logging find action=remote]');
     _outln('do={/system logging remove $i }');
     _outln(':foreach i in [/system logging action find name=guifi]');
     _outln('do=[/system logging action remove $i]');
-    _outln('/system logging action add name='.$dev->nick.' target=remote remote='.$dev->logserver.':514 src-address='.$ipd);
+    _outln('/system logging action add name='.$dev->nick.' target=remote remote='.$dev->logserver.':514 src-address='.$ipd['ipv4']);
     _outln('/system logging add action=guifi_remot topics=critical');
     _outln('/system logging add action=guifi_remot topics=account');
   }
