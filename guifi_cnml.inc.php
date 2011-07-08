@@ -84,25 +84,25 @@ function guifi_cnml($cnmlid,$action = 'help') {
    case 'nodecount':
      $CNML=fnodecount($cnmlid);
      drupal_set_header('Content-Type: application/xml; charset=utf-8');
-     echo $CNML->asXML();
+     print_pretty_CNML ($CNML);
      return;
      break;
    case 'ips':
      $CNML=dump_guifi_ips($cnmlid);
      drupal_set_header('Content-Type: application/xml; charset=utf-8');
-     echo $CNML->asXML();
+     print_pretty_CNML ($CNML);
      return;
      break;
    case 'ospfnet': //http://guifi.net/guifi/cnml/NNNN/ospfnet    NNNN = node id OSPF zone
      $CNML=ospf_net($cnmlid);
      drupal_set_header('Content-Type: application/xml; charset=utf-8');
-     echo $CNML->asXML();
+     print_pretty_CNML ($CNML);
      return;
      break;
    case 'domains':
      $CNML=dump_guifi_domains($cnmlid, $action);
      drupal_set_header('Content-Type: application/xml; charset=utf-8');
-     echo $CNML->asXML();
+     print_pretty_CNML ($CNML);
      return;
      break;
    case 'plot':
@@ -118,7 +118,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
    case 'home':
      $CNML=guifi_cnml_home($cnmlid);
      drupal_set_header('Content-Type: application/xml; charset=utf-8');
-     echo $CNML->asXML();
+     print_pretty_CNML ($CNML);
      return;
      break;
   }
@@ -648,7 +648,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
   }
 
   drupal_set_header('Content-Type: application/xml; charset=utf-8');
-  echo $CNML->asXML();
+  print_pretty_CNML ($CNML);
 
   return;
 
@@ -1501,6 +1501,15 @@ function guifi_cnml_home($cnmlid){
     }
   }
   return $CNML;
+}
+
+function print_pretty_CNML($cnml) {
+   $dom = new DOMDocument('1.0');
+   $dom->preserveWhiteSpace = false;
+   $dom->formatOutput = true;
+   $dom->loadXML($cnml->asXML());
+
+   echo $dom->saveXML();
 }
 
 ?>
