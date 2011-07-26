@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file guifi_api.inc.php
+ */
+
 // The source code packaged with this file is Free Software, Copyright (C) 2010 by
 // Eduard Duran <eduard.duran@iglu.cat>.
 // It's licensed under the GENERAL PUBLIC LICENSE v2.0 unless stated otherwise.

@@ -1,12 +1,21 @@
 <?php
-/*
- * Created on 27/09/2008
- *
+/**
+ * @file guifi_cron.inc.php
  * Cron jobs to be executed periodically
+ *
+ * Created on 27/09/2008
  */
 
-/** guifi_notify_send(): Delivers all the waiting messages and empties the queue
-*/
+
+/**
+ * It delivers all the notification messages and empties the queue
+ *
+ * @param $send
+ *   If FALSE, the messages won't be sent nor removed from the queue
+ *
+ * @return
+ *   Message sent or to be sent, HTML formatted
+ */
 function guifi_notify_send($send = TRUE) {
   global $user;
 
@@ -80,6 +89,15 @@ function guifi_notify_send($send = TRUE) {
   return $output;
 }
 
+/**
+ * Converts string to epoch date
+ *
+ * @param $str
+ *  Date string in the form of "YYYY/MM/DD HH:mm"
+ *
+ * @return
+ *   int representing epoch time
+ */
 function to_date($str) {
   if ($str == 'n/a')
     return NULL;
@@ -97,6 +115,18 @@ function to_date($str) {
     (int)substr($datestr,0,4));
 }
 
+/**
+ * Load statistics from remote CNML graph servers into the database
+ *
+ * @param $graph_server
+ *   Graph server ID.
+ *
+ * @param $verbose
+ *   If TRUE, it will return theme()
+ *
+ * @return
+ *   theme() if $verbose==TRUE
+ */
 function guifi_cron_loadCNMLstats($graph_server,$verbose=FALSE) {
   if (is_null($gs))
     $gs = guifi_service_load($graph_server);

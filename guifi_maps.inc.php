@@ -1,8 +1,8 @@
 <?php
-
 /**
+ * @file guifi_maps.inc.php
  * Modul de mapes per a en Carles (exemple)
- **/
+ */
 
 /*
  * Return de array of datum requerest

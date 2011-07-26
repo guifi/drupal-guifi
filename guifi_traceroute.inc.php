@@ -1,9 +1,11 @@
 <?php
-/*
+
+/**
+ * @file guifi_traceroute.inc.php
  * Created on 1/08/2008 by rroca
- *
- * functions for traceroute tools
+ * Functions for traceroute tools
  */
+
 
 function guifi_live_ping($device_id) {
   if (empty($device_id))

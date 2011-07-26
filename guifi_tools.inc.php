@@ -1,10 +1,21 @@
 <?php
-/*
- * Created on 16/08/2008 by rroca
+/**
+ * @file guifi_tools.inc.php
+ * IP and Network management tools
  *
- * functions for various tools
+ * Created on 16/08/2008 by rroca
  */
 
+
+/**
+ * Query information about assigned IPv4 addresses. Wildcard (%) is allowed.
+ *
+ * @param $ipv4
+ *   IPv4 to query information about.
+ *
+ * @return
+ *   Table with information about nodes, HTML formatted.
+ */
 function guifi_tools_ip_search($ipv4 = NULL) {
 
   $output = drupal_get_form('guifi_tools_ip_search_form',$ipv4);
@@ -72,7 +83,10 @@ function guifi_tools_ip_search($ipv4 = NULL) {
   return $output;
 }
 
-// IP search
+
+/**
+ * IP search form.
+ */
 function guifi_tools_ip_search_form($form_state, $params = array()) {
 
   $form['ipv4'] = array(
@@ -93,12 +107,25 @@ function guifi_tools_ip_search_form($form_state, $params = array()) {
   return $form;
 }
 
+
+/**
+ * IP search form submit.
+ */
 function guifi_tools_ip_search_form_submit($form, &$form_state) {
    drupal_goto('guifi/menu/ip/ipsearch/'.urlencode($form_state['values']['ipv4']));
    return;
 }
 
-// MAC Search
+
+/**
+ * Query information about existing MAC addresses.
+ *
+ * @param $mac
+ *   MAC to query information about.
+ *
+ * @return
+ *   Table with information about nodes, HTML formatted.
+ */
 function guifi_tools_mac_search($mac = NULL) {
   $output = drupal_get_form('guifi_tools_mac_search_form',$mac);
 
@@ -149,6 +176,10 @@ function guifi_tools_mac_search($mac = NULL) {
   return $output;
 }
 
+
+/**
+ * MAC search form.
+ */
 function guifi_tools_mac_search_form($form_state, $params = array()) {
 
   $form['mac'] = array(
@@ -169,11 +200,28 @@ function guifi_tools_mac_search_form($form_state, $params = array()) {
   return $form;
 }
 
+
+/**
+ * MAC search form submit.
+ */
 function guifi_tools_mac_search_form_submit($form, &$form_state) {
    drupal_goto('guifi/menu/ip/macsearch/'.$form_state['values']['mac']);
    return;
 }
 
+
+/**
+ * Search for an unused subrange of network in the database.
+ *
+ * You can specify a network_zone where to search a subrange. In case such subrange is too big or doesn't exist,
+ * it will try to find it in the parent network zone and so, recursively.
+ *
+ * @param $params
+ *   String with values separated by commas: $mask, $network_type, $zone_id and $allocate.
+ *
+ * @return
+ *   theme()
+ */
 function guifi_tools_ip_rangesearch($params = NULL) {
 
   $output .=  drupal_get_form('guifi_tools_ip_rangesearch_form',$params);
@@ -238,7 +286,10 @@ function guifi_tools_ip_rangesearch($params = NULL) {
          theme('box',t('Performance'),'<small>'.$toutput.'</small>');
 }
 
-// IP search
+
+/**
+ * IP subrange search form.
+ */
 function guifi_tools_ip_rangesearch_form($form_state, $params = array()) {
 
   if (empty($params)) {
@@ -280,6 +331,10 @@ function guifi_tools_ip_rangesearch_form($form_state, $params = array()) {
   return $form;
 }
 
+
+/**
+ * IP subrange search form submit.
+ */
 function guifi_tools_ip_rangesearch_form_submit($form, $form_state) {
    drupal_goto('guifi/menu/ip/networksearch/'.
      $form_state['values']['mask'].','.
@@ -291,12 +346,22 @@ function guifi_tools_ip_rangesearch_form_submit($form, $form_state) {
 }
 
 
-// Mail search & massive update
+/**
+ * Search and update existing notification e-mail addresses massively.
+ *
+ * @param $mail
+ *   E-mail address to search. Wildcard (%) is allowed
+ *
+ * @return
+ *
+ * @todo
+ *   Add support to search in nodes that have several notification e-mail addresses without wildcards
+ */
 function guifi_tools_mail_search($mail = NULL) {
 
   $output = drupal_get_form('guifi_tools_mail_search_form',$mail);
 
-  // if a vaild mail has given, allow massive update
+  // If a valid email address has been given, allow massive update
   if ((!empty($mail)) and (valid_email_address($mail)))
     $output .= drupal_get_form('guifi_tools_mail_update_form',$mail);
 
@@ -371,6 +436,10 @@ function guifi_tools_mail_search($mail = NULL) {
   return $output;
 }
 
+
+/**
+ * E-mail address search form
+ */
 function guifi_tools_mail_search_form($form_state, $params = array()) {
 
 //  $form['submit'] = array(
@@ -406,6 +475,10 @@ function guifi_tools_mail_search_form($form_state, $params = array()) {
   return $form;
 }
 
+
+/**
+ * E-mail address update form
+ */
 function guifi_tools_mail_update_form($form_state, $params = array()) {
 
   $form['mail_search'] = array(
@@ -440,6 +513,13 @@ function guifi_tools_mail_update_form($form_state, $params = array()) {
   return $form;
 }
 
+
+/**
+ * It checks if the given e-mails are valid, otherwise it shows an error.
+ *
+ * @todo
+ *   Unused function?
+ */
 function guifi_tools_mail_update_form_validate($form, &$form_state) {
   if (!valid_email_address($form_state['values']['mail_replacewith']))
     form_set_error('mail_replacewith',
@@ -452,10 +532,18 @@ function guifi_tools_mail_update_form_validate($form, &$form_state) {
         array('%email' => $form_state['values']['mail_replacewith'])));
 }
 
+
+/**
+ * E-mail address search form submit
+ */
 function guifi_tools_mail_search_form_submit($form, &$form_state) {
   drupal_goto('guifi/menu/ip/mailsearch/'.$form_state['values']['mail']);
 }
 
+
+/**
+ * E-mail address update form submit
+ */
 function guifi_tools_mail_update_form_submit($form, &$form_state) {
   global $user;
 
@@ -551,7 +639,20 @@ function guifi_tools_mail_update_form_submit($form, &$form_state) {
   drupal_goto('guifi/menu/ip/mailsearch/'.$form_state['values']['mail_replacewith']);
 }
 
+
 // Administrative tools
+
+
+/**
+ * View the notification queue or send and flush the notification queue
+ *
+ * @param $view
+ *   if TRUE, it will send all pending notifications in the queue and flush it.
+ *   if FALSE, it will only show pending notifications.
+ *
+ * @return $output
+ *   HTML formatted text, showing pending or sent notifications
+ */
 function guifi_admin_notify($view = 'FALSE') {
   if ($view == 'FALSE')
     $send = TRUE;
@@ -573,8 +674,19 @@ function guifi_admin_notify($view = 'FALSE') {
   return $output;
 }
 
+
 // development tools
 
+
+/**
+ * Load statistics from remote CNML graph servers into the database.
+ *
+ * @param $server_id
+ *   Graph server ID.
+ *
+ * @return
+ *   HTML formatted text
+ */
 function guifi_admin_loadstats($server_id) {
 
   $output = drupal_get_form('guifi_admin_loadstats_form',$server_id);
@@ -589,6 +701,10 @@ function guifi_admin_loadstats($server_id) {
   return $output;
 }
 
+
+/**
+ * Load statistics form
+ */
 function guifi_admin_loadstats_form($form_state, $params = array()) {
 
   $form['zone_services']['graph_serverstr'] = array(
@@ -607,12 +723,21 @@ function guifi_admin_loadstats_form($form_state, $params = array()) {
   return $form;
 }
 
+
+/**
+ * Load statistics form submit
+ */
 function guifi_admin_loadstats_form_submit($form, &$form_state) {
    drupal_goto('guifi/menu/admin/loadstats/'.urlencode($form_state['values']['graph_server']));
    return;
 }
 
-//data review
+
+/**
+ * Data review. It shows number of working nodes
+ *
+ * It also shows the number of working nodes that have no devices and radios.
+ */
 function guifi_tools_datareview() {
   $data = array();
   $output = '';
@@ -645,9 +770,21 @@ function guifi_tools_datareview() {
   //$output .= theme_pager(NULL, 50);
   return $output;
 }
-/*
- * look if two devices are connected
- * return 1 is connected   0 not is connected
+
+
+/**
+ * Checks if there is a path between two devices
+ *
+ * @param $fromdev
+ *   Origin device
+ *
+ * @param $todev
+ *   Destiny device
+ *
+ * @return
+ *   Number of routes existing from $fromdev to $todev or 0 if they are disconnected
+ *
+ * @todo Unused??
  */
 function guifi_tools_isdevconnect($fromdev, $todev) {
 
@@ -659,6 +796,31 @@ function guifi_tools_isdevconnect($fromdev, $todev) {
   return count($routes);
 }
 
+
+/**
+ * Checks if there is a path between two devices in $maxhops maximum hops.
+ *
+ * This function is recursive and checks the graph.
+ *
+ * @param $path
+ *   Path travelled to reach $to
+ *
+ * @param $to
+ *   Destiny device
+ *
+ * @param &$routes
+ *   Existing routes from origin to destiny devices
+ *
+ * @param $maxhops
+ *   Maximum number of hops
+ *
+ * @param $alinks
+ *
+ * @return
+ *   Number of devices
+ *
+ * @todo Unused??
+ */
 function guifi_tools_isdevconnect_search($path, $to, &$routes, $maxhops = 50, $alinks = array()) {
   static $a=0;
   $a++;
@@ -678,7 +840,7 @@ function guifi_tools_isdevconnect_search($path, $to, &$routes, $maxhops = 50, $a
       $alinks['devices'][$link['device_id']][] = $link['id'];
 
       if (isset($alinks['links'][$link['id']])) {
-        // link data is alredy filled just adding a peer
+        // link data is already filled just adding a peer
         // the other peer is the other key
 
         end($alinks['links'][$link['id']]);

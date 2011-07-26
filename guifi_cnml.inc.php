@@ -1,7 +1,7 @@
 <?php
 /**
- * guifi_cnml
-**/
+ * @file guifi_cnml.inc.php
+ */
 
 function guifi_cnml($cnmlid,$action = 'help') {
 

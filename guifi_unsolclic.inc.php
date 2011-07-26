@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file guifi_unsolclic.inc.php
+ */
 
 // Generador dels unsolclic
 function guifi_unsolclic($dev, $format = 'html') {

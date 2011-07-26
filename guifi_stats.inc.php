@@ -1,8 +1,8 @@
 <?php
-/*
+/**
+ * @file guifi_zone.inc.php
  * Created on 1/08/2009 by Eduard
- *
- * functions for statistics graphs
+ * Functions for statistics graphs
  */
 
  function guifi_stats($action,$statsid = 0) {

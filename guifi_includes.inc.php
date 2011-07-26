@@ -1,13 +1,14 @@
 <?php
-
-// Miscellaneous and auxiliar routines for guifi.module
+/**
+ * @file guifi_includes.inc.php
+ * Miscellaneous and auxiliar routines for guifi.module
+ */
 
 /**
  *  _guifi_mac_sum adds an integer to a MAC address
  *    use negative op for substract
  *    returns the resulting new MAC
-**/
-
+ */
 function _guifi_mac_sum($mac, $op) {
   $mac = _guifi_validate_mac($mac);
   if ($mac) {
@@ -1310,10 +1311,15 @@ function guifi_to_7bits($str) {
  return $str_new;
 }
 
+/**
+ * This function builds an URL to the CNML service target :?
+ *
+ * @todo Assert url != null
+ */
 function guifi_cnml_call_service($target,$service,$params=array(),$extra=NULL) {
 //  guifi_log(GUIFILOG_BASIC,'call CNML service target',$target);
 
-  // processing graphserver
+  // processing graphserver. Needs refactor
   if (is_array($target)) {
 //    print_r($target);
 //    print "\n<br />Key: ".key($target)."\n";
@@ -1332,7 +1338,7 @@ function guifi_cnml_call_service($target,$service,$params=array(),$extra=NULL) {
 
   $basename = basename($url);
 
-  // Temprary, for backward compatibility, to take out later
+  // Temporary, for backward compatibility, to take out later
   if ($basename=='graphs.php') {
     $version = '1.0';
 
@@ -1355,10 +1361,19 @@ function guifi_cnml_call_service($target,$service,$params=array(),$extra=NULL) {
     return $url.'/index.php?call='.$service.'&'.guifi_cnml_args($params,$extra);
 }
 
+/**
+ * Builds url parameters for CNML request
+ *
+ * @param $args
+ *
+ * @param $extra
+ *
+ * @todo Change name to a more appropriate one like build_args
+ */
 function guifi_cnml_args($args,$extra=NULL) {
   $params = array();
 
-  // Temprary, for backward compatibility, to take out later
+  // Temporary, for backward compatibility, to take out later
   foreach ($args as $param => $value) {
     if ($param=='device' and empty($value))
       continue;
@@ -1371,6 +1386,9 @@ function guifi_cnml_args($args,$extra=NULL) {
   return $str;
 }
 
+/**
+ * Returns image url to CNML
+ */
 function guifi_cnml_availability($args,$gs = NULL) {
   if (is_null($gs))
     $gs = guifi_service_load(guifi_graphs_get_server($args['device'],'device'));

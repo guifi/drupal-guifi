@@ -1,8 +1,6 @@
 <?php
-// $Id: guifi.module x$
-
 /**
- * @file
+ * @file guifi_service.inc.php
  * Manage guifi_service
  */
 
@@ -29,7 +27,15 @@ function guifi_service_access($op, $node) {
   }
 }
 
+/**
+ * @todo Improve asserts in the beginning
+ * @todo what object is expected to be $node?
+ * @todo $node is over used :P
 
+ * @return
+ *   Object with the extra field ($node->var) and link to the node ($node->l)
+ *   or FALSE if $node is not found in database
+ */
 function guifi_service_load($node) {
   if (!$node)
     return FALSE;

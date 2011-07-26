@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file guifi_networkutils.inc.php
+ */
 
 function _dec_addr($ip) {
   list($IP1, $IP2, $IP3, $IP4) = split("\.",$ip,4);

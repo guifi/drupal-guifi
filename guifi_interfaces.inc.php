@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file guifi_interfaces.inc.php
+ */
 
 function guifi_interfaces_form(&$interface,$ptree) {
   global $hotspot;

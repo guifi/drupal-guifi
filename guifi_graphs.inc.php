@@ -1,9 +1,12 @@
 <?php
+/**
+ * @file guifi_graphs.inc.php
+ */
 
 /**
  * guifi_graph_detail
  * outputs a page with node detailed graphs
-**/
+ */
 function guifi_graph_detail() {
   $type = $_GET['type'];
 
@@ -127,7 +130,15 @@ function get_SSID_radio($radio) {
    return $SSID->ssid;
 }
 
-
+/**
+ *
+ * @param $id
+ *
+ * @param $type
+ *   Possible values are 'device' (default), 'node', 'zone', 'radio'
+ *
+ * @todo 'device' and 'radio' are the same. Unify.
+ */
 function guifi_graphs_get_server($id, $type='device') {
 	switch ($type) {
     case 'node':
@@ -145,7 +156,7 @@ function guifi_graphs_get_server($id, $type='device') {
           return guifi_graphs_get_server($z->master,'zone');
         else
           return FALSE;
-		case 'device':
+	case 'device':
     case 'radio':
       $d = db_fetch_object(db_query('SELECT nid, graph_server FROM {guifi_devices} WHERE id=%d',$id));
       if ($d->graph_server)
@@ -175,6 +186,7 @@ function guifi_graphs_get_server($id, $type='device') {
       else
         return guifi_graphs_get_server($d->nid,'node');
 	}
+
   return FALSE;
 }
 

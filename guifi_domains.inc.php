@@ -1,6 +1,6 @@
 <?php
 /**
- * @file
+ * @file guifi_domains.inc.php
  * Manage guifi_domains
  */
 
