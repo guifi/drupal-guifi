@@ -3,6 +3,15 @@
  * @file guifi_cnml.inc.php
  */
 
+
+/**
+ *
+ * @param $cnmlid
+ *
+ * @param $action
+ *
+ * @return
+ */
 function guifi_cnml($cnmlid,$action = 'help') {
 
   guifi_log(GUIFILOG_TRACE,'function guifi_cnml()',$cnmlid);
@@ -654,6 +663,13 @@ function guifi_cnml($cnmlid,$action = 'help') {
 
 }
 
+
+/**
+ *
+ * @param $cnmlid
+ *
+ * @return
+ */
 function fnodecount($cnmlid){
   if($cnmlid<0 or $cnmlid>9){
     $vid=0;
@@ -669,7 +685,7 @@ function fnodecount($cnmlid){
   case 6:
   case 7:
   case 8:
-  case 0: //compte els nodes per any
+  case 0: //count nodes by year
     $result=db_query("select COUNT(*) as num, YEAR(FROM_UNIXTIME(timestamp_created)) as ano from {guifi_location} GROUP BY YEAR(FROM_UNIXTIME(timestamp_created)) ");
     $classXML = $CNML->addChild('nodesxyear');
     $nreg=0;
@@ -681,7 +697,7 @@ function fnodecount($cnmlid){
     };
     $classXML->addAttribute('numyears',$nreg);
     break;
-  case 1:  //compte els nodes per any i estat
+  case 1:  //count nodes by year and status
     $result=db_query("select COUNT(*) as num,status_flag, YEAR(FROM_UNIXTIME(timestamp_created)) as ano from {guifi_location} GROUP BY YEAR(FROM_UNIXTIME(timestamp_created)),status_flag ");
     $classXML = $CNML->addChild('nodesxyearxstatus');
     $nreg=0;
@@ -701,7 +717,7 @@ function fnodecount($cnmlid){
     $classXML->addAttribute('numrecs',$nreg);
     $classXML->addAttribute('numyears',$nyear);
     break;
-  case 2:  //compta els nodes per estat
+  case 2:  //count nodes by status
     $result=db_query("select COUNT(*) as num, status_flag from {guifi_location} GROUP BY status_flag ");
     $classXML = $CNML->addChild('nodesxstatus');
     $nreg=0;
@@ -713,7 +729,7 @@ function fnodecount($cnmlid){
     };
     $classXML->addAttribute('numstatus',$nreg);
     break;
-  case 3:  //torna els nodes actius totals
+  case 3:  //returns total working nodes
     $result=db_query("select COUNT(*) as num from {guifi_location} where status_flag='Working'");
     $classXML = $CNML->addChild('totalactivenodes');
     $nreg=0;
@@ -723,7 +739,7 @@ function fnodecount($cnmlid){
     };
     $classXML->addAttribute('result',$nreg);
     break;
-  case 4:  //torna els nombre i distancies dels enllaços per tipo denllaç'
+  case 4:  //returns name and distance of links by link type
     $oGC = new GeoCalc();
     $dTotals = array();
     $qlinks = db_query('
@@ -786,7 +802,7 @@ function fnodecount($cnmlid){
     };
     $classXML->addAttribute('numrecs',$nreg);
     break;
-  case 9:  //torna els nodes actius totals i els del ultim minut
+  case 9:  //returns total working nodes and those from the last minute
     $afecha=getdate();
     $tiempomin=mktime($afecha[hours],$afecha[minutes]-1,$afecha[seconds],$afecha[mon],$afecha[mday],$afecha[year]);
     $tiempomax=$tiempomin+60;
