@@ -84,29 +84,29 @@ function guifi_cnml($cnmlid,$action = 'help') {
    case 'nodecount':
      $CNML=fnodecount($cnmlid);
      drupal_set_header('Content-Type: application/xml; charset=utf-8');
-     echo $CNML->asXML();
+     print_pretty_CNML ($CNML);
      return;
      break;
    case 'ips':
-     $CNML=dump_guifi_ips($cnmlid);
+     $CNML=dump_guifi_ips();
      drupal_set_header('Content-Type: application/xml; charset=utf-8');
-     echo $CNML->asXML();
+     print_pretty_CNML ($CNML);
      return;
      break;
    case 'ospfnet': //http://guifi.net/guifi/cnml/NNNN/ospfnet    NNNN = node id OSPF zone
      $CNML=ospf_net($cnmlid);
      drupal_set_header('Content-Type: application/xml; charset=utf-8');
-     echo $CNML->asXML();
+     print_pretty_CNML ($CNML);
      return;
      break;
    case 'domains':
      $CNML=dump_guifi_domains($cnmlid, $action);
      drupal_set_header('Content-Type: application/xml; charset=utf-8');
-     echo $CNML->asXML();
+     print_pretty_CNML ($CNML);
      return;
      break;
    case 'plot':
-     plot_guifi($cnmlid);
+     plot_guifi();
      return;
      break;
    case 'growthmap': //http://guifi.net/guifi/cnml/0/growthmap?lat1=1.23&lon1=2.34&lat2=1.22&lon2=2.23
@@ -118,7 +118,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
    case 'home':
      $CNML=guifi_cnml_home($cnmlid);
      drupal_set_header('Content-Type: application/xml; charset=utf-8');
-     echo $CNML->asXML();
+     print_pretty_CNML ($CNML);
      return;
      break;
   }
@@ -649,7 +649,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
   }
 
   drupal_set_header('Content-Type: application/xml; charset=utf-8');
-  echo $CNML->asXML();
+  print_pretty_CNML ($CNML);
 
   return;
 
@@ -811,7 +811,7 @@ function fnodecount($cnmlid){
 
 
 // Creates CNML with all guifi's IPs, used to generate DNS Reverse Resolution zones (RRZ)
-function dump_guifi_ips($cnmlid){
+function dump_guifi_ips(){
   $CNML = new SimpleXMLElement('<cnml></cnml>');
   $CNML->addAttribute('version','0.1');
   $CNML->addAttribute('server_id','1');
@@ -1186,7 +1186,7 @@ function dump_guifi_domains($cnmlid, $action){
 }
 
 //create gif working nodes for guifi home
-function plot_guifi($cnmlid){
+function plot_guifi(){
     include drupal_get_path('module','guifi').'/contrib/phplot/phplot.php';
     $result=db_query("select COUNT(*) as num, MONTH(FROM_UNIXTIME(timestamp_created)) as mes, YEAR(FROM_UNIXTIME(timestamp_created)) as ano from {guifi_location} where status_flag='Working' GROUP BY YEAR(FROM_UNIXTIME(timestamp_created)),MONTH(FROM_UNIXTIME(timestamp_created)) ");
     $inicial=5;
@@ -1504,6 +1504,15 @@ function guifi_cnml_home($cnmlid){
     }
   }
   return $CNML;
+}
+
+function print_pretty_CNML($cnml) {
+   $dom = new DOMDocument('1.0');
+   $dom->preserveWhiteSpace = false;
+   $dom->formatOutput = true;
+   $dom->loadXML($cnml->asXML());
+
+   echo $dom->saveXML();
 }
 
 ?>
