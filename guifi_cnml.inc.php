@@ -385,6 +385,15 @@ function guifi_cnml($cnmlid,$action = 'help') {
                    break;
                    }
                }
+                else if  (in_array($model_name,
+                   array('DIR-600 B1/B2'
+                            ))) {
+                   switch ($device->variable['firmware']) {
+                 case 'DD-WRTv24preSP2':
+                   $radioXML->addAttribute('snmp_name','ra0');
+                   break;
+                   }
+               }
             }
             switch ($radio->mode) {
               case 'ap': $nodesummary->ap++; break;
