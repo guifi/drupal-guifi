@@ -531,7 +531,7 @@ function guifi_device_form($form_state, $params = array()) {
     '#size' => 60,
     '#maxlength' => 60,
     '#title' => t('Log Server'),
-    '#description' =>  t('Put your syslog server IP')
+    '#description' =>  t('If you have a log server for mikrotik (dude), add your ip.')
   );
 
   if (user_access('administer guifi zones')
