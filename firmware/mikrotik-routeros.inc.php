@@ -18,8 +18,8 @@ function unsolclic_routeros($dev) {
            $ipv4,
            $id));
     _outln(sprintf('multihop=no route-reflect=no ttl=1 in-filter=ospf-in out-filter=ospf-out disabled=%s', $disabled));
-
   }
+
   function ospf_interface($iname, $netid, $maskbits, $ospf_name , $ospf_zone, $ospf_id, $disabled) {
     _outln('/ routing ospf interface');
     _outln(sprintf(':foreach i in [/routing ospf interface find interface=%s] do={/routing ospf interface remove $i;}',$iname));
@@ -27,13 +27,6 @@ function unsolclic_routeros($dev) {
     _outln('/ routing ospf network');
     _outln(sprintf(':foreach i in [/routing ospf network find network=%s/%d] do={/routing ospf network remove $i;}',$netid,$maskbits));
     _outln(sprintf('add network=%s/%d area=%s disabled=%s',$netid,$maskbits,$ospf_name, $disabled));
-
-// TODO
-//    _outln('/ routing ospf area');
-//    _outln(sprintf(':foreach i in [/routing ospf area find name=%s] do={/routing ospf area remove $i;}',$ospf_name));
-//    _outln(sprintf('add name=%s area-id=%s type=default translator-role=translate-candidate  authentication=none default-cost=1 disabled=no',$ospf_name, $ospf_id));
-//
-
 }
 
 
@@ -54,21 +47,12 @@ function unsolclic_routeros($dev) {
   $zone = node_load(array('nid' => $node->zone_id));
   _outln(sprintf(':log info "Unsolclic for %d-%s going to be executed."',$dev->id,$dev->nick));
   _outln_comment();
-  if ($dev->variable[firmware] == 'RouterOSv2.9') {
-    _outln_comment(t('Configuration for RouterOS 2.9.51'));
-  }
-  if ($dev->variable[firmware] == 'RouterOSv3.x') {
-    _outln_comment(t('Configuration for RouterOS 3.30'));
-  }
-  if ($dev->variable[firmware] == 'RouterOSv4.0+') {
-    _outln_comment(t('Configuration for RouterOS 4.6'));
-  }
   if ($dev->variable[firmware] == 'RouterOSv4.7+') {
-    _outln_comment(t('Configuration for RouterOS 4.7 and newer'));
+    _outln_comment(t('Configuration for RouterOS 4.7 and newer 4.x'));
+  } else {
+    _outln_comment(t('Configuration for '.$dev->variable[firmware]));
   }
   _outln_comment(t('Device').': '.$dev->id.'-'.$dev->nick);
-  _outln_comment();
-  _outln_comment(t('WARNING: Beta version'));
   _outln_comment();
   _outln_comment(t('Methods to upload/execute this script:'));
   _outln_comment(t('1.-As a script. Upload this output as a script either with:'));
@@ -87,10 +71,7 @@ function unsolclic_routeros($dev) {
   _outln_comment('&nbsp;&nbsp;&nbsp;&nbsp;'.t('directly on the terminal input.'));
   _outln_comment();
   _outln_comment(t('Notes:'));
-  _outln_comment(t('-routing-test package is required, be sure you have it enabled at system packages'));
-//  _outln_comment(t('-By default, OSPF is *DEACTIVATED*, and BGP activated, peers should be enabled'));
-//  _outln_comment(t('&nbsp;&nbsp;manually. To enable ospf, enable the backbone network at'));
-//  _outln_comment(t('&nbsp;&nbsp;/routing ospf network'));
+  _outln_comment(t('-routing-test package is required if you use RouterOSv2.9 , be sure you have it enabled at system packages'));
   _outln_comment(t('-wlans should be enabled manually, be sure to set the correct antenna (a or b)'));
   _outln_comment(t('&nbsp;&nbsp;according in how did you connect the cable to the miniPCI. Keep the'));
   _outln_comment(t('&nbsp;&nbsp;power at the minimum possible and check the channel.'));
@@ -166,7 +147,7 @@ function unsolclic_routeros($dev) {
   // LogServer
     if (!empty($dev->logserver)) {
     $ipd = array();
-    $ipd = guifi_main_ip($dev->id);	
+    $ipd = guifi_main_ip($dev->id);
     _outln_comment(t('Ip for ServerLogs'));
     _outln('/system logging');
     _outln(':foreach i in [/system logging find action=remote]');
@@ -208,13 +189,18 @@ function unsolclic_routeros($dev) {
     switch ($radio[mode]) {
     case 'ap':
       $mode = 'ap-bridge';
-      $ssid = $radio[ssid];
-      $gain = $radio[antenna_gain];
+      $ssid = $radio['ssid'];
+      $gain = $radio['antenna_gain'];
       if ($radio[channel] < 5000)
         $band = '2.4ghz-b';
       else
-        $band = '5ghz';
-
+        if ($dev->variable['firmware'] == 'RouterOSv5.x') {
+          $band = '5ghz-a';
+          $chwidth = 'channel-width=20mhz';
+        } else {
+          $band = '5ghz';
+          $chwidth = '';
+        }
       break;
     case 'client':
     case 'clientrouted':
@@ -242,7 +228,7 @@ function unsolclic_routeros($dev) {
     _outln_comment('Radio#: '.$radio_id.' '.$radio[ssid]);
     _outln(sprintf('/interface wireless set wlan%d name="wlan%d" \ ',$radio_id+1,$radio_id+1));
     _outln(sprintf('    radio-name="%s" mode=%s ssid="guifi.net-%s" \ ',$radio[ssid],$mode,$ssid));
-    _outln(sprintf('    band="%s" \ ',$band));
+    _outln(sprintf('    band="%s" '.$chwidth.' \ ',$band));
     _outln(sprintf('    frequency-mode=regulatory-domain country=spain antenna-gain=%s \ ',$gain));
     if (($radio[channel] != 0) and ($radio[channel] != 5000)) { // if not auto.. set channel
       if ($radio[channel] < 20) {
@@ -252,7 +238,7 @@ function unsolclic_routeros($dev) {
       _outln(sprintf('    frequency=%d \ ',$radio[channel]));
     }
     if (
-         (($band == '5ghz') and ($radio[channel] == 5000 /* 5ghz auto */)) or
+         (($band == '5ghz' OR $band == '5ghz-a') and ($radio[channel] == 5000 /* 5ghz auto */)) or
          (($band == '2.4ghz-b') and ($radio[channel] == 0 /* 2.4ghz auto */))
        )
       _outln('    dfs-mode=radar-detect \ ');
@@ -560,8 +546,6 @@ function unsolclic_routeros($dev) {
   _outln('redistribute-connected=yes redistribute-rip=yes redistribute-ospf=yes \ ');
   _outln('redistribute-other-bgp=yes out-filter=ospf-out \ ');
   _outln('client-to-client-reflection=yes comment="" disabled=no');
-
-
 
   // OSPF
        _outln_comment();

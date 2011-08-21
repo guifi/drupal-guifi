@@ -43,6 +43,7 @@ function guifi_unsolclic($dev, $format = 'html') {
     case 'RouterOSv3.x':
     case 'RouterOSv4.0+':
     case 'RouterOSv4.7+':
+    case 'RouterOSv5.x':
       unsolclic_routeros($dev);
       exit;
       break;
