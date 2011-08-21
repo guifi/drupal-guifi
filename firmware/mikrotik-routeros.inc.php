@@ -17,7 +17,7 @@ function unsolclic_routeros($dev) {
            $peername,
            $ipv4,
            $id));
-    _outln(sprintf('multihop=no route-reflect=no ttl=1 in-filter=ospf-in out-filter=ospf-out disabled=%s', $disabled));
+    _outln(sprintf('multihop=no route-reflect=no ttl=default in-filter=ebgp-in out-filter=ebgp-out disabled=%s', $disabled));
   }
 
   function ospf_interface($iname, $netid, $maskbits, $ospf_name , $ospf_zone, $ospf_id, $disabled) {
@@ -297,12 +297,12 @@ function unsolclic_routeros($dev) {
            _outln(sprintf('/ ip address add address=%s/%d network=%s broadcast=%s interface=%s disabled=%s comment="%s"',$ipv4[ipv4],$item[maskbits],$item[netid],$item[broadcast],$wdsname,$disabled,$wdsname));
 
            if ($link['routing'] == 'OSPF') {
-            ospf_interface($wdsname, $item[netid], $item[maskbits], $ospf_name, $ospf_zone, $ospf_id, 'no');
-            bgp_peer($link['device_id'],$link['interface']['ipv4']['ipv4'],'yes');
-            } else {
-            ospf_interface($wdsname, $item[netid], $item[maskbits], $ospf_name, $ospf_zone, $ospf_id, 'yes');
-            bgp_peer($link['device_id'],$link['interface']['ipv4']['ipv4'],'no');
-}
+             ospf_interface($wdsname, $item[netid], $item[maskbits], $ospf_name, $ospf_zone, $ospf_id, 'no');
+             bgp_peer($link['device_id'],$link['interface']['ipv4']['ipv4'],'yes');
+           } else {
+             ospf_interface($wdsname, $item[netid], $item[maskbits], $ospf_name, $ospf_zone, $ospf_id, 'yes');
+             bgp_peer($link['device_id'],$link['interface']['ipv4']['ipv4'],'no');
+           }
          } // each wds link (ipv4)
        } else { // wds
          // wLan, wLan/Lan, Hotspot or client
@@ -317,20 +317,21 @@ function unsolclic_routeros($dev) {
            }
            $item = _ipcalc($ipv4[ipv4],$ipv4[netmask]);
            _outln('/ip address');
-           if ($interface[interface_type]=='Wan')
+           if ($interface[interface_type] == 'Wan')
              _outln(sprintf(':foreach i in [find interface=%s] do={remove $i}',$iname));
-           _outln(sprintf(':foreach i in [find address="%s/%d"] do={remove $i}',$ipv4[ipv4],$item[maskbits]));
-           _outln(sprintf('/ ip address add address=%s/%d network=%s broadcast=%s interface=%s disabled=no',$ipv4[ipv4],$item[maskbits],$item[netid],$item[broadcast],$iname));
+             _outln(sprintf(':foreach i in [find address="%s/%d"] do={remove $i}',$ipv4[ipv4],$item[maskbits]));
+             _outln(sprintf('/ ip address add address=%s/%d network=%s broadcast=%s interface=%s disabled=no',$ipv4[ipv4],$item[maskbits],$item[netid],$item[broadcast],$iname));
            $defined_ips[$ipv4[ipv4]] = $item;
            $ospf_zone = guifi_get_ospf_zone($zone);
+           _outln('/ routing bgp network');
+           _outln(sprintf(':foreach i in [/routing bgp network find network=%s/%d] do={/routing bgp network remove $i;}',$item[netid],$item[maskbits]));
+           _outln(sprintf('add network=%s/%d disabled=no',$item[netid],$item[maskbits]));
            if ($radio[mode] != 'client') {
              ospf_interface($iname, $item[netid], $item[maskbits], $ospf_name, $ospf_zone, $ospf_id, 'no');
            } else {
              ospf_interface($iname, $item[netid], $item[maskbits], $ospf_name, $ospf_zone, $ospf_id, 'yes');
-           }           
+           }
          }
-
-
            // HotSpot
          if ($interface[interface_type] == 'HotSpot') {
            _outln_comment();
@@ -363,9 +364,9 @@ function unsolclic_routeros($dev) {
 
 
          _outln(':delay 1');
-         if ($interface[interface_type] != 'HotSpot') {
+         if ($interface[interface_type] != 'HotSpot' || 'Wan') {
            // Not link only (AP), setting DHCP
-           if ($mode=='ap-bridge') {
+           if ($mode =='ap-bridge') {
              $maxip = ip2long($item[netstart]) + 1;
              if (($maxip + 5) > (ip2long($item[netend]) - 5)) {
                $maxip = ip2long($item['netend']);
@@ -549,17 +550,21 @@ function unsolclic_routeros($dev) {
   _outln_comment(t('BGP &#038; OSPF Filters'));
   _outln(':foreach i in [/routing filter find chain=ospf-in] do={/routing filter remove $i;}');
   _outln(':foreach i in [/routing filter find chain=ospf-out] do={/routing filter remove $i;}');
+  _outln(':foreach i in [/routing filter find chain=ebgp-in] do={/routing filter remove $i;}');
+  _outln(':foreach i in [/routing filter find chain=ebgp-out] do={/routing filter remove $i;}');
   _outln("/ routing filter");
-  _outln('add chain=ospf-out prefix=10.0.0.0/8 prefix-length=8-32 invert-match=no action=accept comment="" disabled=no');
-  _outln('add chain=ospf-out invert-match=no action=discard comment="" disabled=no');
-  _outln('add chain=ospf-in prefix=10.0.0.0/8 prefix-length=8-32 invert-match=no action=accept comment="" disabled=no');
-  _outln('add chain=ospf-in invert-match=no action=reject comment="" disabled=no');
+  _outln('add action=discard chain=ebgp-in comment="1. Discard insert non 10.x routes" disabled=no invert-match=no prefix=!10.0.0.0/8 prefix-length=!8-32');
+  _outln('add action=discard chain=ebgp-out comment="2. Discard send non 10.x routes" disabled=no invert-match=no prefix=!10.0.0.0/8 prefix-length=!8-32');
   _outln_comment();
   _outln_comment(t('BGP instance'));
   _outln("/ routing bgp instance");
-  _outln(sprintf('set default name="default" as=%d router-id=%s redistribute-static=yes \ ',$dev->id,$ospf_routerid));
-  _outln('redistribute-connected=yes redistribute-rip=yes redistribute-ospf=yes \ ');
-  _outln('redistribute-other-bgp=yes out-filter=ospf-out \ ');
+  _outln(sprintf('set default name="default" as=%d router-id=%s \ ',$dev->id,$ospf_routerid));
+  if ($dev->variable[firmware] == 'RouterOSv4.0+' || 'RouterOSv4.7+' || 'RouterOSv5x') {
+    _outln('redistribute-connected=no redistribute-static=no redistribute-rip=no \ ');
+  } else {
+    _outln('redistribute-connected=yes redistribute-static=yes redistribute-rip=yes \ ');
+  }
+  _outln('redistribute-ospf=yes redistribute-other-bgp=yes out-filter=ebgp-out \ ');
   _outln('client-to-client-reflection=yes comment="" disabled=no');
 
   // OSPF
@@ -571,7 +576,7 @@ function unsolclic_routeros($dev) {
   }
   if ($dev->variable[firmware] == 'RouterOSv4.0+' || 'RouterOSv4.7+' || 'RouterOSv5x') {
        _outln(sprintf('/routing ospf instance set default name=default router-id=%s comment="" disabled=no distribute-default=never 
-     redistribute-bgp=as-type-1 redistribute-connected=no redistribute-other-ospf=no redistribute-rip=no redistribute-static=no in-filter=ospf-in out-filter=ospf-out',$ospf_routerid));
+     redistribute-bgp=as-type-1 redistribute-connected=no redistribute-other-ospf=no redistribute-rip=no redistribute-static=no in-filter=ebgp-in out-filter=ebgp-out',$ospf_routerid));
   }
 
   // End of Unsolclic
