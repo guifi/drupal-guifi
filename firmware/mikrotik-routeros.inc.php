@@ -192,7 +192,13 @@ function unsolclic_routeros($dev) {
       $ssid = $radio['ssid'];
       $gain = $radio['antenna_gain'];
       if ($radio[channel] < 5000)
-        $band = '2.4ghz-b';
+        if ($dev->variable['firmware'] == 'RouterOSv5.x') {
+          $band = '2ghz-b';
+          $chwidth = 'channel-width=20mhz';
+        } else {
+          $band = '2.4ghz-b';
+          $chwidth = '';
+        }
       else
         if ($dev->variable['firmware'] == 'RouterOSv5.x') {
           $band = '5ghz-a';
@@ -213,9 +219,17 @@ function unsolclic_routeros($dev) {
         $protocol = guifi_get_ap_protocol($link['interface']['device_id'],$link['interface']['radiodev_counter']);
         $channel = guifi_get_ap_channel($link['interface']['device_id'],$link['interface']['radiodev_counter']);
         if ($protocol == '802.11b')
-          $band = '2.4ghz-b';
+          if ($dev->variable['firmware'] == 'RouterOSv5.x') {
+            $band = '2ghz-b';
+          } else {
+            $band = '2.4ghz-b';
+          }
         if ($protocol == '802.11a')
-          $band = '5ghz';
+          if ($dev->variable['firmware'] == 'RouterOSv5.x') {
+            $band = '5ghz-a';
+          } else {
+            $band = '5ghz';
+          }
         if (($protocol == '802.11n') AND ($channel > 5000))
           $band = '5ghz-a/n';
       }
@@ -238,8 +252,8 @@ function unsolclic_routeros($dev) {
       _outln(sprintf('    frequency=%d \ ',$radio[channel]));
     }
     if (
-         (($band == '5ghz' OR $band == '5ghz-a') and ($radio[channel] == 5000 /* 5ghz auto */)) or
-         (($band == '2.4ghz-b') and ($radio[channel] == 0 /* 2.4ghz auto */))
+         (($band == '5ghz' || '5ghz-a') and ($radio[channel] == 5000 /* 5ghz auto */)) or
+         (($band == '2.4ghz-b' || '2ghz-b') and ($radio[channel] == 0 /* 2.4ghz auto */))
        )
       _outln('    dfs-mode=radar-detect \ ');
     else
@@ -521,12 +535,13 @@ function unsolclic_routeros($dev) {
   _outln(':foreach i in [/ip firewall nat find src-address="192.168.0.0/16"] do={/ip firewall nat remove $i;}');
   _outln('/ip firewall nat');
   if ($dev->variable[firmware] == 'RouterOSv2.9') {
-  _outln(sprintf('add chain=srcnat src-address="192.168.0.0/16" dst-address=!192.168.0.0/16 action=src-nat to-addresses=%s to-ports=0-65535 comment="" disabled=no',$ospf_routerid));
-  _outln(sprintf('add chain=srcnat src-address="172.16.0.0/12" dst-address=!172.16.0.0/12 protocol=!ospf action=src-nat to-addresses=%s to-ports=0-65535 comment="" disabled=no',$ospf_routerid));
-  }
-  if ($dev->variable[firmware] == 'RouterOSv3.x' || 'RouterOSv4.0+' || 'RouterOSv4.7+' || 'RouterOSv5x') {
-  _outln(sprintf('add chain=srcnat src-address="192.168.0.0/16" dst-address=!192.168.0.0/16 action=src-nat to-addresses=%s comment="" disabled=no',$ospf_routerid));
-  _outln(sprintf('add chain=srcnat src-address="172.16.0.0/12" dst-address=!172.16.0.0/12 protocol=!ospf action=src-nat to-addresses=%s comment="" disabled=no',$ospf_routerid));
+    _outln(sprintf('add chain=srcnat src-address="192.168.0.0/16" dst-address=!192.168.0.0/16 action=src-nat to-addresses=%s to-ports=0-65535 comment="" disabled=no',$ospf_routerid));
+    _outln(sprintf('add chain=srcnat src-address="172.16.0.0/12" dst-address=!172.16.0.0/12 protocol=!ospf action=src-nat to-addresses=%s to-ports=0-65535 comment="" disabled=no',$ospf_routerid));
+  } else {
+    if ($dev->variable[firmware] == 'RouterOSv3.x' || 'RouterOSv4.0+' || 'RouterOSv4.7+' || 'RouterOSv5x') {
+      _outln(sprintf('add chain=srcnat src-address="192.168.0.0/16" dst-address=!192.168.0.0/16 action=src-nat to-addresses=%s comment="" disabled=no',$ospf_routerid));
+      _outln(sprintf('add chain=srcnat src-address="172.16.0.0/12" dst-address=!172.16.0.0/12 protocol=!ospf action=src-nat to-addresses=%s comment="" disabled=no',$ospf_routerid));
+    }
   }
   // BGP
   _outln_comment();
@@ -550,7 +565,7 @@ function unsolclic_routeros($dev) {
   // OSPF
        _outln_comment();
        _outln_comment(t('OSPF Routing'));
-  if (($dev->variable[firmware] == 'RouterOSv3.x') or ($dev->variable['firmware'] == 'RouterOSv2.9')) {
+  if ($dev->variable[firmware] == 'RouterOSv3.x' || 'RouterOSv2.9') {
        _outln(sprintf('/routing ospf set router-id=%s distribute-default=never redistribute-connected=no 
      redistribute-static=no redistribute-rip=no redistribute-bgp=as-type-1',$ospf_routerid));
   }
