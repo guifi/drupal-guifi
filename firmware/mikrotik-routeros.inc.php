@@ -97,13 +97,13 @@ function unsolclic_routeros($dev) {
   $dns[] .=$primary_dns;
   $dns[] .=$secondary_dns;
   if ($secondary_dns != null) {
-    if ($dev->variable[firmware] == 'RouterOSv4.7+' || 'RouterOSv5x')
+    if (($dev->variable[firmware] == 'RouterOSv4.7+') or ($dev->variable[firmware] == 'RouterOSv5.x'))
       _outln(sprintf('/ip dns set servers=%s,%s allow-remote-requests=yes',$primary_dns,$secondary_dns));
     else
       _outln(sprintf('/ip dns set primary-dns=%s secondary-dns=%s allow-remote-requests=yes',$primary_dns,$secondary_dns));
   }
   else if ($primary_dns != null) {
-    if ($dev->variable[firmware] == 'RouterOSv4.7+' || 'RouterOSv5x')
+    if (($dev->variable[firmware] == 'RouterOSv4.7+') or ($dev->variable[firmware] == 'RouterOSv5.x'))
       _outln(sprintf('/ip dns set servers=%s allow-remote-requests=yes',$primary_dns));
     else
       _outln(sprintf('/ip dns set primary-dns=%s allow-remote-requests=yes',$primary_dns));
@@ -535,15 +535,20 @@ function unsolclic_routeros($dev) {
   _outln(':foreach i in [/ip firewall nat find src-address="172.16.0.0/12"] do={/ip firewall nat remove $i;}');
   _outln(':foreach i in [/ip firewall nat find src-address="192.168.0.0/16"] do={/ip firewall nat remove $i;}');
   _outln('/ip firewall nat');
-  if ($dev->variable[firmware] == 'RouterOSv2.9') {
+  switch ($dev->variable['firmware'] ) {
+  case  'RouterOSv2.9':
     _outln(sprintf('add chain=srcnat src-address="192.168.0.0/16" dst-address=!192.168.0.0/16 action=src-nat to-addresses=%s to-ports=0-65535 comment="" disabled=no',$ospf_routerid));
     _outln(sprintf('add chain=srcnat src-address="172.16.0.0/12" dst-address=!172.16.0.0/12 protocol=!ospf action=src-nat to-addresses=%s to-ports=0-65535 comment="" disabled=no',$ospf_routerid));
-  } else {
-    if ($dev->variable[firmware] == 'RouterOSv3.x' || 'RouterOSv4.0+' || 'RouterOSv4.7+' || 'RouterOSv5x') {
+  break;
+  case 'RouterOSv3.x':
+  case 'RouterOSv4.0+' :
+  case 'RouterOSv4.7+':
+  case 'RouterOSv5.x':
       _outln(sprintf('add chain=srcnat src-address="192.168.0.0/16" dst-address=!192.168.0.0/16 action=src-nat to-addresses=%s comment="" disabled=no',$ospf_routerid));
       _outln(sprintf('add chain=srcnat src-address="172.16.0.0/12" dst-address=!172.16.0.0/12 protocol=!ospf action=src-nat to-addresses=%s comment="" disabled=no',$ospf_routerid));
-    }
-  }
+    break;
+}
+
   // BGP
   _outln_comment();
   _outln_comment(t('BGP Routing'));
@@ -559,9 +564,14 @@ function unsolclic_routeros($dev) {
   _outln_comment(t('BGP instance'));
   _outln("/ routing bgp instance");
   _outln(sprintf('set default name="default" as=%d router-id=%s \ ',$dev->id,$ospf_routerid));
-  if ($dev->variable[firmware] == 'RouterOSv4.0+' || 'RouterOSv4.7+' || 'RouterOSv5x') {
-    _outln('redistribute-connected=no redistribute-static=no redistribute-rip=no \ ');
-  } else {
+
+  switch ($dev->variable['firmware'] ) {
+  case 'RouterOSv4.0+':
+  case 'RouterOSv4.7+':
+  case 'RouterOSv5.x':
+     _outln('redistribute-connected=no redistribute-static=no redistribute-rip=no \ ');
+  break;
+ default:
     _outln('redistribute-connected=yes redistribute-static=yes redistribute-rip=yes \ ');
   }
   _outln('redistribute-ospf=yes redistribute-other-bgp=yes out-filter=ebgp-out \ ');
@@ -570,13 +580,19 @@ function unsolclic_routeros($dev) {
   // OSPF
        _outln_comment();
        _outln_comment(t('OSPF Routing'));
-  if ($dev->variable[firmware] == 'RouterOSv3.x' || 'RouterOSv2.9') {
-       _outln(sprintf('/routing ospf set router-id=%s distribute-default=never redistribute-connected=no 
-     redistribute-static=no redistribute-rip=no redistribute-bgp=as-type-1',$ospf_routerid));
-  }
-  if ($dev->variable[firmware] == 'RouterOSv4.0+' || 'RouterOSv4.7+' || 'RouterOSv5x') {
-       _outln(sprintf('/routing ospf instance set default name=default router-id=%s comment="" disabled=no distribute-default=never 
-     redistribute-bgp=as-type-1 redistribute-connected=no redistribute-other-ospf=no redistribute-rip=no redistribute-static=no in-filter=ebgp-in out-filter=ebgp-out',$ospf_routerid));
+
+  switch ($dev->variable['firmware'] ) {
+  case 'RouterOSv2.9':
+  case 'RouterOSv3.x':
+   _outln(sprintf('/routing ospf set router-id=%s distribute-default=never redistribute-connected=no \ ',$ospf_routerid));
+   _outln(sprintf('redistribute-static=no redistribute-rip=no redistribute-bgp=as-type-1'));
+  break;
+  case 'RouterOSv4.0+':
+  case 'RouterOSv4.7+':
+  case 'RouterOSv5.x':
+   _outln(sprintf('/routing ospf instance set default name=default router-id=%s comment="" disabled=no distribute-default=never \ ',$ospf_routerid));
+   _outln(sprintf('redistribute-bgp=as-type-1 redistribute-connected=no redistribute-other-ospf=no redistribute-rip=no redistribute-static=no in-filter=ebgp-in out-filter=ebgp-out'));
+  break;
   }
 
   // End of Unsolclic
