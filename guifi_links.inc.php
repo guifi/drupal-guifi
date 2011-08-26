@@ -125,6 +125,12 @@ function guifi_links_form($link,$ipv4,$tree,$multilink) {
     );
   } // if network administrator
 
+  $f['l']['overlap'] = array(
+     '#type' =>          'hidden',
+     '#parents' => array_merge($tree,array('overlap')),
+      '#value'=>         $ipv4['netmask'],
+     '#element_validate' => array('guifi_links_check_overlap'),
+  );
   // Routing
   $f['l']['routing'] = array(
     '#type' =>          'select',
@@ -296,16 +302,63 @@ function guifi_links_validate_subnet($remoteIp,&$form_state) {
 
 
   return;
-//  $longIp = ip2long($ip['#value']);
-//
-//  if (($longIp==FALSE) or (count(explode('.',$ip['#value']))!=4))
-//    form_error($ip,
-//      t('Error in ipv4 address (%addr), use "10.138.0.1" format.',
-//        array('%addr' => $ip['#value'])),'error');
-//  else
-//    $ip['#value'] = long2ip($longIp);
-//
-//  return $ip;
+}
+
+function guifi_links_check_overlap($overlap,&$form_state) {
+
+  if ($form_state['clicked_button']['#value'] == t('Reset'))
+    return;
+
+  $keys         = count($overlap['#parents']);
+  $radio_id     = $overlap['#parents'][$keys - 6];
+  $interface_id = $overlap['#parents'][$keys - 4];
+  $ipv4_id      = $overlap['#parents'][$keys - 2];
+  if ($keys == 7)
+    $ipv4 = &$form_state['values']['radios'][$radio_id]
+                                  ['interfaces'][$interface_id]
+                                  ['ipv4'][$ipv4_id];
+  else
+    $ipv4 = &$form_state['values']['interfaces'][$interface_id]
+                                  ['ipv4'][$ipv4_id];
+
+  if ($ipv4['links'][$link_id]['deleted'])
+    return;
+
+  if ( ip2long($ipv4['netmask']) >= ip2long($ipv4['overlap']) )
+    return;
+
+  $net = _ipcalc($ipv4['ipv4'],$ipv4['netmask']);
+  $net_overlap =  _ipcalc($ipv4['ipv4'],$ipv4['overlap']);
+  $old_netmask = $ipv4['overlap'];
+  $new_netmask = $ipv4['netmask'];
+  $old_netstart = $net['netstart'];
+  $new_broadcast = $net['broadcast'];
+  $old_broadcast = $net_overlap['broadcast'];
+
+// guifi_log(GUIFILOG_BASIC,'<br>Old Netmask: '.$old_netmask.'<br>New NetMask: '.$new_netmask.'<br>Old broadcast: '.$old_broadcast.'<br>New Broadcast: '.$new_broadcast.'<br><br> ');
+ $sql = db_query("SELECT INET_ATON(ipv4) as ip FROM guifi_ipv4 WHERE ipv4 BETWEEN '%s' AND '%s' ", $old_broadcast, $new_broadcast);
+
+  while ($item = db_fetch_array($sql)) {
+    $ip = long2ip($item['ip']);
+    $s = ip2long($old_netstart);
+    $e = ip2long($new_broadcast);
+    for($i = $s; $i < $e+1; $i++) {
+      $kk5 = long2ip($i);
+      if ($ip == $kk5) {
+    drupal_set_message(t('Ip address: %ip is already taken on another device!!', array('%ip' => $ip)),'error');
+    $error = TRUE;
+     //   guifi_log(GUIFILOG_BASIC,'Ip en ús: '.$ip.'<br>');
+   }
+    }
+    $count = $e-$s+1;
+  }
+    if ($error == TRUE) {
+    form_error($overlap, t('Error! Your new netmask: /%bit ( %mask ) is overlapping another existing subnet, you can\'t expand it!<br>'
+                                       .'Then, We will find a range of network in your area with the size needed, just for information. You can use it if it thinks fit.',
+          array('%mask' => $new_netmask, '%bit' => $net['maskbits'])));
+   $nid =$form_state['values']['nid'];
+   guifi_ipcalc_get_subnet_by_nid($nid,$new_netmask, 'backbone', $ips_allocated, 'Yes', TRUE);
+  }
 }
 
 ?>
