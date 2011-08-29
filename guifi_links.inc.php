@@ -357,6 +357,7 @@ function guifi_links_check_overlap($overlap,&$form_state) {
                                        .'Then, We will find a range of network in your area with the size needed, just for information. You can use it if it thinks fit.',
           array('%mask' => $new_netmask, '%bit' => $net['maskbits'])));
    $nid =$form_state['values']['nid'];
+   $ips_allocated = guifi_ipcalc_get_ips('0.0.0.0', '0.0.0.0', array(), 2);
    guifi_ipcalc_get_subnet_by_nid($nid,$new_netmask, 'backbone', $ips_allocated, 'Yes', TRUE);
   }
 }
