@@ -1895,13 +1895,6 @@ function guifi_cron() {
   guifi_purge();
 }
 
-/** print formatted dump
- */
-function print_r_h ($arr) {
-        ?><pre><?
-        print_r($arr);
-}
-
 /** check for overlapping routes.
  */
 function guifi_overlap_check ( $verbose = FALSE) {
