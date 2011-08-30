@@ -377,7 +377,14 @@ function guifi_menu() {
     'access arguments' => array('access devel information'),
     'weight' => 3,
   );
-  
+    $items['guifi/menu/devel/overlap'] = array(
+    'title' => 'overlap',
+    'description' => 'check for overlapping routes.',
+    'page callback' => 'guifi_overlap_check',
+    'page arguments' => array('TRUE'),
+    'access arguments' => array('access devel information'),
+    'weight' => 4,
+  );
   // Statistics
   $items['guifi/menu/stats'] = array(
     'title' => 'Statistics',
@@ -1888,7 +1895,50 @@ function guifi_cron() {
   guifi_purge();
 }
 
-/** putge orphan data
+/** print formatted dump
+ */
+function print_r_h ($arr) {
+        ?><pre><?
+        print_r($arr);
+}
+
+/** check for overlapping routes.
+ */
+function guifi_overlap_check ( $verbose = FALSE) {
+  $tstart = microtime(TRUE);
+  $array = array();
+  $query = db_query("SELECT ipv4, netmask FROM guifi_ipv4 WHERE ipv4_type = '2' ORDER BY ipv4 ASC");
+
+  while ( $ipv4 = db_fetch_array($query) ) {
+    $net = _ipcalc($ipv4['ipv4'],$ipv4['netmask']);
+    $array[] = array($net['netid'],$net['netmask']);
+  }
+
+  sort($array);
+  $network = array();
+  $temp = '';
+
+  foreach ( $array as $key => $netid) {
+    $broadcast = $netid[1];
+    if($temp != $broadcast) {
+      $network[] = $netid[0];
+    }
+   $temp= $broadcast;
+  }
+  $temp2 ="";
+  while (list($i,$value) = each($network)) {
+    if($temp2 == $value) {
+    drupal_set_message(t('%value is overllaped!', array('%value' => $value)));
+    }
+    $temp2 = $value;
+  }
+
+    return t('Database Overlap check in %secs', array('%secs' =>
+      number_format(microtime(TRUE)-$tstart, 4)));
+
+}
+
+/** purge orphan data
  */
 function guifi_purge($verbose = FALSE) {
   // deleting orphan devices
