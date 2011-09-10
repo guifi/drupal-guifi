@@ -225,7 +225,7 @@ function guifi_devel_devices_save($edit) {
 }
 
 function guifi_devel_devices_delete_confirm($form_state,$mid) {
-  guifi_log(GUIFILOG_TRACE,'guifi_devl_device_delete_confirm()',$mid);
+  guifi_log(GUIFILOG_TRACE,'guifi_devel_device_delete_confirm()',$mid);
 
   $form['mid'] = array('#type' => 'hidden', '#value' => $mid);
   $qry= db_fetch_object(db_query("SELECT model FROM {guifi_model} WHERE mid = %d", $mid));
@@ -578,7 +578,7 @@ function guifi_devel_manufacturer_save($edit) {
 }
 
 function guifi_devel_manufacturer_delete_confirm($form_state,$mid) {
-  guifi_log(GUIFILOG_TRACE,'guifi_devl_device_delete_confirm()',$mid);
+  guifi_log(GUIFILOG_TRACE,'guifi_devel_device_delete_confirm()',$mid);
 
   $form['fid'] = array('#type' => 'hidden', '#value' => $mid);
   $qry= db_fetch_object(db_query("SELECT name FROM {guifi_manufacturer} WHERE fid = %d", $mid));
