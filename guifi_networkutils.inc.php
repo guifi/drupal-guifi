@@ -70,7 +70,7 @@ function _ipcalc($ip,$mask) {
 	  $return['maskbits'] = 32;
   else {
 	  if (! preg_match("/^(1+)0+$/",$octets['mask']['binary'],$matches)) {
-		  guifi_log(GUIFILOG_NONE,'_ipcalc '.$ip. ' mask '.$mask.' invalid (mask)',$matches);
+		  guifi_log(GUIFILOG_NONE,'_ipcalc '.$ip. ' mask '.$mask.' invalid ('.$obj.')',$matches);
 		  //    print "Error: Item 'mask' ".$mask." invàlid ";
 		  return -1;
 	  } else {

@@ -1895,6 +1895,11 @@ function guifi_cron() {
   guifi_purge();
 }
 
+function print_r_h ($arr) {
+        echo '<pre>';
+        print_r($arr);
+        echo '</pre>';
+}
 /** check for overlapping routes.
  */
 function guifi_overlap_check ( $verbose = FALSE) {
@@ -1909,26 +1914,36 @@ function guifi_overlap_check ( $verbose = FALSE) {
 
   sort($array);
   $network = array();
-  $temp = '';
+  $brcst = '';
 
   foreach ( $array as $key => $netid) {
     $broadcast = $netid[1];
-    if($temp != $broadcast) {
-      $network[] = $netid[0];
+    if($brcst != $broadcast) {
+      $network[] = array($netid[0], $netid[1]);
     }
-   $temp= $broadcast;
+   $brcst = $broadcast;
   }
-  $temp2 ="";
+
+  $net2 = "";
+  $overlapped = array();
+  $mask2 ="255.255.255.252";
+
   while (list($i,$value) = each($network)) {
-    if($temp2 == $value) {
-    drupal_set_message(t('%value is overllaped!', array('%value' => $value)));
+    $net = $value[0];
+    $mask = $value[1];
+    $maskbits = _ipcalc($net,$value[1]);
+    $maskbits2 = _ipcalc($net2,$mask2);
+
+    if($net2 == $net) {
+      drupal_set_message(t('%net/%mask is overlapped by %net2/%mask2!!', array('%net' => $net, '%mask' => $maskbits['maskbits'],'%net2' => $net2, '%mask2' => $maskbits2['maskbits'])));
+      $overlapped[] = $net;
     }
-    $temp2 = $value;
+    $net2 = $net;
+    $mask2 = $mask;
   }
 
     return t('Database Overlap check in %secs', array('%secs' =>
       number_format(microtime(TRUE)-$tstart, 4)));
-
 }
 
 /** purge orphan data
