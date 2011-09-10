@@ -19,7 +19,7 @@ function guifi_devel_devices($devid , $op) {
   }
   $rows = array();
   $value = t('Add a new device model');
-  $output  = '<from>';
+  $output  = '<form>';
   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/device/add\'"/>';
   $output .= '</form>';
 
