@@ -331,6 +331,21 @@ function guifi_menu() {
     'access arguments' => array('guifi module developer'),
     'file' => 'guifi_devel.inc.php'
   );
+  $items['guifi/menu/devel/service'] = array(
+    'title' => 'Services',
+    'description' => 'A full list of services we use in the network, add, edit or delete it.',
+    'page callback' => 'guifi_devel_services',
+    'access arguments' => array('guifi module developer'),
+    'weight' => 8,
+    'file' => 'guifi_devel.inc.php'
+  );
+  $items['guifi/menu/devel/service/%/%'] = array(
+    'title' => 'Services',
+    'page callback' => 'guifi_devel_services',
+    'page arguments' => array(4, 5),
+    'access arguments' => array('guifi module developer'),
+    'file' => 'guifi_devel.inc.php'
+  );
   $items['guifi/menu/devel/firmware'] = array(
     'title' => 'Firmware',
     'description' => 'A full list of firmware we use in the devices, add, edit or delete it.',

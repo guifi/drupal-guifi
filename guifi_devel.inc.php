@@ -1,5 +1,146 @@
 <?php
 
+// Services output
+function guifi_devel_services($service_id , $op) {
+
+  switch($service_id) {
+    case 'add':
+     $service_id = 'New';
+     return drupal_get_form('guifi_devel_services_form',$service_id);
+  }
+  switch($op) {
+    case 'edit':
+      return drupal_get_form('guifi_devel_services_form',$service_id);
+    case 'delete':
+      guifi_log(GUIFILOG_TRACE,'guifi_devel_services_delete()',$service_id);
+      return drupal_get_form(
+      'guifi_devel_services_delete_confirm', $service_id);
+    guifi_devel_services_delete($service_id);
+  }
+  $rows = array();
+  $value = t('Add a new service');
+  $output  = '<form>';
+  $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/service/add\'"/>';
+  $output .= '</form>';
+
+  $headers = array(t('Service ID'), t('Text'), t('Description'), t('Edit'), t('Delete'));
+
+  $sql = db_query('SELECT * FROM {guifi_types} where type="service" ORDER BY id ASC');
+
+  while ($service = db_fetch_object($sql)) {
+    $rows[] = array($service->id,
+                    $service->text,
+                    $service->description,
+                    l(guifi_img_icon('edit.png'),'guifi/menu/devel/service/'.$service->id.'/edit',
+            array(
+              'html' => TRUE,
+              'title' => t('edit service'),
+              )).'</td><td>'.
+                 l(guifi_img_icon('drop.png'),'guifi/menu/devel/service/'.$service->id.'/delete',
+            array(
+              'html' => TRUE,
+              'title' => t('delete service'),
+              )));
+  }
+
+  $output .= theme('table',$headers,$rows);
+  print theme('page',$output, FALSE);
+  return;
+}
+
+// Services Form
+function guifi_devel_services_form($form_state, $service_id) {
+
+  $sql = db_query('SELECT * FROM {guifi_types} WHERE type = "service" and id = %d', $service_id);
+  $service = db_fetch_object($sql);
+
+  if ($service_id == 'New' ) {
+   $form['new'] = array('#type' => 'hidden', '#value' => TRUE);
+  } else {
+    $form['id'] = array('#type' => 'hidden','#value' => $service_id);
+  }
+  $form['text'] = array(
+    '#type' => 'textfield',
+    '#size' => 24,
+    '#maxlength' => 24,
+    '#title' => t('Text'),
+    '#required' => TRUE,
+    '#default_value' => $service->text,
+    '#description' =>  t('Text abbreviation of the service.')
+  );
+  $form['description'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Description'),
+    '#required' => TRUE,
+    '#default_value' => $service->description,
+    '#description' =>  t('Text description of the service.')
+  );
+
+  $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
+
+  return $form;
+}
+
+
+function guifi_devel_services_form_submit($form, &$form_state) {
+  guifi_log(GUIFILOG_TRACE,'function guifi_devel_services_form_submit()',$form_state);
+
+  guifi_devel_services_save($form_state['values']);
+  drupal_goto('guifi/menu/devel/service');
+  return;
+}
+
+function guifi_devel_services_save($edit) {
+  global $user;
+
+  $to_mail = $edit->notification;
+  $log ='';
+
+  $edit['type'] = 'service';
+  guifi_log(GUIFILOG_TRACE,'function guifi_devel_services_save()',$edit);
+
+  _guifi_db_sql('guifi_types',array('id' => $edit['id'], 'type' => 'service'),$edit,$log,$to_mail);
+
+  guifi_notify(
+    $to_mail,
+    t('The service !service has been created / updated by !user.',array('!service ' => $edit['model'], '!user' => $user->name)),
+    $log);
+}
+
+function guifi_devel_services_delete_confirm($form_state,$id) {
+  guifi_log(GUIFILOG_TRACE,'guifi_devel_service_delete_confirm()',$id);
+
+  $form['id'] = array('#type' => 'hidden', '#value' => $id);
+  $qry= db_fetch_object(db_query("SELECT text FROM {guifi_types} WHERE type = 'service' and id = %d", $id));
+  return confirm_form(
+    $form,
+    t('Are you sure you want to delete the service " %service "?',
+      array('%service' => $qry->text)),
+      ' ',
+    t('This action cannot be undone.'),
+    t('Delete'),
+    t('Cancel'));
+}
+
+
+function guifi_devel_services_delete_confirm_submit($form, &$form_state) {
+
+  global $user;
+  $depth = 0;
+  if ($form_state['values']['op'] != t('Delete'))
+    return;
+
+  $to_mail = explode(',',$node->notification);
+  $log = _guifi_db_delete('guifi_types',array('id' => $form_state['values']['id'], 'type' => 'service'),$to_mail,$depth);
+  drupal_set_message($log);
+  guifi_notify(
+           $to_mail,
+           t('The service %name has been DELETED by %user.',array('%name' => $form_state['values']['text'], '%user' => $user->name)),
+           $log);
+    drupal_goto('guifi/menu/devel/service');
+}
+
+
 // Device Models output
 function guifi_devel_devices($devid , $op) {
 
@@ -19,7 +160,7 @@ function guifi_devel_devices($devid , $op) {
   }
   $rows = array();
   $value = t('Add a new device model');
-  $output  = '<from>';
+  $output  = '<form>';
   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/device/add\'"/>';
   $output .= '</form>';
 
@@ -225,7 +366,7 @@ function guifi_devel_devices_save($edit) {
 }
 
 function guifi_devel_devices_delete_confirm($form_state,$mid) {
-  guifi_log(GUIFILOG_TRACE,'guifi_devl_device_delete_confirm()',$mid);
+  guifi_log(GUIFILOG_TRACE,'guifi_devel_device_delete_confirm()',$mid);
 
   $form['mid'] = array('#type' => 'hidden', '#value' => $mid);
   $qry= db_fetch_object(db_query("SELECT model FROM {guifi_model} WHERE mid = %d", $mid));
@@ -578,7 +719,7 @@ function guifi_devel_manufacturer_save($edit) {
 }
 
 function guifi_devel_manufacturer_delete_confirm($form_state,$mid) {
-  guifi_log(GUIFILOG_TRACE,'guifi_devl_device_delete_confirm()',$mid);
+  guifi_log(GUIFILOG_TRACE,'guifi_devel_device_delete_confirm()',$mid);
 
   $form['fid'] = array('#type' => 'hidden', '#value' => $mid);
   $qry= db_fetch_object(db_query("SELECT name FROM {guifi_manufacturer} WHERE fid = %d", $mid));
