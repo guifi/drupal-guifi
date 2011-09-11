@@ -117,7 +117,7 @@ function guifi_devel_services_delete_confirm($form_state,$id) {
     $form,
     t('Are you sure you want to delete the service " %service "?',
       array('%service' => $qry->text)),
-      ' ',
+      "guifi/menu/devel/service",
     t('This action cannot be undone.'),
     t('Delete'),
     t('Cancel'));
@@ -375,7 +375,7 @@ function guifi_devel_devices_delete_confirm($form_state,$mid) {
     $form,
     t('Are you sure you want to delete the device model " %model "?',
       array('%model' => $qry->model)),
-      ' ',
+      'guifi/menu/devel/device',
     t('This action cannot be undone.'),
     t('Delete'),
     t('Cancel'));
@@ -571,7 +571,7 @@ function guifi_devel_firmware_delete_confirm($form_state,$id) {
     $form,
     t('Are you sure you want to delete the firmware " %firmware "?',
       array('%firmware' => $qry->text)),
-      ' ',
+      'guifi/menu/devel/firmware',
     t('This action cannot be undone.'),
     t('Delete'),
     t('Cancel'));
@@ -728,7 +728,7 @@ function guifi_devel_manufacturer_delete_confirm($form_state,$mid) {
     $form,
     t('Are you sure you want to delete the device manufacturer " %manufacturer "?',
       array('%manufacturer' => $qry->name)),
-      ' ',
+      'guifi/menu/devel/manufacturer',
     t('This action cannot be undone.'),
     t('Delete'),
     t('Cancel'));
