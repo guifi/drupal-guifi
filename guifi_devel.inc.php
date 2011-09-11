@@ -20,7 +20,7 @@ function guifi_devel_services($service_id , $op) {
   $rows = array();
   $value = t('Add a new service');
   $output  = '<form>';
-  $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/service/add\'"/>';
+  $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\''.url("guifi/menu/devel/service/add").'\'"/>';
   $output .= '</form>';
 
   $headers = array(t('Service ID'), t('Text'), t('Description'), t('Edit'), t('Delete'));
@@ -76,7 +76,8 @@ function guifi_devel_services_form($form_state, $service_id) {
     '#description' =>  t('Text description of the service.')
   );
 
-  $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
+  $form['submit'] = array('#type' => 'submit', '#weight' => 98, '#value' => t('Save'));
+  $form['cancel'] = array('#type' => 'markup', '#weight' => 99, '#value' => l(t('Cancel'), "guifi/menu/devel/service"),);
 
   return $form;
 }
