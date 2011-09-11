@@ -1051,7 +1051,7 @@ function guifi_radio_add_link2ap_form(&$form,&$form_state) {
 //    $form_weight);
 
 
-  $form['devices-list'] = guifi_devices_select($form_state['values']['filters'],
+  $form['list-devices'] = guifi_devices_select($form_state['values']['filters'],
      'guifi_radio_add_link2ap_confirm_submit');
 
   return FALSE;
@@ -1366,7 +1366,7 @@ function guifi_radio_add_wds_form(&$form,&$form_state) {
 //    $form_weight);
 
 
-  $form['devices-list'] = guifi_devices_select($form_state['values']['filters'], 'guifi_radio_add_wds_confirm_submit');
+  $form['list-devices'] = guifi_devices_select($form_state['values']['filters'], 'guifi_radio_add_wds_confirm_submit');
 
 /*
   if (count($choices) == 0) {
