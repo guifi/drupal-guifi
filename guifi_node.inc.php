@@ -754,7 +754,7 @@ function guifi_node_distances_form($form_state,$node) {
 
   $form['filters_region'] = guifi_devices_select_filter($form_state,'guifi_node_distances');
 
-  $form['devices-list'] = guifi_node_distances_list($form_state['values']['filters'],$node);
+  $form['list-devices'] = guifi_node_distances_list($form_state['values']['filters'],$node);
 
   return $form;
 }
