@@ -311,7 +311,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
                        'Routerboard 800',
                        'Supertrasto guifiBUS guifi.net',
                        'Routerboard SXT 5HnD',
-                       'RouterBoard 493g',
+                       'Routerboard 493/G',
                      ))) {
                  switch ($device->variable['firmware']) {
                  case 'kamikaze':
@@ -327,8 +327,8 @@ function guifi_cnml($cnmlid,$action = 'help') {
               }
                 else if  (in_array($model_name,
                      array(
-                       'RouterBoard 1100',
-	               'Routerboard 750/750G'
+                       'Routerboard 1100',
+	               'Routerboard 750/G'
                      ))) {
                    $radioXML->addAttribute('snmp_name','Lan/Lan');
               }

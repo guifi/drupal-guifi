@@ -760,9 +760,9 @@ function guifi_install() {
 (49, 15, 'GuifiStation2', 'Extern', 1, 1, 100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://tienda.setupinformatica.com/wac/detalle.php?codigo=CPEGS2', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
 (50, 15, 'GuifiStation5', 'Extern', 1, 1, 100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://tienda.setupinformatica.com/wac/detalle.php?codigo=CPEGS5', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
 (51, 10, 'RouterStationPro', 'Extern', 4, 1, 400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/rspro', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(52, 8, 'Routerboard 750/750G', 'Extern', 0, 5, 400, 'Yes', 'Yes', 'Yes', 'Lan/Lan|ether1|ether2|ether3|ether4|ether5', 'http://www.routerboard.com/pricelist.php?showProduct=90', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(53, 8, 'RouterBoard SXT 5HnD', NULL, 1, 1, NULL, 'Yes', 'Yes', 'Yes', 'wlan1|ether1', 'http://www.routerboard.com/index.php?showProduct=108', NULL, 'Yes', '', 0, 0, 0, 0),
-(54, 8, 'RouterBoard 1100', NULL, 0, 13, NULL, 'Yes', 'No', 'Yes', 'Lan/Lan|ether1|ether2|ether3|ether4|ether5|ether6|ether7|ether8|ether9|ether10|ether11|ether12|ether13', 'http://www.routerboard.com/index.php?showProduct=98', NULL, 'Yes', '', 0, 0, 0, 0);");
+(52, 8, 'Routerboard 750/G', 'Extern', 0, 5, 400, 'Yes', 'Yes', 'Yes', 'Lan/Lan|ether1|ether2|ether3|ether4|ether5', 'http://www.routerboard.com/pricelist.php?showProduct=90', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(53, 8, 'Routerboard SXT 5HnD', NULL, 1, 1, NULL, 'Yes', 'Yes', 'Yes', 'wlan1|ether1', 'http://www.routerboard.com/index.php?showProduct=108', NULL, 'Yes', '', 0, 0, 0, 0),
+(54, 8, 'Routerboard 1100', NULL, 0, 13, NULL, 'Yes', 'No', 'Yes', 'Lan/Lan|ether1|ether2|ether3|ether4|ether5|ether6|ether7|ether8|ether9|ether10|ether11|ether12|ether13', 'http://www.routerboard.com/index.php?showProduct=98', NULL, 'Yes', '', 0, 0, 0, 0);");
 
   // --
   // -- user status types
