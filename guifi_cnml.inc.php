@@ -403,6 +403,9 @@ function guifi_cnml($cnmlid,$action = 'help') {
                    break;
                    }
                }
+                else {
+                   $radioXML->addAttribute('snmp_name','eth0');
+               }
             }
             switch ($radio->mode) {
               case 'ap': $nodesummary->ap++; break;
