@@ -308,8 +308,10 @@ function guifi_cnml($cnmlid,$action = 'help') {
                        'Routerboard 433',
                        'Routerboard 532',
                        'Routerboard 600',
-                       'Routerboard 800' ,
-                       'Supertrasto guifiBUS guifi.net'
+                       'Routerboard 800',
+                       'Supertrasto guifiBUS guifi.net',
+                       'Routerboard SXT 5HnD',
+                       'Routerboard 493/G',
                      ))) {
                  switch ($device->variable['firmware']) {
                  case 'kamikaze':
@@ -322,6 +324,13 @@ function guifi_cnml($cnmlid,$action = 'help') {
                    $radioXML->addAttribute('snmp_name','wlan'.(string) ($id + 1));
                  break;
                    }
+              }
+                else if  (in_array($model_name,
+                     array(
+                       'Routerboard 1100',
+	               'Routerboard 750/G'
+                     ))) {
+                   $radioXML->addAttribute('snmp_name','Lan/Lan');
               }
                 else if  (in_array($model_name,
                      array('NanoStation2' , 'NanoStation5', 'LiteStation2', 'LiteStation5', 'NanoStation Loco2', 'NanoStation Loco5', 'Bullet2', 'Bullet5'))) {
@@ -393,6 +402,9 @@ function guifi_cnml($cnmlid,$action = 'help') {
                    $radioXML->addAttribute('snmp_name','ra0');
                    break;
                    }
+               }
+                else {
+                   $radioXML->addAttribute('snmp_name','eth0');
                }
             }
             switch ($radio->mode) {
@@ -782,7 +794,7 @@ function fnodecount($cnmlid){
                   from guifi_location as t1
                   inner join guifi_zone as t2 on t1.zone_id = t2.id
                   GROUP BY zone_id,YEAR(FROM_UNIXTIME(timestamp_created)),status_flag ");
-    
+
     $classXML = $CNML->addChild('nodesxzonexyearxstatus');
     $nreg=0;
     while ($record=db_fetch_object($result)){
@@ -866,14 +878,12 @@ function ospf_net($cnmlid){
   $nreg = 0;
   $n=0;
   $CNML = new SimpleXMLElement('<cnml></cnml>');
-  
   $tbegin = microtime(TRUE);
-  
   $CNML->addAttribute('version','0.1');
   $CNML->addAttribute('server_id','1');
   $CNML->addAttribute('server_url','http://guifi.net');
   $CNML->addAttribute('generated',date('Ymd hi',time()));
-  $CNML->addAttribute('description','ospf zone networks'); 
+  $CNML->addAttribute('description','ospf zone networks');
 
   $nodesid["$cnmlid"]="";
   $nodes[]=$cnmlid;
@@ -903,7 +913,7 @@ function ospf_net($cnmlid){
       };
       ospf_net_add_node_networks($networks,$nodes[$n]);
    }
-   
+
    ksort($networks);
    //busqueda de xarxes de la zona
    if (count($azones)) foreach ($azones as $key => $azone){
@@ -936,7 +946,7 @@ function ospf_net($cnmlid){
    }
    //agrupació de subxarxes
    $subnets=array_values($networks);
-   
+
    for($nmaskbits=30;$nmaskbits>16;$nmaskbits--){
       $net1="";
       $knet1=0;
@@ -1011,14 +1021,14 @@ function ospf_net($cnmlid){
       $reg->addAttribute('zone',$azones[$aznet["zid"]]);
    }
    $classXML3->addAttribute('total_zone_networks',$nreg);
-   
-   $CNML->addAttribute('elapsed',round(microtime(TRUE)-$tbegin,4)); 
+
+   $CNML->addAttribute('elapsed',round(microtime(TRUE)-$tbegin,4));
    return $CNML;
 }
 
 function ospf_net_search_links(&$nodes,&$nodesid,$nid){
    $n=0;
-   $resultlinks=db_query(sprintf('SELECT id FROM guifi_links where nid = (%s) and routing="OSPF" and (link_type="cable" or link_type="wds")',$nid)); 
+   $resultlinks=db_query(sprintf('SELECT id FROM guifi_links where nid = (%s) and routing="OSPF" and (link_type="cable" or link_type="wds")',$nid));
    while ($recordlink=db_fetch_object($resultlinks)){
       $result=db_query(sprintf("SELECT nid, routing, link_type FROM guifi_links where id = (%s) and nid != (%s)",$recordlink->id,$nid));
       if ($record=db_fetch_object($result)){
@@ -1050,7 +1060,7 @@ function ospf_net_add_node_networks(&$networks,$nid){
    };
    return 0;
 }
-// end ospf_net ==================================== 
+// end ospf_net ====================================
 
 
 function dump_guifi_domains($cnmlid, $action){
@@ -1266,13 +1276,13 @@ function plot_guifi(){
     $plot->SetFileFormat('png');
     $plot->SetDataType("data-data");
     $plot->SetDataValues($data);
-    $plot->SetPlotType("linepoints"); 
+    $plot->SetPlotType("linepoints");
     $plot->SetYTickIncrement(2000);
     $plot->SetXTickIncrement(12);
     $plot->SetSkipBottomTick(TRUE);
     $plot->SetSkipLeftTick(TRUE);
     $plot->SetXAxisPosition(0);
-    $plot->SetPointShapes($shapes); 
+    $plot->SetPointShapes($shapes);
     $plot->SetPointSizes(10);
     $plot->SetTickLength(3);
     $plot->SetDrawXGrid(TRUE);
@@ -1352,7 +1362,6 @@ function growth_map($plat1,$plon1,$plat2,$plon2){
             if($ldate<$record->ldate){
                $ldate=$record->ldate;
             }
-            
             if($v>0){
                $numlinks++;
                $links["$record->lid"]=array("nid1" => $lnode,"nid2" => $record->nid,"type" => $v);
@@ -1384,7 +1393,7 @@ function growth_map($plat1,$plon1,$plat2,$plon2){
    }
    asort($objects);
    $vjson=json_encode(array($objects,$nodes,$links));
-   
+
    return $vjson;
 }
 // end growth_map ====================================
@@ -1448,7 +1457,7 @@ function guifi_cnml_home($cnmlid){
     $classXML = $CNML->addChild('total_links');
     $classXML->addAttribute('num',$dTotals['count']);
     $classXML->addAttribute('kms',$dTotals['dTotal']);
-    
+
     //add nodes last week
     $afecha=getdate();
     $tiempomax=mktime($afecha[hours],$afecha[minutes],$afecha[seconds],$afecha[mon],$afecha[mday],$afecha[year]);
@@ -1499,7 +1508,7 @@ function guifi_cnml_home($cnmlid){
       $qbudgets = db_query(
         "SELECT b.id, b.expires " .
         "FROM {budgets} b " .
-        "WHERE b.budget_status = 'Open' and b.zone_id = 3671 and b.expires >= " . $today[0] . " " . 
+        "WHERE b.budget_status = 'Open' and b.zone_id = 3671 and b.expires >= " . $today[0] . " " .
         "ORDER BY b.id DESC");
       while ($budget = db_fetch_object($qbudgets)) {
         $b = node_load(array('nid' => $budget->id));
