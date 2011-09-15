@@ -10,7 +10,7 @@ function unsolclic_routeros($dev) {
   $defined_ips = array();
 
   function bgp_peer($id, $ipv4, $disabled) {
-    $peername=guifi_get_hostname($id);
+    $peername = guifi_get_hostname($id);
     _outln('/ routing bgp peer');
     _outln(sprintf(':foreach i in [find name=%s] do={/routing bgp peer remove $i;}',$peername));
     _outln(sprintf('add name="%s" instance=default remote-address=%s remote-as=%s \ ',
@@ -32,13 +32,14 @@ function unsolclic_routeros($dev) {
 
 //  Check if there's any wLan/Lan interface defined on the device
 
-  $wlanlan=false;
+  $wlanlan = false;
   foreach ($dev->radios as $ri)
     {
-      $ii=$ri[interfaces];
+      $ii = $ri['interfaces'];
       foreach ($ii as $iii)
 	{
-	    if ($iii[interface_type]=='wLan/Lan') $wlanlan=true;
+	    if ($iii['interface_type'] == 'wLan/Lan')
+              $wlanlan = true;
 	}
 
     }
@@ -47,10 +48,10 @@ function unsolclic_routeros($dev) {
   $zone = node_load(array('nid' => $node->zone_id));
   _outln(sprintf(':log info "Unsolclic for %d-%s going to be executed."',$dev->id,$dev->nick));
   _outln_comment();
-  if ($dev->variable[firmware] == 'RouterOSv4.7+') {
+  if ($dev->variable['firmware'] == 'RouterOSv4.7+') {
     _outln_comment(t('Configuration for RouterOS 4.7 and newer 4.x'));
   } else {
-    _outln_comment(t('Configuration for '.$dev->variable[firmware]));
+    _outln_comment(t('Configuration for '.$dev->variable['firmware']));
   }
   _outln_comment(t('Device').': '.$dev->id.'-'.$dev->nick);
   _outln_comment();
@@ -94,16 +95,16 @@ function unsolclic_routeros($dev) {
   _outln_comment();
   _outln_comment('DNS (client &#038; server cache) zone: '.$node->zone_id);
   list($primary_dns,$secondary_dns) = explode(' ',guifi_get_dns($zone,2));
-  $dns[] .=$primary_dns;
-  $dns[] .=$secondary_dns;
+  $dns[] .= $primary_dns;
+  $dns[] .= $secondary_dns;
   if ($secondary_dns != null) {
-    if (($dev->variable[firmware] == 'RouterOSv4.7+') or ($dev->variable[firmware] == 'RouterOSv5.x'))
+    if (($dev->variable['firmware'] == 'RouterOSv4.7+') or ($dev->variable['firmware'] == 'RouterOSv5.x'))
       _outln(sprintf('/ip dns set servers=%s,%s allow-remote-requests=yes',$primary_dns,$secondary_dns));
     else
       _outln(sprintf('/ip dns set primary-dns=%s secondary-dns=%s allow-remote-requests=yes',$primary_dns,$secondary_dns));
   }
   else if ($primary_dns != null) {
-    if (($dev->variable[firmware] == 'RouterOSv4.7+') or ($dev->variable[firmware] == 'RouterOSv5.x'))
+    if (($dev->variable['firmware'] == 'RouterOSv4.7+') or ($dev->variable['firmware'] == 'RouterOSv5.x'))
       _outln(sprintf('/ip dns set servers=%s allow-remote-requests=yes',$primary_dns));
     else
       _outln(sprintf('/ip dns set primary-dns=%s allow-remote-requests=yes',$primary_dns));
@@ -118,7 +119,7 @@ function unsolclic_routeros($dev) {
     _outln(sprintf('/system ntp client set enabled=yes mode=unicast primary-ntp=%s secondary-ntp=%s',$primary_ntp,$secondary_ntp));
   else if ($primary_ntp != null)
     _outln(sprintf('/system ntp client set enabled=yes mode=unicast primary-ntp=%s',$primary_ntp));
-  if ($dev->variable[firmware] == 'RouterOSv2.9')
+  if ($dev->variable['firmware'] == 'RouterOSv2.9')
   _outln(sprintf('/system ntp server set manycast=no enabled=yes'));
   _outln(':delay 1');
 
@@ -211,10 +212,10 @@ function unsolclic_routeros($dev) {
     case 'client':
     case 'clientrouted':
       $mode = 'station';
-      $gain = $radio[antenna_gain];
-      foreach ($radio[interfaces] as $interface)
-      foreach ($interface[ipv4] as $ipv4)
-      foreach ($ipv4[links] as $link) {
+      $gain = $radio['antenna_gain'];
+      foreach ($radio['interfaces'] as $interface)
+      foreach ($interface['ipv4'] as $ipv4)
+      foreach ($ipv4['links'] as $link) {
         $ssid = guifi_get_ap_ssid($link['interface']['device_id'],$link['interface']['radiodev_counter']);
         $protocol = guifi_get_ap_protocol($link['interface']['device_id'],$link['interface']['radiodev_counter']);
         $channel = guifi_get_ap_channel($link['interface']['device_id'],$link['interface']['radiodev_counter']);
@@ -233,7 +234,7 @@ function unsolclic_routeros($dev) {
         if (($protocol == '802.11n') AND ($channel > 5000))
           $band = '5ghz-a/n';
       }
-        $firewall=true;
+        $firewall = true;
       break;
     }
 
@@ -244,63 +245,63 @@ function unsolclic_routeros($dev) {
     _outln(sprintf('    radio-name="%s" mode=%s ssid="guifi.net-%s" \ ',$radio[ssid],$mode,$ssid));
     _outln(sprintf('    band="%s" '.$chwidth.' \ ',$band));
     _outln(sprintf('    frequency-mode=regulatory-domain country=spain antenna-gain=%s \ ',$gain));
-    if (($radio[channel] != 0) and ($radio[channel] != 5000)) { // if not auto.. set channel
-      if ($radio[channel] < 20) {
-        $incr = $radio[channel] * 5;
-        $radio[channel] = 2407 + $incr;
+    if (($radio['channel'] != 0) and ($radio['channel'] != 5000)) { // if not auto.. set channel
+      if ($radio['channel'] < 20) {
+        $incr = $radio['channel'] * 5;
+        $radio['channel'] = 2407 + $incr;
       }
-      _outln(sprintf('    frequency=%d \ ',$radio[channel]));
+      _outln(sprintf('    frequency=%d \ ',$radio['channel']));
     }
     if (
-         (($band == '5ghz' || '5ghz-a') and ($radio[channel] == 5000 /* 5ghz auto */)) or
-         (($band == '2.4ghz-b' || '2ghz-b') and ($radio[channel] == 0 /* 2.4ghz auto */))
+         (($band == '5ghz' || '5ghz-a') and ($radio['channel'] == 5000 /* 5ghz auto */)) or
+         (($band == '2.4ghz-b' || '2ghz-b') and ($radio['channel'] == 0 /* 2.4ghz auto */))
        )
       _outln('    dfs-mode=radar-detect \ ');
     else
       _outln('    dfs-mode=none \ ');
 
-    if (empty($radio[antenna_mode])) {
+    if (empty($radio['antenna_mode'])) {
 	_outln(sprintf('    wds-mode=static wds-default-bridge=none wds-default-cost=100 \ '));
     } else {
-    if ($radio[antenna_mode] != 'Main')
-          $radio[antenna_mode]= 'ant-b';
+    if ($radio['antenna_mode'] != 'Main')
+          $radio['antenna_mode'] = 'ant-b';
         else
-          $radio[antenna_mode]= 'ant-a';
+          $radio['antenna_mode'] = 'ant-a';
 
-    _outln(sprintf('    antenna-mode=%s wds-mode=static wds-default-bridge=none wds-default-cost=100 \ ',$radio[antenna_mode]));
+    _outln(sprintf('    antenna-mode=%s wds-mode=static wds-default-bridge=none wds-default-cost=100 \ ',$radio['antenna_mode']));
     }
     _outln('    wds-cost-range=50-150 wds-ignore-ssid=yes hide-ssid=no');
 
-    if (isset($radio[interfaces])) foreach ($radio[interfaces] as $interface_id => $interface) {
+    if (isset($radio['interfaces'])) foreach ($radio['interfaces'] as $interface_id => $interface) {
        _outln(':delay 1');
-       _outln_comment('Type: '.$interface[interface_type]);
-       if ($interface[interface_type] == 'wds/p2p') {
+       _outln_comment('Type: '.$interface['interface_type']);
+       if ($interface['interface_type'] == 'wds/p2p') {
          _outln_comment(t('Remove all existing wds interfaces'));
          _outln(sprintf(':foreach i in [/interface wireless wds find master-interface=wlan%s] \ ',$radio_id+1));
          _outln('do={:foreach n in [/interface wireless wds get $i name] \ ');
          _outln('do={:foreach inum in [/ip address find interface=$n] \ ');
          _outln('do={/ip address remove $inum;};}; \ ');
          _outln('/interface wireless wds remove $i;}');
-         if (isset($interface[ipv4])) foreach ($interface[ipv4] as $ipv4_id => $ipv4)
-         if (isset($ipv4[links])) foreach ($ipv4[links] as $link_id => $link) {
+         if (isset($interface['ipv4'])) foreach ($interface['ipv4'] as $ipv4_id => $ipv4)
+         if (isset($ipv4['links'])) foreach ($ipv4['links'] as $link_id => $link) {
            if (preg_match("/(Working|Testing|Building)/",$link['flag']))
-             $disabled='no';
+             $disabled = 'no';
            else
-             $disabled='yes';
+             $disabled = 'yes';
            $wdsname = 'wds_'.guifi_get_hostname($link['device_id']);
            if ($link['interface']['mac'] == null)
-             $link['interface'][mac]= 'FF:FF:FF:FF:FF:FF';
+             $link['interface']['mac'] = 'FF:FF:FF:FF:FF:FF';
            _outln('/ interface wireless wds');
-           _outln(sprintf('add name="%s" master-interface=wlan%d wds-address=%s disabled=%s',$wdsname,$radio_id+1,$link['interface'][mac],$disabled));
-           $item = _ipcalc($ipv4[ipv4],$ipv4[netmask]);
+           _outln(sprintf('add name="%s" master-interface=wlan%d wds-address=%s disabled=%s',$wdsname,$radio_id+1,$link['interface']['mac'],$disabled));
+           $item = _ipcalc($ipv4['ipv4'],$ipv4['netmask']);
            $ospf_zone = guifi_get_ospf_zone($zone);
-           _outln(sprintf('/ ip address add address=%s/%d network=%s broadcast=%s interface=%s disabled=%s comment="%s"',$ipv4[ipv4],$item[maskbits],$item[netid],$item[broadcast],$wdsname,$disabled,$wdsname));
+           _outln(sprintf('/ ip address add address=%s/%d network=%s broadcast=%s interface=%s disabled=%s comment="%s"',$ipv4['ipv4'],$item['maskbits'],$item['netid'],$item['broadcast'],$wdsname,$disabled,$wdsname));
 
            if ($link['routing'] == 'OSPF') {
-             ospf_interface($wdsname, $item[netid], $item[maskbits], $ospf_name, $ospf_zone, $ospf_id, 'no');
+             ospf_interface($wdsname, $item['netid'], $item['maskbits'], $ospf_name, $ospf_zone, $ospf_id, 'no');
              bgp_peer($link['device_id'],$link['interface']['ipv4']['ipv4'],'yes');
            } else {
-             ospf_interface($wdsname, $item[netid], $item[maskbits], $ospf_name, $ospf_zone, $ospf_id, 'yes');
+             ospf_interface($wdsname, $item['netid'], $item['maskbits'], $ospf_name, $ospf_zone, $ospf_id, 'yes');
              bgp_peer($link['device_id'],$link['interface']['ipv4']['ipv4'],'no');
            }
          } // each wds link (ipv4)
@@ -308,32 +309,32 @@ function unsolclic_routeros($dev) {
          // wLan, wLan/Lan, Hotspot or client
 
          // Defining all networks and IP addresses at the interface
-         if (isset($interface[ipv4])) foreach ($interface[ipv4] as $ipv4_id => $ipv4) {
-           if ($interface[interface_type] == 'wLan/Lan') {
-             $iname = $interface[interface_type];
-             $ospf_routerid=$ipv4[ipv4];
+         if (isset($interface['ipv4'])) foreach ($interface['ipv4'] as $ipv4_id => $ipv4) {
+           if ($interface['interface_type'] == 'wLan/Lan') {
+             $iname = $interface['interface_type'];
+             $ospf_routerid=$ipv4['ipv4'];
            } else {
              $iname = 'wlan'.($radio_id+1);
            }
-           $item = _ipcalc($ipv4[ipv4],$ipv4[netmask]);
+           $item = _ipcalc($ipv4['ipv4'],$ipv4['netmask']);
            _outln('/ip address');
-           if ($interface[interface_type] == 'Wan')
+           if ($interface['interface_type'] == 'Wan')
              _outln(sprintf(':foreach i in [find interface=%s] do={remove $i}',$iname));
-             _outln(sprintf(':foreach i in [find address="%s/%d"] do={remove $i}',$ipv4[ipv4],$item[maskbits]));
-             _outln(sprintf('/ ip address add address=%s/%d network=%s broadcast=%s interface=%s disabled=no',$ipv4[ipv4],$item[maskbits],$item[netid],$item[broadcast],$iname));
-           $defined_ips[$ipv4[ipv4]] = $item;
+             _outln(sprintf(':foreach i in [find address="%s/%d"] do={remove $i}',$ipv4['ipv4'],$item['maskbits']));
+             _outln(sprintf('/ ip address add address=%s/%d network=%s broadcast=%s interface=%s disabled=no',$ipv4['ipv4'],$item['maskbits'],$item['netid'],$item['broadcast'],$iname));
+           $defined_ips[$ipv4['ipv4']] = $item;
            $ospf_zone = guifi_get_ospf_zone($zone);
            _outln('/ routing bgp network');
-           _outln(sprintf(':foreach i in [/routing bgp network find network=%s/%d] do={/routing bgp network remove $i;}',$item[netid],$item[maskbits]));
-           _outln(sprintf('add network=%s/%d disabled=no',$item[netid],$item[maskbits]));
-           if ($radio[mode] != 'client') {
-             ospf_interface($iname, $item[netid], $item[maskbits], $ospf_name, $ospf_zone, $ospf_id, 'no');
+           _outln(sprintf(':foreach i in [/routing bgp network find network=%s/%d] do={/routing bgp network remove $i;}',$item['netid'],$item['maskbits']));
+           _outln(sprintf('add network=%s/%d disabled=no',$item['netid'],$item['maskbits']));
+           if ($radio['mode'] != 'client') {
+             ospf_interface($iname, $item['netid'], $item['maskbits'], $ospf_name, $ospf_zone, $ospf_id, 'no');
            } else {
-             ospf_interface($iname, $item[netid], $item[maskbits], $ospf_name, $ospf_zone, $ospf_id, 'yes');
+             ospf_interface($iname, $item['netid'], $item['maskbits'], $ospf_name, $ospf_zone, $ospf_id, 'yes');
            }
          }
            // HotSpot
-         if ($interface[interface_type] == 'HotSpot') {
+         if ($interface['interface_type'] == 'HotSpot') {
            _outln_comment();
            _outln_comment('HotSpot');
            _outln('/interface wireless');
@@ -364,11 +365,12 @@ function unsolclic_routeros($dev) {
 
 
          _outln(':delay 1');
-         if ($interface[interface_type] != 'HotSpot' || 'Wan') {
+
+         if ( !preg_match("/(HotSpot|Wan)/", $interface['interface_type'])) {
            // Not link only (AP), setting DHCP
            if ($mode =='ap-bridge') {
-             $maxip = ip2long($item[netstart]) + 1;
-             if (($maxip + 5) > (ip2long($item[netend]) - 5)) {
+             $maxip = ip2long($item['netstart']) + 1;
+             if (($maxip + 5) > (ip2long($item['netend']) - 5)) {
                $maxip = ip2long($item['netend']);
                $dhcp_disabled='yes';
              } else {
@@ -379,25 +381,25 @@ function unsolclic_routeros($dev) {
              _outln_comment();
              _outln_comment('DHCP');
              _outln(sprintf(':foreach i in [/ip pool find name=dhcp-%s] do={/ip pool remove $i;}',$iname));
-             _outln(sprintf('/ip pool add name=dhcp-%s ranges=%s-%s',$iname,long2ip($maxip),$item[netend]));
+             _outln(sprintf('/ip pool add name=dhcp-%s ranges=%s-%s',$iname,long2ip($maxip),$item['netend']));
              _outln(sprintf(':foreach i in [/ip dhcp-server find name=dhcp-%s] do={/ip dhcp-server remove $i;}',$iname));
              _outln(sprintf('/ip dhcp-server add name=dhcp-%s interface=%s address-pool=dhcp-%s disabled=%s',$iname,$iname,$iname,$dhcp_disabled));
-             _outln(sprintf(':foreach i in [/ip dhcp-server network find address="%s/%d"] do={/ip dhcp-server network remove $i;}',$item[netid],$item[maskbits]));
-             _outln(sprintf('/ip dhcp-server network add address=%s/%d gateway=%s domain=guifi.net comment=dhcp-%s',$item[netid],$item[maskbits],$item[netstart],$iname));
+             _outln(sprintf(':foreach i in [/ip dhcp-server network find address="%s/%d"] do={/ip dhcp-server network remove $i;}',$item['netid'],$item['maskbits']));
+             _outln(sprintf('/ip dhcp-server network add address=%s/%d gateway=%s domain=guifi.net comment=dhcp-%s',$item['netid'],$item['maskbits'],$item['netstart'],$iname));
 
              $dhcp = array();
              $dhcp[] = '/ip dhcp-server lease';
              $dhcp[] = ':foreach i in [find comment=""] do={remove $i;}';
              $dhcp[] = ':delay 1';
-             if (isset($ipv4[links])) foreach ($ipv4[links] as $link_id => $link) {
-               if (isset($link['interface'][ipv4][ipv4]))
-               if (ip2long($link['interface'][ipv4][ipv4]) >= $maxip)
-                 $maxip = ip2long($link['interface'][ipv4][ipv4]) + 1;
-               if ($link['interface'][mac] == null)
+             if (isset($ipv4['links'])) foreach ($ipv4['links'] as $link_id => $link) {
+               if (isset($link['interface']['ipv4']['ipv4']))
+               if (ip2long($link['interface']['ipv4']['ipv4']) >= $maxip)
+                 $maxip = ip2long($link['interface']['ipv4']['ipv4']) + 1;
+               if ($link['interface']['mac'] == null)
                  $rmac = 'ff:ff:ff:ff:ff:ff';
                else 
-                 $rmac = $link['interface'][mac];
-                 $dhcp[] = sprintf('add address=%s mac-address=%s client-id=%s server=dhcp-%s',$link['interface'][ipv4][ipv4],$rmac,guifi_get_hostname($link[device_id]),$iname);
+                 $rmac = $link['interface']['mac'];
+                 $dhcp[] = sprintf('add address=%s mac-address=%s client-id=%s server=dhcp-%s',$link['interface']['ipv4']['ipv4'],$rmac,guifi_get_hostname($link['device_id']),$iname);
              }
              foreach ($dhcp as $outln)
                _outln($outln);
@@ -416,7 +418,7 @@ function unsolclic_routeros($dev) {
      _outln_comment('Device has firewall (setting up as CPE)');
 
     // Setting gateway
-     _outln(sprintf('/ip route add gateway=%s',$link['interface'][ipv4][ipv4]));
+     _outln(sprintf('/ip route add gateway=%s',$link['interface']['ipv4']['ipv4']));
 
     // Setting proxy-arp
     _outln('/interface ethernet set ether1 arp=proxy-arp');
@@ -494,42 +496,42 @@ function unsolclic_routeros($dev) {
     case 'vlan4': $iname = 'wLan/Lan'; break;
     case 'Wan':   $iname = 'wLan/Lan'; break;
     default:
-      $iname = $interface[interface_type];
+      $iname = $interface['interface_type'];
       break;
     }
     $ospf_intrefaces[] = $iname;
-    if (isset($interface[ipv4])) foreach ($interface[ipv4] as $ipv4_id => $ipv4) {
-      if (!isset($defined_ips[$ipv4[ipv4]])) {
+    if (isset($interface['ipv4'])) foreach ($interface['ipv4'] as $ipv4_id => $ipv4) {
+      if (!isset($defined_ips[$ipv4['ipv4']])) {
         $disabled='yes';
-        if (isset($ipv4[links])) {
+        if (isset($ipv4['links'])) {
           unset($comments);
-          foreach ($ipv4[links] as $link_id => $link) {
+          foreach ($ipv4['links'] as $link_id => $link) {
             if (($disabled='yes') and (preg_match("/(Working|Testing|Building)/",$link['flag'])))
               $disabled='no';
-            $comments[] = guifi_get_hostname($link[device_id]);
+            $comments[] = guifi_get_hostname($link['device_id']);
             $ospf_zone = guifi_get_ospf_zone($zone);
-            $item = _ipcalc($ipv4[ipv4],$ipv4[netmask]);
+            $item = _ipcalc($ipv4['ipv4'],$ipv4['netmask']);
                if ($link['routing'] == 'OSPF') {
-                ospf_interface($iname, $item[netid], $item[maskbits], $ospf_name, $ospf_zone, $ospf_id, 'no');
+                ospf_interface($iname, $item['netid'], $item['maskbits'], $ospf_name, $ospf_zone, $ospf_id, 'no');
                 bgp_peer($link['device_id'],$link['interface']['ipv4']['ipv4'], 'yes');
                 } else {
-                ospf_interface($iname, $item[netid], $item[maskbits], $ospf_name, $ospf_zone, $ospf_id, 'yes');
+                ospf_interface($iname, $item['netid'], $item['maskbits'], $ospf_name, $ospf_zone, $ospf_id, 'yes');
                 bgp_peer($link['device_id'],$link['interface']['ipv4']['ipv4'], 'no');
                 }
           }
         } else
           $disabled='no';
-        $item = _ipcalc($ipv4[ipv4],$ipv4[netmask]);
-        _outln(sprintf(':foreach i in [/ip address find address="%s/%d"] do={/ip address remove $i;}',$ipv4[ipv4],$item[maskbits]));
+        $item = _ipcalc($ipv4['ipv4'],$ipv4['netmask']);
+        _outln(sprintf(':foreach i in [/ip address find address="%s/%d"] do={/ip address remove $i;}',$ipv4['ipv4'],$item['maskbits']));
         _outln(':delay 1');
-        _outln(sprintf('/ ip address add address=%s/%d network=%s broadcast=%s interface=%s disabled=%s comment="%s"',$ipv4[ipv4],$item[maskbits],$item[netid],$item[broadcast],$iname,$disabled,implode(',',$comments)));
-        $defined_ips[$ipv4[ipv4]] = $item;
+        _outln(sprintf('/ ip address add address=%s/%d network=%s broadcast=%s interface=%s disabled=%s comment="%s"',$ipv4['ipv4'],$item['maskbits'],$item['netid'],$item['broadcast'],$iname,$disabled,implode(',',$comments)));
+        $defined_ips[$ipv4['ipv4']] = $item;
       }
     }
   }
 
   // NAT for internal addresses while being used inside the router
-  
+
   _outln_comment();
   _outln_comment(t('Internal addresses NAT'));
   _outln(':foreach i in [/ip firewall nat find src-address="172.16.0.0/12"] do={/ip firewall nat remove $i;}');
