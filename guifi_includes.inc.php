@@ -1819,15 +1819,10 @@ function guifi_coord_dtodms($coord){
 }
 
 function guifi_gmap_key() {
-  $gmap_key = variable_get('guifi_gmap_key','');
-  if ($gmap_key != '') {
-    drupal_add_js(drupal_get_path('module', 'guifi').'/js/wms-gs-1_1_1.js','module');
-    drupal_set_html_head('<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key='.
-           $gmap_key.
-         '" type="text/javascript"></script>');
-    return TRUE;
-  }
-  return FALSE;
+  drupal_add_js(drupal_get_path('module', 'guifi').'/js/wms-gs-2_0_0.js','module');
+  drupal_set_html_head('<script src="http://maps.google.com/maps/api/js?sensor=false' .
+       '" type="text/javascript"></script>');
+  return TRUE;
 }
 
 function guifi_validate_js($form_name) {

@@ -11,7 +11,7 @@ if(Drupal.jsEnabled) {
 function xz() 
 {
   if (GBrowserIsCompatible()) {
-    map=new GMap2(document.getElementById("map"));
+    map=new google.maps.Map(document.getElementById("map"));
     if (map.getSize().height >= 300)
       map.addControl(new GLargeMapControl());
     else
