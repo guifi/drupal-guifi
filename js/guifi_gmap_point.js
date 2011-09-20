@@ -1,7 +1,5 @@
 var map = null;
 
-var marker_Node;
-
 if(Drupal.jsEnabled) {
   $(document).ready(function(){
     draw_map();
@@ -37,20 +35,14 @@ function draw_map()
     map = new google.maps.Map(divmap, opts);
 
     // Add the node position as a marker on the map
-    var marcador = new google.maps.Marker(node);
+    var marcador = new google.maps.Marker( { position: node } );
     marcador.setMap(map);
-  
-    // Wait for idle map
+
     google.maps.event.addListener(map, 'idle', function() {
         // Draw the WMS layer 
-	    var guifi_layer = new GWMSTileLayer(map);
-        guifi_layer.baseURL=document.getElementById("guifi-wms").value;
-        guifi_layer.layers = "Nodes,Links";
-        guifi_layer.format = "image/png";
-        guifi_layer.draw_layer();
+        var guifi = new GuifiMapType(map, baseURL);
+        map.overlayMapTypes.insertAt(0, guifi.overlay); // set the overlay, 0 index
     });
+
 }
-
-
-
 
