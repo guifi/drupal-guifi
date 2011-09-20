@@ -21,7 +21,8 @@ function draw_map()
         zoom: 16,
         mapTypeControl: true,
         mapTypeControlOptions: {
-            mapTypeIds: [google.maps.MapTypeId.ROADMAP, google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID, "guifi.net"],
+            mapTypeIds: [ "osm", google.maps.MapTypeId.ROADMAP, 
+                          google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID ],
         },
         mapTypeId: google.maps.MapTypeId.HYBRID,
         scaleControl: false,
@@ -32,7 +33,6 @@ function draw_map()
             style: google.maps.ZoomControlStyle.LARGE
         },
 
-        mapTypeId: google.maps.MapTypeId.HYBRID
     }
 
     // Add the map to the div
@@ -42,12 +42,12 @@ function draw_map()
     var marcador = new google.maps.Marker( { position: node, draggable: true } );
     marcador.setMap(map);
 
+    // Add the OSM map type
+    map.mapTypes.set('osm', openStreet);
+
     // Add the guifi layer
-    google.maps.event.addListener(map, 'idle', function() {
-        // Draw the WMS layer 
-        var guifi = new GuifiMapType(map, baseURL);
-        map.overlayMapTypes.insertAt(0, guifi.overlay);
-    });
+    var guifi = new GuifiMapType(map, baseURL);
+    map.overlayMapTypes.insertAt(0, guifi.overlay);
 
     //map.mapTypes.set(guifiMapType.MAPTYPE_ID, guifiMapType.overlay);
     //map.setMapTypeId(guifiMapType.MAPTYPE_ID);

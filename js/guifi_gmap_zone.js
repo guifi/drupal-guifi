@@ -7,41 +7,50 @@ var marker_move ;
 var border;
 
 if(Drupal.jsEnabled) {
-	  $(document).ready(function(){
-		xz();
-	    }); 
-	}
+    $(document).ready(function(){
+        draw_map();
+    }); 
+}
 
-function xz() 
+function drawp_map() 
 {
-  if (GBrowserIsCompatible()) {
-    map=new GMap2(document.getElementById("map"));
-    if (map.getSize().height >= 300)
-      map.addControl(new GLargeMapControl());
-    else
-      map.addControl(new GSmallMapControl());
-    if (map.getSize().width >= 500) {
-      map.addControl(new GScaleControl()) ;
-      map.addControl(new GOverviewMapControl());
-  	  map.addControl(new GMapTypeControl());
+
+    var divmap = document.getElementById("map");
+    var lat = document.getElementById("edit-lat").value;
+    var lon = document.getElementById("edit-lon").value;
+    var baseURL=document.getElementById("edit-guifi-wms").value;
+
+    var node  = new google.maps.LatLng(lat, lon);
+
+    opts = {
+        center: node,
+        zoom: 16,
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+            mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
+                          google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID ],
+        },
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        scaleControl: false,
+        streetViewControl: false,
+        zoomControl: true,
+        panControl: true,
+        zoomControlOptions: {
+            style: google.maps.ZoomControlStyle.LARGE
+        },
+
+        mapTypeId: google.maps.MapTypeId.HYBRID
     }
-    map.enableScrollWheelZoom();
-    
-	var layer1 = new GWMSTileLayer(map, new GCopyrightCollection("guifi.net"),1,17);
-    layer1.baseURL=document.getElementById("guifi-wms").value;
-    layer1.layers="Nodes,Links";
-    layer1.mercZoomLevel = 0;
-    layer1.opacity = 1.0;
 
-    var myMapTypeLayers=[G_SATELLITE_MAP.getTileLayers()[0],layer1];
-    var myCustomMapType = new GMapType(myMapTypeLayers, 
-    		G_NORMAL_MAP.getProjection(), "guifi.net", G_SATELLITE_MAP);
+    // Add the map to the div
+    map = new google.maps.Map(divmap, opts);
 
-    map.addMapType(myCustomMapType);	
-	
-    map.setCenter(new GLatLng(20.0, -10.0), 2);
-    map.setMapType(myCustomMapType);
+    // Add the guifi layer
+    var guifi = new GuifiMapType(map, baseURL);
+    map.overlayMapTypes.insertAt(0, guifi.overlay);
     
+    map.setCenter(new google.maps.LatLng(20.0, -10.0), 2);
+    return; 
     initialPosition();
   }
 }

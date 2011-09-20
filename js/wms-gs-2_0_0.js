@@ -19,7 +19,6 @@ GWMSTileLayer.prototype = {
 
 var GuifiMapType = function(map, url) {
 
-    this.MAPTYPE_ID = "guifi.net";
     this.map = map;
     this.tileSize = new google.maps.Size(256, 256);
 
@@ -29,18 +28,18 @@ var GuifiMapType = function(map, url) {
         this.baseURL = "http://guifi.net/cgi-bin/mapserv?map=/home/guifi/maps.guifi.net/guifimaps/GMap.map";
     }
      
-    this.options = {
+    this.overlay = new google.maps.ImageMapType( {
 
-        tileSize: this.tileSize,
-        minZoom: 2,
-        maxZoom: 24,
-        baseURL: this.baseURL,
-        map: this.map,
         name: "guifi.net",
         alt: "guifi.net WMS Image Layer",
+        maxZoom: 18,
+
+        tileSize: this.tileSize,
+        baseURL: this.baseURL,
+        map: this.map,
         layers: "Nodes,Links",
         format: "image/png",
-        mercZoomLevel: 15,
+        mercZoomLevel: 0,
 
         getTileUrl: function(point, zoom) {
 
@@ -79,26 +78,18 @@ var GuifiMapType = function(map, url) {
 
             return url;
         }
-    }
-
-    this.overlay = new google.maps.ImageMapType(this.options);
+    });
 
 }
 
-GuifiMapType.prototype.getOverlay= function() {
-    return new google.maps.ImageMapType(this.options);
-}
-
-GuifiMapType.prototype.getTile = function(coord, zoom, ownerDocument) {
-
-    var div = ownerDocument.createElement('DIV');
-    div.innerHTML = coord;
-    div.style.width = this.tileSize.width + 'px';
-    div.style.height = this.tileSize.height + 'px';
-    div.style.fontSize = '10';
-    div.style.borderStyle = 'solid';
-    div.style.borderWidth = '1px';
-    div.style.borderColor = '#AAAAAA';
-    return div;
-
-}
+var openStreet = new google.maps.ImageMapType({
+      getTileUrl: function(ll, z) {
+              var X = ll.x % (1 << z);  // wrap
+              return "http://tile.openstreetmap.org/" + z + "/" + X + "/" + ll.y + ".png";
+      },
+      tileSize: new google.maps.Size(256, 256),
+      isPng: true,
+      maxZoom: 18,
+      name: "OSM",
+      alt: "Open Streetmap tiles"
+});

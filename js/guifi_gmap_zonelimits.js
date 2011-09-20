@@ -12,33 +12,44 @@ var icon_SW;
 var icon_move ;
 
 if(Drupal.jsEnabled) {
-	  $(document).ready(function(){
-		xz();
-	    }); 
-	}
+    $(document).ready(function(){
+        draw_map();
+    }); 
+}
 
-function xz() 
+function draw_map() 
 {
-  if (GBrowserIsCompatible()) {
-    map=new GMap2(document.getElementById("map"));
-    map.addControl(new GLargeMapControl());
-    map.addControl(new GScaleControl()) ;
-//    map.addControl(new GMapTypeControl());
-    map.enableScrollWheelZoom();
-    map.addControl(new GOverviewMapControl());
-    
-	var layer1 = new GWMSTileLayer(map, new GCopyrightCollection("guifi.net"),1,17);
-    layer1.baseURL=document.getElementById("edit-guifi-wms").value;
-    layer1.layers="Nodes,Links";
-    layer1.mercZoomLevel = 0;
-    layer1.opacity = 1.0;
 
-    var myMapTypeLayers=[G_SATELLITE_MAP.getTileLayers()[0],layer1];
-    var myCustomMapType = new GMapType(myMapTypeLayers, 
-    		G_NORMAL_MAP.getProjection(), "guifi.net", G_SATELLITE_MAP);
+    var divmap = document.getElementById("map");
+    var baseURL=document.getElementById("edit-guifi-wms").value;
 
-    map.addMapType(myCustomMapType);
-	map.addControl(new GMapTypeControl());	
+    opts = {
+        center: google.maps.LatLng(20.0, -10.0),
+        zoom: 2,
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+            mapTypeIds: [ "osm", google.maps.MapTypeId.ROADMAP,
+                          google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID ],
+        },
+        mapTypeId: google.maps.MapTypeId.HYBRID,
+        scaleControl: false,
+        streetViewControl: false,
+        zoomControl: true,
+        panControl: true,
+        zoomControlOptions: {
+            style: google.maps.ZoomControlStyle.LARGE
+        },
+
+    }
+
+    // Add the map to the div
+    map = new google.maps.Map(divmap, opts);
+
+    // Add the guifi layer
+    var guifi = new GuifiMapType(map);
+    map.overlayMapTypes.insertAt(0, guifi.overlay);
+
+    return;
 	
     icon_NE = new GIcon(); 
     icon_NE.image = document.getElementById("edit-jspath").value+
@@ -68,11 +79,8 @@ function xz()
     icon_move.dragCrossImage = '';
 
 
-    map.setCenter(new GLatLng(20.0, -10.0), 2);
-    //map.setMapType(myCustomMapType);
-    
+    return; 
     initialPosition();
-  }
 }
  
 function initialPosition()
