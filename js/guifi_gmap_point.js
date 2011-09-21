@@ -35,8 +35,7 @@ function draw_map()
     map = new google.maps.Map(divmap, opts);
 
     // Add the node position as a marker on the map
-    var marcador = new google.maps.Marker( { position: node } );
-    marcador.setMap(map);
+    var marcador = new google.maps.Marker( { position: node, map: map } );
 
     google.maps.event.addListener(map, 'idle', function() {
         // Draw the WMS layer 

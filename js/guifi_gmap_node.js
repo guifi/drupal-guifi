@@ -39,8 +39,7 @@ function draw_map()
     map = new google.maps.Map(divmap, opts);
 
     // Add the marker
-    var marcador = new google.maps.Marker( { position: node, draggable: true } );
-    marcador.setMap(map);
+    var marcador = new google.maps.Marker( { position: node, draggable: true, map: map } );
 
     // Add the OSM map type
     map.mapTypes.set('osm', openStreet);

@@ -21,17 +21,17 @@ function draw_map()
 {
 
     var divmap = document.getElementById("map");
-    var baseURL=document.getElementById("edit-guifi-wms").value;
+    var baseURL = document.getElementById("edit-guifi-wms").value;
 
     opts = {
-        center: google.maps.LatLng(20.0, -10.0),
+        center: new google.maps.LatLng(20.0, -10.0),
         zoom: 2,
         mapTypeControl: true,
         mapTypeControlOptions: {
-            mapTypeIds: [ "osm", google.maps.MapTypeId.ROADMAP,
+            mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
                           google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID ],
         },
-        mapTypeId: google.maps.MapTypeId.HYBRID,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
         scaleControl: false,
         streetViewControl: false,
         zoomControl: true,
@@ -49,118 +49,103 @@ function draw_map()
     var guifi = new GuifiMapType(map);
     map.overlayMapTypes.insertAt(0, guifi.overlay);
 
-    return;
-	
-    icon_NE = new GIcon(); 
-    icon_NE.image = document.getElementById("edit-jspath").value+
-      'marker_NE_icon.png';
-    icon_NE.shadow = '';
-    icon_NE.iconSize = new GSize(32, 32);
-    icon_NE.shadowSize = new GSize(22, 20);
-    icon_NE.iconAnchor = new GPoint(22, 10);
-    icon_NE.dragCrossImage = '';
+    var icon_NE_url = document.getElementById("edit-jspath").value + 'marker_NE_icon.png';
+    icon_NE = new google.maps.MarkerImage( {
+                    url: icon_NE_url,
+                    size: new google.maps.Size(32, 32),
+                    origin: new google.maps.Point(0, 0),
+                    anchor: new google.maps.Point(22, 10) });
 
-    icon_SW = new GIcon(); 
-    icon_SW.image = document.getElementById("edit-jspath").value+
-      'marker_SW_icon.png';
-    icon_SW.shadow = '';
-    icon_SW.iconSize = new GSize(32, 32);
-    icon_SW.shadowSize = new GSize(22, 20);
-    icon_SW.iconAnchor = new GPoint(6, 20);
-    icon_SW.dragCrossImage = '';
+    //icon_NE.shadowSize = new GSize(22, 20);
+    //icon_NE.dragCrossImage = '';
+    //icon_NE.shadow = '';
 
-    icon_move = new GIcon();
-    icon_move.image = document.getElementById("edit-jspath").value+
-      'marker_move_icon.png';
-    icon_move.shadow = '';
-    icon_move.iconSize = new GSize(32, 32);
-    icon_move.shadowSize = new GSize(6, 20);
-    icon_move.iconAnchor = new GPoint(6, 20);
-    icon_move.dragCrossImage = '';
+    var icon_SW_url = document.getElementById("edit-jspath").value + 'marker_SW_icon.png';
+    icon_SW = new google.maps.MarkerImage( {
+                    url: icon_SW_url,
+                    size: new google.maps.Size(32, 32),
+                    origin: new google.maps.Point(0, 0),
+                    anchor: new google.maps.Point(22, 10) });
+
+    //icon_SW.shadow = '';
+    //icon_SW.shadowSize = new GSize(22, 20);
+    //icon_SW.dragCrossImage = '';
+
+    var icon_move_url = document.getElementById("edit-jspath").value + 'marker_move_icon.png';
+    icon_move = new google.maps.MarkerImage( {
+                    url: icon_move_url,
+                    size: new google.maps.Size(32, 32),
+                    origin: new google.maps.Point(0, 0),
+                    anchor: new google.maps.Point(6, 20) });
+
+    //icon_move.shadow = '';
+    //icon_move.shadowSize = new GSize(6, 20);
+    //icon_move.dragCrossImage = '';
 
 
-    return; 
-    initialPosition();
-}
- 
-function initialPosition()
-{
- map.clearOverlays();
+    var newNE = new google.maps.LatLng(document.getElementById("edit-maxy").value, 
+			                           document.getElementById("edit-maxx").value);
+    var newSW = new google.maps.LatLng(document.getElementById("edit-miny").value, 
+			                           document.getElementById("edit-minx").value); 
 
- var newNE = new GLatLng(document.getElementById("edit-maxy").value, 
-			 document.getElementById("edit-maxx").value);
- var newSW = new GLatLng(document.getElementById("edit-miny").value, 
-			 document.getElementById("edit-minx").value); 
+    var newBounds = new google.maps.LatLngBounds(newSW, newNE) ;
 
- var newBounds = new GLatLngBounds(newSW, newNE) ;
+    marker_NE = new google.maps.Marker( { position: newBounds.getNorthEast(), draggable: true, icon: icon_NE, map: map } ) ;
+    google.maps.event.addListener(marker_NE, 'dragend', function() { updatePolyline() ; }) ;
 
- marker_NE = new GMarker(newBounds.getNorthEast(), {draggable: true, icon: icon_NE}) ;
- GEvent.addListener(marker_NE, 'dragend', function() { updatePolyline() ; }) ;
+    marker_SW = new google.maps.Marker( { position: newBounds.getSouthWest(), draggable: true, icon: icon_SW, map: map } ) ;
+    google.maps.event.addListener(marker_SW, 'dragend', function() { updatePolyline() ; }) ;
 
- marker_SW = new GMarker(newBounds.getSouthWest(), {draggable: true, icon: icon_SW}) ;
- GEvent.addListener(marker_SW, 'dragend', function() { updatePolyline() ; }) ;
+    marker_move = new google.maps.Marker( { position: new google.maps.LatLng(((marker_SW.getPosition().lat() + marker_NE.getPosition().lat()) / 2), (marker_NE.getPosition().lng() + marker_SW.getPosition().lng()) / 2), draggable: true, icon: icon_move, map: map  }) ;
+    google.maps.event.addListener(marker_move, 'dragend', function() { updatePolyline() ; }) ;
+    marker_move.savePoint = marker_move.getPosition() ;			// Save for later
 
- marker_move = new GMarker( new GLatLng(((marker_SW.getPoint().lat() + marker_NE.getPoint().lat()) / 2),
-		 (marker_NE.getPoint().lng() + marker_SW.getPoint().lng()) / 2), {draggable: true, icon: icon_move}) ;
- GEvent.addListener(marker_move, 'dragend', function() { updatePolyline() ; }) ;
- marker_move.savePoint = marker_move.getPoint() ;			// Save for later
- 
- map.addOverlay(marker_NE);
- map.addOverlay(marker_SW);
- map.addOverlay(marker_move);
-
- updatePolyline();
+    updatePolyline();
 }
 
-function updatePolyline()
-{
- var bounds = new GLatLngBounds();
+function updatePolyline() {
+
+    var bounds = new google.maps.LatLngBounds();
 	
- if (border)
- {
-  map.removeOverlay(border);
- }
+    if (border) {
+        border.setMap(null);
+    }
 
- // Check for moved center...
+    // Check for moved center...
+    if ( marker_move.getPosition() != marker_move.savePoint ) {
+        var x = marker_move.getPosition().lat() - marker_move.savePoint.lat() ;
+        var y = marker_move.getPosition().lng() - marker_move.savePoint.lng() ;
+        marker_SW.setPosition( new google.maps.LatLng( marker_SW.getPosition().lat() + x, marker_SW.getPosition().lng() + y) ) ;
+        marker_NE.setPosition( new google.maps.LatLng( marker_NE.getPosition().lat() + x, marker_NE.getPosition().lng() + y) ) ;
+    } else {
+        // Center not moved so move center
+        var x = (marker_SW.getPosition().lat() + marker_NE.getPosition().lat()) / 2 ;
+        var y = (marker_NE.getPosition().lng() + marker_SW.getPosition().lng()) / 2 ;
+        marker_move.setPosition( new google.maps.LatLng(x,y) ) ;
+        map.setCenter(new google.maps.LatLng(x,y));
+    }
 
- if ( marker_move.getPoint() != marker_move.savePoint )
- {
-  var x = marker_move.getPoint().lat() - marker_move.savePoint.lat() ;
-  var y = marker_move.getPoint().lng() - marker_move.savePoint.lng() ;
-  marker_SW.setPoint( new GLatLng( marker_SW.getPoint().lat() + x, marker_SW.getPoint().lng() + y) ) ;
-  marker_NE.setPoint( new GLatLng( marker_NE.getPoint().lat() + x, marker_NE.getPoint().lng() + y) ) ;
+    marker_move.savePoint = marker_move.getPosition() ;			// Save for later
 
- } else						// Center not moved so move center
- {
-  var x = (marker_SW.getPoint().lat() + marker_NE.getPoint().lat()) / 2 ;
-  var y = (marker_NE.getPoint().lng() + marker_SW.getPoint().lng()) / 2 ;
-  marker_move.setPoint( new GLatLng(x,y) ) ;
- // map.setCenter(new GLatLng(x,y),Math.abs(90/x));
-  
-  map.setCenter(new GLatLng(x,y));
- }
+    var points = [
+        marker_NE.getPosition(),
+        new google.maps.LatLng(marker_SW.getPosition().lat(), marker_NE.getPosition().lng()),
+        marker_SW.getPosition(),
+        new google.maps.LatLng(marker_NE.getPosition().lat(), marker_SW.getPosition().lng()),
+        marker_NE.getPosition()
+    ];
 
- marker_move.savePoint = marker_move.getPoint() ;			// Save for later
+    border = new google.maps.Polyline( { path: points, strokeColor: "#66000", strokeOpacity: .4, strokeWeight: 5, map: map });
 
- var points = [
-      marker_NE.getPoint(),
-      new GLatLng(marker_SW.getPoint().lat(), marker_NE.getPoint().lng()),
-      marker_SW.getPoint(),
-      new GLatLng(marker_NE.getPoint().lat(), marker_SW.getPoint().lng()),
-      marker_NE.getPoint()];
- border = new GPolyline(points, "#66000");
  
- document.getElementById("edit-miny").value = marker_SW.getPoint().lat();
- document.getElementById("edit-minx").value = marker_SW.getPoint().lng();
- document.getElementById("edit-maxy").value = marker_NE.getPoint().lat();
- document.getElementById("edit-maxx").value = marker_NE.getPoint().lng();
+    document.getElementById("edit-miny").value = marker_SW.getPosition().lat();
+    document.getElementById("edit-minx").value = marker_SW.getPosition().lng();
+    document.getElementById("edit-maxy").value = marker_NE.getPosition().lat();
+    document.getElementById("edit-maxx").value = marker_NE.getPosition().lng();
 
- map.addOverlay(border);
- bounds.extend(marker_SW.getPoint());
- bounds.extend(marker_NE.getPoint());
- map.setZoom(map.getBoundsZoomLevel(bounds)); 
- 
-// map.setCenter(new GLatLng(20.0, -10.0), 2)
+    bounds.extend(marker_SW.getPosition());
+    bounds.extend(marker_NE.getPosition());
+    map.fitBounds(bounds);
 
 }
 
