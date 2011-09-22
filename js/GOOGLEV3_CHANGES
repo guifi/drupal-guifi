@@ -1,0 +1,34 @@
+* La v3 de los google maps no necesitan API KEY
+* La v2 de los google maps será obsoleta el 19 de Mayo de 2013
+* guifi_gmap_key no es necesario, la llamada a guifi_gmap_key() no es necesario
+* que retorne true or false
+*
+* el objeto GMap2 es sustituido por google.maps.Map
+* La inclusión del script de Google donde están definidos los métodos de los
+* google maps cambia de:
+*
+<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;key=$APIKEY" type="text/javascript"></script>
+
+ a:
+
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false">
+
+* GTileLayer no puede usarse.
+* GBrowserIsCompatible no debe usarse, es obsoleto.
+http://www.smashinglabs.pl/gmap/faq 
+A: GBrowserIsCompatible() is no longer valid for V3 API. Luckily, you don’t
+need it at all. Simply place compatibility information in target div for your
+map. It will disappear if map loads correctly.
+
+* No se pueden añadir o eliminar controles de forma dinámica, sólo en el
+  momento de la creación del mapa.
+
+  http://code.google.com/intl/es-ES/apis/maps/documentation/javascript/controls.html#DefaultControls
+
+
+* Los controles del mapa por defeto se general en función del tamaño del div
+* del mapa. Se hace de manera automática.
+*
+* OverviewMap no existe en V3 (minimapa en esquina inferior derecha).
+*
+* guifi zonelimits (Falta afinar el que los bordes se salgan del mapa)

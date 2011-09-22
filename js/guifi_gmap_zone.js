@@ -65,7 +65,7 @@ function draw_map() {
 
     google.maps.event.addListener(map, "click", function(event) {
 
-        point = event.latLng;
+        var point = event.latLng;
 
         if (map.getZoom() <= 15 ) {
             map.setZoom(map.getZoom()+3);

@@ -2,10 +2,10 @@ var map = null;
 var oGMark = null; //GMarker
 
 if(Drupal.jsEnabled) {
-	  $(document).ready(function(){
-		xz();
-	    }); 
-	}
+    $(document).ready(function(){
+        draw_map();
+    }); 
+}
 	
 var icon_start;
 var oNode;
@@ -94,7 +94,7 @@ function derive(newclass, base) {
   newclass.prototype = new xxx();
 }
 
-derive(ImgOverlay, GOverlay);
+derive(ImgOverlay, google.maps.OverlayView);
 
 ImgOverlay.prototype.initialize = function(map) {
   this.map            = map;
@@ -232,9 +232,9 @@ WTControl.prototype.reset = function() {
   this.trigger(0);
 }
 
-        // for these guys, the action happens when the map calls initialize
+// for these guys, the action happens when the map calls initialize
 function WTGControl(map, x, width, text0, text1, titlef, onclick, oncreate) {
-  var c = new GControl(0, 0);
+  //var c = new GControl(0, 0);
   c.initialize = function(map) {
     var w = new WTControl(map.getContainer(), 2,
                   function(d) { s = d.style;
@@ -407,70 +407,6 @@ var myCustomMapTypeNormal;
 var myCustomMapTypeSatellite;
 var myCustomMapTypePhysical;
 
-function remove_guifi() {
-  var imaptype = map.getCurrentMapType();
-  var name = imaptype.getName();
-
-  map.removeMapType(myCustomMapTypeNormal);
-  var myMapTypeLayers=[G_NORMAL_MAP.getTileLayers()[0]];
-  myCustomMapTypeNormal = new GMapType(myMapTypeLayers,
-              G_NORMAL_MAP.getProjection(), "Map", G_NORMAL_MAP);
-  map.addMapType(myCustomMapTypeNormal);
-
-  map.removeMapType(myCustomMapTypeSatellite);
-  var myMapTypeLayers=[G_SATELLITE_MAP.getTileLayers()[0]];
-  myCustomMapTypeSatellite = new GMapType(myMapTypeLayers,
-              G_SATELLITE_MAP.getProjection(), "Satellite", G_SATELLITE_MAP);
-  map.addMapType(myCustomMapTypeSatellite);
-
-  map.removeMapType(myCustomMapTypePhysical);
-  var myMapTypeLayers=[G_PHYSICAL_MAP.getTileLayers()[0]];
-  myCustomMapTypePhysical = new GMapType(myMapTypeLayers,
-              G_PHYSICAL_MAP.getProjection(), "Relief", G_PHYSICAL_MAP);
-  map.addMapType(myCustomMapTypePhysical);
-
-  if (name == "Map")
-    map.setMapType(myCustomMapTypeNormal);
-  else if (name == "Satellite")
-    map.setMapType(myCustomMapTypeSatellite);
-  else if (name == "Relief")
-    map.setMapType(myCustomMapTypePhysical);
-}
-
-function show_guifi() {
-  if (map.getCurrentMapType()) {
-    var imaptype = map.getCurrentMapType();
-    var name = imaptype.getName();
-  }
-
-  map.removeMapType(myCustomMapTypeNormal);
-  var myMapTypeLayers=[G_NORMAL_MAP.getTileLayers()[0],layer1];
-  myCustomMapTypeNormal = new GMapType(myMapTypeLayers,
-              G_NORMAL_MAP.getProjection(), "Map", G_NORMAL_MAP);
-  map.addMapType(myCustomMapTypeNormal);
-
-  map.removeMapType(myCustomMapTypeSatellite);
-  var myMapTypeLayers=[G_SATELLITE_MAP.getTileLayers()[0],layer1];
-  myCustomMapTypeSatellite = new GMapType(myMapTypeLayers,
-              G_SATELLITE_MAP.getProjection(), "Satellite", G_SATELLITE_MAP);
-  map.addMapType(myCustomMapTypeSatellite);
-
-  map.removeMapType(myCustomMapTypePhysical);
-  var myMapTypeLayers=[G_PHYSICAL_MAP.getTileLayers()[0],layer1];
-  myCustomMapTypePhysical = new GMapType(myMapTypeLayers,
-              G_PHYSICAL_MAP.getProjection(), "Relief", G_PHYSICAL_MAP);
-  map.addMapType(myCustomMapTypePhysical);
-
-  if (map.getCurrentMapType()) {
-    if (name == "Map")
-      map.setMapType(myCustomMapTypeNormal);
-    else if (name == "Satellite")
-      map.setMapType(myCustomMapTypeSatellite);
-    else if (name == "Relief")
-      map.setMapType(myCustomMapTypePhysical);
-  }
-}
-
 var guifi_widget;
 function create_guifi_widget(x, width) {
   WTGControl(map, x, width, '<b>Guifi</b>', 'Guifi', null,
@@ -480,81 +416,79 @@ function create_guifi_widget(x, width) {
 }
 //
 
-function xz() 
+function draw_map() 
 {
-  if (GBrowserIsCompatible()) {
-    map=new GMap2(document.getElementById("map"));
-    if (map.getSize().height >= 300)
-      map.addControl(new GLargeMapControl());
-    else
-      map.addControl(new GSmallMapControl());
-    if (map.getSize().width >= 500) {
-      map.addControl(new GScaleControl());
-      var overviewMap = new GOverviewMapControl();
-      map.addControl(overviewMap);
-      overviewMap.setMapType(G_SATELLITE_MAP);
-  	   map.addControl(new GMapTypeControl());
+
+    var divmap = document.getElementById("map");
+    var baseURL = document.getElementById("guifi-wms").value;
+
+    opts = {
+        center: new google.maps.LatLng(20.0, -10.0),
+        zoom: 13,
+        minZoom: 2,
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+            mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
+                          google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID ],
+        },
+        mapTypeId: google.maps.MapTypeId.SATELLITE,
+        scaleControl: false,
+        streetViewControl: false,
+        zoomControl: true,
+        panControl: true,
+        zoomControlOptions: {
+            style: google.maps.ZoomControlStyle.LARGE
+        },
+
     }
-    map.enableScrollWheelZoom();
-    
-    icon_start = new GIcon();
-    icon_start.image = document.getElementById("edit-jspath").value+'marker_start.png';
-    icon_start.shadow = '';
-    icon_start.iconSize = new GSize(32, 32);
-    icon_start.shadowSize = new GSize(6, 20);
-    icon_start.iconAnchor = new GPoint(6, 20);
-    icon_start.dragCrossImage = '';
-    
-    layer1 = new GWMSTileLayer(map, new GCopyrightCollection("guifi.net"),1,17);
-    layer1.baseURL=document.getElementById("guifi-wms").value;
-    layer1.layers="Nodes,Links";
-    layer1.mercZoomLevel = 0;
-    layer1.opacity = 1.0;
 
-    show_guifi();
+    // Add the map to the div
+    map = new google.maps.Map(divmap, opts);
 
-    newNode = new GLatLng(document.getElementById("lat").value, 
+    // Add the guifi layer
+    var guifi = new GuifiMapType(map);
+    map.overlayMapTypes.insertAt(0, guifi.overlay);
+
+    var icon_start_url = document.getElementById("edit-jspath").value + 'marker_start.png';
+    icon_start = new google.maps.MarkerImage(
+                    icon_start_url,
+                    new google.maps.Size(32, 32),
+                    null,
+                    new google.maps.Point(6, 20));
+
+    newNode = new google.maps.LatLng(document.getElementById("lat").value, 
 			 document.getElementById("lon").value);
     
-    map.setCenter(newNode, 13);
+    map.setCenter(newNode);
     
-    
-    GEvent.addListener(map, "click", function(marker, point) {
-      initialPosition(point);
-
+    google.maps.event.addListener(map, "click", function(event) {
+        initialPosition(event.latLng);
     });
 
-    oNode = new GMarker(newNode,{icon: icon_start});
-    map.addOverlay(oNode);
+    oNode = new google.maps.Marker({ position: newNode, icon: icon_start, map: map });
 
-    create_guifi_widget(164, 34);
-    create_visibilitycloak_widget(73, 86);
-    create_contour_widget(7, 59);
-    map.setMapType(myCustomMapTypeSatellite);
+    //create_guifi_widget(164, 34);
+    //create_visibilitycloak_widget(73, 86);
+    //create_contour_widget(7, 59);
 
     if (document.getElementById("lon2").value != "NA") {
-      lon2 = document.getElementById("lon2").value;      
-      if (document.getElementById("lat2").value != "NA") {
-        lat2 = document.getElementById("lat2").value;
-      }
-      point = new GLatLng(lat2,lon2);
-      initialPosition(point);
-      var bounds = new GLatLngBounds();
-      bounds = pLine.getBounds();
-      map.setCenter(bounds.getCenter(),map.getBoundsZoomLevel(bounds)); 
-	 }
+        lon2 = document.getElementById("lon2").value;      
+        if (document.getElementById("lat2").value != "NA") {
+            lat2 = document.getElementById("lat2").value;
+        }
+        point = new google.maps.LatLng(lat2,lon2);
+        initialPosition(point);
+        var bounds = new google.maps.LatLngBounds();
+        bounds = pLine.getBounds();
+        map.setCenter(bounds.getCenter(),map.getBoundsZoomLevel(bounds)); 
+	}
 	
-    map.removeMapType(G_NORMAL_MAP);
-    map.removeMapType(G_SATELLITE_MAP);
-    map.removeMapType(G_HYBRID_MAP);
-  }
 }
 
 function initialPosition(ppoint) {
-  map.clearOverlays();
   point=ppoint;  //save point in global var
   oGMark = null;  //init global var
-  var dNode = new GMarker(point);
+  var dNode = new google.maps.Marker( { position: point, map: map });
   var y = Math.abs(document.getElementById("lat").value - point.y);
   var x = Math.abs(document.getElementById("lon").value - point.x);
   var distance = Math.sqrt(y*y + x*x);
@@ -570,19 +504,20 @@ function initialPosition(ppoint) {
     ",00c000,9";   
   
   for (var i = 0; i < cloak_overlays.length; i++) {
-    map.addOverlay(cloak_overlays[i]);
+    cloak_overlays[i].setMap(map);
   }
 
   if (contour_overlay)
-    map.addOverlay(contour_overlay);
+    contour_overlay.setMap(map);
 
-  pLine = new GPolyline([newNode,point],"#ff0000", 5);
-  map.addOverlay(dNode);
-  map.addOverlay(pLine);   
-  map.addOverlay(oNode);
+  pLine = new google.maps.Polyline({ path: [newNode,point], strokeColor: "#ff0000", strokeWeight: 5, strokeOpacity: .4 });
+  dNode.setMap(map);
+  pLine.setMap(map);   
+  oNode.setMap(map);
   document.getElementById('tdistance').innerHTML=Math.round(GCDistance_js(newNode.y,newNode.x,point.y,point.x)*1000)/1000;
   document.getElementById('tazimut').innerHTML=Math.round(GCAzimuth_js(newNode.y,newNode.x,point.y,point.x)*100)/100;
 }
+
 function profileclick(event){
     var oProfile=document.getElementById("profile");
     var pointClic=coord_relativ(event,oProfile);
