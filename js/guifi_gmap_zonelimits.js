@@ -26,6 +26,7 @@ function draw_map()
     opts = {
         center: new google.maps.LatLng(20.0, -10.0),
         zoom: 2,
+        minZoom: 2,
         mapTypeControl: true,
         mapTypeControlOptions: {
             mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
@@ -50,38 +51,25 @@ function draw_map()
     map.overlayMapTypes.insertAt(0, guifi.overlay);
 
     var icon_NE_url = document.getElementById("edit-jspath").value + 'marker_NE_icon.png';
-    icon_NE = new google.maps.MarkerImage( {
-                    url: icon_NE_url,
-                    size: new google.maps.Size(32, 32),
-                    origin: new google.maps.Point(0, 0),
-                    anchor: new google.maps.Point(22, 10) });
-
-    //icon_NE.shadowSize = new GSize(22, 20);
-    //icon_NE.dragCrossImage = '';
-    //icon_NE.shadow = '';
+    icon_NE = new google.maps.MarkerImage(
+                    icon_NE_url,
+                    new google.maps.Size(32, 32),
+                    null,
+                    new google.maps.Point(22, 10));
 
     var icon_SW_url = document.getElementById("edit-jspath").value + 'marker_SW_icon.png';
-    icon_SW = new google.maps.MarkerImage( {
-                    url: icon_SW_url,
-                    size: new google.maps.Size(32, 32),
-                    origin: new google.maps.Point(0, 0),
-                    anchor: new google.maps.Point(22, 10) });
-
-    //icon_SW.shadow = '';
-    //icon_SW.shadowSize = new GSize(22, 20);
-    //icon_SW.dragCrossImage = '';
+    icon_SW = new google.maps.MarkerImage(
+                    icon_SW_url, 
+                    new google.maps.Size(32, 32), 
+                    null,
+                    new google.maps.Point(6, 20));
 
     var icon_move_url = document.getElementById("edit-jspath").value + 'marker_move_icon.png';
-    icon_move = new google.maps.MarkerImage( {
-                    url: icon_move_url,
-                    size: new google.maps.Size(32, 32),
-                    origin: new google.maps.Point(0, 0),
-                    anchor: new google.maps.Point(6, 20) });
-
-    //icon_move.shadow = '';
-    //icon_move.shadowSize = new GSize(6, 20);
-    //icon_move.dragCrossImage = '';
-
+    icon_move = new google.maps.MarkerImage(
+                    icon_move_url,
+                    new google.maps.Size(32, 32),
+                    null,
+                    new google.maps.Point(6, 20));
 
     var newNE = new google.maps.LatLng(document.getElementById("edit-maxy").value, 
 			                           document.getElementById("edit-maxx").value);
@@ -145,6 +133,7 @@ function updatePolyline() {
 
     bounds.extend(marker_SW.getPosition());
     bounds.extend(marker_NE.getPosition());
+    console.log(bounds);
     map.fitBounds(bounds);
 
 }

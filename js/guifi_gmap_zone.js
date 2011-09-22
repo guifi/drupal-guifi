@@ -4,8 +4,6 @@ var marker_NE;
 var marker_SW;
 var marker_move ;
 
-var border;
-
 if(Drupal.jsEnabled) {
     $(document).ready(function(){
         draw_map();
@@ -86,16 +84,7 @@ function draw_map() {
         }
     });
     
-    updatePolyline();
-}
-
-function updatePolyline() {
-
     var bounds = new google.maps.LatLngBounds();
-
-    if (border) {
-        border.setMap(null);
-    }
 
     // Check for moved center...
     if ( marker_move.getPosition() != marker_move.savePoint ) {
@@ -123,7 +112,7 @@ function updatePolyline() {
         marker_NE.getPosition()
     ];
 
-    border = new google.maps.Polyline( { path: points, strokeColor: "#66000", strokeOpacity: .4, strokeWeight: 5, map: map });
+    var border = new google.maps.Polyline( { path: points, strokeColor: "#66000", strokeOpacity: .4, strokeWeight: 5, map: map });
  
     bounds.extend(marker_SW.getPosition());
     bounds.extend(marker_NE.getPosition());
