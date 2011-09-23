@@ -125,9 +125,6 @@ function guifi_service_form($node, $param) {
     '#description' => t("Who did possible this service or who to contact with regarding this service if it is distinct of the owner of this page."),
   );
 
-  //$output .= form_textfield(t("Contact"), "contact", $node->contact, 60, 128, t("Who did possible this service or who to contact with regarding this service if it is distinct of the owner of this page.") . ($error['contact'] ? $error["contact"] : ''));
-////  $output .= form_select(t('Zone'), 'zone_id', $node->zone_id, guifi_zones_listbox(), t('The zone where this node where this node belongs to.'));
-
   $f['server'] = array(
     '#type' => 'textfield',
     '#title' => t("Device"),

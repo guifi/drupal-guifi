@@ -236,7 +236,6 @@ function guifi_zone_form(&$node, &$param) {
   $form_weight = -20;
 
   $type = node_get_types('type',$node);
-
   if (($type->has_title)) {
     $form['title'] = array(
       '#type' => 'textfield',
@@ -683,6 +682,18 @@ function guifi_zone_validate($node) {
      }
   }
 
+  // check if master zone is a child
+ $childs = guifi_zone_childs($node->nid);
+  foreach ( $childs as $key => $child) {
+    if ( $child == $node->master ) {
+      $childname = db_fetch_object(db_query(
+           'SELECT title
+            FROM {guifi_zone}
+            WHERE id = %s', $child));
+       form_set_error('master',
+         t("You can't use a child zone <strong>%child</strong> from %zone as master!!!", array('%child' => $childname->title, '%zone' => $node->title)));
+    }
+  }
   // check that master is not being assigned to itself
   if (!empty($node->nid))
   if ($node->master == $node->nid)
@@ -953,15 +964,9 @@ function guifi_zone_totals($zones) {
   return $summary;
 }
 
-function guifi_zone_childs_and_parents($zid) {
-  return array_merge(guifi_zone_childs($zid),
-           guifi_zone_get_parents($zid));
-}
-
 function guifi_zone_childs($zid) {
   return array_keys(guifi_zone_childs_tree($zid,9999));
 }
-
 
 function guifi_zone_childs_tree($parents, $maxdepth = 1, &$depth = 0) {
 
@@ -1215,44 +1220,6 @@ function guifi_zone_view($node, $teaser = FALSE, $page = FALSE, $block = FALSE) 
 
 /** Miscellaneous utilities related to zones
 **/
-
-
-function guifi_zones_listbox_recurse($id, $indent, $listbox, $children, $exclude) {
-  if ($children[$id]) {
-    foreach ($children[$id] as $foo => $zone) {
-      if (!$exclude || $exclude != $zone->id) {
-        $listbox[$zone->id] = $indent .' '. $zone->title;
-        $listbox = guifi_zones_listbox_recurse($zone->id, $indent .'--', $listbox, $children, $exclude);
-      }
-    }
-  }
-
-  return $listbox;
-}
-
-/** guifi_zones_listbox(): Creates a list of the zones
-**/
-function guifi_zones_listbox($exclude = 0) {
-  $result = db_query(
-    'SELECT z.id, z.title, z.master, z.weight ' .
-    'FROM {guifi_zone} z ' .
-    'ORDER BY z.weight, z.title');
-
-  while ($zone = db_fetch_object($result)) {
-    if (!isset($children[$zone->master])) {
-      $children[$zone->master] = array();
-    }
-    array_push($children[$zone->master], $zone);
-  }
-
-  $listbox = array();
-
-  $listbox[0] = '<'. t('root zone') .'>';
-
-  $listbox = guifi_zones_listbox_recurse(0, '', $listbox, $children, $exclude);
-
-  return $listbox;
-}
 
 /** guifi_zone_l(): Creates a link to the zone
 **/
