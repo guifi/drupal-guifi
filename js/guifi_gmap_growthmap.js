@@ -7,10 +7,10 @@ var map = null;
 
 
 if(Drupal.jsEnabled) {
-	  $(document).ready(function(){
-        xz();
-	    }); 
-	}
+    $(document).ready(function(){
+        draw_map();
+    }); 
+}
 
 var http_request;
 var adata;  //carga el json de la web en el array
@@ -65,88 +65,96 @@ var nnormal = 35;
 var nslow = 100;
 var speed = nfast;;
 
-function xz()
-{
-  if (GBrowserIsCompatible()) {
-      map=new GMap2(document.getElementById("map"));
-      if (map.getSize().height >= 300) map.addControl(navmapcontrol = new GLargeMapControl());
-      else map.addControl(navmapcontrol = new GSmallMapControl());
-      if (map.getSize().width >= 500) {
-            map.addControl(new GScaleControl()) ;
-            map.addControl(new GMapTypeControl());
-      }
-      map.enableScrollWheelZoom();
-      icon = new GIcon();
-      icon.image = document.getElementById("edit-jspath").value+'marker_traceroute_icon1.png';
-      icon.shadow = '';
-      icon.shadowSize = new GSize(0,0);
-      icon.iconSize = new GSize(10, 10);
-      icon.iconAnchor = new GPoint(5, 5);
-      icon.dragCrossImage = '';
-      icon2 = new GIcon();
-      icon2.image = document.getElementById("edit-jspath").value+'marker_traceroute_icon9.png';
-      icon2.shadow = '';
-      icon2.shadowSize = new GSize(0,0);
-      icon2.iconSize = new GSize(8, 8);
-      icon2.iconAnchor = new GPoint(4, 4);
-      icon2.dragCrossImage = '';
-      
-      img = new Image();
-      img.src = document.getElementById("edit-jspath").value+'marker_traceroute_icon1.png';
-      img2 = new Image();
-      img2.src = document.getElementById("edit-jspath").value+'marker_traceroute_icon9.png';
+function draw_map() {
+
+    var divmap = document.getElementById("map");
+    var baseURL = document.getElementById("edit-guifi-wms").value;
+
+    opts = {
+        center: new google.maps.LatLng(41.83, 2.30),
+        zoom: 9,
+        minZoom: 2,
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+            mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
+                          google.maps.MapTypeId.SATELLITE,
+                          google.maps.MapTypeId.HYBRID,
+                          google.maps.MapTypeId.TERRAIN ],
+        },
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        scaleControl: false,
+        streetViewControl: false,
+        zoomControl: true,
+        panControl: true,
+        zoomControlOptions: {
+            style: google.maps.ZoomControlStyle.LARGE
+        },
+
+    }
+
+    // Add the map to the div
+    map = new google.maps.Map(divmap, opts);
+
+    // Add the guifi layer
+    var guifi = new GuifiLayer(map);
+    map.overlayMapTypes.insertAt(0, guifi.overlay);
 
 
-      var layer1 = new GWMSTileLayer(map, new GCopyrightCollection("guifi.net"),1,17);
-      layer1.baseURL=document.getElementById("guifi-wms").value;
-      layer1.layers="Nodes,Links";
-      layer1.mercZoomLevel = 0;
-      layer1.opacity = 1.0;
-  
-      var myMapTypeLayers=[G_SATELLITE_MAP.getTileLayers()[0],layer1];
-      var myCustomMapType = new GMapType(myMapTypeLayers, 
-              G_NORMAL_MAP.getProjection(), "guifi.net", G_SATELLITE_MAP);
-  
-      map.addMapType(myCustomMapType);
-      //map.setMapType(myCustomMapType);
-      map.setMapType(G_SATELLITE_MAP);
-      map.setCenter(new GLatLng(41.83, 2.30), 9);
+    var icon_url = document.getElementById("edit-jspath").value + 'marker_traceroute_icon1.png';
+    icon = new google.maps.MarkerImage(
+                 icon_NE_url,
+                 new google.maps.Size(10, 10),
+                 null,
+                 new google.maps.Point(5, 5));
+    
+    var icon2_url = document.getElementById("edit-jspath").value + 'marker_traceroute_icon9.png';
+    icon2 = new google.maps.MarkerImage(
+                 icon_NE_url,
+                 new google.maps.Size(8, 8),
+                 null,
+                 new google.maps.Point(4, 4));
+    
+    img = new Image();
+    img.src = document.getElementById("edit-jspath").value+'marker_traceroute_icon1.png';
+    img2 = new Image();
+    img2.src = document.getElementById("edit-jspath").value+'marker_traceroute_icon9.png';
 
-      var nini=35;
-      var ninc=22
-      create_init_widget(8,nini+(ninc*0),34);
-      create_play_widget(8,nini+(ninc*1),34);
-      create_clean_widget(8,nini+(ninc*2),34);
-      create_fast_widget(8,nini+(ninc*3),34);
-      create_normal_widget(8,nini+(ninc*4),34);
-      create_slow_widget(8,nini+(ninc*5),34);
-      init_widget.enable();
-      play_widget.disable();
-      clean_widget.disable();
-      speed = nfast;
-      fast_widget.disable();
-      normal_widget.enable();
-      slow_widget.enable();
+
+    var nini=35;
+    var ninc=22
+    create_init_widget(8,nini+(ninc*0),34);
+    create_play_widget(8,nini+(ninc*1),34);
+    create_clean_widget(8,nini+(ninc*2),34);
+    create_fast_widget(8,nini+(ninc*3),34);
+    create_normal_widget(8,nini+(ninc*4),34);
+    create_slow_widget(8,nini+(ninc*5),34);
+    init_widget.enable();
+    play_widget.disable();
+    clean_widget.disable();
+    speed = nfast;
+    fast_widget.disable();
+    normal_widget.enable();
+    slow_widget.enable();
       
-      document.getElementById("edit-formmap2").value="";
+    document.getElementById("edit-formmap2").value="";
       
-      if (document.getElementById('testcanvas').getContext!=undefined){
-            supportsCanvas = true;
+    if (document.getElementById('testcanvas').getContext!=undefined){
+          supportsCanvas = true;
             
-            /**
-            * @fileoverview Canvas tools for google maps. The first object is
-            * to create arrows on google maps.
-            * @author frank2008cn@gmail.com (Xiaoxi Wu)
-            * modified for this application
-            */
-              var Canvas = function(pname,pzorder) {
-                this.name_ = pname;
-                this.zorder_=pzorder;
-              };
+          /**
+          * @fileoverview Canvas tools for google maps. The first object is
+          * to create arrows on google maps.
+          * @author frank2008cn@gmail.com (Xiaoxi Wu)
+          * modified for this application
+          */
+            var Canvas = function(pname,pzorder) {
+              this.name_ = pname;
+              this.zorder_=pzorder;
+            };
            
-              Canvas.prototype = new GOverlay();
+            Canvas.prototype = new GOverlay();
            
-              Canvas.prototype.initialize = function(map) {
+            Canvas.prototype.initialize = function(map) {
                 this.map_ = map;
                 var div = document.createElement('div');
                 div.style.position = "absolute";
@@ -160,19 +168,19 @@ function xz()
                 this.reset();
               };
            
-              Canvas.prototype.remove = function() {
+            Canvas.prototype.remove = function() {
                  this.canvas_.parentNode.removeChild(this.canvas_);
-              };
+            };
            
-              Canvas.prototype.copy = function() {
+            Canvas.prototype.copy = function() {
                   return new Canvas();
-              };
+            };
            
-              Canvas.prototype.redraw = function(change_in_coordinate_system) {
+            Canvas.prototype.redraw = function(change_in_coordinate_system) {
  
-              };
+            };
 
-              Canvas.prototype.reset = function() {
+            Canvas.prototype.reset = function() {
                   var p = this.map_.fromLatLngToDivPixel(this.map_.getCenter());
                   //var h = parseInt(this.div_.clientHeight);
                   //this.div_.style.width = "800px";
@@ -186,23 +194,23 @@ function xz()
                   this.latlngne_=this.map_.fromDivPixelToLatLng(j);
                   var k = new GPoint(p.x - 400,p.y + 300);
                   this.latlngsw_=this.map_.fromDivPixelToLatLng(k);
-              };
+            };
 
-              Canvas.prototype.getne = function() {
+            Canvas.prototype.getne = function() {
                   return(this.latlngne_);
-              };
-              Canvas.prototype.getsw = function() {
+            };
+            Canvas.prototype.getsw = function() {
                   return(this.latlngsw_);
-              };
-              Canvas.prototype.LatLngToCanvasPixel = function(pLatLng) {
+            };
+            Canvas.prototype.LatLngToCanvasPixel = function(pLatLng) {
                   var p=this.map_.fromLatLngToDivPixel(pLatLng);
                   var v=new GPoint(p.x - this.xoffset_,p.y - this.yoffset_);
                   return(v);
-              };
+            };
               
-              Canvas.prototype.obj = function() {
+            Canvas.prototype.obj = function() {
                   return this.canvas_.getContext('2d');
-              };
+            };
             //****************************************************
             
             objsupernodes = new Canvas("canvassupernodes",204);
@@ -229,7 +237,6 @@ function xz()
       if(document.getElementById("maprun").value==1){
             init();
       };
-  }
 }
 
 function build_history(pdata){

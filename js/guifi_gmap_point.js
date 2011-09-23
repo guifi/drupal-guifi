@@ -39,7 +39,7 @@ function draw_map()
 
     google.maps.event.addListener(map, 'idle', function() {
         // Draw the WMS layer 
-        var guifi = new GuifiMapType(map, baseURL);
+        var guifi = new GuifiLayer(map, baseURL);
         map.overlayMapTypes.insertAt(0, guifi.overlay); // set the overlay, 0 index
     });
 

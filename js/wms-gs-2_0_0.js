@@ -17,7 +17,7 @@ GWMSTileLayer.prototype = {
     },
 }
 
-var GuifiMapType = function(map, url) {
+var GuifiLayer = function(map, url) {
 
     this.map = map;
     this.tileSize = new google.maps.Size(256, 256);
@@ -93,3 +93,62 @@ var openStreet = new google.maps.ImageMapType({
       name: "OSM",
       alt: "Open Streetmap tiles"
 });
+
+function Control(name, disabled) {
+    this.div = document.createElement('DIV');
+    
+    // Set CSS styles for the DIV containing the control
+    // Setting padding to 5 px will offset the control
+    // from the edge of the map
+    this.div.style.padding = '5px';
+    this.div.style.paddingLeft = '0px';
+    this.div.style.paddingRight = '1px';
+
+    // Set CSS for the control border
+    this.ui = document.createElement('DIV');
+    this.ui.style.backgroundColor = '#708dce';
+    this.ui.style.borderStyle = 'solid';
+    this.ui.style.borderColor= '#708dce';
+    this.ui.style.borderWidth = '1px';
+    this.ui.style.cursor = 'pointer';
+    this.ui.style.textAlign = 'center';
+    this.ui.title = 'Add/Remove the ' + name + ' layer';
+    this.div.appendChild(this.ui);
+
+    // Set CSS for the control interior
+    this.text = document.createElement('DIV');
+    this.text.style.fontFamily = 'Arial,sans-serif';
+    this.text.style.fontSize = '12px';
+    this.text.style.color = 'white';
+    this.text.style.fontWeight= 'bold';
+    this.text.style.paddingLeft = '10px';
+    this.text.style.paddingRight = '10px';
+    this.text.style.paddingTop = '2px';
+    this.text.style.paddingBottom = '2px';
+    this.text.innerHTML = name + ' layer';
+    this.ui.appendChild(this.text);
+
+    if (disabled) {
+        this.ui.style.backgroundColor = 'white';
+        this.ui.style.borderColor= '#a9bbdf';
+        this.text.style.color = 'black';
+        this.text.style.fontWeight = 'normal';
+    }
+}
+
+Control.prototype = {
+
+    enableButton: function() {
+            this.ui.style.backgroundColor = '#708dce';
+            this.ui.style.borderColor= '#708dce';
+            this.text.style.color = 'white';
+            this.text.style.fontWeight = 'bold';
+    },
+
+    disableButton: function() {
+            this.ui.style.backgroundColor = 'white';
+            this.ui.style.borderColor= '#a9bbdf';
+            this.text.style.color = 'black';
+            this.text.style.fontWeight = 'normal';
+    },
+}

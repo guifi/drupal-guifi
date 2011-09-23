@@ -1,5 +1,5 @@
 var map = null;
-var oGMark = null; //GMarker
+var markers = Array();
 
 if(Drupal.jsEnabled) {
     $(document).ready(function(){
@@ -8,8 +8,8 @@ if(Drupal.jsEnabled) {
 }
 	
 var icon_start;
-var oNode;
-var newNode; //initial point
+var node_marker;
+var node; //initial point
 var lat2;
 var lon2;
 var marker;
@@ -130,7 +130,7 @@ ImgOverlay.prototype.redraw = function(change_in_coordinate_system) {
 }
 
 function OneDegreeImgOverlay(lat, lon, fudge, url) {
-  return new ImgOverlay(new GLatLngBounds(new GLatLng(lat - fudge, lon - fudge), 
+  return new ImgOverlay(new google.maps.LatLngBounds(new GLatLng(lat - fudge, lon - fudge), 
     new GLatLng(lat + 1 + fudge, lon + 1 + fudge)), url);
 }
 
@@ -236,7 +236,7 @@ WTControl.prototype.reset = function() {
 function WTGControl(map, x, width, text0, text1, titlef, onclick, oncreate) {
   //var c = new GControl(0, 0);
   c.initialize = function(map) {
-    var w = new WTControl(map.getContainer(), 2,
+  var w = new WTControl(map.getContainer(), 2,
                   function(d) { s = d.style;
                                 s.border          = '1px solid black'
                                 s.padding         = '0px 3px';
@@ -347,6 +347,16 @@ var contour_listener;
                                  // 0     1     2     3     4     5     6     7    8    9   10   11   12   13  14  15  16  17
 var contour_interval_m_array  = [1000, 1000,  750,  750,  750,  250,  250,  250, 200, 100,  50,  50,  25,  25, 25, 10,  3];
 
+var contourLayer = new google.maps.ImageMapType({
+  //contour_overlay = new GTileLayerOverlay(TileLayer(0, 17, 'Contours (C) 2007', 'Michael Kosowsky',
+     tileSize: new google.maps.Size(256, 256),
+     getTileUrl: function(coord, zoom) {
+        return 'http://contour.heywhatsthat.com/bin/contour_tiles.cgi?x=' + 
+            point.x+'&y='+point.y+'&zoom='+zoom+'&interval='+contour_interval(zoom) +
+	        '&color=0000FF30&src=guifi.net';
+        },
+});
+
 function contour_interval(z) {
   if (z >= contour_interval_m_array.length)
     return contour_interval_m_array[contour_interval_m_array.length - 1];
@@ -361,75 +371,22 @@ function TileLayer(min_zoom, max_zoom, copyright_prefix, copyright, url_function
   return t;
 }
 
-function show_contour_overlay() {
-  if (contour_overlay)
-    map.removeOverlay(contour_overlay);
-  contour_overlay = new GTileLayerOverlay(TileLayer(0, 17, 'Contours (C) 2007', 'Michael Kosowsky',
-    function(point, zoom) {
-      return 'http://contour.heywhatsthat.com/bin/contour_tiles.cgi?x='+ 
-        point.x+'&y='+point.y+'&zoom='+zoom+'&interval='+contour_interval(zoom)+
-	'&color=0000FF30&src=guifi.net';
-     }));
-  map.addOverlay(contour_overlay);
-}
 
-function create_contour_widget(x, width) {
-  WTGControl(map, x, width, 'Contours', '<b>Contours</b>',
-    function() {
-      return this.state?
-                 'contour interval ' + contour_interval(map.getZoom()) + ' m'
-               : 'Click to see contours';
-    },
-    function(i) {
-      if (i) {
-        show_contour_overlay();
-      } else {
-        if (contour_overlay)
-          map.removeOverlay(contour_overlay);
-        contour_overlay = null;
-      }
-    },
-    function() {
-      contour_widget = this;
-    });
-
-  contour_listener = GEvent.addListener(map, "zoomend", contour_zoom_callback);
-}
-
-function contour_zoom_callback(oldz, newz) {
-  if (contour_widget)
-    contour_widget.set_title();
-}
-
-// GUIFI
-var layer1;
-var myCustomMapTypeNormal;
-var myCustomMapTypeSatellite;
-var myCustomMapTypePhysical;
-
-var guifi_widget;
-function create_guifi_widget(x, width) {
-  WTGControl(map, x, width, '<b>Guifi</b>', 'Guifi', null,
-    function(i) { if (i) remove_guifi(); else show_guifi(); },
-    function() { guifi_widget = this; }
-);
-}
-//
-
-function draw_map() 
-{
+function draw_map() {
 
     var divmap = document.getElementById("map");
     var baseURL = document.getElementById("guifi-wms").value;
-
-    opts = {
-        center: new google.maps.LatLng(20.0, -10.0),
+    node = new google.maps.LatLng(document.getElementById("lat").value, 
+			 document.getElementById("lon").value);
+    
+    var opts = {
+        center: node,
         zoom: 13,
         minZoom: 2,
         mapTypeControl: true,
         mapTypeControlOptions: {
             mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
-                          google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID ],
+                          google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID, google.maps.MapTypeId.TERRAIN ],
         },
         mapTypeId: google.maps.MapTypeId.SATELLITE,
         scaleControl: false,
@@ -445,29 +402,58 @@ function draw_map()
     // Add the map to the div
     map = new google.maps.Map(divmap, opts);
 
-    // Add the guifi layer
-    var guifi = new GuifiMapType(map);
-    map.overlayMapTypes.insertAt(0, guifi.overlay);
-
     var icon_start_url = document.getElementById("edit-jspath").value + 'marker_start.png';
     icon_start = new google.maps.MarkerImage(
-                    icon_start_url,
-                    new google.maps.Size(32, 32),
-                    null,
-                    new google.maps.Point(6, 20));
+                     icon_start_url,
+                     new google.maps.Size(32, 32),
+                     null,
+                     new google.maps.Point(16, 16));
 
-    newNode = new google.maps.LatLng(document.getElementById("lat").value, 
-			 document.getElementById("lon").value);
-    
-    map.setCenter(newNode);
-    
     google.maps.event.addListener(map, "click", function(event) {
         initialPosition(event.latLng);
     });
 
-    oNode = new google.maps.Marker({ position: newNode, icon: icon_start, map: map });
+    node_marker = new google.maps.Marker({ position: node, icon: icon_start, map: map });
 
-    //create_guifi_widget(164, 34);
+    // Guifi control
+    var guifi = new GuifiLayer(map, baseURL);
+    map.overlayMapTypes.insertAt(0, guifi.overlay);
+
+    var guifiControl = new Control("guifi");
+    guifiControl.div.index = 1;
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(guifiControl.div);
+
+    // Setup the click event listeners: simply set the map to Chicago
+    google.maps.event.addDomListener(guifiControl.ui, 'click', function() {
+        if (map.overlayMapTypes.getAt(0)) {
+            map.overlayMapTypes.removeAt(0);
+            guifiControl.disableButton();
+        } else {
+            // Add the guifi layer
+            map.overlayMapTypes.insertAt(0, guifi.overlay);
+            guifiControl.enableButton();
+        }
+    });
+
+    // Contour control
+    var contourControl = new Control("contour", true);
+    contourControl.div.index = 1;
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(contourControl.div);
+
+    // Setup the click event listeners: simply set the map to Chicago
+    google.maps.event.addDomListener(contourControl.ui, 'click', function() {
+        if (map.overlayMapTypes.getAt(1)) {
+            map.overlayMapTypes.removeAt(1);
+            contourControl.disableButton();
+        } else {
+            // Add the guifi layer
+            map.overlayMapTypes.insertAt(1, contourLayer);
+            contourControl.enableButton();
+        }
+    });
+
+    return;
+    create_guifi_widget(164, 34);
     //create_visibilitycloak_widget(73, 86);
     //create_contour_widget(7, 59);
 
@@ -485,60 +471,39 @@ function draw_map()
 	
 }
 
-function initialPosition(ppoint) {
-  point=ppoint;  //save point in global var
-  oGMark = null;  //init global var
-  var dNode = new google.maps.Marker( { position: point, map: map });
-  var y = Math.abs(document.getElementById("lat").value - point.y);
-  var x = Math.abs(document.getElementById("lon").value - point.x);
-  var distance = Math.sqrt(y*y + x*x);
-  var curvature = distance > 0.1 ? 1 : 0; // 0.1 a ojimetro son 10Km xD
+function initialPosition(point) {
 
-  document.getElementById("profile").src =
-    "http://www.heywhatsthat.com/bin/profile.cgi?"+
-    "axes=1&curvature="+curvature+"&metric=1&groundrelative=1&"+
-    "src=guifi.net&"+
-    "pt0="+document.getElementById("lat").value+","+document.getElementById("lon").value+
-    ",ff0000,"+document.getElementById("elevation").value+
-    "&pt1="+point.y+","+point.x+
-    ",00c000,9";   
+    for (i in markers) {
+        markers[i].setMap(null);
+    }
+
+    var dNode = new google.maps.Marker( { position: point, map: map });
+    markers.push(dNode);
+    var y = Math.abs(document.getElementById("lat").value - point.y);
+    var x = Math.abs(document.getElementById("lon").value - point.x);
+    var distance = Math.sqrt(y*y + x*x);
+    var curvature = distance > 0.1 ? 1 : 0; // 0.1 a ojimetro son 10Km xD
+
+    document.getElementById("profile").src =
+        "http://www.heywhatsthat.com/bin/profile.cgi?"+
+        "axes=1&curvature="+curvature+"&metric=1&groundrelative=1&"+
+        "src=guifi.net&"+
+        "pt0="+document.getElementById("lat").value+","+document.getElementById("lon").value+
+        ",ff0000,"+document.getElementById("elevation").value+
+        "&pt1="+point.y+","+point.x+
+        ",00c000,9";   
   
-  for (var i = 0; i < cloak_overlays.length; i++) {
-    cloak_overlays[i].setMap(map);
-  }
+    for (var i = 0; i < cloak_overlays.length; i++) {
+        cloak_overlays[i].setMap(map);
+    }
 
-  if (contour_overlay)
-    contour_overlay.setMap(map);
+    if (contour_overlay) contour_overlay.setMap(map);
 
-  pLine = new google.maps.Polyline({ path: [newNode,point], strokeColor: "#ff0000", strokeWeight: 5, strokeOpacity: .4 });
-  dNode.setMap(map);
-  pLine.setMap(map);   
-  oNode.setMap(map);
-  document.getElementById('tdistance').innerHTML=Math.round(GCDistance_js(newNode.y,newNode.x,point.y,point.x)*1000)/1000;
-  document.getElementById('tazimut').innerHTML=Math.round(GCAzimuth_js(newNode.y,newNode.x,point.y,point.x)*100)/100;
-}
+    pLine = new google.maps.Polyline({ path: [node,point], strokeColor: "#ff0000", strokeWeight: 5, strokeOpacity: .4, map:map });
+    markers.push(pLine);
 
-function profileclick(event){
-    var oProfile=document.getElementById("profile");
-    var pointClic=coord_relativ(event,oProfile);
-    //var nLat=parseFloat(document.getElementById("lat").value);
-    //var nLon=parseFloat(document.getElementById("lon").value);
-    var nLat=newNode.y;
-    var nLon=newNode.x;
-    var nLat2=point.y;
-    var nLon2=point.x;
-    var nDistance = GCDistance_js(nLat,nLon,nLat2,nLon2);
-    var nNewDistance=(pointClic.x-29)*nDistance/(oProfile.width-29);
-    var nAzimut=GCAzimuth_js(nLat,nLon,nLat2,nLon2)
-    //alert('Distancia:'+nNewDistance+'  Azimut:'+nAzimut);
-    var pointNew=getDestPoint(nLat,nLon,nNewDistance,nAzimut);
-    //alert(' inici:'+nLat+'  '+nLon+'    newpoint:'+pointNew.lat+'  '+pointNew.lon+'   final:'+nLat2+'  '+nLon2);
-    var pointGMark=new GLatLng(pointNew.lat,pointNew.lon);
-    if(oGMark!=null){
-        map.removeOverlay(oGMark);
-    };
-    oGMark=new GMarker(pointGMark);
-    map.addOverlay(oGMark);
+    document.getElementById('tdistance').innerHTML=Math.round(GCDistance_js(node.y,node.x,point.y,point.x)*1000)/1000;
+    document.getElementById('tazimut').innerHTML=Math.round(GCAzimuth_js(node.y,node.x,point.y,point.x)*100)/100;
 }
 
 /*

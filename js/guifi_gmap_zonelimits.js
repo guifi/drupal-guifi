@@ -30,7 +30,9 @@ function draw_map()
         mapTypeControl: true,
         mapTypeControlOptions: {
             mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
-                          google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID ],
+                          google.maps.MapTypeId.SATELLITE,
+                          google.maps.MapTypeId.HYBRID,
+                          google.maps.MapTypeId.TERRAIN ],
         },
         mapTypeId: google.maps.MapTypeId.ROADMAP,
         scaleControl: false,
@@ -46,9 +48,25 @@ function draw_map()
     // Add the map to the div
     map = new google.maps.Map(divmap, opts);
 
-    // Add the guifi layer
-    var guifi = new GuifiMapType(map);
+    // Guifi control
+    var guifi = new GuifiLayer(map, baseURL);
     map.overlayMapTypes.insertAt(0, guifi.overlay);
+
+    var guifiControl = new Control("guifi");
+    guifiControl.div.index = 1;
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(guifiControl.div);
+
+    // Setup the click event listeners: simply set the map to Chicago
+    google.maps.event.addDomListener(guifiControl.ui, 'click', function() {
+        if (map.overlayMapTypes.getAt(0)) {
+            map.overlayMapTypes.removeAt(0);
+            guifiControl.disableButton();
+        } else {
+            // Add the guifi layer
+            map.overlayMapTypes.insertAt(0, guifi.overlay);
+            guifiControl.enableButton();
+        }
+    });
 
     var icon_NE_url = document.getElementById("edit-jspath").value + 'marker_NE_icon.png';
     icon_NE = new google.maps.MarkerImage(

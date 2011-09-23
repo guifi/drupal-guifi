@@ -21,7 +21,9 @@ function draw_map() {
         mapTypeControl: true,
         mapTypeControlOptions: {
             mapTypeIds: [ "osm", google.maps.MapTypeId.ROADMAP,
-                          google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID ],
+                          google.maps.MapTypeId.SATELLITE,
+                          google.maps.MapTypeId.HYBRID,
+                          google.maps.MapTypeId.TERRAIN ],
         },
         mapTypeId: google.maps.MapTypeId.ROADMAP,
         scaleControl: false,
@@ -41,9 +43,25 @@ function draw_map() {
     // Add the OSM map type
     map.mapTypes.set('osm', openStreet);
 
-    // Add the guifi layer
-    var guifi = new GuifiMapType(map, baseURL);
+    // Guifi control
+    var guifi = new GuifiLayer(map, baseURL);
     map.overlayMapTypes.insertAt(0, guifi.overlay);
+
+    var guifiControl = new Control("guifi");
+    guifiControl.div.index = 1;
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(guifiControl.div);
+
+    // Setup the click event listeners: simply set the map to Chicago
+    google.maps.event.addDomListener(guifiControl.ui, 'click', function() {
+        if (map.overlayMapTypes.getAt(0)) {
+            map.overlayMapTypes.removeAt(0);
+            guifiControl.disableButton();
+        } else {
+            // Add the guifi layer
+            map.overlayMapTypes.insertAt(0, guifi.overlay);
+            guifiControl.enableButton();
+        }
+    });
 
     var marcador = new google.maps.Marker();
 
