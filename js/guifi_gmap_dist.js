@@ -1,5 +1,6 @@
 var map = null;
 var markers = Array();
+var cloack_overlays = Array();
 
 if(Drupal.jsEnabled) {
     $(document).ready(function(){
@@ -7,18 +8,13 @@ if(Drupal.jsEnabled) {
     }); 
 }
 	
-var icon_start;
-var node_marker;
-var node; //initial point
 var lat2;
 var lon2;
 var marker;
 var point; //end point
 var pLine;
-
 var id;
 var r;
-
 
 // REQUEST
 
@@ -147,123 +143,8 @@ function exec_or_value(f, o) {
   return f.apply(o, a);
 }
 
-function WTControl(parent, n_states, enablef, disablef, innerHTMLf, titlef, clickf) {
-  this.div        = document.createElement('div');
-  parent.appendChild(this.div);
-  this.style      = this.div.style;
-  this.n_states   = n_states;
-  this.enablef    = enablef;
-  this.disablef   = disablef;
-  this.innerHTMLf = innerHTMLf;
-  this.clickf     = clickf;
-  this.titlef     = titlef;
-  this.state      = 0;
-  this.enabled    = 0;
-  this.enable();
-  this.update();
-}
-
-WTControl.prototype.enable = function()  {
-  this.enablef(this.div);
-  var t = this;
-  this.div.onclick = function() { t.onclick(); };
-  this.enabled = 1;
-  this.set_title();
-}
-
-WTControl.prototype.disable = function() {
-  this.enabled = 0;
-  this.disablef(this.div);
-  this.div.onclick = null;
-  this.set_title();
-}
-
-WTControl.prototype.show = function() {
-  this.style.display = '';
-}
-
-WTControl.prototype.hide = function() {
-  this.style.display = 'none';
-}
-
-WTControl.prototype.is_visible = function() {
-  return this.style.display != 'none';
-}
-
-WTControl.prototype.update = function() {
-  this.div.innerHTML = exec_or_value(this.innerHTMLf, this, this.state);
-  this.set_title();
-}
-
-WTControl.prototype.callback = function() {
-  if (this.clickf)
-    this.clickf(this.state);
-}
-
-WTControl.prototype.onclick = function() {
-  this.state++;
-  if (this.state >= this.n_states)
-    this.state = 0;
-  this.update();
-  this.callback();
-}
-
-WTControl.prototype.clear_title = function() {
-  this.div.title = null;
-}
-
-WTControl.prototype.set_title = function() {
-  if (this.titlef)
-    this.div.title = exec_or_value(this.titlef, this);
-}
-
-WTControl.prototype.set_state = function(state) {
-  this.state = state;
-  this.update();
-}
-
-WTControl.prototype.trigger = function(state) {
-  this.state = state;
-  this.update();
-  this.callback();
-}
-
-WTControl.prototype.reset = function() {
-  this.trigger(0);
-}
-
-// for these guys, the action happens when the map calls initialize
-function WTGControl(map, x, width, text0, text1, titlef, onclick, oncreate) {
-  //var c = new GControl(0, 0);
-  c.initialize = function(map) {
-  var w = new WTControl(map.getContainer(), 2,
-                  function(d) { s = d.style;
-                                s.border          = '1px solid black'
-                                s.padding         = '0px 3px';
-                                s.backgroundColor = 'white';
-                                s.color           = 'black';
-                                s.fontSize        = '12px';
-                                s.fontFamily      = 'Arial,sans-serif';
-                                s.cursor          = 'pointer';
-                                s.width           = width + 'px';
-                                s.textAlign       = 'center';
-                  },
-                  null,  // for disable, tried  function(d) { d.style.color = '#606060'; },
-                  function(i) { return i? text1 : text0; },
-                  titlef,
-                  onclick
-            );
-
-    if (oncreate)
-      oncreate.call(w);
-    return w.div;
-  };
-  map.addControl(c, new GControlPosition(G_ANCHOR_TOP_RIGHT, new GSize(x, 30)));
-}
-
 
 // VISIBILITY CLOAK
-
 function show_alert() {
   alert("Generating visibility cloak. Please wait 1 minute!");
 }
@@ -288,30 +169,33 @@ var cloak_overlays = [];
 var cloak_query = false;
 
 function show_cloak() {
-  if (!cloak_query) {
-    handle_query();
-    cloak_query = true;
-    setTimeout(show_alert, 0);
-  }
-  cloak_overlays = [];
-  var a = wt_request_array_of_lines('../list_cloakm/'+id, 'CLOAK');
-  if (!a)
-    return;
-  for (var i = 0; i < a.length; i++) {
-    var b = CloakOverlayByName(a[i]);
-    if (b) {
-    //alert(a[i]);
-    
-      cloak_overlays.push(b);
-      map.addOverlay(b);
+
+    if (!cloak_query) {
+        handle_query();
+        cloak_query = true;
+        setTimeout(show_alert, 0);
     }
-  }
+
+    cloak_overlays.length = 0;
+
+    var a = wt_request_array_of_lines('../list_cloakm/'+id, 'CLOAK');
+    if (!a) return;
+    for (var i = 0; i < a.length; i++) {
+        var b = CloakOverlayByName(a[i]);
+        if (b) {
+            //alert(a[i]);
+    
+            cloak_overlays.push(b);
+            b.setMap(map);
+        }
+    }
 }
 
 function remove_cloak() {
-  for (var i = 0; i < cloak_overlays.length; i++)
-    map.removeOverlay(cloak_overlays[i]);
-  cloak_overlays = [];
+    for (var i = 0; i < cloak_overlays.length; i++) {
+        cloack_overlays[i].setMap(null);
+    }
+    cloack_overlays.length = 0;
 }
 
 function handle_query() {
@@ -330,27 +214,22 @@ function handle_query() {
   return;
 }
 
-var cloak_widget;
-function create_visibilitycloak_widget(x, width) {
-  WTGControl(map, x, width, 'Visibility&nbsp;cloak', '<b>Visibility&nbsp;cloak</b>', null,
-    function(i) { if (i) show_cloak(); else remove_cloak(); },
-    function() { cloak_widget = this; }
-  );
-}
-
-
 // CONTOUR
-
-var contour_overlay;
-var contour_widget;
-var contour_listener;
-                                 // 0     1     2     3     4     5     6     7    8    9   10   11   12   13  14  15  16  17
-var contour_interval_m_array  = [1000, 1000,  750,  750,  750,  250,  250,  250, 200, 100,  50,  50,  25,  25, 25, 10,  3];
-
 var contourLayer = new google.maps.ImageMapType({
   //contour_overlay = new GTileLayerOverlay(TileLayer(0, 17, 'Contours (C) 2007', 'Michael Kosowsky',
      tileSize: new google.maps.Size(256, 256),
-     getTileUrl: function(coord, zoom) {
+     getTileUrl: function(point, zoom) {
+        return 'http://contour.heywhatsthat.com/bin/contour_tiles.cgi?x=' + 
+            point.x+'&y='+point.y+'&zoom='+zoom+'&interval='+contour_interval(zoom) +
+	        '&color=0000FF30&src=guifi.net';
+        },
+});
+
+// VISIBILITY CLOACK
+var cloackLayer = new google.maps.ImageMapType({
+  //cloack_overlay = new GTileLayerOverlay(TileLayer(0, 17, 'Contours (C) 2007', 'Michael Kosowsky',
+     tileSize: new google.maps.Size(256, 256),
+     getTileUrl: function(point, zoom) {
         return 'http://contour.heywhatsthat.com/bin/contour_tiles.cgi?x=' + 
             point.x+'&y='+point.y+'&zoom='+zoom+'&interval='+contour_interval(zoom) +
 	        '&color=0000FF30&src=guifi.net';
@@ -358,6 +237,9 @@ var contourLayer = new google.maps.ImageMapType({
 });
 
 function contour_interval(z) {
+  //                                  0     1     2     3     4     5     6     7    8    9   10   11   12   13  14  15  16  17
+  var contour_interval_m_array  = [1000, 1000,  750,  750,  750,  250,  250,  250, 200, 100,  50,  50,  25,  25, 25, 10,  3];
+
   if (z >= contour_interval_m_array.length)
     return contour_interval_m_array[contour_interval_m_array.length - 1];
   return contour_interval_m_array[z];
@@ -376,8 +258,8 @@ function draw_map() {
 
     var divmap = document.getElementById("map");
     var baseURL = document.getElementById("guifi-wms").value;
-    node = new google.maps.LatLng(document.getElementById("lat").value, 
-			 document.getElementById("lon").value);
+    var node = new google.maps.LatLng(document.getElementById("lat").value, 
+			       document.getElementById("lon").value);
     
     var opts = {
         center: node,
@@ -403,17 +285,17 @@ function draw_map() {
     map = new google.maps.Map(divmap, opts);
 
     var icon_start_url = document.getElementById("edit-jspath").value + 'marker_start.png';
-    icon_start = new google.maps.MarkerImage(
-                     icon_start_url,
-                     new google.maps.Size(32, 32),
-                     null,
-                     new google.maps.Point(16, 16));
+    var icon_start = new google.maps.MarkerImage(
+                         icon_start_url,
+                         new google.maps.Size(32, 32),
+                         null,
+                         new google.maps.Point(16, 16));
 
     google.maps.event.addListener(map, "click", function(event) {
         initialPosition(event.latLng);
     });
 
-    node_marker = new google.maps.Marker({ position: node, icon: icon_start, map: map });
+    var node_marker = new google.maps.Marker({ position: node, icon: icon_start, map: map });
 
     // Guifi control
     var guifi = new GuifiLayer(map, baseURL);
@@ -452,10 +334,22 @@ function draw_map() {
         }
     });
 
-    return;
-    create_guifi_widget(164, 34);
-    //create_visibilitycloak_widget(73, 86);
-    //create_contour_widget(7, 59);
+    // Visibility cloack control
+    var cloackControl = new Control("visibility cloack", true);
+    cloackControl.div.index = 1;
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(cloackControl.div);
+
+    // Setup the click event listeners: simply set the map to Chicago
+    google.maps.event.addDomListener(cloackControl.ui, 'click', function() {
+        if (cloack_overlays.length != 0) {
+            remove_cloack(); 
+            cloackControl.disableButton();
+        } else {
+            // Add the guifi layer
+            show_cloack();
+            cloackControl.enableButton();
+        }
+    });
 
     if (document.getElementById("lon2").value != "NA") {
         lon2 = document.getElementById("lon2").value;      
@@ -496,8 +390,6 @@ function initialPosition(point) {
     for (var i = 0; i < cloak_overlays.length; i++) {
         cloak_overlays[i].setMap(map);
     }
-
-    if (contour_overlay) contour_overlay.setMap(map);
 
     pLine = new google.maps.Polyline({ path: [node,point], strokeColor: "#ff0000", strokeWeight: 5, strokeOpacity: .4, map:map });
     markers.push(pLine);
