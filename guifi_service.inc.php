@@ -125,6 +125,9 @@ function guifi_service_form($node, $param) {
     '#description' => t("Who did possible this service or who to contact with regarding this service if it is distinct of the owner of this page."),
   );
 
+  //$output .= form_textfield(t("Contact"), "contact", $node->contact, 60, 128, t("Who did possible this service or who to contact with regarding this service if it is distinct of the owner of this page.") . ($error['contact'] ? $error["contact"] : ''));
+////  $output .= form_select(t('Zone'), 'zone_id', $node->zone_id, guifi_zones_listbox(), t('The zone where this node where this node belongs to.'));
+
   $f['server'] = array(
     '#type' => 'textfield',
     '#title' => t("Device"),
@@ -835,5 +838,31 @@ function guifi_service_view($node, $teaser = FALSE, $page = FALSE, $block = FALS
   return $node;
 }
 
+function dump_guifi_proxy_federation($node) {
+
+  $qryself=db_query("SELECT id,extra FROM {guifi_services} WHERE service_type = 'Proxy' AND id = '%s' AND (status_flag = 'Working' OR status_flag = 'Testing') ORDER BY id",$node->id);
+  $qryothers = db_query("SELECT id,extra FROM {guifi_services} WHERE service_type = 'Proxy' AND id != '%s' AND (status_flag = 'Working' OR status_flag = 'Testing') ORDER BY id",$node->id);
+
+  $ownproxy = db_fetch_array( $qryself );
+  $extra=unserialize($ownproxy['extra']);
+  $in = $extra['fed']['IN'];
+  $out = $extra['fed']['OUT'];
+  $in = strtolower(($in == '0')?'':$in);
+  $out = strtolower(($out == '0')?'':$out);
+  $inout = ($in.$out == '')?'private':$in.$out;
+  $head = $ownproxy['id']."-".$inout."\n";
+
+  while ( ($row = db_fetch_array( $qryothers )) != null) {
+    unset($extra);
+    $extra=unserialize($row['extra']);
+    $in = $extra['fed']['IN'];
+    $out = $extra['fed']['OUT'];
+    $in = strtolower(($in == '0')?'':$in);
+    $out = strtolower(($out == '0')?'':$out);
+    $inout = ($in.$out == '')?'private':$in.$out;
+    $head .= $row['id']."-".$inout."\n";
+      }
+  echo $head;
+}
 
 ?>
