@@ -12,6 +12,7 @@ var lat2;
 var lon2;
 var marker;
 var point; //end point
+var node;
 var pLine;
 var id;
 var r;
@@ -258,7 +259,7 @@ function draw_map() {
 
     var divmap = document.getElementById("map");
     var baseURL = document.getElementById("guifi-wms").value;
-    var node = new google.maps.LatLng(document.getElementById("lat").value, 
+    node = new google.maps.LatLng(document.getElementById("lat").value, 
 			       document.getElementById("lon").value);
     
     var opts = {
@@ -299,37 +300,39 @@ function draw_map() {
 
     // Guifi control
     var guifi = new GuifiLayer(map, baseURL);
-    map.overlayMapTypes.insertAt(0, guifi.overlay);
+    map.overlayMapTypes.push(null);
+    map.overlayMapTypes.setAt(0, guifi.overlay);
 
     var guifiControl = new Control("guifi");
     guifiControl.div.index = 1;
     map.controls[google.maps.ControlPosition.TOP_RIGHT].push(guifiControl.div);
 
-    // Setup the click event listeners: simply set the map to Chicago
+    // Setup the click event listeners
     google.maps.event.addDomListener(guifiControl.ui, 'click', function() {
         if (map.overlayMapTypes.getAt(0)) {
-            map.overlayMapTypes.removeAt(0);
+            map.overlayMapTypes.setAt(0, null);
             guifiControl.disableButton();
         } else {
             // Add the guifi layer
-            map.overlayMapTypes.insertAt(0, guifi.overlay);
+            map.overlayMapTypes.setAt(0, guifi.overlay);
             guifiControl.enableButton();
         }
     });
 
     // Contour control
     var contourControl = new Control("contour", true);
+    map.overlayMapTypes.push(null);
     contourControl.div.index = 1;
     map.controls[google.maps.ControlPosition.TOP_RIGHT].push(contourControl.div);
 
-    // Setup the click event listeners: simply set the map to Chicago
+    // Setup the click event listeners
     google.maps.event.addDomListener(contourControl.ui, 'click', function() {
         if (map.overlayMapTypes.getAt(1)) {
-            map.overlayMapTypes.removeAt(1);
+            map.overlayMapTypes.setAt(1, null);
             contourControl.disableButton();
         } else {
             // Add the guifi layer
-            map.overlayMapTypes.insertAt(1, contourLayer);
+            map.overlayMapTypes.setAt(1, contourLayer);
             contourControl.enableButton();
         }
     });
@@ -370,6 +373,7 @@ function initialPosition(point) {
     for (i in markers) {
         markers[i].setMap(null);
     }
+    markers.length = 0;
 
     var dNode = new google.maps.Marker( { position: point, map: map });
     markers.push(dNode);
