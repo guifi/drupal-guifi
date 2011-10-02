@@ -1,6 +1,6 @@
 var map = null;
 var markers = Array();
-var cloack_overlays = Array();
+var cloak_overlays = Array();
 
 if(Drupal.jsEnabled) {
     $(document).ready(function(){
@@ -17,61 +17,22 @@ var pLine;
 var id;
 var r;
 
+var cloak_overlays = [];
+var cloak_query = false;
+
 // REQUEST
-
-function parse_response(request) {
-  var o = {ok: 0,
-           response: null,
-           http_status_code: null,
-           http_status_message: null,
-           app_status_code: null,
-           app_status_message: null};
-
-  o.http_status_code    = request.status;
-  o.http_status_message = request.statusText;
-  if (request.status != 200)
-    return o;
-
-  var s;
-  var a;
-  try { s = request.getResponseHeader('X-App-Status'); } catch(e) {}
-  if (s && (a = s.match(/^(\d\d\d)\s+(.+)/))) {
-    o.app_status_code    = a[1];
-    o.app_status_message = a[2];
-    if (a[0] != 200)
-      return o;
-  }
-
-  o.ok             = 1;
-  o.response       = request.responseText;
-
-  return o;
-}
-
-function _wt_request(url, error_label) {
-  var request  = GXmlHttp.create();
-//alert(url);
-  request.open("GET", url, 0);
-  request.send(null);
-  var o = parse_response(request);
-  if (!o.ok && error_label)
-    alert(error_label + ': ' +
-                (  o.status_message?     o.status_message
-                 : o.app_status_message? o.app_status_message
-                 : 'request error'));
-  return o;
-}
-
 function wt_request(url, error_label) {
-  var o = _wt_request(url, error_label);
-  return o.response;
+  return $.ajax({
+                        url: url,
+                        async: false,
+                }).responseText;
 }
 
 function wt_request_array_of_lines(url, name) {
   var s = wt_request(url, name);
-  if (s == null)
-    return null;
-        // pop off last element, which will be blank (if response ends with \n)
+  if (s == null) return null;
+
+  // pop off last element, which will be blank (if response ends with \n)
   var a = s.split('\n');
   a.pop();
   return a;
@@ -79,30 +40,37 @@ function wt_request_array_of_lines(url, name) {
 
 
 // IMGOVERLAY CLASS
-
-function ImgOverlay(bounds, url) {
+function ImgOverlay(bounds, url, map) {
   this.bounds  = bounds;
-  this.url     = ".."+url;
+  this.url     = ".." + url;
+  this.map     = map;
 }
 
-function derive(newclass, base) {
-  function xxx() {}
-  xxx.prototype      = base.prototype;
-  newclass.prototype = new xxx();
-}
+ImgOverlay.prototype = new google.maps.OverlayView();
 
-derive(ImgOverlay, google.maps.OverlayView);
+ImgOverlay.prototype.onAdd = function() {
+  // Create the DIV and set some basic attributes.
+  var div = document.createElement('DIV');
+  div.style.border = "none";
+  div.style.borderWidth = "0px";
+  div.style.position = "absolute";
 
-ImgOverlay.prototype.initialize = function(map) {
-  this.map            = map;
-  this.img            = document.createElement("img");
-  this.img.src        = this.url;
-  this.style          = this.img.style;
-  this.style.position = "absolute";
+  // Create an IMG element and attach it to the DIV.
+  var img = document.createElement("img");
+  img.src = this.url;
+  img.style.width = "100%";
+  img.style.height = "100%";
+
+  div.appendChild(img);
+
+  // Set the overlay's div_ property to this DIV
+  this.img = img;
+  this.div_ = div;
 
   // Our image is flat against the map, so we add our selves to the MAP_PANE pane,
   // which is at the same z-index as the map itself (i.e., below the marker shadows)
-  map.getPane(G_MAP_MAP_PANE).appendChild(this.img);
+  var panes = this.getPanes();
+  panes.overlayLayer.appendChild(div);
 }
 
 ImgOverlay.prototype.remove = function() {
@@ -110,44 +78,32 @@ ImgOverlay.prototype.remove = function() {
 }
 
 ImgOverlay.prototype.copy = function() {
-  return new ImgOverlay(this.bounds, this.url);
+  return new ImgOverlay(this.bounds, this.url, this.map);
 }
 
-ImgOverlay.prototype.redraw = function(change_in_coordinate_system) {
-  if (!change_in_coordinate_system)
-    return;
+ImgOverlay.prototype.draw = function() {
+  // Size and position the overlay. We use a southwest and northeast
+  // position of the overlay to peg it to the correct position and size.
+  // We need to retrieve the projection from this overlay to do this.
+  var overlayProjection = this.getProjection();
 
-  var sw   = this.map.fromLatLngToDivPixel(this.bounds.getSouthWest());
-  var ne   = this.map.fromLatLngToDivPixel(this.bounds.getNorthEast());
-  var s    = this.style;
-  s.width  = (ne.x - sw.x) + "px";
-  s.height = (sw.y - ne.y) + "px";
-  s.left   = sw.x + "px";
-  s.top    = ne.y + "px";
+  // Retrieve the southwest and northeast coordinates of this overlay
+  // in latlngs and convert them to pixels coordinates.
+  // We'll use these coordinates to resize the DIV.
+  var sw = overlayProjection.fromLatLngToDivPixel(this.bounds.getSouthWest());
+  var ne = overlayProjection.fromLatLngToDivPixel(this.bounds.getNorthEast());
+
+  // Resize the image's DIV to fit the indicated dimensions.
+  var div = this.div_;
+  div.style.left = sw.x + 'px';
+  div.style.top = ne.y + 'px';
+  div.style.width = (ne.x - sw.x) + 'px';
+  div.style.height = (sw.y - ne.y) + 'px';
 }
 
-function OneDegreeImgOverlay(lat, lon, fudge, url) {
-  return new ImgOverlay(new google.maps.LatLngBounds(new GLatLng(lat - fudge, lon - fudge), 
-    new GLatLng(lat + 1 + fudge, lon + 1 + fudge)), url);
-}
-
-
-// CONTROLS
-
-function exec_or_value(f, o) {
-  if (typeof f != 'function')
-    return f;
-                // arguments.slice(2) doesn't work
-  var a = [];
-  for (var i = 2; i < arguments.length; i++)
-    a.push(arguments[i]);
-  return f.apply(o, a);
-}
-
-
-// VISIBILITY CLOAK
-function show_alert() {
-  alert("Generating visibility cloak. Please wait 1 minute!");
+function OneDegreeImgOverlay(lat, lon, fudge, url, map) {
+  return new ImgOverlay(new google.maps.LatLngBounds(new google.maps.LatLng(lat - fudge, lon - fudge), 
+    new google.maps.LatLng(lat + 1 + fudge, lon + 1 + fudge)), url, map);
 }
 
 var srtm_re = /([NS])(\d\d)([EW])(\d\d\d)\./;
@@ -163,29 +119,23 @@ function CloakOverlayByName(name) {
   var a = srtm_latlon(name);
   if (!a)
     return null;
-  return new OneDegreeImgOverlay(a[0], a[1], .5/3600, name);
+  return new OneDegreeImgOverlay(a[0], a[1], .5/3600, name, map);
 }
-
-var cloak_overlays = [];
-var cloak_query = false;
 
 function show_cloak() {
 
     if (!cloak_query) {
         handle_query();
         cloak_query = true;
-        setTimeout(show_alert, 0);
     }
 
     cloak_overlays.length = 0;
-
     var a = wt_request_array_of_lines('../list_cloakm/'+id, 'CLOAK');
     if (!a) return;
+
     for (var i = 0; i < a.length; i++) {
         var b = CloakOverlayByName(a[i]);
         if (b) {
-            //alert(a[i]);
-    
             cloak_overlays.push(b);
             b.setMap(map);
         }
@@ -194,9 +144,9 @@ function show_cloak() {
 
 function remove_cloak() {
     for (var i = 0; i < cloak_overlays.length; i++) {
-        cloack_overlays[i].setMap(null);
+        cloak_overlays[i].setMap(null);
     }
-    cloack_overlays.length = 0;
+    cloak_overlays.length = 0;
 }
 
 function handle_query() {
@@ -226,9 +176,9 @@ var contourLayer = new google.maps.ImageMapType({
         },
 });
 
-// VISIBILITY CLOACK
-var cloackLayer = new google.maps.ImageMapType({
-  //cloack_overlay = new GTileLayerOverlay(TileLayer(0, 17, 'Contours (C) 2007', 'Michael Kosowsky',
+// VISIBILITY CLOAK
+var cloakLayer = new google.maps.ImageMapType({
+  //cloak_overlay = new GTileLayerOverlay(TileLayer(0, 17, 'Contours (C) 2007', 'Michael Kosowsky',
      tileSize: new google.maps.Size(256, 256),
      getTileUrl: function(point, zoom) {
         return 'http://contour.heywhatsthat.com/bin/contour_tiles.cgi?x=' + 
@@ -248,12 +198,11 @@ function contour_interval(z) {
 
 function TileLayer(min_zoom, max_zoom, copyright_prefix, copyright, url_function) {
   var cc = new GCopyrightCollection(copyright_prefix);
-  cc.addCopyright(new GCopyright(2, new GLatLngBounds(new GLatLng(-54,-180), new GLatLng(60,180)), min_zoom, copyright));
+  cc.addCopyright(new GCopyright(2, new google.maps.LatLngBounds(new google.maps.LatLng(-54,-180), new google.maps.LatLng(60,180)), min_zoom, copyright));
   var t = new GTileLayer(cc, min_zoom, max_zoom);
   t.getTileUrl = url_function;
   return t;
 }
-
 
 function draw_map() {
 
@@ -337,20 +286,21 @@ function draw_map() {
         }
     });
 
-    // Visibility cloack control
-    var cloackControl = new Control("visibility cloack", true);
-    cloackControl.div.index = 1;
-    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(cloackControl.div);
+    // Visibility cloak control
+    var cloakControl = new Control("visibility cloak", true);
+    map.overlayMapTypes.push(null);
+    cloakControl.div.index = 1;
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(cloakControl.div);
 
     // Setup the click event listeners: simply set the map to Chicago
-    google.maps.event.addDomListener(cloackControl.ui, 'click', function() {
-        if (cloack_overlays.length != 0) {
-            remove_cloack(); 
-            cloackControl.disableButton();
+    google.maps.event.addDomListener(cloakControl.ui, 'click', function() {
+        if (cloak_overlays.length != 0) {
+            remove_cloak(); 
+            cloakControl.disableButton();
         } else {
             // Add the guifi layer
-            show_cloack();
-            cloackControl.enableButton();
+            show_cloak();
+            cloakControl.enableButton();
         }
     });
 
