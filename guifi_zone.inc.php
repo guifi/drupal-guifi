@@ -964,6 +964,11 @@ function guifi_zone_totals($zones) {
   return $summary;
 }
 
+function guifi_zone_childs_and_parents($zid) {
+  return array_merge(guifi_zone_childs($zid),
+           guifi_zone_get_parents($zid));
+}
+
 function guifi_zone_childs($zid) {
   return array_keys(guifi_zone_childs_tree($zid,9999));
 }
