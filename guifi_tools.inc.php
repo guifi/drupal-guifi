@@ -18,9 +18,8 @@ function guifi_tools_ip_search($ipv4 = NULL) {
   $headers = array(t('id'),
     array('data' => t('nipv4')),
     t('mask'),t('interface'),t('device'),t('node'));
-  $sql = 'SELECT *,inet_aton(ipv4) AS nipv4 FROM {guifi_ipv4} WHERE ipv4 LIKE "'.$ipv4.'" ORDER BY inet_aton(ipv4)';
-//  $sql .= tablesort_sql($header);
-  $sqla = pager_query($sql,50);
+  $sql = 'SELECT *,inet_aton(ipv4) AS nipv4 FROM {guifi_ipv4} WHERE ipv4 LIKE "%s" ORDER BY inet_aton(ipv4)';
+  $sqla = pager_query($sql,50,0,NULL,$ipv4);
   while ($ipv4 = db_fetch_object($sqla)) {
     $row = array();
     $row[] = $ipv4->id.'/'.$ipv4->interface_id;
@@ -109,7 +108,7 @@ function guifi_tools_mac_search($mac = NULL) {
     array('%ipv4' => "'".$mac."'")).'</h2>';
 
   $headers = array(t('mac'),t('interface'),t('device'),t('node'));
-  $sqlm = pager_query('SELECT * FROM {guifi_interfaces} WHERE mac LIKE "'.$mac.'"',50);
+  $sqlm = pager_query('SELECT * FROM {guifi_interfaces} WHERE mac LIKE "%s"',50,0,NULL,$mac);
   while ($interface = db_fetch_object($sqlm)) {
     $row = array();
     $row[] = $interface->mac;
