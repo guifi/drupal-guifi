@@ -1,6 +1,7 @@
 var map = null;
 var markers = Array();
 var cloak_overlays = Array();
+var cloak_query = false;
 
 if(Drupal.jsEnabled) {
     $(document).ready(function(){
@@ -16,9 +17,6 @@ var node;
 var pLine;
 var id;
 var r;
-
-var cloak_overlays = [];
-var cloak_query = false;
 
 // REQUEST
 function wt_request(url, error_label) {
@@ -269,7 +267,7 @@ function draw_map() {
     });
 
     // Contour control
-    var contourControl = new Control("contour", true);
+    var contourControl = new Control("contour layer", true);
     map.overlayMapTypes.push(null);
     contourControl.div.index = 1;
     map.controls[google.maps.ControlPosition.TOP_RIGHT].push(contourControl.div);
@@ -287,7 +285,7 @@ function draw_map() {
     });
 
     // Visibility cloak control
-    var cloakControl = new Control("visibility cloak", true);
+    var cloakControl = new Control("visibility cloak layer", true);
     map.overlayMapTypes.push(null);
     cloakControl.div.index = 1;
     map.controls[google.maps.ControlPosition.TOP_RIGHT].push(cloakControl.div);

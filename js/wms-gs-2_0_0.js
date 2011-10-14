@@ -96,13 +96,14 @@ var openStreet = new google.maps.ImageMapType({
 
 function Control(name, disabled) {
     this.div = document.createElement('DIV');
-    
+    this.enabled = !disabled;
+
     // Set CSS styles for the DIV containing the control
     // Setting padding to 5 px will offset the control
     // from the edge of the map
     this.div.style.padding = '5px';
     this.div.style.paddingLeft = '0px';
-    this.div.style.paddingRight = '1px';
+    this.div.style.paddingRight = '5px';
 
     // Set CSS for the control border
     this.ui = document.createElement('DIV');
@@ -112,7 +113,7 @@ function Control(name, disabled) {
     this.ui.style.borderWidth = '1px';
     this.ui.style.cursor = 'pointer';
     this.ui.style.textAlign = 'center';
-    this.ui.title = 'Add/Remove the ' + name + ' layer';
+    this.ui.title = name;
     this.div.appendChild(this.ui);
 
     // Set CSS for the control interior
@@ -125,7 +126,7 @@ function Control(name, disabled) {
     this.text.style.paddingRight = '10px';
     this.text.style.paddingTop = '2px';
     this.text.style.paddingBottom = '2px';
-    this.text.innerHTML = name + ' layer';
+    this.text.innerHTML = name;
     this.ui.appendChild(this.text);
 
     if (disabled) {
