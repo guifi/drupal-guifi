@@ -1,14 +1,13 @@
 var map = null;
 
-
 if(Drupal.jsEnabled) {
-	  $(document).ready(function(){
-        xz();
-	    }); 
-	}
+    $(document).ready(function(){
+        draw_map();
+    });
+}
 
 var init_widget;
-var swinit;
+var swinit = 0;
     
 var oLinks = new Object;
 var oNodes = new Object;
@@ -21,19 +20,69 @@ var icons = new Array();
 var nRoute = 0;
 var nRouteActual = 0;
 
-function xz(){
-  swinit=0
-  if (GBrowserIsCompatible()) {
-    map=new GMap2(document.getElementById("map"));
-    if (map.getSize().height >= 300) map.addControl(new GLargeMapControl());
-    else map.addControl(new GSmallMapControl());
-    if (map.getSize().width >= 500) {
-      map.addControl(new GScaleControl()) ;
-      map.addControl(new GOverviewMapControl());
-  	   map.addControl(new GMapTypeControl());
+function draw_map(){
+
+    var divmap = document.getElementById("map");
+    var baseURL = document.getElementById("guifi-wms").value;
+                   document.getElementById("lon").value);
+
+    var opts = {
+        center: node,
+        zoom: 13,
+        minZoom: 2,
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+            mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
+                          google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID, google.maps.MapTypeId.TERRAIN ],
+        },
+        mapTypeId: google.maps.MapTypeId.SATELLITE,
+        scaleControl: false,
+        streetViewControl: false,
+        zoomControl: true,
+        panControl: true,
+        zoomControlOptions: {
+            style: google.maps.ZoomControlStyle.LARGE
+        },
+
     }
-    map.enableScrollWheelZoom();
-    
+
+    // Add the map to the div
+    map = new google.maps.Map(divmap, opts);
+
+    var icon_start_url = document.getElementById("edit-jspath").value + 'marker_start.png';
+    var icon_start = new google.maps.MarkerImage(
+                         icon_start_url,
+                         new google.maps.Size(32, 32),
+                         null,
+                         new google.maps.Point(16, 16));
+
+    google.maps.event.addListener(map, "click", function(event) {
+        initialPosition(event.latLng);
+    });
+
+    var node_marker = new google.maps.Marker({ position: node, icon: icon_start, map: map });
+
+    // Guifi control
+    var guifi = new GuifiLayer(map, baseURL);
+    map.overlayMapTypes.push(null);
+    map.overlayMapTypes.setAt(0, guifi.overlay);
+
+    var guifiControl = new Control("guifi");
+    guifiControl.div.index = 1;
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(guifiControl.div);
+
+    // Setup the click event listeners
+    google.maps.event.addDomListener(guifiControl.ui, 'click', function() {
+        if (map.overlayMapTypes.getAt(0)) {
+            map.overlayMapTypes.setAt(0, null);
+            guifiControl.disableButton();
+        } else {
+            // Add the guifi layer
+            map.overlayMapTypes.setAt(0, guifi.overlay);
+            guifiControl.enableButton();
+        }
+    });
+
     for(var i=1;i<=10;i++){
       icons[i] = new GIcon();
       icons[i].image = document.getElementById("edit-jspath").value+'marker_traceroute_icon' + i + '.png';
@@ -44,22 +93,9 @@ function xz(){
       icons[i].dragCrossImage = '';
     }
     
-	 var layer1 = new GWMSTileLayer(map, new GCopyrightCollection("guifi.net"),1,17);
-    layer1.baseURL=document.getElementById("guifi-wms").value;
-    layer1.layers="Nodes,Links";
-    layer1.mercZoomLevel = 0;
-    layer1.opacity = 1.0;
-
-    var myMapTypeLayers=[G_SATELLITE_MAP.getTileLayers()[0],layer1];
-    var myCustomMapType = new GMapType(myMapTypeLayers, 
-    		G_NORMAL_MAP.getProjection(), "guifi.net", G_SATELLITE_MAP);
-
-    map.addMapType(myCustomMapType);
-    map.setCenter(new GLatLng(41.83, 2.30), 9);
-    map.setMapType(myCustomMapType);
     create_init_widget(8,35,34);
     document.getElementById("topmap").innerHTML="Find a supernode ospf area and click the init button";
-    swinit=1
+    swinit = 1;
   }
 }
 

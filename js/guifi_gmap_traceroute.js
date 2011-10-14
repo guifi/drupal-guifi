@@ -1,12 +1,15 @@
 var map = null;
 
-
 if(Drupal.jsEnabled) {
-	  $(document).ready(function(){
-        xz();
-	    }); 
-	}
+    $(document).ready(function(){
+        draw_map();
+    });
+}
 
+var init_widget;
+var swinit = 0;
+var infowindow = new google.maps.InfoWindow();
+    
 var oLinks = new Object;
 var oNodes = new Object;
 var oGNodes = new Array;
@@ -18,57 +21,77 @@ var icons = new Array();
 var nRoute = 0;
 var nRouteActual = 0;
 
-function xz() 
-{
-  if (GBrowserIsCompatible()) {
-    map=new GMap2(document.getElementById("map"));
-    if (map.getSize().height >= 300)
-      map.addControl(new GLargeMapControl());
-    else
-      map.addControl(new GSmallMapControl());
-    if (map.getSize().width >= 500) {
-      map.addControl(new GScaleControl()) ;
-      map.addControl(new GOverviewMapControl());
-  	   map.addControl(new GMapTypeControl());
+function draw_map(){
+
+    var divmap = document.getElementById("map");
+    var baseURL = document.getElementById("guifi-wms").value;
+
+    var opts = {
+        center: new google.maps.LatLng(41.974175, 2.238118),
+        zoom: 13,
+        minZoom: 2,
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+            mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
+                          google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID, google.maps.MapTypeId.TERRAIN ],
+        },
+        mapTypeId: google.maps.MapTypeId.SATELLITE,
+        scaleControl: false,
+        streetViewControl: false,
+        zoomControl: true,
+        panControl: true,
+        zoomControlOptions: {
+            style: google.maps.ZoomControlStyle.LARGE
+        },
+
     }
-    map.enableScrollWheelZoom();
-    
+
+    // Add the map to the div
+    map = new google.maps.Map(divmap, opts);
+
+    // Guifi control
+    var guifi = new GuifiLayer(map, baseURL);
+    map.overlayMapTypes.push(null);
+    map.overlayMapTypes.setAt(0, guifi.overlay);
+
+    var guifiControl = new Control("guifi");
+    guifiControl.div.index = 1;
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(guifiControl.div);
+
+    // Setup the click event listeners
+    google.maps.event.addDomListener(guifiControl.ui, 'click', function() {
+        if (map.overlayMapTypes.getAt(0)) {
+            map.overlayMapTypes.setAt(0, null);
+            guifiControl.disableButton();
+        } else {
+            // Add the guifi layer
+            map.overlayMapTypes.setAt(0, guifi.overlay);
+            guifiControl.enableButton();
+        }
+    });
+
     for(var i=1;i<=10;i++){
-      icons[i] = new GIcon();
-      icons[i].image = document.getElementById("edit-jspath").value+'marker_traceroute_icon' + i + '.png';
-      icons[i].shadow = '';
-      icons[i].iconSize = new GSize(10, 10);
-      icons[i].shadowSize = new GSize(5,5);
-      icons[i].iconAnchor = new GPoint(5, 5);
-      icons[i].dragCrossImage = '';
+        var url = document.getElementById("edit-jspath").value+'marker_traceroute_icon' + i + '.png';
+        icons[i] = new google.maps.MarkerImage(
+                        url,
+                        new google.maps.Size(10, 10),
+                        null,
+                        new google.maps.Point(5, 5));
     }
     
-	 var layer1 = new GWMSTileLayer(map, new GCopyrightCollection("guifi.net"),1,17);
-    layer1.baseURL=document.getElementById("guifi-wms").value;
-    layer1.layers="Nodes,Links";
-    layer1.mercZoomLevel = 0;
-    layer1.opacity = 1.0;
-
-    var myMapTypeLayers=[G_SATELLITE_MAP.getTileLayers()[0],layer1];
-    var myCustomMapType = new GMapType(myMapTypeLayers, 
-    		G_NORMAL_MAP.getProjection(), "guifi.net", G_SATELLITE_MAP);
-
-    map.addMapType(myCustomMapType);
+    var pointUpLeft = new google.maps.LatLng(document.getElementById("lat").value, 
+			                                 document.getElementById("lon").value);
+    var pointDownRight = new google.maps.LatLng(document.getElementById("lat2").value, 
+			                                    document.getElementById("lon2").value);
     
-    var pointUpLeft = new GLatLng(document.getElementById("lat").value, 
-			 document.getElementById("lon").value);
-    var pointDownRight = new GLatLng(document.getElementById("lat2").value, 
-			 document.getElementById("lon2").value);
-    
-    var bounds = new GLatLngBounds(pointUpLeft,pointDownRight);
-    map.setCenter(bounds.getCenter(), map.getBoundsZoomLevel(bounds));
+    var bounds = new google.maps.LatLngBounds(pointUpLeft, pointDownRight);
+    map.setCenter(bounds.getCenter());
+    map.fitBounds(bounds);
 
     var v = document.getElementById("datalinks").value;
-    eval("oLinks = "+v);
+    eval("oLinks = " + v);
     var v = document.getElementById("datanodes").value;
-    eval("oNodes = "+v);
-
-    map.setMapType(myCustomMapType);
+    eval("oNodes = " + v);
 
     //numbered routes and assigns levels to nodes and links, depending on the cost and distance from the main route
     //mark links repeated
@@ -127,57 +150,63 @@ function xz()
     nRouteActual=0;
     for(nNode in oNodes){
       var oNode=oNodes[nNode];
-      var point = new GLatLng(oNode.lat,oNode.lon);
-      oGNodes[nNode] = new GMarker(point,icons[oSubRouteLevel[oNode.subroute]]);
-      map.addOverlay(oGNodes[nNode]);
+      var point = new google.maps.LatLng(oNode.lat,oNode.lon);
+      oGNodes[nNode] = new google.maps.Marker({ position: point, icon: icons[oSubRouteLevel[oNode.subroute]], map: map });
       createEventNode(oGNodes[nNode],nNode);
     }
-    var polyOptions = {clickable:true};
+    
     var n=0;
+
     for(nLink in oLinks){
       n++;
       var oLink = oLinks[nLink];
       if(oLink.subroute>0){
-            var point1 = new GLatLng(oNodes[oLink.fromnode].lat,oNodes[oLink.fromnode].lon);
-            var point2 = new GLatLng(oNodes[oLink.tonode].lat,oNodes[oLink.tonode].lon);
-            oGLinks[nLink] = new GPolyline([point1,point2],colors[oSubRouteLevel[oLink.subroute]], 5,0.6,polyOptions);
+            var point1 = new google.maps.LatLng(oNodes[oLink.fromnode].lat,oNodes[oLink.fromnode].lon);
+            var point2 = new google.maps.LatLng(oNodes[oLink.tonode].lat,oNodes[oLink.tonode].lon);
+            oGLinks[nLink] = new google.maps.Polyline({ path: [point1,point2], 
+                                                        strokeColor: colors[oSubRouteLevel[oLink.subroute]], 
+                                                        strokeWeight: 5, 
+                                                        strokeOpacity: 0.6, 
+                                                        clickable: true });
             if(oLink.paint==0){
-                  oGLinks[nLink].hide();
+                  oGLinks[nLink].setMap(null);
             }
-            map.addOverlay(oGLinks[nLink]);
+            oGLinks[nLink].setMap(map);
             createEventLink(oGLinks[nLink],nLink);
       }
     }
-  }
 }
+
 function createEventNode(pNode, pNumber) {
   pNode.value = pNumber;
-  GEvent.addListener(pNode, "mouseover", function() {
-      var point = new GLatLng(oNodes[pNumber].lat,oNodes[pNumber].lon);
+  google.maps.event.addListener(pNode, "mouseover", function() {
+      var point = new google.maps.LatLng(oNodes[pNumber].lat,oNodes[pNumber].lon);
       var v="Node: "+oNodes[pNumber]["nodelink"]+"-"+oNodes[pNumber]["nodename"];
-      v+="<br>level: "+oSubRouteLevel[oNodes[pNumber].subroute];
-      map.openInfoWindowHtml(point,v);
-      //pNode.openInfoWindowHtml(v);
+      v += "<br>level: "+oSubRouteLevel[oNodes[pNumber].subroute];
+      infowindow.setContent(v);
+      infowindow.setPosition(point);
+      infowindow.open(map);
   });
-  GEvent.addListener(pNode, "mouseout", function() {
-      map.closeInfoWindow();
+  google.maps.event.addListener(pNode, "mouseout", function() {
+      infowindow.close();
   });
 }
+
 function createEventLink(pLink, pNumber) {
   pLink.value = pNumber;
-  GEvent.addListener(pLink, "click", function(point) {
+  google.maps.event.addListener(pLink, "click", function(point) {
       var v="from device: "+oLinks[pNumber]["fromdevicename"]+"-"+oLinks[pNumber]["fromipv4"];
       v+="<br>to device: "+oLinks[pNumber]["todevicename"]+"-"+oLinks[pNumber]["toipv4"];
       v+="<br>distance: "+oLinks[pNumber]["distance"]+" Km."+"&nbsp;&nbsp;&nbsp;&nbsp;level: "+oSubRouteLevel[oLinks[pNumber]["subroute"]];
       v+="<br>routes: "+oLinksId[oLinks[pNumber]["idlink"]]["routes"];
-      map.openInfoWindowHtml(point,v);
+      infowindow.setContent(v);
+      infowindow.setPosition(point.latLng);
+      infowindow.open(map);
   });
 }
 
-
-
 function printroute(p){
-    map.closeInfoWindow();
+    infowindow.close();
     var vroute=document.getElementById("edit-formmap2").value;
     if (p==-1){
       if (vroute>0) vroute--;
@@ -186,37 +215,39 @@ function printroute(p){
     }else vroute=0;
     document.getElementById("edit-formmap2").value=vroute;
     nRouteActual=vroute;
+
     //hide nodes and links    
     for(nNode in oNodes) {
-      oGNodes[nNode].hide();
+      oGNodes[nNode].setMap(null);
     }
+
     for(nLink in oLinks){
       if(oLinks[nLink]["subroute"]>0){
-            oGLinks[nLink].hide()
+            oGLinks[nLink].setMap(null);
       }
     }
+
     if (vroute>0){
       //show route vroute    
       for(nLink in oLinks){
         var oLink = oLinks[nLink];
         if(oLink.route==vroute && oLink.subroute>0){
-            oGLinks[nLink].show();
-            if (oGNodes[oLink.fromnode].isHidden()) oGNodes[oLink.fromnode].show()
-            if (oGNodes[oLink.tonode].isHidden()) oGNodes[oLink.tonode].show()
+            oGLinks[nLink].setMap(map);
+            if (oGNodes[oLink.fromnode].getMap() == null) oGNodes[oLink.fromnode].setMap(map);
+            if (oGNodes[oLink.tonode].getMap() == null) oGNodes[oLink.tonode].setMap(map);
         }    
       }
-    }else{
+    } else {
       //show all routes
-
       for(nNode in oNodes){
-        oGNodes[nNode].show();
+        oGNodes[nNode].setMap(map);
       }
+
       for(nLink in oLinks){
         var oLink = oLinks[nLink];
-        if(oLink.subroute>0 && oLink.paint==1) oGLinks[nLink].show();
+        if(oLink.subroute>0 && oLink.paint==1) oGLinks[nLink].setMap(map);
       }
     }
+
     return(false);
 }
-
-

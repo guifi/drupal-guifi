@@ -32,3 +32,8 @@ map. It will disappear if map loads correctly.
 * OverviewMap no existe en V3 (minimapa en esquina inferior derecha).
 *
 * guifi zonelimits (Falta afinar el que los bordes se salgan del mapa)
+*
+TODO
+routing
+routingall
+traceroute
