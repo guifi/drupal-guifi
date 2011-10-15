@@ -60,13 +60,13 @@ function draw_map(){
 
     // Setup the click event listeners
     google.maps.event.addDomListener(guifiControl.ui, 'click', function() {
-        if (map.overlayMapTypes.getAt(0)) {
+        if (guifiControl.enabled) {
             map.overlayMapTypes.setAt(0, null);
             guifiControl.disableButton();
         } else {
             // Add the guifi layer
             map.overlayMapTypes.setAt(0, guifi.overlay);
-            guifiControl.enableButton();
+            guifiControl.enable();
         }
     });
 

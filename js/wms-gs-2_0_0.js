@@ -97,6 +97,7 @@ var openStreet = new google.maps.ImageMapType({
 function Control(name, disabled) {
     this.div = document.createElement('DIV');
     this.enabled = !disabled;
+    this.blocked = false;
 
     // Set CSS styles for the DIV containing the control
     // Setting padding to 5 px will offset the control
@@ -139,14 +140,32 @@ function Control(name, disabled) {
 
 Control.prototype = {
 
-    enableButton: function() {
+    enable: function() {
+            this.enabled = true;
             this.ui.style.backgroundColor = '#708dce';
             this.ui.style.borderColor= '#708dce';
             this.text.style.color = 'white';
             this.text.style.fontWeight = 'bold';
     },
 
-    disableButton: function() {
+    disable: function() {
+            this.enabled = false;
+            this.ui.style.backgroundColor = 'white';
+            this.ui.style.borderColor= '#a9bbdf';
+            this.text.style.color = 'black';
+            this.text.style.fontWeight = 'normal';
+    },
+
+    block: function() {
+            this.blocked = true;
+            this.ui.style.backgroundColor = 'white';
+            this.ui.style.borderColor= '#a9bbdf';
+            this.text.style.color = 'grey';
+            this.text.style.fontWeight = 'normal';
+    },
+
+    unblock: function() {
+            this.blocked = false;
             this.ui.style.backgroundColor = 'white';
             this.ui.style.borderColor= '#a9bbdf';
             this.text.style.color = 'black';

@@ -1,17 +1,10 @@
 var map = null;
-
-
-if(Drupal.jsEnabled) {
-	  $(document).ready(function(){
-        xz();
-	    }); 
-	}
-
-var init_widget;
-var bgp_widget;
-var ospf_widget;
-var area_widget;
-var swinit;
+var swinit = 0;
+var overlays = Array();
+var initControl = null;
+var BGPControl = null;
+var OSPFControl = null;
+var AreaControl = null;
     
 var alinks = new Array;
 var anodes = new Array;
@@ -19,67 +12,156 @@ var colors = new Array("","#ff0000","#00aeff")
 var pics = new Array(0,1,5,2)
 var icons = new Array();
 var picspath = new Array();
-
 var narea;
 
-function xz(){
-  swinit=0
-  if (GBrowserIsCompatible()) {
-    map=new GMap2(document.getElementById("map"));
-    if (map.getSize().height >= 300) map.addControl(new GLargeMapControl());
-    else map.addControl(new GSmallMapControl());
-    if (map.getSize().width >= 500) {
-      map.addControl(new GScaleControl()) ;
-      map.addControl(new GOverviewMapControl());
-  	   map.addControl(new GMapTypeControl());
+if(Drupal.jsEnabled) {
+    $(document).ready(function(){
+        draw_map();
+    });
+}
+
+function draw_map(){
+
+    var divmap = document.getElementById("map");
+    var baseURL = document.getElementById("guifi-wms").value;
+
+    var opts = {
+        center: new google.maps.LatLng(41.83, 2.30),
+        zoom: 9,
+        minZoom: 2,
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+            mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
+                          google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID, google.maps.MapTypeId.TERRAIN ],
+        },
+        mapTypeId: google.maps.MapTypeId.SATELLITE,
+        scaleControl: false,
+        streetViewControl: false,
+        zoomControl: true,
+        panControl: true,
+        zoomControlOptions: {
+            style: google.maps.ZoomControlStyle.LARGE
+        },
+
     }
-    map.enableScrollWheelZoom();
+
+    // Add the map to the div
+    map = new google.maps.Map(divmap, opts);
+
+    // Guifi control
+    var guifi = new GuifiLayer(map, baseURL);
+    map.overlayMapTypes.push(null);
+    map.overlayMapTypes.setAt(0, guifi.overlay);
+
+    var guifiControl = new Control("guifi");
+    guifiControl.div.index = 1;
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(guifiControl.div);
+
+    // Setup the click event listeners
+    google.maps.event.addDomListener(guifiControl.ui, 'click', function() {
+        if (guifiControl.enabled) {
+            map.overlayMapTypes.setAt(0, null);
+            guifiControl.disable();
+        } else {
+            // Add the guifi layer
+            map.overlayMapTypes.setAt(0, guifi.overlay);
+            guifiControl.enable();
+        }
+    });
     
     for(var i=1;i<=3;i++){
-      picspath[i] = document.getElementById("edit-jspath").value+'marker_traceroute_icon' + pics[i] + '.png';
-      icons[i] = new GIcon();
-      icons[i].image = document.getElementById("edit-jspath").value+'marker_traceroute_icon' + pics[i] + '.png';
-      icons[i].shadow = '';
-      icons[i].iconSize = new GSize(10, 10);
-      icons[i].shadowSize = new GSize(5,5);
-      icons[i].iconAnchor = new GPoint(5, 5);
-      icons[i].dragCrossImage = '';
+      var url = document.getElementById("edit-jspath").value+'marker_traceroute_icon' + pics[i] + '.png';
+      picspath[i] = url;
+
+      icons[i] = new google.maps.MarkerImage(
+                        url,
+                        new google.maps.Size(10, 10),
+                        null,
+                        new google.maps.Point(5, 5));
     }
-    
-	 var layer1 = new GWMSTileLayer(map, new GCopyrightCollection("guifi.net"),1,17);
-    layer1.baseURL=document.getElementById("guifi-wms").value;
-    layer1.layers="Nodes,Links";
-    layer1.mercZoomLevel = 0;
-    layer1.opacity = 1.0;
+   
+    // Init control
+    initControl = new Control("init", true);
+    map.overlayMapTypes.push(null);
+    initControl.div.index = 1;
+    map.controls[google.maps.ControlPosition.RIGHT_TOP].push(initControl.div);
 
-    var myMapTypeLayers=[G_SATELLITE_MAP.getTileLayers()[0],layer1];
-    var myCustomMapType = new GMapType(myMapTypeLayers, 
-    		G_NORMAL_MAP.getProjection(), "guifi.net", G_SATELLITE_MAP);
+    // Setup the click event listeners
+    google.maps.event.addDomListener(initControl.ui, 'click', function() {
+        if (initControl.enabled) {
+            initControl.disableButton();
+        } else {
+            init(0);
+            initControl.enable();
+        }
+    }); 
 
-    map.addMapType(myCustomMapType);
-    map.setCenter(new GLatLng(41.83, 2.30), 9);
-    map.setMapType(myCustomMapType);
-    var vh=25;
-    var vw=50;
-    create_init_widget(8,35,vw);
-    create_bgp_widget(8,35+1*vh,vw);
-    bgp_widget.set_state(1);
-    create_ospf_widget(8,35+2*vh,vw);
-    ospf_widget.set_state(1);
-    create_area_widget(8,35+3*vh,vw);
+    // BGP control
+    BGPControl = new Control("BGP", true);
+    map.overlayMapTypes.push(null);
+    BGPControl.div.index = 1;
+    map.controls[google.maps.ControlPosition.RIGHT_TOP].push(BGPControl.div);
+
+    // Setup the click event listeners
+    google.maps.event.addDomListener(BGPControl.ui, 'click', function() {
+        if (!BGPControl.blocked) {
+            if (BGPControl.enabled) {
+                fbgp(0);
+                BGPControl.disable();
+            } else {
+                fbgp(1);
+                BGPControl.enable();
+            }
+        }
+    }); 
+
+    // OSPF control
+    OSPFControl = new Control("OSPF", true);
+    map.overlayMapTypes.push(null);
+    OSPFControl.div.index = 1;
+    map.controls[google.maps.ControlPosition.RIGHT_TOP].push(OSPFControl.div);
+
+    // Setup the click event listeners
+    google.maps.event.addDomListener(OSPFControl.ui, 'click', function() {
+        if (!OSPFControl.blocked) {
+            if (OSPFControl.enabled) {
+                fospf(0);
+                OSPFControl.disable();
+            } else {
+                fospf(1);
+                OSPFControl.enable();
+            }
+        }
+    }); 
+
+    // Area control
+    AreaControl = new Control("Area", true);
+    map.overlayMapTypes.push(null);
+    AreaControl.div.index = 1;
+    map.controls[google.maps.ControlPosition.RIGHT_TOP].push(AreaControl.div);
+
+    // Setup the click event listeners
+    google.maps.event.addDomListener(AreaControl.ui, 'click', function() {
+        if (!AreaControl.blocked) {
+            farea();
+        }
+    }); 
+
     disable_widgets();
-    document.getElementById("topmap").innerHTML="Find routing area and click the init button";
-    swinit=1
-  }
+    $("#topmap").text("Find routing area and click the init button");
+    swinit = 1;
+
 }
 
 function init(p){
-  map.clearOverlays();
-  swinit=2;
-  document.getElementById("topmap").innerHTML="Loading.";
-  loaddata();
-}
-function loaddata(plat,plon){
+    for (var i = 0; i < overlays.length; i++) {
+        overlays[i].setMap(null);
+    }
+    overlays.length = 0;
+
+    $("#topmap").text("Loading...");
+    swinit = 2;
+
     var vbounds=map.getBounds();
     var vlatlon_sw=vbounds.getSouthWest();
     var vlatlon_ne=vbounds.getNorthEast();
@@ -87,16 +169,20 @@ function loaddata(plat,plon){
     var lon1=vlatlon_sw.lng();
     var lat2=vlatlon_ne.lat();
     var lon2=vlatlon_ne.lng();
-    var vurl='/guifi/routingmap/allsearch/0?lat1='+lat1+'&lon1='+lon1+'&lat2='+lat2+'&lon2='+lon2;
+    var vurl='/guifi/guifi/routingmap/allsearch/0?lat1='+lat1+'&lon1='+lon1+'&lat2='+lat2+'&lon2='+lon2;
     //var vurl='/guifi/routingmap/allsearch/0?lat1=41.21378767703215&lon1=0.97503662109375&lat2=42.44170109062157&lon2=3.6199951171874996';
-    document.getElementById("topmap").innerHTML="Loading...";
     loadXMLDoc(vurl);
+    OSPFControl.enableButton();
+    OSPFControl.enabled = true;
+    BGPControl.enableButton();
+    BGPControl.enable = true;
+    initCrontrol.disableButton();
 }
 
-function build_routing(pdata){
+function build_routing(pdata) {
   //alert(pdata);
   adata=eval(pdata);
-  document.getElementById("topmap").innerHTML="Building...";
+  $("#topmap").text("Building...");
 
   avars = adata[0];
   anodes = adata[1];
@@ -109,62 +195,75 @@ function build_routing(pdata){
     v=0;
     if(anodes[node]["bgp"]>0) v=1; 
     if(anodes[node]["ospf"]>0) v=v+2; 
-    var markerOptions = {icon:icons[v],clickable:false};
-    var vpoint = new GLatLng(anodes[node]["lat"],anodes[node]["lon"]);
-    anodes[node]["overlay"]= new GMarker(vpoint,markerOptions);
-    map.addOverlay(anodes[node]["overlay"]);
+    var vpoint = new google.maps.LatLng(anodes[node]["lat"], anodes[node]["lon"]);
+    anodes[node]["overlay"]= new google.maps.Marker({ position: vpoint, icon:icons[v], clickable:false });
+    overlays.push(anodes[node]["overlay"]);
+    anodes[node]["overlay"].setMap(map);
   }
-  var polyOptions = {clickable:false};
+
   for(link in alinks){
     if(alinks[link]["n1"]>0 && alinks[link]["n2"]>0 && alinks[link]["type"]=="wds") {
-        var vpoint1 = new GLatLng(anodes[alinks[link]["n1"]]["lat"],anodes[alinks[link]["n1"]]["lon"]);
-        var vpoint2 = new GLatLng(anodes[alinks[link]["n2"]]["lat"],anodes[alinks[link]["n2"]]["lon"]);
-        if(alinks[link]["routing"]=="BGP") v=1; else v=2;            
-        alinks[link]["overlay"] = new GPolyline([vpoint1,vpoint2],colors[v], 2,1,polyOptions);
-        map.addOverlay(alinks[link]["overlay"]);
+        var vpoint1 = new google.maps.LatLng(anodes[alinks[link]["n1"]]["lat"], anodes[alinks[link]["n1"]]["lon"]);
+        var vpoint2 = new google.maps.LatLng(anodes[alinks[link]["n2"]]["lat"], anodes[alinks[link]["n2"]]["lon"]);
+        if (alinks[link]["routing"]=="BGP") v=1; else v=2;            
+        alinks[link]["overlay"] = new google.maps.Polyline({ path: [vpoint1,vpoint2], 
+                                                             strokeColor: colors[v],
+                                                             strokeWeight: 2,
+                                                             strokeOpacity: 1,
+                                                             clickable: false });
+        overlays.push(alinks[link]["overlay"]);
+        alinks[link]["overlay"].setMap(map);
     }
   }
-  document.getElementById("topmap").innerHTML="<img src='"+picspath[1]+"'>&nbsp;BGP&nbsp;&nbsp;&nbsp;<img src='"+picspath[3]+"'>&nbsp;BGP/OSPF&nbsp;&nbsp;&nbsp;<img src='"+picspath[2]+"'>&nbsp;OSPF";
+
+  $("#topmap").html("<img src='"+picspath[1]+"'>&nbsp;BGP&nbsp;&nbsp;&nbsp;<img src='"+picspath[3]+"'>&nbsp;BGP/OSPF&nbsp;&nbsp;&nbsp;<img src='"+picspath[2]+"'>&nbsp;OSPF");
   enable_widgets();
 }
 
 function enable_widgets(){
-  bgp_widget.enable();
-  ospf_widget.enable();
-  area_widget.enable();
+  BGPControl.unblock();
+  BGPControl.enable();
+  OSPFControl.unblock();
+  OSPFControl.enable();
+  AreaControl.unblock();
 }
+
 function disable_widgets(){
-  bgp_widget.disable();
-  ospf_widget.disable();
-  area_widget.disable();
+  BGPControl.disable();
+  BGPControl.block();
+  OSPFControl.disable();
+  OSPFControl.block();
+  AreaControl.disable();
+  AreaControl.block();
 }
 
 function fbgp(p){
-  var v=0;
-  for (node in anodes){
-    v=0;
-    if(anodes[node]["bgp"]>0) v=1; 
-    if(anodes[node]["ospf"]>0) v=v+2;
-    if(p==0){
-        if(v==1 || ospf_widget.state==0){
-            anodes[node]["overlay"].hide()
-        }
-    }else{
-        if(v==1 || v==3){
-            anodes[node]["overlay"].show();
+    var v=0;
+    for (node in anodes){
+        v=0;
+        if(anodes[node]["bgp"]>0) v=1; 
+        if(anodes[node]["ospf"]>0) v=v+2;
+        if(p==0){
+            if(v==1 || BGPControl.enabled==false){
+                anodes[node]["overlay"].setMap(null);
+            }
+        } else {
+            if(v==1 || v==3) {
+                anodes[node]["overlay"].setMap(map);
+            }
         }
     }
-  }
-    for(link in alinks){
-      if(alinks[link]["n1"]>0 && alinks[link]["n2"]>0 && alinks[link]["type"]=="wds") {
-          if(alinks[link]["routing"]=="BGP"){
-            if(p==0){
-                alinks[link]["overlay"].hide();
-            }else{
-                alinks[link]["overlay"].show();
+
+    for (link in alinks){
+        if (alinks[link]["n1"]>0 && alinks[link]["n2"]>0 && alinks[link]["type"]=="wds") {
+            if (alinks[link]["routing"]=="BGP"){
+                if (p==0) {
+                    alinks[link]["overlay"].setMap(null);
+                } else {
+                    alinks[link]["overlay"].setMap(map);
+                }
             }
-          }
-      }
+        }
     }    
 }
 
@@ -175,12 +274,12 @@ function fospf(p){
     if(anodes[node]["bgp"]>0) v=1; 
     if(anodes[node]["ospf"]>0) v=v+2;
      if(p==0){
-        if(v==2 || bgp_widget.state==0){
-            anodes[node]["overlay"].hide()
+        if(v==2 || OSPFControl.enabled == false ){
+            anodes[node]["overlay"].setMap(null);
         }
     }else{
         if(v==2 || v==3){
-            anodes[node]["overlay"].show();
+            anodes[node]["overlay"].setMap(map);
         }
     }
   }
@@ -188,9 +287,9 @@ function fospf(p){
       if(alinks[link]["n1"]>0 && alinks[link]["n2"]>0 && alinks[link]["type"]=="wds") {
           if(alinks[link]["routing"]=="OSPF"){
             if(p==0){
-                alinks[link]["overlay"].hide();
+                alinks[link]["overlay"].setMap(null);
             }else{
-                alinks[link]["overlay"].show();
+                alinks[link]["overlay"].setMap(map);
             }
           }
       }
@@ -206,9 +305,9 @@ function farea(){
       if(alinks[link]["n1"]>0 && alinks[link]["n2"]>0 && alinks[link]["type"]=="wds") {
           if(alinks[link]["routing"]=="OSPF"){
             if(alinks[link]["area"]==narea){
-                alinks[link]["overlay"].setStrokeStyle({color:"#0000ff"});
+                alinks[link]["overlay"].setOptions({strokeColor: "#0000ff"});
             }else{
-                alinks[link]["overlay"].setStrokeStyle({color:colors[2]});
+                alinks[link]["overlay"].setOptions({strokeColor: colors[2]});
             }
           }
       }
@@ -227,170 +326,12 @@ function exec_or_value(f, o) {
   return f.apply(o, a);
 }
 
-function create_init_widget(x, y, width) {
-  WTGControl(map, x, y, width, 'Init', 'Init', null,
-    function(i) { if (i) init(0); else init(0);},
-    function() { init_widget = this; });
-}
-
-function create_bgp_widget(x, y, width) {
-  WTGControl(map, x, y, width, 'BGP', '<b>BGP</b>', null,
-    function(i) { if (i) fbgp(1); else fbgp(0);},
-    function() { bgp_widget = this; });
-}
-
-function create_ospf_widget(x, y, width) {
-  WTGControl(map, x, y, width, 'OSPF', '<b>OSPF</b>', null,
-    function(i) { if (i) fospf(1); else fospf(0);},
-    function() { ospf_widget = this; });
-}
-
-function create_area_widget(x, y, width) {
-  WTGControl(map, x, y, width, 'Area', 'Area', null,
-    function(i) { if (i) farea(); else farea();},
-    function() { area_widget = this; });
-}
-
-function WTControl(parent, n_states, enablef, disablef, innerHTMLf, titlef, clickf) {
-  this.div        = document.createElement('div');
-  parent.appendChild(this.div);
-  this.style      = this.div.style;
-  this.n_states   = n_states;
-  this.enablef    = enablef;
-  this.disablef   = disablef;
-  this.innerHTMLf = innerHTMLf;
-  this.clickf     = clickf;
-  this.titlef     = titlef;
-  this.state      = 0;
-  this.enabled    = 0;
-  this.enable();
-  this.update();
-}
-
-WTControl.prototype.enable = function()  {
-  this.enablef(this.div);
-  var t = this;
-  this.div.onclick = function() { t.onclick(); };
-  this.enabled = 1;
-  this.set_title();
-}
-
-WTControl.prototype.disable = function() {
-  this.enabled = 0;
-  this.disablef(this.div);
-  this.div.onclick = null;
-  this.set_title();
-}
-
-WTControl.prototype.show = function() {
-  this.style.display = '';
-}
-
-WTControl.prototype.hide = function() {
-  this.style.display = 'none';
-}
-
-WTControl.prototype.is_visible = function() {
-  return this.style.display != 'none';
-}
-
-WTControl.prototype.update = function() {
-  this.div.innerHTML = exec_or_value(this.innerHTMLf, this, this.state);
-  this.set_title();
-}
-
-WTControl.prototype.callback = function() {
-  if (this.clickf)
-    this.clickf(this.state);
-}
-
-WTControl.prototype.onclick = function() {
-  this.state++;
-  if (this.state >= this.n_states)
-    this.state = 0;
-  this.update();
-  this.callback();
-}
-
-WTControl.prototype.clear_title = function() {
-  this.div.title = null;
-}
-
-WTControl.prototype.set_title = function() {
-  if (this.titlef)
-    this.div.title = exec_or_value(this.titlef, this);
-}
-
-WTControl.prototype.set_state = function(state) {
-  this.state = state;
-  this.update();
-}
-
-WTControl.prototype.trigger = function(state) {
-  this.state = state;
-  this.update();
-  this.callback();
-}
-
-WTControl.prototype.reset = function() {
-  this.trigger(0);
-}
-
-        // for these guys, the action happens when the map calls initialize
-function WTGControl(map, x, y, width, text0, text1, titlef, onclick, oncreate) {
-  var c = new GControl(0, 0);
-  c.initialize = function(map) {
-    var w = new WTControl(map.getContainer(), 2,
-                  function(d) { s = d.style;
-                                s.border          = '1px solid black'
-                                s.padding         = '0px 3px';
-                                s.backgroundColor = 'white';
-                                s.color           = 'black';
-                                s.fontSize        = '12px';
-                                s.fontFamily      = 'Arial,sans-serif';
-                                s.cursor          = 'pointer';
-                                s.width           = width + 'px';
-                                s.textAlign       = 'center';
-                  },
-                  function(d) { d.style.color = '#aaaaaa'; }, 
-                  function(i) { return i? text1 : text0; },
-                  titlef,
-                  onclick
-            );
-
-    if (oncreate)
-      oncreate.call(w);
-    return w.div;
-  };
-  map.addControl(c, new GControlPosition(G_ANCHOR_TOP_RIGHT, new GSize(x, y)));
-}
-
 //httprequest
-function loadXMLDoc(url){
-      http_request=null;
-      if (window.XMLHttpRequest){ // code for Firefox, Opera, IE7, etc.
-            http_request=new XMLHttpRequest();
-      }else if (window.ActiveXObject){ // code for IE5 and IE6
-            http_request=new ActiveXObject("Microsoft.XMLHTTP");
-      }
-      if (http_request!=null){
-            http_request.onreadystatechange=state_Change;
-            http_request.open("GET",url,true);
-            http_request.send(null);
-      }else{
-            alert("Your browser does not support XMLHTTP.");
-      }
+// REQUEST
+function loadXMLDoc(url) {
+    var r = $.ajax({
+                     url: url,
+                     async: false,
+                   }).responseText;
+    return build_routing(r);j
 }
-
-function state_Change(){
-      if (http_request.readyState==4){// 4 = "loaded"
-            if (http_request.status==200){// 200 = OK
-                  build_routing(http_request.responseText);
-            }else{
-                  alert("Problem retrieving data:" + http_request.statusText);
-            }
-      }
-}
-
-
-

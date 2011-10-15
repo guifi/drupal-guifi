@@ -58,13 +58,13 @@ function draw_map()
 
     // Setup the click event listeners: simply set the map to Chicago
     google.maps.event.addDomListener(guifiControl.ui, 'click', function() {
-        if (map.overlayMapTypes.getAt(0)) {
+        if (guifiControl.enabled) {
             map.overlayMapTypes.removeAt(0);
-            guifiControl.disableButton();
+            guifiControl.disable();
         } else {
             // Add the guifi layer
             map.overlayMapTypes.insertAt(0, guifi.overlay);
-            guifiControl.enableButton();
+            guifiControl.enable();
         }
     });
 

@@ -61,13 +61,13 @@ function draw_map(){
 
     // Setup the click event listeners
     google.maps.event.addDomListener(guifiControl.ui, 'click', function() {
-        if (map.overlayMapTypes.getAt(0)) {
+        if (guifiControl.enabled) {
             map.overlayMapTypes.setAt(0, null);
             guifiControl.disableButton();
         } else {
             // Add the guifi layer
             map.overlayMapTypes.setAt(0, guifi.overlay);
-            guifiControl.enableButton();
+            guifiControl.enable();
         }
     });
 
@@ -89,17 +89,14 @@ function draw_map(){
     // Setup the click event listeners
     google.maps.event.addDomListener(initControl.ui, 'click', function() {
         if (initControl.enabled) {
-            initControl.enabled = false;
-            initControl.disableButton();
+            initControl.disable();
         } else {
-            // Add the guifi layer
-            initControl.enabled = true;
             init(0);
-            initControl.enableButton();
+            initControl.enable();
         }
     });
  
-    document.getElementById("topmap").innerHTML="Find a supernode ospf area and click the init button";
+    $("#topmap").text("Find a supernode ospf area and click the init button");
     swinit = 1;
 }
 
@@ -116,12 +113,12 @@ function init(p){
         }
     });
     swinit=1;
-    document.getElementById("topmap").innerHTML="Click on the initial node";
+    $("#topmap").text("Click on the initial node");
 }
 
 function init_search(platlng){
     if(swinit==1){
-        document.getElementById("topmap").innerHTML="Searching";
+        $("#topmap").text("Searching");
         google.maps.event.clearListeners(map,"click");
         swinit=2;
         loaddata(platlng.lat(),platlng.lng());
@@ -135,7 +132,7 @@ function loaddata(plat,plon){
     var lat2=plat+vinc;
     var lon2=plon+vinc;
     //alert(lat1 + ' ' + lon1 + ' ' + lat2 + ' ' + lon2);
-    var vurl='/guifi/guifi/routingmap/search/0?lat1='+lat1+'&lon1='+lon1+'&lat2='+lat2+'&lon2='+lon2
+    var vurl='/guifi/routingmap/search/0?lat1='+lat1+'&lon1='+lon1+'&lat2='+lat2+'&lon2='+lon2
     //var vurl='http://localhost/guifi/routingmap/search/0?lat1=41.86486002927498&lon1=2.289477752685547&lat2=41.866860029274974&lon2=2.2914777526855468';
     //alert(vurl);
     loadXMLDoc(vurl);
@@ -152,7 +149,7 @@ function build_routing(pdata){
     initControl.disableButton();
     return;
   }else{
-    document.getElementById("topmap").innerHTML="You've selected the supernode " + vnodeinit + ". Drawing....";
+    $("#topmap").text("You've selected the supernode " + vnodeinit + ". Drawing....");
   }
 
   anodes = adata[1];
@@ -195,8 +192,8 @@ function build_routing(pdata){
     output += aznets[znet]["netid"] + "/" + aznets[znet]["maskbits"]+"&nbsp;&nbsp;broadcast:"+aznets[znet]["broadcast"]+"&nbsp;&nbsp;zone:"+aznets[znet]["zid"]+"&nbsp;"+aznets[znet]["znick"]+"<br>";
   }
 
-  document.getElementById("topmap").innerHTML="Completed";
-  document.getElementById("bottommap").innerHTML=output;
+  $("#topmap").text("Completed");
+  $("#bottommap").text(output);
 
   // Disable the init button
   initControl.enabled = false;

@@ -256,13 +256,13 @@ function draw_map() {
 
     // Setup the click event listeners
     google.maps.event.addDomListener(guifiControl.ui, 'click', function() {
-        if (map.overlayMapTypes.getAt(0)) {
+        if (guifiControl.enabled) {
             map.overlayMapTypes.setAt(0, null);
-            guifiControl.disableButton();
+            guifiControl.disable();
         } else {
             // Add the guifi layer
             map.overlayMapTypes.setAt(0, guifi.overlay);
-            guifiControl.enableButton();
+            guifiControl.enable();
         }
     });
 
@@ -274,13 +274,13 @@ function draw_map() {
 
     // Setup the click event listeners
     google.maps.event.addDomListener(contourControl.ui, 'click', function() {
-        if (map.overlayMapTypes.getAt(1)) {
+        if (contourControl.enabled) {
             map.overlayMapTypes.setAt(1, null);
             contourControl.disableButton();
         } else {
             // Add the guifi layer
             map.overlayMapTypes.setAt(1, contourLayer);
-            contourControl.enableButton();
+            contourControl.enable();
         }
     });
 
@@ -292,13 +292,13 @@ function draw_map() {
 
     // Setup the click event listeners: simply set the map to Chicago
     google.maps.event.addDomListener(cloakControl.ui, 'click', function() {
-        if (cloak_overlays.length != 0) {
+        if (cloakControl.enabled) {
             remove_cloak(); 
-            cloakControl.disableButton();
+            cloakControl.disable();
         } else {
             // Add the guifi layer
             show_cloak();
-            cloakControl.enableButton();
+            cloakControl.enable();
         }
     });
 
