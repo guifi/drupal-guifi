@@ -175,10 +175,10 @@ function draw_map() {
     google.maps.event.addDomListener(playControl.ui, 'click', function() {
         if (!playControl.blocked) {
             if (playControl.enabled) {
-                playControl.disable();
+                playControl.disable("Play");
                 pause();
             } else {
-                playControl.enable();
+                playControl.enable("Pause");
                 play();
             }
         }
@@ -421,6 +421,12 @@ function build_history(pdata){
       adata=null;
       swinit=1;
       total_objects=aobjects.length-1;
+
+      initControl.block();
+      cleanControl.unblock();
+      playControl.unblock();
+      playControl.enable("Pause");
+
       init_calendar();
       init_interval();
 }
@@ -654,9 +660,6 @@ function init(){
       stop_interval();
       document.getElementById("edit-formmap2").value="";
       aobjects.length=0;
-      initControl.block();
-      playControl.unblock();
-      cleanControl.unblock();
       if(supportsCanvas){
             canvassupernodes = $("#canvassupernodes")[0].getContext('2d');
             canvasbackbone = $("#canvasbackbone")[0].getContext('2d');

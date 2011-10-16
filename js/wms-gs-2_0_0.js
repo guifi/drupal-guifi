@@ -152,10 +152,15 @@ function Control(name, disabled, loading_icon, size) {
 
 Control.prototype = {
 
-    enable: function() {
+    enable: function(text) {
             if (this.loading_icon) {
                 $("img#" + this.name.replace(/ /g, "") + "-loading").hide();
             }
+
+            if (text) {
+                this.text.innerHTML = text;
+            }
+
             this.enabled = true;
             this.ui.style.backgroundColor = '#708dce';
             this.ui.style.borderColor= '#708dce';
@@ -166,10 +171,15 @@ Control.prototype = {
             $("#" + this.imgid).show();
     },
 
-    disable: function() {
+    disable: function(text) {
             if (this.loading_icon) {
                 $("img#" + this.name.replace(/ /g, "") + "-loading").hide();
             }
+
+            if (text) {
+                this.text.innerHTML = text;
+            }
+
             this.enabled = false;
             this.ui.style.backgroundColor = 'white';
             this.ui.style.borderColor= '#a9bbdf';
@@ -177,6 +187,9 @@ Control.prototype = {
     },
 
     block: function() {
+            if (this.loading_icon) {
+                $("img#" + this.name.replace(/ /g, "") + "-loading").hide();
+            }
             this.blocked = true;
             this.ui.style.backgroundColor = 'white';
             this.ui.style.borderColor= '#a9bbdf';
@@ -184,6 +197,9 @@ Control.prototype = {
     },
 
     unblock: function() {
+            if (this.loading_icon) {
+                $("img#" + this.name.replace(/ /g, "") + "-loading").hide();
+            }
             this.blocked = false;
             this.ui.style.backgroundColor = 'white';
             this.ui.style.borderColor= '#a9bbdf';
