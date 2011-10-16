@@ -174,7 +174,7 @@ var contourLayer = new google.maps.ImageMapType({
      tileSize: new google.maps.Size(256, 256),
      getTileUrl: function(point, zoom) {
         return 'http://contour.heywhatsthat.com/bin/contour_tiles.cgi?x=' + 
-            point.lng+'&y='+point.lat+'&zoom='+zoom+'&interval='+contour_interval(zoom) +
+            point.lng()+'&y='+point.lat()+'&zoom='+zoom+'&interval='+contour_interval(zoom) +
 	        '&color=0000FF30&src=guifi.net';
         },
 });
@@ -185,7 +185,7 @@ var cloakLayer = new google.maps.ImageMapType({
      tileSize: new google.maps.Size(256, 256),
      getTileUrl: function(point, zoom) {
         return 'http://contour.heywhatsthat.com/bin/contour_tiles.cgi?x=' + 
-            point.lng+'&y='+point.lat+'&zoom='+zoom+'&interval='+contour_interval(zoom) +
+            point.lng()+'&y='+point.lat()+'&zoom='+zoom+'&interval='+contour_interval(zoom) +
 	        '&color=0000FF30&src=guifi.net';
         },
 });
@@ -336,8 +336,8 @@ function initialPosition(ppoint) {
 
     var dNode = new google.maps.Marker( { position: point, map: map });
     markers.push(dNode);
-    var y = Math.abs(document.getElementById("lat").value - point.lat);
-    var x = Math.abs(document.getElementById("lon").value - point.lng);
+    var y = Math.abs(document.getElementById("lat").value - point.lat());
+    var x = Math.abs(document.getElementById("lon").value - point.lng());
     var distance = Math.sqrt(y*y + x*x);
     var curvature = distance > 0.1 ? 1 : 0; // 0.1 a ojimetro son 10Km xD
 
@@ -347,7 +347,7 @@ function initialPosition(ppoint) {
         "src=guifi.net&"+
         "pt0="+document.getElementById("lat").value+","+document.getElementById("lon").value+
         ",ff0000,"+document.getElementById("elevation").value+
-        "&pt1="+point.lat+","+point.lng+
+        "&pt1="+point.lat()+","+point.lng()+
         ",00c000,9";   
   
     for (var i = 0; i < cloak_overlays.length; i++) {
@@ -357,8 +357,8 @@ function initialPosition(ppoint) {
     pLine = new google.maps.Polyline({ path: [node, point], strokeColor: "#ff0000", strokeWeight: 5, strokeOpacity: .4, map:map });
     markers.push(pLine);
 
-    document.getElementById('tdistance').innerHTML=Math.round(GCDistance_js(node.lat,node.lng,point.lat,point.lng)*1000)/1000;
-    document.getElementById('tazimut').innerHTML=Math.round(GCAzimuth_js(node.lat,node.lng,point.lat,point.lng)*100)/100;
+    document.getElementById('tdistance').innerHTML=Math.round(GCDistance_js(node.lat(),node.lng(),point.lat(),point.lng())*1000)/1000;
+    document.getElementById('tazimut').innerHTML=Math.round(GCAzimuth_js(node.lat(),node.lng(),point.lat(),point.lng())*100)/100;
 }
 
 /*
