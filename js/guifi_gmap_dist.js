@@ -2,7 +2,6 @@ var map = null;
 var markers = Array();
 var cloak_overlays = Array();
 var cloak_query = false;
-var overlay;
 
 var cloakControl = null;
 
@@ -237,10 +236,6 @@ function draw_map() {
 
     // Add the map to the div
     map = new google.maps.Map(divmap, opts);
-
-    overlay = new google.maps.OverlayView();
-    overlay.draw = function() {};
-    overlay.setMap(map);
 
     var icon_start_url = document.getElementById("edit-jspath").value + 'marker_start.png';
     var icon_start = new google.maps.MarkerImage(

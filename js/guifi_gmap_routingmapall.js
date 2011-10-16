@@ -31,7 +31,8 @@ function draw_map(){
         minZoom: 2,
         mapTypeControl: true,
         mapTypeControlOptions: {
-            mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
+            mapTypeIds: [ "osm",
+                          google.maps.MapTypeId.ROADMAP,
                           google.maps.MapTypeId.SATELLITE,
                           google.maps.MapTypeId.HYBRID,
                           google.maps.MapTypeId.TERRAIN ],
@@ -49,6 +50,9 @@ function draw_map(){
 
     // Add the map to the div
     map = new google.maps.Map(divmap, opts);
+
+    // Add the OSM map type
+    map.mapTypes.set('osm', openStreet);
 
     // Guifi control
     var guifi = new GuifiLayer(map, baseURL);
@@ -83,7 +87,7 @@ function draw_map(){
     }
    
     // Init control
-    initControl = new Control("init", true);
+    initControl = new Control("init", true, true, 55);
     map.overlayMapTypes.push(null);
     initControl.div.index = 1;
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(initControl.div);
@@ -93,13 +97,13 @@ function draw_map(){
         if (initControl.enabled) {
             initControl.disable();
         } else {
-            initControl.enable();
+            initControl.loading();
             init();
         }
     }); 
 
     // BGP control
-    BGPControl = new Control("BGP", true);
+    BGPControl = new Control("BGP", true, false, 55);
     map.overlayMapTypes.push(null);
     BGPControl.div.index = 1;
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(BGPControl.div);
@@ -118,7 +122,7 @@ function draw_map(){
     }); 
 
     // OSPF control
-    OSPFControl = new Control("OSPF", true);
+    OSPFControl = new Control("OSPF", true, false, 55);
     map.overlayMapTypes.push(null);
     OSPFControl.div.index = 1;
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(OSPFControl.div);
@@ -137,7 +141,7 @@ function draw_map(){
     }); 
 
     // Area control
-    AreaControl = new Control("Area", true);
+    AreaControl = new Control("Area", true, false, 55);
     map.overlayMapTypes.push(null);
     AreaControl.div.index = 1;
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(AreaControl.div);
@@ -173,7 +177,13 @@ function init(){
     var lon2=vlatlon_ne.lng();
     var vurl='/guifi/routingmap/allsearch/0?lat1='+lat1+'&lon1='+lon1+'&lat2='+lat2+'&lon2='+lon2;
     //var vurl='/guifi/routingmap/allsearch/0?lat1=41.21378767703215&lon1=0.97503662109375&lat2=42.44170109062157&lon2=3.6199951171874996';
-    loadXMLDoc(vurl);
+
+    var r = $.ajax({
+                     url: vurl,
+                     success: function(data) {
+                         build_routing(data);
+                     }
+                   });
 }
 
 function build_routing(pdata) {
@@ -321,15 +331,4 @@ function exec_or_value(f, o) {
   for (var i = 2; i < arguments.length; i++)
     a.push(arguments[i]);
   return f.apply(o, a);
-}
-
-//httprequest
-// REQUEST
-function loadXMLDoc(url) {
-    var r = $.ajax({
-                     url: url,
-                     success: function(data) {
-                         build_routing(data);
-                     }
-                   });
 }

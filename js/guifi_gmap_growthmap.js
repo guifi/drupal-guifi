@@ -4,7 +4,7 @@
  * functions for growth map
  */
 var map = null;
-var overlays = Array();
+var overlay = false;
 
 var initControl = null;
 var playControl = null;
@@ -82,7 +82,8 @@ function draw_map() {
         minZoom: 2,
         mapTypeControl: true,
         mapTypeControlOptions: {
-            mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
+            mapTypeIds: [ "osm",
+                          google.maps.MapTypeId.ROADMAP,
                           google.maps.MapTypeId.SATELLITE,
                           google.maps.MapTypeId.HYBRID,
                           google.maps.MapTypeId.TERRAIN ],
@@ -100,6 +101,9 @@ function draw_map() {
 
     // Add the map to the div
     map = new google.maps.Map(divmap, opts);
+
+    // Add the OSM map type
+    map.mapTypes.set('osm', openStreet);
 
     // Add the guifi layer
     var guifi = new GuifiLayer(map);
@@ -144,7 +148,7 @@ function draw_map() {
     var ninc=22;
 
     // Init control
-    initControl = new Control("Init", true);
+    initControl = new Control("Init", true, true, 55);
     map.overlayMapTypes.push(null);
     initControl.div.index = 1;
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(initControl.div);
@@ -156,14 +160,13 @@ function draw_map() {
                 initControl.disable();
             } else {
                 initControl.loading();
-                initControl.enable();
                 init();
             }
         }
     }); 
 
     // Play control
-    playControl = new Control("Play", true);
+    playControl = new Control("Play", true, false, 55);
     map.overlayMapTypes.push(null);
     playControl.div.index = 1;
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(playControl.div);
@@ -182,7 +185,7 @@ function draw_map() {
     }); 
 
     // Clean control
-    cleanControl = new Control("Clean", true);
+    cleanControl = new Control("Clean", true, false, 55);
     map.overlayMapTypes.push(null);
     cleanControl.div.index = 1;
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(cleanControl.div);
@@ -197,7 +200,7 @@ function draw_map() {
     }); 
 
     // Fast control
-    fastControl = new Control("Fast", true);
+    fastControl = new Control("Fast", true, false, 55);
     map.overlayMapTypes.push(null);
     fastControl.div.index = 1;
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(fastControl.div);
@@ -215,7 +218,7 @@ function draw_map() {
     }); 
 
     // Nor. control
-    normalControl = new Control("Norm.", true);
+    normalControl = new Control("Norm.", true, false, 55);
     map.overlayMapTypes.push(null);
     normalControl.div.index = 1;
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(normalControl.div);
@@ -233,7 +236,7 @@ function draw_map() {
     }); 
 
     // Slow control
-    slowControl = new Control("Slow", true);
+    slowControl = new Control("Slow", true, false, 55);
     map.overlayMapTypes.push(null);
     slowControl.div.index = 1;
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(slowControl.div);
@@ -259,6 +262,11 @@ function draw_map() {
       
     if (document.getElementById('testcanvas').getContext!=undefined){
           supportsCanvas = true;
+
+          overlay = new google.maps.OverlayView();
+          overlay.draw = function() {};
+          overlay.setMap(map);
+
           /**
           * @fileoverview Canvas tools for google maps. The first object is
           * to create arrows on google maps.
@@ -266,40 +274,37 @@ function draw_map() {
           * modified for this application
           */
             var Canvas = function(pname,pzorder) {
-              this.name_ = pname;
-              this.zorder_=pzorder;
-            };
-           
-            Canvas.prototype = new google.maps.OverlayView();
-           
-            Canvas.prototype.initialize = function(map) {
+                this.name_ = pname;
                 this.map_ = map;
+                this.zorder_=pzorder;
+                this.setMap(map);
+            }
+
+            Canvas.prototype = new google.maps.OverlayView();
+
+            Canvas.prototype.onAdd = function() {
                 var div = document.createElement('div');
                 div.style.position = "absolute";
                 div.innerHTML = '<canvas id="'+this.name_+'" width="800px" height="600px"></canvas>' ;
-
-                map.getPane(G_MAP_MARKER_PANE).appendChild(div);
-                this.map_ = map;
                 this.div_ = div;
                 this.div_.style.zIndex=this.zorder_;
-                this.canvas_ = document.getElementById(this.name_);
-                this.reset();
-              };
-           
-            Canvas.prototype.remove = function() {
-                 this.canvas_.parentNode.removeChild(this.canvas_);
+
+                var panes = this.getPanes();
+                panes.overlayLayer.appendChild(div);
+
+                //this.reset();
             };
            
-            Canvas.prototype.copy = function() {
-                  return new Canvas();
-            };
-           
-            Canvas.prototype.redraw = function(change_in_coordinate_system) {
- 
+            Canvas.prototype.draw = function() {
             };
 
+            Canvas.prototype.remove = function() {
+                this.div_.parentNode.removeChild(this.div_);
+                this.div_ = null;
+            };
+           
             Canvas.prototype.reset = function() {
-                  var p = this.map_.fromLatLngToDivPixel(this.map_.getCenter());
+                  var p = overlay.getProjection().fromLatLngToDivPixel(this.map_.getCenter());
                   //var h = parseInt(this.div_.clientHeight);
                   //this.div_.style.width = "800px";
                   //this.div_.style.height = "600px";
@@ -309,49 +314,43 @@ function draw_map() {
                   this.div_.style.top = this.yoffset_ + "px";
 
                   var j =new google.maps.Point(p.x +400,p.y - 300);
-                  this.latlngne_=this.map_.fromDivPixelToLatLng(j);
+                  this.latlngne_ = overlay.getProjection().fromDivPixelToLatLng(j);
                   var k = new google.maps.Point(p.x - 400,p.y + 300);
-                  this.latlngsw_=this.map_.fromDivPixelToLatLng(k);
+                  this.latlngsw_ = overlay.getProjection().fromDivPixelToLatLng(k);
             };
 
             Canvas.prototype.getne = function() {
                   return(this.latlngne_);
             };
+
             Canvas.prototype.getsw = function() {
                   return(this.latlngsw_);
             };
+
             Canvas.prototype.LatLngToCanvasPixel = function(pLatLng) {
-                  var p=this.map_.getProjection().fromLatLngToDivPixel(pLatLng);
+                  var p = overlay.getProjection().fromLatLngToDivPixel(pLatLng);
                   var v=new google.maps.Point(p.x - this.xoffset_,p.y - this.yoffset_);
                   return(v);
             };
-              
+             
             Canvas.prototype.obj = function() {
+                  this.canvas_ = document.getElementById(this.name_);
+                  console.log(this.canvas_);
                   return this.canvas_.getContext('2d');
-            };
+            }
+ 
             //****************************************************
             
             objsupernodes = new Canvas("canvassupernodes",204);
-            objsupernodes.setMap(map);
-            canvassupernodes=objsupernodes.obj();
-
             objbackbone = new Canvas("canvasbackbone",203);
-            objbackbone.setMap(map);
-            canvasbackbone=objbackbone.obj();
-
             objnodes = new Canvas("canvasnodes",202);
-            objnodes.setMap(map);
-            canvasnodes=objnodes.obj();
-
             objlinks = new Canvas("canvaslinks",201);
-            objlinks.setMap(map);
-            canvaslinks=objlinks.obj();
-
             document.getElementById("footmap").innerHTML="Mode: canvas";
       } else {
             supportsCanvas = false;
             document.getElementById("footmap").innerHTML="Mode: SVG/VLM";
       }
+
       if(document.getElementById("maprun").value==1){
             init();
       };
@@ -608,26 +607,32 @@ function link_zindex1(){
 }
 
 function loaddata(){
-            document.getElementById("edit-formmap2").value="Loading.";
-            if(supportsCanvas){
-                  objsupernodes.reset();
-                  objbackbone.reset()
-                  objnodes.reset()
-                  objlinks.reset()
-                  var vlatlon_sw=objsupernodes.getsw();
-                  var vlatlon_ne=objsupernodes.getne();
-            }else{
-                  var vbounds=map.getBounds();
-                  var vlatlon_sw=vbounds.getSouthWest();
-                  var vlatlon_ne=vbounds.getNorthEast();
-            }
-            var lat1=vlatlon_sw.lat();
-            var lon1=vlatlon_sw.lng();
-            var lat2=vlatlon_ne.lat();
-            var lon2=vlatlon_ne.lng();
-            document.getElementById("edit-formmap2").value="Loading...";
-            var vurl='/guifi/guifi/cnml/0/growthmap?lat1='+lat1+'&lon1='+lon1+'&lat2='+lat2+'&lon2='+lon2
-            loadXMLDoc(vurl);
+    document.getElementById("edit-formmap2").value="Loading.";
+    if(supportsCanvas){
+          objsupernodes.reset();
+          objbackbone.reset()
+          objnodes.reset()
+          objlinks.reset()
+          var vlatlon_sw=objsupernodes.getsw();
+          var vlatlon_ne=objsupernodes.getne();
+    }else{
+          var vbounds=map.getBounds();
+          var vlatlon_sw=vbounds.getSouthWest();
+          var vlatlon_ne=vbounds.getNorthEast();
+    }
+    var lat1=vlatlon_sw.lat();
+    var lon1=vlatlon_sw.lng();
+    var lat2=vlatlon_ne.lat();
+    var lon2=vlatlon_ne.lng();
+    document.getElementById("edit-formmap2").value="Loading...";
+    var vurl='/guifi/cnml/0/growthmap?lat1='+lat1+'&lon1='+lon1+'&lat2='+lat2+'&lon2='+lon2;
+
+    $.ajax({
+             url: vurl,
+             success: function(data) {
+                 build_history(data);
+             }
+           });
 }
 
 function play(){
@@ -653,18 +658,17 @@ function init(){
       playControl.unblock();
       cleanControl.unblock();
       if(supportsCanvas){
+            canvassupernodes = $("#canvassupernodes")[0].getContext('2d');
+            canvasbackbone = $("#canvasbackbone")[0].getContext('2d');
+            canvasnodes = $("#canvasnodes")[0].getContext('2d');
+            canvaslinks = $("#canvaslinks")[0].getContext('2d');
             canvassupernodes.clearRect(0,0,800,600);
             canvasbackbone.clearRect(0,0,800,600);
             canvasnodes.clearRect(0,0,800,600);
             canvaslinks.clearRect(0,0,800,600);
-            map.disableDoubleClickZoom();
-            map.removeControl(navmapcontrol);
-            map.disableScrollWheelZoom();
-      }else{
-            for (var i = 0; i < overlays.length; i++) {
-                overlays[i].setMap(null);
-            }
-            overlays.length = 0;
+            map.disableDoubleClickZoom = true;
+            map.mapTypeControl = false;
+            map.scrollwheel = false;
       }
       swinit=0;
       loaddata();
@@ -681,11 +685,6 @@ function clean(){
             canvasbackbone.clearRect(0,0,800,600);
             canvasnodes.clearRect(0,0,800,600);
             canvaslinks.clearRect(0,0,800,600);
-      }else{
-            for (var i = 0; i < overlays.length; i++) {
-                overlays[i].setMap(null);
-            }
-            overlays.length = 0;
       }
 }
 
@@ -732,14 +731,3 @@ function exec_or_value(f, o) {
   return f.apply(o, a);
 }
 
-
-//httprequest
-// REQUEST
-function loadXMLDoc(url) {
-    var r = $.ajax({
-                     url: url,
-                     success: function(data) {
-                         build_history(data);
-                     }
-                   });
-}

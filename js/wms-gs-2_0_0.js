@@ -167,6 +167,9 @@ Control.prototype = {
     },
 
     disable: function() {
+            if (this.loading_icon) {
+                $("img#" + this.name.replace(/ /g, "") + "-loading").hide();
+            }
             this.enabled = false;
             this.ui.style.backgroundColor = 'white';
             this.ui.style.borderColor= '#a9bbdf';
