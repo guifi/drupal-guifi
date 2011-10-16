@@ -63,7 +63,7 @@ function draw_map(){
     google.maps.event.addDomListener(guifiControl.ui, 'click', function() {
         if (guifiControl.enabled) {
             map.overlayMapTypes.setAt(0, null);
-            guifiControl.disableButton();
+            guifiControl.disable();
         } else {
             // Add the guifi layer
             map.overlayMapTypes.setAt(0, guifi.overlay);
@@ -145,8 +145,7 @@ function build_routing(pdata){
   if(vnodeinit==0){
     alert("You have not selected any node. Has to try again");
     init(1);
-    initControl.enabled = false;
-    initControl.disableButton();
+    initControl.disable();
     return;
   }else{
     $("#topmap").text("You've selected the supernode " + vnodeinit + ". Drawing....");
@@ -196,8 +195,7 @@ function build_routing(pdata){
   $("#bottommap").text(output);
 
   // Disable the init button
-  initControl.enabled = false;
-  initControl.disableButton();
+  initControl.disable();
 }
 
 //CONTROLS

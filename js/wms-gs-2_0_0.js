@@ -94,10 +94,12 @@ var openStreet = new google.maps.ImageMapType({
       alt: "Open Streetmap tiles"
 });
 
-function Control(name, disabled) {
+function Control(name, disabled, loading_icon, size) {
     this.div = document.createElement('DIV');
     this.enabled = !disabled;
     this.blocked = false;
+    this.name = name;
+    this.loading_icon = loading_icon;
 
     // Set CSS styles for the DIV containing the control
     // Setting padding to 5 px will offset the control
@@ -114,6 +116,11 @@ function Control(name, disabled) {
     this.ui.style.borderWidth = '1px';
     this.ui.style.cursor = 'pointer';
     this.ui.style.textAlign = 'center';
+
+    if (size) {
+        this.ui.style.width = size + "px";
+    }
+
     this.ui.title = name;
     this.div.appendChild(this.ui);
 
@@ -127,7 +134,14 @@ function Control(name, disabled) {
     this.text.style.paddingRight = '10px';
     this.text.style.paddingTop = '2px';
     this.text.style.paddingBottom = '2px';
-    this.text.innerHTML = name;
+
+    if (loading_icon) {
+        this.imgid = this.name.replace(/ /g, "") + "-loading";
+        this.text.innerHTML = '<img id="' + this.imgid + '" style="display: none; vertical-align: middle;" src="/guifi/sites/all/modules/guifi/icons/loading.gif" /> ' + name;
+    } else {
+        this.text.innerHTML = name;
+    }
+
     this.ui.appendChild(this.text);
 
     if (disabled) {
@@ -141,11 +155,18 @@ function Control(name, disabled) {
 Control.prototype = {
 
     enable: function() {
+            if (this.loading_icon) {
+                $("img#" + this.name.replace(/ /g, "") + "-loading").hide();
+            }
             this.enabled = true;
             this.ui.style.backgroundColor = '#708dce';
             this.ui.style.borderColor= '#708dce';
             this.text.style.color = 'white';
             this.text.style.fontWeight = 'bold';
+    },
+
+    loading: function() {
+            $("#" + this.imgid).show();
     },
 
     disable: function() {

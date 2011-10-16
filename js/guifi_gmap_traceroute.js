@@ -62,7 +62,7 @@ function draw_map(){
     google.maps.event.addDomListener(guifiControl.ui, 'click', function() {
         if (guifiControl.enabled) {
             map.overlayMapTypes.setAt(0, null);
-            guifiControl.disableButton();
+            guifiControl.disable();
         } else {
             // Add the guifi layer
             map.overlayMapTypes.setAt(0, guifi.overlay);

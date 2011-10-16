@@ -2,6 +2,9 @@ var map = null;
 var markers = Array();
 var cloak_overlays = Array();
 var cloak_query = false;
+var overlay;
+
+var cloakControl = null;
 
 if(Drupal.jsEnabled) {
     $(document).ready(function(){
@@ -18,22 +21,26 @@ var pLine;
 var id;
 var r;
 
-// REQUEST
-function wt_request(url, error_label) {
-  return $.ajax({
-                        url: url,
-                        async: false,
-                }).responseText;
-}
-
 function wt_request_array_of_lines(url, name) {
-  var s = wt_request(url, name);
-  if (s == null) return null;
 
-  // pop off last element, which will be blank (if response ends with \n)
-  var a = s.split('\n');
-  a.pop();
-  return a;
+  $.ajax({
+            url: url,
+            success: function(data) {
+                if (!data) return null;
+                var a = data.split('\n');
+                // pop off last element, which will be blank (if response ends with \n)
+                a.pop();
+
+                for (var i = 0; i < a.length; i++) {
+                    var b = CloakOverlayByName(a[i]);
+                    if (b) {
+                        cloak_overlays.push(b);
+                        b.setMap(map);
+                    }
+                }
+                cloakControl.enable();
+            },
+  });
 }
 
 
@@ -128,16 +135,7 @@ function show_cloak() {
     }
 
     cloak_overlays.length = 0;
-    var a = wt_request_array_of_lines('../list_cloakm/'+id, 'CLOAK');
-    if (!a) return;
-
-    for (var i = 0; i < a.length; i++) {
-        var b = CloakOverlayByName(a[i]);
-        if (b) {
-            cloak_overlays.push(b);
-            b.setMap(map);
-        }
-    }
+    wt_request_array_of_lines('../list_cloakm/'+id, 'CLOAK');
 }
 
 function remove_cloak() {
@@ -158,9 +156,16 @@ function handle_query() {
   }
 
   var elev = document.getElementById("elevation").value;
-  id = wt_request('../query/'+lat+'/'+lon+'/'+elev,'QUERY');
 
-  return;
+  $.ajax( {
+            url: '../query/' + lat + '/' + lon + '/' + elev,
+            success: function(data) {
+                cloak_overlays.length = 0;
+                id = data;
+                wt_request_array_of_lines('../list_cloakm/' + data, 'CLOAK');
+            }
+  });
+
 }
 
 // CONTOUR
@@ -169,7 +174,7 @@ var contourLayer = new google.maps.ImageMapType({
      tileSize: new google.maps.Size(256, 256),
      getTileUrl: function(point, zoom) {
         return 'http://contour.heywhatsthat.com/bin/contour_tiles.cgi?x=' + 
-            point.x+'&y='+point.y+'&zoom='+zoom+'&interval='+contour_interval(zoom) +
+            point.lng+'&y='+point.lat+'&zoom='+zoom+'&interval='+contour_interval(zoom) +
 	        '&color=0000FF30&src=guifi.net';
         },
 });
@@ -180,7 +185,7 @@ var cloakLayer = new google.maps.ImageMapType({
      tileSize: new google.maps.Size(256, 256),
      getTileUrl: function(point, zoom) {
         return 'http://contour.heywhatsthat.com/bin/contour_tiles.cgi?x=' + 
-            point.x+'&y='+point.y+'&zoom='+zoom+'&interval='+contour_interval(zoom) +
+            point.lng+'&y='+point.lat+'&zoom='+zoom+'&interval='+contour_interval(zoom) +
 	        '&color=0000FF30&src=guifi.net';
         },
 });
@@ -232,6 +237,10 @@ function draw_map() {
     // Add the map to the div
     map = new google.maps.Map(divmap, opts);
 
+    overlay = new google.maps.OverlayView();
+    overlay.draw = function() {};
+    overlay.setMap(map);
+
     var icon_start_url = document.getElementById("edit-jspath").value + 'marker_start.png';
     var icon_start = new google.maps.MarkerImage(
                          icon_start_url,
@@ -267,7 +276,7 @@ function draw_map() {
     });
 
     // Contour control
-    var contourControl = new Control("contour layer", true);
+    var contourControl = new Control("contour layer", true, false, 95);
     map.overlayMapTypes.push(null);
     contourControl.div.index = 1;
     map.controls[google.maps.ControlPosition.TOP_RIGHT].push(contourControl.div);
@@ -276,7 +285,7 @@ function draw_map() {
     google.maps.event.addDomListener(contourControl.ui, 'click', function() {
         if (contourControl.enabled) {
             map.overlayMapTypes.setAt(1, null);
-            contourControl.disableButton();
+            contourControl.disable();
         } else {
             // Add the guifi layer
             map.overlayMapTypes.setAt(1, contourLayer);
@@ -285,7 +294,7 @@ function draw_map() {
     });
 
     // Visibility cloak control
-    var cloakControl = new Control("visibility cloak layer", true);
+    cloakControl = new Control("visibility cloak layer", true, true, 140);
     map.overlayMapTypes.push(null);
     cloakControl.div.index = 1;
     map.controls[google.maps.ControlPosition.TOP_RIGHT].push(cloakControl.div);
@@ -296,9 +305,9 @@ function draw_map() {
             remove_cloak(); 
             cloakControl.disable();
         } else {
+            cloakControl.loading();
             // Add the guifi layer
             show_cloak();
-            cloakControl.enable();
         }
     });
 
@@ -316,7 +325,9 @@ function draw_map() {
 	
 }
 
-function initialPosition(point) {
+function initialPosition(ppoint) {
+
+    point = ppoint;
 
     for (i in markers) {
         markers[i].setMap(null);
@@ -325,8 +336,8 @@ function initialPosition(point) {
 
     var dNode = new google.maps.Marker( { position: point, map: map });
     markers.push(dNode);
-    var y = Math.abs(document.getElementById("lat").value - point.y);
-    var x = Math.abs(document.getElementById("lon").value - point.x);
+    var y = Math.abs(document.getElementById("lat").value - point.lat);
+    var x = Math.abs(document.getElementById("lon").value - point.lng);
     var distance = Math.sqrt(y*y + x*x);
     var curvature = distance > 0.1 ? 1 : 0; // 0.1 a ojimetro son 10Km xD
 
@@ -336,18 +347,18 @@ function initialPosition(point) {
         "src=guifi.net&"+
         "pt0="+document.getElementById("lat").value+","+document.getElementById("lon").value+
         ",ff0000,"+document.getElementById("elevation").value+
-        "&pt1="+point.y+","+point.x+
+        "&pt1="+point.lat+","+point.lng+
         ",00c000,9";   
   
     for (var i = 0; i < cloak_overlays.length; i++) {
         cloak_overlays[i].setMap(map);
     }
 
-    pLine = new google.maps.Polyline({ path: [node,point], strokeColor: "#ff0000", strokeWeight: 5, strokeOpacity: .4, map:map });
+    pLine = new google.maps.Polyline({ path: [node, point], strokeColor: "#ff0000", strokeWeight: 5, strokeOpacity: .4, map:map });
     markers.push(pLine);
 
-    document.getElementById('tdistance').innerHTML=Math.round(GCDistance_js(node.y,node.x,point.y,point.x)*1000)/1000;
-    document.getElementById('tazimut').innerHTML=Math.round(GCAzimuth_js(node.y,node.x,point.y,point.x)*100)/100;
+    document.getElementById('tdistance').innerHTML=Math.round(GCDistance_js(node.lat,node.lng,point.lat,point.lng)*1000)/1000;
+    document.getElementById('tazimut').innerHTML=Math.round(GCAzimuth_js(node.lat,node.lng,point.lat,point.lng)*100)/100;
 }
 
 /*

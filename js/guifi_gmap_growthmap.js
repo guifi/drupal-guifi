@@ -155,6 +155,7 @@ function draw_map() {
             if (initControl.enabled) {
                 initControl.disable();
             } else {
+                initControl.loading();
                 initControl.enable();
                 init();
             }

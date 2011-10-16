@@ -151,9 +151,7 @@ function updatePolyline() {
 
     bounds.extend(marker_SW.getPosition());
     bounds.extend(marker_NE.getPosition());
-    console.log(bounds);
     map.fitBounds(bounds);
-
 }
 
 
