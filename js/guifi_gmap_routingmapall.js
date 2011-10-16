@@ -32,7 +32,9 @@ function draw_map(){
         mapTypeControl: true,
         mapTypeControlOptions: {
             mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
-                          google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID, google.maps.MapTypeId.TERRAIN ],
+                          google.maps.MapTypeId.SATELLITE,
+                          google.maps.MapTypeId.HYBRID,
+                          google.maps.MapTypeId.TERRAIN ],
         },
         mapTypeId: google.maps.MapTypeId.SATELLITE,
         scaleControl: false,
@@ -89,10 +91,10 @@ function draw_map(){
     // Setup the click event listeners
     google.maps.event.addDomListener(initControl.ui, 'click', function() {
         if (initControl.enabled) {
-            initControl.disableButton();
+            initControl.disable();
         } else {
-            init(0);
             initControl.enable();
+            init();
         }
     }); 
 
@@ -153,7 +155,7 @@ function draw_map(){
 
 }
 
-function init(p){
+function init(){
     for (var i = 0; i < overlays.length; i++) {
         overlays[i].setMap(null);
     }
@@ -169,20 +171,14 @@ function init(p){
     var lon1=vlatlon_sw.lng();
     var lat2=vlatlon_ne.lat();
     var lon2=vlatlon_ne.lng();
-    var vurl='/guifi/guifi/routingmap/allsearch/0?lat1='+lat1+'&lon1='+lon1+'&lat2='+lat2+'&lon2='+lon2;
+    var vurl='/guifi/routingmap/allsearch/0?lat1='+lat1+'&lon1='+lon1+'&lat2='+lat2+'&lon2='+lon2;
     //var vurl='/guifi/routingmap/allsearch/0?lat1=41.21378767703215&lon1=0.97503662109375&lat2=42.44170109062157&lon2=3.6199951171874996';
     loadXMLDoc(vurl);
-    OSPFControl.enableButton();
-    OSPFControl.enabled = true;
-    BGPControl.enableButton();
-    BGPControl.enable = true;
-    initCrontrol.disableButton();
 }
 
 function build_routing(pdata) {
   //alert(pdata);
   adata=eval(pdata);
-  $("#topmap").text("Building...");
 
   avars = adata[0];
   anodes = adata[1];
@@ -217,6 +213,7 @@ function build_routing(pdata) {
   }
 
   $("#topmap").html("<img src='"+picspath[1]+"'>&nbsp;BGP&nbsp;&nbsp;&nbsp;<img src='"+picspath[3]+"'>&nbsp;BGP/OSPF&nbsp;&nbsp;&nbsp;<img src='"+picspath[2]+"'>&nbsp;OSPF");
+  initControl.disable();
   enable_widgets();
 }
 
@@ -331,7 +328,8 @@ function exec_or_value(f, o) {
 function loadXMLDoc(url) {
     var r = $.ajax({
                      url: url,
-                     async: false,
-                   }).responseText;
-    return build_routing(r);j
+                     success: function(data) {
+                         build_routing(data);
+                     }
+                   });
 }
