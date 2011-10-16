@@ -129,7 +129,6 @@ function Control(name, disabled, loading_icon, size) {
     this.text.style.fontFamily = 'Arial,sans-serif';
     this.text.style.fontSize = '12px';
     this.text.style.color = 'white';
-    this.text.style.fontWeight= 'bold';
     this.text.style.paddingLeft = '10px';
     this.text.style.paddingRight = '10px';
     this.text.style.paddingTop = '2px';
@@ -148,7 +147,6 @@ function Control(name, disabled, loading_icon, size) {
         this.ui.style.backgroundColor = 'white';
         this.ui.style.borderColor= '#a9bbdf';
         this.text.style.color = 'black';
-        this.text.style.fontWeight = 'normal';
     }
 }
 
@@ -162,7 +160,6 @@ Control.prototype = {
             this.ui.style.backgroundColor = '#708dce';
             this.ui.style.borderColor= '#708dce';
             this.text.style.color = 'white';
-            this.text.style.fontWeight = 'bold';
     },
 
     loading: function() {
@@ -174,7 +171,6 @@ Control.prototype = {
             this.ui.style.backgroundColor = 'white';
             this.ui.style.borderColor= '#a9bbdf';
             this.text.style.color = 'black';
-            this.text.style.fontWeight = 'normal';
     },
 
     block: function() {
@@ -182,7 +178,6 @@ Control.prototype = {
             this.ui.style.backgroundColor = 'white';
             this.ui.style.borderColor= '#a9bbdf';
             this.text.style.color = 'grey';
-            this.text.style.fontWeight = 'normal';
     },
 
     unblock: function() {
@@ -190,6 +185,5 @@ Control.prototype = {
             this.ui.style.backgroundColor = 'white';
             this.ui.style.borderColor= '#a9bbdf';
             this.text.style.color = 'black';
-            this.text.style.fontWeight = 'normal';
     },
 }

@@ -173,8 +173,9 @@ var contourLayer = new google.maps.ImageMapType({
   //contour_overlay = new GTileLayerOverlay(TileLayer(0, 17, 'Contours (C) 2007', 'Michael Kosowsky',
      tileSize: new google.maps.Size(256, 256),
      getTileUrl: function(point, zoom) {
+         console.log(point);
         return 'http://contour.heywhatsthat.com/bin/contour_tiles.cgi?x=' + 
-            point.lng()+'&y='+point.lat()+'&zoom='+zoom+'&interval='+contour_interval(zoom) +
+            point.x+'&y='+point.y+'&zoom='+zoom+'&interval='+contour_interval(zoom) +
 	        '&color=0000FF30&src=guifi.net';
         },
 });
@@ -185,7 +186,7 @@ var cloakLayer = new google.maps.ImageMapType({
      tileSize: new google.maps.Size(256, 256),
      getTileUrl: function(point, zoom) {
         return 'http://contour.heywhatsthat.com/bin/contour_tiles.cgi?x=' + 
-            point.lng()+'&y='+point.lat()+'&zoom='+zoom+'&interval='+contour_interval(zoom) +
+            point.x+'&y='+point.y+'&zoom='+zoom+'&interval='+contour_interval(zoom) +
 	        '&color=0000FF30&src=guifi.net';
         },
 });
