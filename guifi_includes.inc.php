@@ -1408,45 +1408,6 @@ function guifi_clear_cache($num = NULL) {
     cache_clear_all('%/'.$num.'/','cache_page', TRUE);
 }
 
-function guifi_zone_childs_recurse($id, $childs, $children) {
-  if ($children[$id]) {
-    foreach ($children[$id] as $foo => $zone) {
-        $childs[$zone->id] = $zone->title;
-        $childs = guifi_zone_childs_recurse($zone->id, $childs, $children);
-    }
-  }
-
-
-  return $childs;
-}
-
-//function guifi_nodexchange_tree($zid) {
-//  $result = db_query('SELECT id, master, title FROM {guifi_zone} ORDER BY title');
-//  while ($zone = db_fetch_object($result)) {
-//    $zones[$zone->id] = $zone;
-//  }
-//  $result = db_query('SELECT * FROM {guifi_location}');
-//  while ($node = db_fetch_object($result)) {
-//    $zones[$node->zone_id]->nodes[] = $node;
-//  }
-//
-//
-//  $childs = array();
-//
-//  foreach ($zones as $zoneid => $zone) {
-//    if (!$children[$zone->master]) {
-//      $children[$zone->master][$zoneid] = $zone;
-//    }
-//    $children[$zone->master][$zoneid] = $zone;
-//    if ($zoneid == $zid)
-//      $childs[$zid] = $zone;
-//  }
-//
-//  $childs[$zid]->childs = guifi_zone_tree_recurse($zid,$children);
-//
-//  return $childs;
-//}
-
 function guifi_cnml_tree($zid) {
   $result = db_query('
     SELECT z.id, z.master parent_id, z.title, z.nick, z.time_zone, z.ntp_servers,

@@ -838,5 +838,31 @@ function guifi_service_view($node, $teaser = FALSE, $page = FALSE, $block = FALS
   return $node;
 }
 
+function dump_guifi_proxy_federation($node) {
+
+  $qryself=db_query("SELECT id,extra FROM {guifi_services} WHERE service_type = 'Proxy' AND id = '%s' AND (status_flag = 'Working' OR status_flag = 'Testing') ORDER BY id",$node->id);
+  $qryothers = db_query("SELECT id,extra FROM {guifi_services} WHERE service_type = 'Proxy' AND id != '%s' AND (status_flag = 'Working' OR status_flag = 'Testing') ORDER BY id",$node->id);
+
+  $ownproxy = db_fetch_array( $qryself );
+  $extra=unserialize($ownproxy['extra']);
+  $in = $extra['fed']['IN'];
+  $out = $extra['fed']['OUT'];
+  $in = strtolower(($in == '0')?'':$in);
+  $out = strtolower(($out == '0')?'':$out);
+  $inout = ($in.$out == '')?'private':$in.$out;
+  $head = $ownproxy['id']."-".$inout."\n";
+
+  while ( ($row = db_fetch_array( $qryothers )) != null) {
+    unset($extra);
+    $extra=unserialize($row['extra']);
+    $in = $extra['fed']['IN'];
+    $out = $extra['fed']['OUT'];
+    $in = strtolower(($in == '0')?'':$in);
+    $out = strtolower(($out == '0')?'':$out);
+    $inout = ($in.$out == '')?'private':$in.$out;
+    $head .= $row['id']."-".$inout."\n";
+      }
+  echo $head;
+}
 
 ?>
