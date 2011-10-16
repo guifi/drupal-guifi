@@ -136,7 +136,7 @@ function Control(name, disabled, loading_icon, size) {
 
     if (loading_icon) {
         this.imgid = this.name.replace(/ /g, "") + "-loading";
-        this.text.innerHTML = '<img id="' + this.imgid + '" style="display: none; vertical-align: middle;" src="/guifi/sites/all/modules/guifi/icons/loading.gif" /> ' + name;
+        this.text.innerHTML = '<img id="' + this.imgid + '" style="display: none; vertical-align: middle;" src="/sites/all/modules/guifi/icons/loading.gif" /> ' + name;
     } else {
         this.text.innerHTML = name;
     }
