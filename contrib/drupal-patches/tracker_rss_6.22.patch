@@ -1,0 +1,104 @@
+diff -crB tracker/tracker.module tracker_feed/tracker.module
+*** tracker/tracker.module	2011-05-25 22:43:55.000000000 +0200
+--- tracker_feed/tracker.module	2011-10-21 10:47:26.000000000 +0200
+***************
+*** 33,38 ****
+--- 33,45 ----
+      'title' => 'All recent posts',
+      'type' => MENU_DEFAULT_LOCAL_TASK,
+    );
++   $items['tracker/feed'] = array(
++     'title' => 'Recent posts',
++     'page callback' => 'tracker_feed',
++     'access arguments' => array('access content'),
++     'weight' => 1,
++     'file' => 'tracker.pages.inc',
++   );  
+    $items['tracker/%user_uid_optional'] = array(
+      'title' => 'My recent posts',
+      'access callback' => '_tracker_myrecent_access',
+diff -crB tracker/tracker.pages.inc tracker_feed/tracker.pages.inc
+*** tracker/tracker.pages.inc	2011-05-25 22:43:55.000000000 +0200
+--- tracker_feed/tracker.pages.inc	2011-10-21 13:41:27.000000000 +0200
+***************
+*** 9,15 ****
+  /**
+   * Menu callback. Prints a listing of active nodes on the site.
+   */
+! function tracker_page($account = NULL, $set_title = FALSE) {
+    // Add CSS
+    drupal_add_css(drupal_get_path('module', 'tracker') .'/tracker.css', 'module', 'all', FALSE);
+  
+--- 9,49 ----
+  /**
+   * Menu callback. Prints a listing of active nodes on the site.
+   */
+! //function tracker_page($account = NULL, $set_title = FALSE) {
+! function tracker_page($uid = NULL, $feed = NULL) {
+!   
+!   if ($uid == 'feed'){
+!     return tracker_feed();
+!   }
+!   elseif (is_numeric($uid) && $feed == 'feed'){
+!     return tracker_feed($uid);
+!   }
+!   elseif (!is_null($uid) && $uid != "all"){
+!     $account = user_load(array('uid' => $uid));
+!   }
+! 
+! if (is_numeric($account->uid)){
+!     $feedpath = url("tracker/".$uid."/feed");
+!     // add 'alternate' tag for the user
+!     drupal_add_link(array(
+!       'rel' => 'alternate',
+!       'type' => 'application/rss+xml',
+!       'title' => t('RSS - %name\'s posts', array('%name' => $account->name)),
+!       'href' => $feedpath)
+!     );
+!   }
+!   else {
+!       $feedpath = url("tracker/feed");
+!       // add 'alternate' tag for all
+!       drupal_add_link(array(
+!         'rel' => 'alternate',
+!         'type' => 'application/rss+xml',
+!         'title' => t('RSS - all posts'),
+!         'href' => $feedpath)
+!       );
+!     }
+!   
+!   
+    // Add CSS
+    drupal_add_css(drupal_get_path('module', 'tracker') .'/tracker.css', 'module', 'all', FALSE);
+  
+***************
+*** 66,72 ****
+--- 100,127 ----
+    $output = '<div id="tracker">';
+    $output .= theme('table', $header, $rows);
+    $output .= theme('pager', NULL, 25, 0);
++   $output .= theme('feed_icon', $feedpath);
+    $output .= '</div>';
+  
+    return $output;
+  }
++ 
++ /**
++ * Generate an RSS feed for an individual user or entire site
++ *
++ * @param $uid
++ *  User id - leave empty to get feed for all users
++ * @return
++ *  The rendered XML RSS feed
++ */
++ 
++ function tracker_feed($uid = NULL){
++   $sql = 'SELECT DISTINCT(n.nid) as nid FROM {node} n INNER JOIN {users} u ON n.uid = u.uid INNER JOIN {node_comment_statistics} l ON n.nid = l.nid WHERE n.status = 1 ORDER BY GREATEST(n.changed, l.last_comment_timestamp) DESC LIMIT %d';
++   $registres = db_query($sql, variable_get('feed_default_items', 10));
++   $channel['title'] = t('All posts on %site', array('%site' => variable_get('site_name', 'drupal')));
++   $channel['link'] = url("tracker");
++   while ($item = db_fetch_object($registres)) {
++     $result[] = $item->nid;
++   }
++   return node_feed($result, $channel);
++ }
