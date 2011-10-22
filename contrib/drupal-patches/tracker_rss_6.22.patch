@@ -1,6 +1,6 @@
-diff -U 3 -dHrN -- modules/tracker/tracker.module modules/tracker2/tracker.module
+diff -U 3 -dHrN -- modules/tracker/tracker.module modules/tracker/tracker.module
 --- modules/tracker/tracker.module	2011-05-25 22:43:55.000000000 +0200
-+++ modules/tracker2/tracker.module	2011-10-22 17:53:24.515936882 +0200
++++ modules/tracker/tracker.module	2011-10-22 17:53:24.515936882 +0200
 @@ -33,14 +33,20 @@
      'title' => 'All recent posts',
      'type' => MENU_DEFAULT_LOCAL_TASK,
@@ -24,9 +24,9 @@ diff -U 3 -dHrN -- modules/tracker/tracker.module modules/tracker2/tracker.modul
    $items['user/%user/track'] = array(
      'title' => 'Track',
      'page callback' => 'tracker_page',
-diff -U 3 -dHrN -- modules/tracker/tracker.pages.inc modules/tracker2/tracker.pages.inc
+diff -U 3 -dHrN -- modules/tracker_test/tracker.pages.inc modules/tracker/tracker.pages.inc
 --- modules/tracker/tracker.pages.inc	2011-05-25 22:43:55.000000000 +0200
-+++ modules/tracker2/tracker.pages.inc	2011-10-22 17:34:21.924746281 +0200
++++ modules/tracker/tracker.pages.inc	2011-10-22 17:34:21.924746281 +0200
 @@ -9,7 +9,37 @@
  /**
   * Menu callback. Prints a listing of active nodes on the site.
