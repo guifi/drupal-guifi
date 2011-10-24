@@ -771,7 +771,7 @@ function guifi_service_view($node, $teaser = FALSE, $page = FALSE, $block = FALS
     $node->content['body']['#value'] =
       theme('box',t('Description'),$node->content['body']['#value']);
     $node->content['body']['#weight'] = 1;
-    $service_data = 
+    $service_data =
         array(
           '#value' => theme('box', t('service information'),
              theme_guifi_service_data($node, FALSE)),
@@ -804,7 +804,7 @@ function guifi_service_view($node, $teaser = FALSE, $page = FALSE, $block = FALS
             array('data' => $domain['type'],'style' => 'text-align: left;'),
             array('data' => $domain['scope']),
             $edit_domain,
-          ); 
+          );
         }
         if (count($rows)) {
           $node->content['data'] = array(
@@ -824,7 +824,7 @@ function guifi_service_view($node, $teaser = FALSE, $page = FALSE, $block = FALS
              )
           );
         }
-    } 
+    }
     else {
       $node->content['data'] = array(
         array(
@@ -850,8 +850,10 @@ function dump_guifi_proxy_federation($node) {
   $in = strtolower(($in == '0')?'':$in);
   $out = strtolower(($out == '0')?'':$out);
   $inout = ($in.$out == '')?'private':$in.$out;
-  $head = $ownproxy['id']."-".$inout."\n";
-
+  if (!empty($ownproxy['id']))
+    $head = $ownproxy['id']."-".$inout."\n";
+  else
+   $head = "0000-private\n";
   while ( ($row = db_fetch_array( $qryothers )) != null) {
     unset($extra);
     $extra=unserialize($row['extra']);
