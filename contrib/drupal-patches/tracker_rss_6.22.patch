@@ -1,6 +1,6 @@
 diff -U 3 -dHrN -- modules/tracker/tracker.module modules/tracker/tracker.module
 --- modules/tracker/tracker.module	2011-05-25 22:43:55.000000000 +0200
-+++ modules/tracker/tracker.module	2011-10-22 17:53:24.515936882 +0200
++++ modules/tracker/tracker.module	2011-10-26 00:35:07.678198014 +0200
 @@ -33,14 +33,20 @@
      'title' => 'All recent posts',
      'type' => MENU_DEFAULT_LOCAL_TASK,
@@ -24,26 +24,24 @@ diff -U 3 -dHrN -- modules/tracker/tracker.module modules/tracker/tracker.module
    $items['user/%user/track'] = array(
      'title' => 'Track',
      'page callback' => 'tracker_page',
-diff -U 3 -dHrN -- modules/tracker_test/tracker.pages.inc modules/tracker/tracker.pages.inc
+diff -U 3 -dHrN -- modules/tracker/tracker.pages.inc modules/tracker/tracker.pages.inc
 --- modules/tracker/tracker.pages.inc	2011-05-25 22:43:55.000000000 +0200
-+++ modules/tracker/tracker.pages.inc	2011-10-22 17:34:21.924746281 +0200
-@@ -9,7 +9,37 @@
++++ modules/tracker/tracker.pages.inc	2011-10-26 00:35:07.678198014 +0200
+@@ -9,7 +9,35 @@
  /**
   * Menu callback. Prints a listing of active nodes on the site.
   */
 -function tracker_page($account = NULL, $set_title = FALSE) {
 +function tracker_page($account = NULL, $feed = NULL) {
 +
-+  if ($account == 'feed'){
-+    return tracker_feed();
++  $uid = $account->uid;
++
++  if ($feed === 'feed') {
++    return tracker_feed($uid);
 +  }
 +
-+  elseif (is_numeric($account->uid) && $feed == 'feed'){
-+    return tracker_feed($account->uid);
-+  }
-+
-+  if (is_numeric($account->uid)){
-+    $feedpath = url("tracker/".$account->uid."/feed");
++  if (is_numeric($uid)){
++    $feedpath = url("tracker/".$uid."/feed");
 +    // add 'alternate' tag for the user
 +    drupal_add_link(array(
 +      'rel' => 'alternate',
@@ -66,7 +64,7 @@ diff -U 3 -dHrN -- modules/tracker_test/tracker.pages.inc modules/tracker/tracke
    // Add CSS
    drupal_add_css(drupal_get_path('module', 'tracker') .'/tracker.css', 'module', 'all', FALSE);
  
-@@ -66,7 +96,44 @@
+@@ -66,7 +94,44 @@
    $output = '<div id="tracker">';
    $output .= theme('table', $header, $rows);
    $output .= theme('pager', NULL, 25, 0);
