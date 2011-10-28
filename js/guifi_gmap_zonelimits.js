@@ -111,8 +111,6 @@ function draw_map()
 
 function updatePolyline() {
 
-    var bounds = new google.maps.LatLngBounds();
-	
     if (border) {
         border.setMap(null);
     }
@@ -121,15 +119,28 @@ function updatePolyline() {
     if ( marker_move.getPosition() != marker_move.savePoint ) {
         var x = marker_move.getPosition().lat() - marker_move.savePoint.lat() ;
         var y = marker_move.getPosition().lng() - marker_move.savePoint.lng() ;
-        marker_SW.setPosition( new google.maps.LatLng( marker_SW.getPosition().lat() + x, marker_SW.getPosition().lng() + y) ) ;
-        marker_NE.setPosition( new google.maps.LatLng( marker_NE.getPosition().lat() + x, marker_NE.getPosition().lng() + y) ) ;
-    } else {
-        // Center not moved so move center
-        var x = (marker_SW.getPosition().lat() + marker_NE.getPosition().lat()) / 2 ;
-        var y = (marker_NE.getPosition().lng() + marker_SW.getPosition().lng()) / 2 ;
-        marker_move.setPosition( new google.maps.LatLng(x,y) ) ;
-        map.setCenter(new google.maps.LatLng(x,y));
+
+        swx = marker_SW.getPosition().lat() + x;
+        if (swx < -85) swx = -85;
+
+        swy = marker_SW.getPosition().lng() + y;
+        if (swy < -170) swy = -170;
+
+        nex = marker_NE.getPosition().lat() + x;
+        if (nex > 85) nex = 85;
+
+        ney = marker_NE.getPosition().lng() + y;
+        if (ney > 170) ney = 170;
+
+        marker_SW.setPosition( new google.maps.LatLng( swx, swy ) ) ;
+        marker_NE.setPosition( new google.maps.LatLng( nex, ney ) ) ;
     }
+
+    // Center not moved so move center
+    var x = (marker_SW.getPosition().lat() + marker_NE.getPosition().lat()) / 2 ;
+    var y = (marker_NE.getPosition().lng() + marker_SW.getPosition().lng()) / 2 ;
+    marker_move.setPosition( new google.maps.LatLng(x,y) ) ;
+    map.setCenter(new google.maps.LatLng(x,y));
 
     marker_move.savePoint = marker_move.getPosition() ;			// Save for later
 
@@ -149,8 +160,7 @@ function updatePolyline() {
     document.getElementById("edit-maxy").value = marker_NE.getPosition().lat();
     document.getElementById("edit-maxx").value = marker_NE.getPosition().lng();
 
-    bounds.extend(marker_SW.getPosition());
-    bounds.extend(marker_NE.getPosition());
+    var bounds = new google.maps.LatLngBounds(marker_SW.getPosition(), marker_NE.getPosition());
     map.fitBounds(bounds);
 }
 
