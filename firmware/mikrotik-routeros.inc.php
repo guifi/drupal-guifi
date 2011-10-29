@@ -562,12 +562,12 @@ function unsolclic_routeros($dev) {
   _outln("/ routing filter");
   _outln('add action=discard chain=ebgp-in comment="1. Discard insert non 10.x routes from BGP peer" disabled=no invert-match=no prefix=!10.0.0.0/8 prefix-length=!8-32');
   _outln('add action=discard chain=ebgp-out comment="2. Discard send non 10.x routes to BGP peer" disabled=no invert-match=no prefix=!10.0.0.0/8 prefix-length=!8-32');
-  _outln('add action=accept chain=ospf-out comment="3. Allow send 10.x routes to OSPF neighbor" disabled=no invert-match=no prefix=10.0.0.0/8 prefix-length=8-32');
-  _outln('add action=accept chain=ospf-out comment="4. Allow send 172.x routes to OSPF neighbor" disabled=no invert-match=no prefix=172.16.0.0/12 prefix-length=8-32');
-  _outln('add action=discard chain=ospf-out comment="5. Discard send non 10.x and 172.x to OSPF neighbor" disabled=no invert-match=no');
-  _outln('add action=accept chain=ospf-in comment="6. Accept insert 10.x routes from OSPF neighbor" disabled=no invert-match=no prefix=10.0.0.0/8 prefix-length=8-32');
-  _outln('add action=accept chain=ospf-in comment="7. Accept insert 172.x routes from OSPF neighbor" disabled=no invert-match=no prefix=172.16.0.0/12 prefix-length=8-32');
-  _outln('add action=discard chain=ospf-in comment="8. Discard insert non 10.x and 172.x from OSPF neighbor" disabled=no invert-match=no');
+  _outln('add action=accept chain=ospf-in comment="3. Accept insert 10.x routes from OSPF neighbor" disabled=no invert-match=no prefix=10.0.0.0/8 prefix-length=8-32');
+  _outln('add action=accept chain=ospf-in comment="4. Accept insert 172.x routes from OSPF neighbor" disabled=no invert-match=no prefix=172.16.0.0/12 prefix-length=8-32');
+  _outln('add action=discard chain=ospf-in comment="5. Discard insert non 10.x and 172.x from OSPF neighbor" disabled=no invert-match=no');
+  _outln('add action=accept chain=ospf-out comment="6. Allow send 10.x routes to OSPF neighbor" disabled=no invert-match=no prefix=10.0.0.0/8 prefix-length=8-32');
+  _outln('add action=accept chain=ospf-out comment="7. Allow send 172.x routes to OSPF neighbor" disabled=no invert-match=no prefix=172.16.0.0/12 prefix-length=8-32');
+  _outln('add action=discard chain=ospf-out comment="8. Discard send non 10.x and 172.x to OSPF neighbor" disabled=no invert-match=no');
   _outln_comment();
   _outln_comment(t('BGP instance'));
   _outln("/ routing bgp instance");
