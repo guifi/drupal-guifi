@@ -29,12 +29,12 @@ function draw_map()
         minZoom: 2,
         mapTypeControl: true,
         mapTypeControlOptions: {
-            mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
+            mapTypeIds: [ "osm", 
+                          google.maps.MapTypeId.TERRAIN,
                           google.maps.MapTypeId.SATELLITE,
-                          google.maps.MapTypeId.HYBRID,
-                          google.maps.MapTypeId.TERRAIN ],
+                          google.maps.MapTypeId.HYBRID ]
         },
-        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        mapTypeId: google.maps.MapTypeId.TERRAIN,
         scaleControl: false,
         streetViewControl: false,
         zoomControl: true,
@@ -47,6 +47,9 @@ function draw_map()
 
     // Add the map to the div
     map = new google.maps.Map(divmap, opts);
+
+    // Add the OSM map type
+    map.mapTypes.set('osm', openStreet);
 
     // Guifi control
     var guifi = new GuifiLayer(map, baseURL);

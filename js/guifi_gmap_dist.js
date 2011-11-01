@@ -220,8 +220,10 @@ function draw_map() {
         minZoom: 2,
         mapTypeControl: true,
         mapTypeControlOptions: {
-            mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
-                          google.maps.MapTypeId.SATELLITE, google.maps.MapTypeId.HYBRID, google.maps.MapTypeId.TERRAIN ],
+            mapTypeIds: [ "osm",
+			  google.maps.MapTypeId.TERRAIN,
+                          google.maps.MapTypeId.SATELLITE,
+			  google.maps.MapTypeId.HYBRID ]
         },
         mapTypeId: google.maps.MapTypeId.SATELLITE,
         scaleControl: false,
@@ -236,6 +238,9 @@ function draw_map() {
 
     // Add the map to the div
     map = new google.maps.Map(divmap, opts);
+
+    // Add the OSM map type
+    map.mapTypes.set('osm', openStreet);
 
     var icon_start_url = document.getElementById("edit-jspath").value + 'marker_start.png';
     var icon_start = new google.maps.MarkerImage(

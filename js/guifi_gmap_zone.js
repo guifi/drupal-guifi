@@ -20,10 +20,10 @@ function draw_map() {
         zoom: 2,
         mapTypeControl: true,
         mapTypeControlOptions: {
-            mapTypeIds: [ "osm", google.maps.MapTypeId.ROADMAP,
+            mapTypeIds: [ "osm",
+                          google.maps.MapTypeId.TERRAIN,
                           google.maps.MapTypeId.SATELLITE,
-                          google.maps.MapTypeId.HYBRID,
-                          google.maps.MapTypeId.TERRAIN ],
+                          google.maps.MapTypeId.HYBRID ]
         },
         mapTypeId: google.maps.MapTypeId.ROADMAP,
         scaleControl: false,

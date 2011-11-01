@@ -90,8 +90,8 @@ var openStreet = new google.maps.ImageMapType({
       tileSize: new google.maps.Size(256, 256),
       isPng: true,
       maxZoom: 18,
-      name: "OSM",
-      alt: "Open Streetmap tiles"
+      name: "Mapa",
+      alt: "Open Streetmap"
 });
 
 function Control(name, disabled, loading_icon, size) {
