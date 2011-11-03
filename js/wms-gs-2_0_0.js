@@ -94,6 +94,34 @@ var openStreet = new google.maps.ImageMapType({
       alt: "Open Streetmap"
 });
 
+var copyrightNode;
+
+function initCopyrights() {
+    
+    // Create div for showing copyrights.
+    copyrightNode = document.createElement('div');
+    copyrightNode.id = 'copyright-control';
+    copyrightNode.style.fontSize = '11px';
+    copyrightNode.style.fontFamily = 'Arial, sans-serif';
+    copyrightNode.style.margin = '0 2px 2px 0';
+    copyrightNode.style.whiteSpace = 'nowrap';
+    copyrightNode.index = 0;
+    map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(copyrightNode);
+    
+    google.maps.event.addListener(map, 'idle', updateCopyrights);
+    google.maps.event.addListener(map, 'maptypeid_changed', updateCopyrights);
+}
+
+function updateCopyrights() {
+    var notice = '&copy; OpenStreetMap contributors, CC-BY-SA';
+    if (map.getMapTypeId() == "osm") {
+    	copyrightNode.innerHTML = notice;
+    } else {
+    	copyrightNode.innerHTML = "";
+    }
+}
+
+
 function Control(name, disabled, loading_icon, size) {
     this.div = document.createElement('DIV');
     this.enabled = !disabled;

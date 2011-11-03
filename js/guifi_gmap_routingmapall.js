@@ -52,6 +52,7 @@ function draw_map(){
 
     // Add the OSM map type
     map.mapTypes.set('osm', openStreet);
+    initCopyrights();
 
     // Guifi control
     var guifi = new GuifiLayer(map, baseURL);

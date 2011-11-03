@@ -103,6 +103,7 @@ function draw_map() {
 
     // Add the OSM map type
     map.mapTypes.set('osm', openStreet);
+    initCopyrights();
 
     // Add the guifi layer
     var guifi = new GuifiLayer(map);

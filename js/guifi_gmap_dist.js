@@ -241,6 +241,7 @@ function draw_map() {
 
     // Add the OSM map type
     map.mapTypes.set('osm', openStreet);
+    initCopyrights();
 
     var icon_start_url = document.getElementById("edit-jspath").value + 'marker_start.png';
     var icon_start = new google.maps.MarkerImage(
