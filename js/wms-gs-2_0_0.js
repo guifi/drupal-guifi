@@ -140,10 +140,12 @@ function Control(name, disabled, loading_icon, size) {
     this.ui = document.createElement('DIV');
     this.ui.style.backgroundColor = '#708dce';
     this.ui.style.borderStyle = 'solid';
-    this.ui.style.borderColor= '#708dce';
+    this.ui.style.borderColor= '#3071ad';
     this.ui.style.borderWidth = '1px';
     this.ui.style.cursor = 'pointer';
     this.ui.style.textAlign = 'center';
+    this.ui.style.boxShadow = '2px 2px 3px #888';
+    this.ui.style.borderRadius = '1px';
 
     if (size) {
         this.ui.style.width = size + "px";
