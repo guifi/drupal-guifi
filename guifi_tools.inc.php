@@ -105,7 +105,7 @@ function guifi_tools_mac_search($mac = NULL) {
     return $output;
 
   $output .= '<h2>'.t('Query result for "mac LIKE %mac"',
-    array('%ipv4' => "'".$mac."'")).'</h2>';
+    array('%mac' => "'".$mac."'")).'</h2>';
 
   $headers = array(t('mac'),t('interface'),t('device'),t('node'));
   $sqlm = pager_query('SELECT * FROM {guifi_interfaces} WHERE mac LIKE "%s"',50,0,NULL,$mac);
