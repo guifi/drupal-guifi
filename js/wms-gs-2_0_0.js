@@ -144,7 +144,7 @@ function Control(name, disabled, loading_icon, size) {
     this.ui.style.borderWidth = '1px';
     this.ui.style.cursor = 'pointer';
     this.ui.style.textAlign = 'center';
-    this.ui.style.boxShadow = '2px 2px 3px #888';
+    this.ui.style.boxShadow = '2px 2px 3px #222';
     this.ui.style.borderRadius = '1px';
 
     if (size) {
