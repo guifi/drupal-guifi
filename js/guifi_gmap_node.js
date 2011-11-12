@@ -1,4 +1,5 @@
 var map = null;
+var marcador = null;
 
 if(Drupal.jsEnabled) {
     $(document).ready(function(){
@@ -41,7 +42,37 @@ function draw_map()
     map = new google.maps.Map(divmap, opts);
 
     // Add the marker
-    var marcador = new google.maps.Marker( { position: node, draggable: true, map: map } );
+    marcador = new google.maps.Marker( { position: node, draggable: true, map: map } );
+
+    // Add the autocomplete
+    var search = document.getElementById("mapSearch");
+    var bounds = new google.maps.LatLngBounds(
+                        new google.maps.LatLng(-10.76171875, 34.91003829791827),
+                        new google.maps.LatLng(4.2578125, 43.91632552738952));
+    var autocomplete = new google.maps.places.Autocomplete(search);
+    autocomplete.bindTo('bounds', map);
+
+    google.maps.event.addListener(autocomplete, 'place_changed', function() {
+        var place = autocomplete.getPlace();
+        map.setOptions({ center: place.geometry.location, zoom: 12 });
+        marcador.setPosition(place.geometry.location);
+    });
+
+    $("input#mapSearch").bind("keypress", function(e) {
+        if ( e.keyCode == 13 ) {
+            e.preventDefault();
+            var addr = $(this).val();
+            var geo = new google.maps.Geocoder();
+            geo.geocode( { address: addr }, function(results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    var result = results[0].geometry.location;
+                    map.setOptions({ center: result, zoom: 12 });
+                    marcador.setPosition(result);
+                }
+            });
+        }
+        return true;
+    });
 
     // Add the OSM map type
     //map.mapTypes.set('osm', openStreet);

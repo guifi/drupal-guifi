@@ -1781,8 +1781,8 @@ function guifi_coord_dtodms($coord){
 
 function guifi_gmap_key() {
   drupal_add_js(drupal_get_path('module', 'guifi').'/js/wms-gs-2_0_0.js','module');
-  drupal_set_html_head('<script src="http://maps.google.com/maps/api/js?sensor=false' .
-       '" type="text/javascript"></script>');
+  drupal_set_html_head('<script src="http://maps.googleapis.com/maps/api/js?sensor=false&libraries=places' .
+      '" type="text/javascript"></script>');
   return TRUE;
 }
 
