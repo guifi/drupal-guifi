@@ -74,6 +74,15 @@ function draw_map()
         return true;
     });
 
+    //Detect the actual position, if possible
+    if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            map.setOptions({ center: latlng, zoom: 10 });
+            marcador.setPosition(latlng);
+          });
+    }
+
     // Add the OSM map type
     //map.mapTypes.set('osm', openStreet);
     //initCopyrights();
