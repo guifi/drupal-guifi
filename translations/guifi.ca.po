@@ -3483,15 +3483,6 @@ msgstr "CNML"
 msgid "export zone in CNML format"
 msgstr "exporta la zona en format CNML"
 
-#: guifi.module:1723;1739
-msgid "guifiproxy"
-msgstr "guifiproxy"
-
-#: guifi.module:1725;946;953
-msgid "export zone proxy services in csv format"
-msgstr "exporta els serveis de proxy de la zona en format csv "
-
-
 #: guifi.module:1727
 msgid "gml"
 msgstr "gml"
