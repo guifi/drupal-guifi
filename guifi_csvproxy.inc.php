@@ -27,6 +27,7 @@ function guifi_csvproxy($zoneid,$action = 'help') {
                   $searchServiceType,
                   $zoneid,
                   $subzoneIds);
+  drupal_set_header('Content-Type: text/csv; charset=utf-8');
   $qservices = db_query($sql_services);
   while ($service = db_fetch_object($qservices)) {
     if (!empty($service->extra)) {
