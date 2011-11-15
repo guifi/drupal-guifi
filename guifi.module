@@ -16,6 +16,7 @@ include_once("guifi_domains.inc.php");   // Domain name server management
 include_once("guifi_hosts.inc.php");     // Host name server management
 // include_once("guifi_nodexchange.inc.php");// nodeXchange (XML) generator
 include_once("guifi_cnml.inc.php");      // CNML (XML) generator
+include_once("guifi_csvproxy.inc.php");  // CSV Proxy Generator
 include_once("guifi_gml.inc.php");       // gml (geographic XML export) generator
 include_once("guifi_maps.inc.php");      // maps management
 include_once("guifi_includes.inc.php");  // misc. routines
@@ -1041,6 +1042,14 @@ function guifi_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK
   );
+  $items['guifi/csvproxy/%'] = array(
+    'title' => 'export zone proxy services in csv format',
+    'page callback' => 'guifi_csvproxy',
+    'page arguments' => array(2),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK
+  );
+  
 //  $items['guifi/nodexchange/%'] = array(
 //    'title' => 'export zone in nodeXchange format',
 //    'page callback' => 'guifi_nodexchange',
@@ -1808,6 +1817,10 @@ function guifi_link($type, $node = 0) {
 //      'title'=> t('nodeXchange'),
 //      'href' => "guifi/nodexchange/$node->nid",
 //      'attributes' => array('title' => t('export zone in nodeXchange format')));
+    $links['guifiproxy'] = array(
+      'title' => t('guifiproxy'),
+      'href' => "guifi/csvproxy/$node->nid",
+      'attributes' => array('title' => t('export zone proxy services in csv format')));
     $links['cnml'] = array(
       'title' => t('CNML'),
       'href' => "guifi/cnml/$node->nid",
