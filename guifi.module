@@ -1537,7 +1537,7 @@ function guifi_counters_block() {
     SELECT
     status_flag, count(*) c
     FROM {guifi_location}
-    GROUP BY status_flag');
+    GROUP BY status_flag ORDER BY C DESC');
   $str = '';
   $rows = array();
   $totals = 0;
@@ -1677,7 +1677,7 @@ function guifi_display_block_1() {
       SELECT
         status_flag, count(*) c
       FROM {guifi_location}
-      GROUP BY status_flag');
+      GROUP BY status_flag ORDER BY C DESC');
     $str = '';
     $rows = array();
     $totals = 0;
