@@ -540,15 +540,15 @@ function unsolclic_routeros($dev) {
   switch ($dev->variable['firmware'] ) {
   case  'RouterOSv2.9':
     _outln(sprintf('add chain=srcnat src-address="192.168.0.0/16" dst-address=!192.168.0.0/16 action=src-nat to-addresses=%s to-ports=0-65535 comment="" disabled=no',$ospf_routerid));
-    //_outln(sprintf('add chain=srcnat src-address="172.16.0.0/12" dst-address=!172.16.0.0/12 protocol=!ospf action=src-nat to-addresses=%s to-ports=0-65535 comment="" disabled=no',$ospf_routerid));
+    _outln(sprintf('add chain=srcnat src-address="172.16.0.0/12" dst-address=!172.16.0.0/12 protocol=!ospf action=src-nat to-addresses=%s to-ports=0-65535 comment="" disabled=no',$ospf_routerid));
   break;
   case 'RouterOSv3.x':
   case 'RouterOSv4.0+' :
   case 'RouterOSv4.7+':
   case 'RouterOSv5.x':
-      _outln(sprintf('add chain=srcnat src-address="192.168.0.0/16" dst-address=!192.168.0.0/16 action=src-nat to-addresses=%s comment="" disabled=no',$ospf_routerid));
-     // _outln(sprintf('add chain=srcnat src-address="172.16.0.0/12" dst-address=!172.16.0.0/12 protocol=!ospf action=src-nat to-addresses=%s comment="" disabled=no',$ospf_routerid));
-    break;
+    _outln(sprintf('add chain=srcnat src-address="192.168.0.0/16" dst-address=!192.168.0.0/16 action=src-nat to-addresses=%s comment="" disabled=no',$ospf_routerid));
+    _outln(sprintf('add chain=srcnat src-address="172.16.0.0/12" dst-address=!172.16.0.0/12 protocol=!ospf action=src-nat to-addresses=%s comment="" disabled=no',$ospf_routerid));
+  break;
 }
 
   // BGP
