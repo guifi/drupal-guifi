@@ -1070,17 +1070,18 @@ function dump_guifi_domains($cnmlid, $action){
   $CNML->addAttribute('server_url','http://guifi.net');
   $CNML->addAttribute('generated',date('Ymds',time()));
 
-  $classXML = $CNML->addChild('domains');
-  $classXML->addAttribute('network_domains',$action);
-  $scope = 'internal';
-  $qryservice=db_query("SELECT notification FROM {guifi_services} WHERE id = '%s'", $cnmlid);
-  $qrydname=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid = '%s' AND scope ='%s' AND management = 'automatic'", $cnmlid, $scope);
-  $domainname = db_fetch_object($qrydname);
-  $qrymaster=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid = '%s' AND scope ='%s' AND management = 'automatic'", $cnmlid, $scope);
-  $qryslavemas=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid != '%s' AND scope ='%s' AND mname != '%s' AND allow = 'slave'", $cnmlid,$scope,$domainname->name);
-  $qryslavefor=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid != '%s' AND scope ='%s' AND mname != '%s' AND allow = 'forward'", $cnmlid,$scope,$domainname->name);
-  $scopex = $classXML->addChild($scope);
-  $notification= db_fetch_object($qryservice);
+  $scopedef = array('internal' => 'internal', 'external' => 'external');
+  foreach ( $scopedef as $key => $scope) {
+    $classXML = $CNML->addChild('domains');
+    $classXML->addAttribute('network_domains',$action);
+    $qryservice=db_query("SELECT notification FROM {guifi_services} WHERE id = '%s'", $cnmlid);
+    $qrydname=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid = '%s' AND scope ='%s' AND management = 'automatic'", $cnmlid, $scope);
+    $domainname = db_fetch_object($qrydname);
+    $qrymaster=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid = '%s' AND scope ='%s' AND management = 'automatic'", $cnmlid, $scope);
+    $qryslavemas=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid != '%s' AND scope ='%s' AND mname != '%s' AND allow = 'slave'", $cnmlid,$scope,$domainname->name);
+    $qryslavefor=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid != '%s' AND scope ='%s' AND mname != '%s' AND allow = 'forward'", $cnmlid,$scope,$domainname->name);
+    $scopex = $classXML->addChild($scope);
+    $notification= db_fetch_object($qryservice);
     while ($record = db_fetch_object($qrymaster)){
       $domain = $scopex->addChild('master');
       $domain->addAttribute('zone',$record->name);
@@ -1094,112 +1095,50 @@ function dump_guifi_domains($cnmlid, $action){
         $domain->addAttribute('allow-transfer','any');
       else
         $domain->addAttribute('allow-transfer','none');
+
       $domain->addAttribute('contact',$notification->notification);
       $domain->addAttribute('domain_id',$record->id);
       $domain->addAttribute('service_id',$record->sid);
       $qrydelegation=db_query("SELECT * FROM {guifi_dns_domains} WHERE mname = '%s' AND scope = '%s'", $record->name,$scope);
-        while ($delegation = db_fetch_object($qrydelegation)) {
-          $qrydomd=db_query("SELECT * FROM {guifi_dns_hosts} WHERE id = '%d'",$delegation->id);
-          $hostd = db_fetch_object($qrydomd);
-            $host = $domain->addChild('delegation');
-            $host->addAttribute('name',strtolower($delegation->name));
-            $host->addAttribute('IPv4',$hostd->ipv4);
-            $host->addAttribute('NS',strtolower($hostd->host).'.'.$delegation->name);
+      while ($delegation = db_fetch_object($qrydelegation)) {
+        $qrydomd=db_query("SELECT * FROM {guifi_dns_hosts} WHERE id = '%d'",$delegation->id);
+        $hostd = db_fetch_object($qrydomd);
+        $host = $domain->addChild('delegation');
+        $host->addAttribute('name',strtolower($delegation->name));
+        $host->addAttribute('IPv4',$hostd->ipv4);
+        $host->addAttribute('NS',strtolower($hostd->host).'.'.$delegation->name);
+      }
+      $qryhost=db_query("SELECT * FROM {guifi_dns_hosts} WHERE id = '%d' ORDER BY counter",$record->id);
+       while( $host = db_fetch_object($qryhost)) {
+        $hostname = $domain->addChild('host');
+        $hostname->addAttribute('name',strtolower($host->host));
+        $hostname->addAttribute('IPv4',$host->ipv4);
+        $hostname->addAttribute('IPv6',$host->ipv6);
+        $alias = unserialize($host->aliases);
+        if (!empty($alias)) {
+          $cnames = implode(",", $alias);
+          $hostname->addAttribute('CNAME',$cnames);
         }
-          $qryhost=db_query("SELECT * FROM {guifi_dns_hosts} WHERE id = '%d' ORDER BY counter",$record->id);
-            while( $host = db_fetch_object($qryhost)) {
-              $hostname = $domain->addChild('host');
-              $hostname->addAttribute('name',strtolower($host->host));
-              $hostname->addAttribute('IPv4',$host->ipv4);
-              $hostname->addAttribute('IPv6',$host->ipv6);
-              $alias = unserialize($host->aliases);
-                  if (!empty($alias)) {
-                    $cnames = implode(",", $alias);
-                    $hostname->addAttribute('CNAME',$cnames);
-                  }
-              $options = unserialize($host->options);
-              if ($options['NS'] != '0')
-                $hostname->addAttribute('NS','y');
-              if ($options['MX'] != '0') {
-                $hostname->addAttribute('MX','y');
-                $hostname->addAttribute('Priority',$options['mxprior']);
-              }
-            }
+        $options = unserialize($host->options);
+        if ($options['NS'] != '0')
+          $hostname->addAttribute('NS','y');
+        if ($options['MX'] != '0') {
+          $hostname->addAttribute('MX','y');
+          $hostname->addAttribute('Priority',$options['mxprior']);
         }
-        while ($record=db_fetch_object($qryslavemas)){
-          $domain = $scopex->addChild('slave');
-          $domain->addAttribute('zone',$record->name);
-          $domain->addAttribute('master',$record->ipv4);
-        }
-        while ($record=db_fetch_object($qryslavefor)){
-          $domain = $scopex->addChild('forward');
-          $domain->addAttribute('zone',$record->name);
-          $domain->addAttribute('forwarder',$record->ipv4);
-        }
-  $scope = 'external';
-  $qrydname=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid = '%s' AND scope ='%s' AND management = 'automatic'", $cnmlid, $scope);
-  $qryservice=db_query("SELECT notification FROM {guifi_services} WHERE id = '%s'", $cnmlid);
-  $domainname = db_fetch_object($qrydname);
-  $qrymaster=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid = '%s' AND scope ='%s' AND management = 'automatic'", $cnmlid, $scope);
-  $qryslavemas=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid != '%s' AND scope ='%s' AND mname != '%s' AND allow = 'slave'", $cnmlid,$scope,$domainname->name);
-  $qryslavefor=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid != '%s' AND scope ='%s' AND mname != '%s' AND allow = 'forward'", $cnmlid,$scope,$domainname->name);
-  $scopex = $classXML->addChild($scope);
-  $notification= db_fetch_object($qryservice);
-    while ($record = db_fetch_object($qrymaster)){
-      $domain = $scopex->addChild('master');
+      }
+    }
+    while ($record=db_fetch_object($qryslavemas)){
+      $domain = $scopex->addChild('slave');
       $domain->addAttribute('zone',$record->name);
-      $domain->addAttribute('IPv4',$record->ipv4);
-      $domain->addAttribute('nameserver','ns1');
-      $domain->addAttribute('domain_ip',$record->defipv4);
-      $domain->addAttribute('domain_ip_v6',$record->defipv6);
-      $domain->addAttribute('externalMX',$record->externalmx);
-      $domain->addAttribute('externalNS',$record->externalns);
-      if ($record->allow == 'slave')
-        $domain->addAttribute('allow-transfer','any');
-      else
-        $domain->addAttribute('allow-transfer','none');
-      $domain->addAttribute('contact',$notification->notification);
-      $domain->addAttribute('domain_id',$record->id);
-      $domain->addAttribute('service_id',$record->sid);
-      $qrydelegation=db_query("SELECT * FROM {guifi_dns_domains} WHERE mname = '%s' AND scope = '%s'", $record->name,$scope);
-        while ($delegation = db_fetch_object($qrydelegation)) {
-          $qrydomd=db_query("SELECT * FROM {guifi_dns_hosts} WHERE id = '%d'",$delegation->id);
-          $hostd = db_fetch_object($qrydomd);
-            $host = $domain->addChild('delegation');
-            $host->addAttribute('name',strtolower($delegation->name));
-            $host->addAttribute('IPv4',$hostd->ipv4);
-            $host->addAttribute('NS',strtolower($hostd->host).'.'.$delegation->name);
-        }
-          $qryhost=db_query("SELECT * FROM {guifi_dns_hosts} WHERE id = '%d' ORDER BY counter",$record->id);
-            while( $host = db_fetch_object($qryhost)) {
-              $hostname = $domain->addChild('host');
-              $hostname->addAttribute('name',strtolower($host->host));
-              $hostname->addAttribute('IPv4',$host->ipv4);
-              $hostname->addAttribute('IPv6',$host->ipv6);
-              $alias = unserialize($host->aliases);
-                foreach ($alias as $id => $name) {
-                  if ($name) {
-                    $cnames = implode(",", $alias);
-                    $hostname->addAttribute('CNAME',$cnames);
-                  }
-                }
-              $options = unserialize($host->options);
-              if ($options['NS'] != '0')
-                $hostname->addAttribute('NS','y');
-              if ($options['MX'] != '0')
-                $hostname->addAttribute('MX','y');
-            }
-        }
-        while ($record=db_fetch_object($qryslavemas)){
-          $domain = $scopex->addChild('slave');
-          $domain->addAttribute('zone',$record->name);
-          $domain->addAttribute('master',$record->ipv4);
-        }
-        while ($record=db_fetch_object($qryslavefor)){
-          $domain = $scopex->addChild('forward');
-          $domain->addAttribute('zone',$record->name);
-          $domain->addAttribute('forwarder',$record->ipv4);
-        }
+      $domain->addAttribute('master',$record->ipv4);
+    }
+    while ($record=db_fetch_object($qryslavefor)){
+      $domain = $scopex->addChild('forward');
+      $domain->addAttribute('zone',$record->name);
+      $domain->addAttribute('forwarder',$record->ipv4);
+    }
+  }
 
   return $CNML;
 }
