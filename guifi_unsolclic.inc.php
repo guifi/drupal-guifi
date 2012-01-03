@@ -10,6 +10,81 @@ function guifi_unsolclic($dev, $format = 'html') {
 
   $dev = (object)$dev;
   
+  if($dev->id=='25638' ) {
+    
+    // FINAL. Treure el fitxer unsolclic resultant com a mime text/plain
+    //drupal_set_header('Content-Type: text/plain; charset=utf-8');
+    
+    // PFC passos
+    //var_dump($dev);
+    
+    // 1. Recuperar informacio del trasto
+      // 1.a Recuperar el id de model del trasto (del camp extra de device)
+      $modelId = $dev->variable['model_id'];
+      // recollir la configuracio unscolclic actual
+      $uscId = $dev->usc_id;
+  
+      // 1.b recollir de la BD la informacio del model
+      $model = guifi_get_model($modelId);
+      
+      // 1.c recollir les característiques del model
+      $caractModel = guifi_get_caractmodel($modelId);
+      
+    
+    // 2. Recuperar informacio del firmware
+      // 2.a Recuperar el id del firmware del trasto(del camp extra de device)
+      $firmwareName = $dev->variable['firmware'];
+  
+      // 2.b recollir de la BD la informacio del firmware
+      $firmware = guifi_get_firmware($firmwareName);
+      
+      // 2.c recollir els parametres del firmware
+      $paramsFirmware = guifi_get_paramsFirmware($firmware['id']);
+
+    // 3. Recuperar la configuracióUnSolClic tq modelid i firmware:id
+    $configuracioUSC = guifi_get_configuracioUSC($modelId,$firmware['id'],$uscId);
+    
+    // 3.a recuperar la plantilla de la configuracio
+    $plantilla = $configuracioUSC['plantilla'];    // a plantilla hi ha el nom de la tpl de la carpeta de la ruta de sota
+    $File = '/home/albert/workspace/guifinet/drupal-6.22/sites/all/modules/guifi/firmware/plantillesUSC/'. $plantilla;
+    $handle = fopen($File, "r");
+    $plantilla = fread($handle, filesize($File));
+    fclose($handle);
+    
+    // 4. recuperar els parametres de la plantilla
+    $paramsconfiguracioUSC = guifi_get_paramsconfiguracioUSC($uscId);
+    var_dump($paramsconfiguracioUSC);
+    echo "<hr>";
+    
+    foreach ($paramsconfiguracioUSC as $tupla) {
+        $param = $tupla['nom'];
+        $valor = $tupla['valor'];
+        echo "<br>Replace \"{\$$param}\", $valor";
+        $plantilla = str_replace("{\$$param}", $valor, $plantilla);
+    }
+    echo "<hr>";
+    var_dump($plantilla);
+    
+    die;
+    
+    //echo $configuracioUSC['plantilla'];
+    
+    //var_dump($configuracioUSC);
+
+    // get ipv4
+    $qa = db_query('
+              SELECT *
+              FROM {guifi_ipv4}
+              WHERE interface_id=%d',
+    49002);
+    //echo "<hr>";
+    while ($a = db_fetch_array($qa)) {
+      //echo "CCC ->". $a['interface_id'];
+    }
+    
+    
+  }
+  
   if ($dev->variable['firmware'] == 'n/a') {
 	_outln_comment(t("ERROR: I do need a firmware selected at the radio web interface: ").'<a href=/guifi/device/'.$dev->id.'/edit>http://guifi.net/guifi/device/'.$dev->id.'/edit');
         return;
@@ -18,17 +93,19 @@ function guifi_unsolclic($dev, $format = 'html') {
 	_outln_comment($dev->variable['firmware']);
   }
 
+
   foreach (glob(drupal_get_path('module', 'guifi') .'/firmware/*.inc.php', GLOB_BRACE) as $firm_inc_php){
     include_once("$firm_inc_php");
+    echo "<br>$firm_inc_php";
   }
  if ($dev->radios[0]['mode'] == 'client') {
     $links = 0;
-     foreach ($dev->radios[0]['interfaces'] as $interface_id => $interface) 
-     foreach ($interface['ipv4'] as $ipv4_id => $ipv4) 
+     foreach ($dev->radios[0]['interfaces'] as $interface_id => $interface)
+     foreach ($interface['ipv4'] as $ipv4_id => $ipv4)
      if (isset($ipv4['links'])) foreach ($ipv4['links'] as $key => $link) {
        if ($link['link_type'] == 'ap/client') {
         $links++;
-        break; 
+        break;
       }
     }
 
@@ -112,7 +189,7 @@ function _outln_nvram($parameter, $value) {
  
   if (strlen($value) <= 80) {
     print $value;
-  } else { 
+  } else {
     $pos = 0;
     if ($otype == 'html') print "\n<br />"; else print "\n";
     do {
@@ -155,7 +232,7 @@ function guifi_get_dns($zone,$max = 3) {
     if ($zone->master == 0) {
       break;
     }
-  } 
+  }
   while (count($dns) > $max)
     array_pop($dns);
 
@@ -171,7 +248,7 @@ function guifi_get_ospf_zone($zone) {
     $zone = db_fetch_object(db_query("SELECT dns_servers, master FROM {guifi_zone} WHERE id=%d",$zone->master));
     if (!empty($zone->ospf_zone))
       return $zone->ospf_zone;
-  } while ($zone->master > 0); 
+  } while ($zone->master > 0);
 
   return '0';
 }
@@ -187,10 +264,68 @@ function guifi_get_ntp($zone,$max = 3) {
     if ($zone->master == 0) {
       break;
     }
-  } 
+  }
   while (count($ntp) > $max)
     array_pop($ntp);
 
   return implode(" ",$ntp);
 }
+
+function guifi_get_model($mid) {
+
+    $modelInfo = db_fetch_array(db_query("select * from {guifi_model} where mid=%d limit 1",$mid));
+    if (!empty($modelInfo)){
+      //var_dump($modelInfo);
+    }
+  return $modelInfo;
+}
+
+function guifi_get_caractmodel($mid) {
+
+  $caractModelInfo = db_fetch_array(db_query("select * from {guifi_pfc_caracteristiquesModel} where mid=%d limit 1",$mid));
+  if (!empty($caractModelInfo)){
+    //var_dump(caractModelInfo);
+  }
+  return $caractModelInfo;
+}
+
+function guifi_get_firmware($nom) {
+
+  $firmwareInfo = db_fetch_array(db_query("select * from {guifi_pfc_firmware} where nom='%s'",$nom));
+  if (!empty($firmwareInfo)){
+    //var_dump($firmwareInfo);
+  }
+  return $firmwareInfo;
+}
+
+function guifi_get_paramsFirmware($fid) {
+
+  $paramsFirmwareInfo = db_fetch_array(db_query("select * from {guifi_pfc_parametresFirmware} where fid='%d'",$fid));
+  if (!empty($paramsFirmwareInfo)){
+    //var_dump($paramsFirmwareInfo);
+  }
+  return $paramsFirmwareInfo;
+}
+
+function guifi_get_configuracioUSC($mid, $fid, $uscid) {
+
+  $configuracioUSCInfo = db_fetch_array(db_query("select id, mid, fid, enabled, tipologia, plantilla from {guifi_pfc_configuracioUnSolclic} where mid=%d and fid=%d and id = %d limit 1",$mid, $fid, $uscid));
+  if (!empty($configuracioUSCInfo)){
+    //var_dump($configuracioUSCInfo);
+  }
+  return $configuracioUSCInfo;
+}
+function guifi_get_paramsconfiguracioUSC($uscid) {
+  $qry = db_query("select p.nom, valor
+                   from {guifi_pfc_parametresConfiguracioUnsolclic} c,
+                        {guifi_pfc_parametres} p
+                   where c.valor <>'' and c.pid = p.id and c.uscid= %d",$uscid);
+  while ($param = db_fetch_array($qry)) {
+    $params[] = $param;
+  }
+  //var_dump($params);
+  return $params;
+}
+
+
 ?>
