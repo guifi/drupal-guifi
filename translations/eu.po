@@ -1,6 +1,6 @@
 # $Id$
 #
-# French translation of Drupal (general)
+# Basque translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
 #  guifi_ahah.inc.php: n/a
@@ -44,14 +44,14 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2010-08-11 03:04+0200\n"
-"PO-Revision-Date: 2010-08-11 03:04+0200\n"
+"POT-Creation-Date: 2010-08-11 03:05+0200\n"
+"PO-Revision-Date: 2010-08-11 03:05+0200\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
-"Language-Team: French <EMAIL@ADDRESS>\n"
+"Language-Team: Basque <EMAIL@ADDRESS>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n>1);\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: guifi_ahah.inc.php:71 guifi_includes.inc.php:1726
 msgid "Not assigned"
@@ -147,11 +147,11 @@ msgstr ""
 
 #: guifi_cnml.inc.php:707 guifi.module:1507;1642
 msgid "PtP link"
-msgstr ""
+msgstr "PtP lotura"
 
 #: guifi_cnml.inc.php:708 guifi_devices.inc.php:1285 guifi.module:1508;1643
 msgid "ap/client"
-msgstr ""
+msgstr "ap/bezeroa"
 
 #: guifi_cnml.inc.php:709 guifi.module:1509;1644
 msgid "unknown"
@@ -159,11 +159,11 @@ msgstr ""
 
 #: guifi_cnml.inc.php:1198 guifi_gml.inc.php:11 guifi.module:1465;1604
 msgid "Nodes"
-msgstr ""
+msgstr "Nodoak"
 
 #: guifi_cnml.inc.php:1201 guifi_stats.inc.php:333;433;626;795 guifi_tools.inc.php:620
 msgid "Working nodes"
-msgstr "Opérationnelle nœuds"
+msgstr ""
 
 #: guifi_cron.inc.php:30
 msgid "Complete trace messages (for trace purposes, to be used by developers)"
@@ -219,7 +219,7 @@ msgstr ""
 
 #: guifi_devices.inc.php:301;869 guifi_domains.inc.php:92;468 guifi_hosts.inc.php:206;226 guifi_includes.inc.php:698;1706;1723;1752;1768 guifi_links.inc.php:263 guifi_service.inc.php:464
 msgid "Reset"
-msgstr ""
+msgstr "Garbitu"
 
 #: guifi_devices.inc.php:308;898 guifi_domains.inc.php:99;497
 msgid "Save & continue edit"
@@ -247,7 +247,7 @@ msgstr ""
 
 #: guifi_devices.inc.php:480 guifi_node.inc.php:867 guifi_tools.inc.php:500 guifi_traceroute.inc.php:507 guifi_users.inc.php:283;305;844
 msgid "Node"
-msgstr "Node"
+msgstr ""
 
 #: guifi_devices.inc.php:504
 msgid "nick"
@@ -259,7 +259,7 @@ msgstr ""
 
 #: guifi_devices.inc.php:512 guifi_includes.inc.php:566 guifi_links.inc.php:142 guifi_node.inc.php:876 guifi_service.inc.php:163 guifi_traceroute.inc.php:511 guifi_users.inc.php:277;300
 msgid "Status"
-msgstr "Statut"
+msgstr "Egoera"
 
 #: guifi_devices.inc.php:516
 msgid "Current status of this device."
@@ -279,11 +279,11 @@ msgstr ""
 
 #: guifi_devices.inc.php:535
 msgid "Default"
-msgstr "Défaut"
+msgstr "Lehenetsia"
 
 #: guifi_devices.inc.php:535 guifi_includes.inc.php:792 guifi_ipv4.inc.php:339
 msgid "None"
-msgstr "Aucun"
+msgstr ""
 
 #: guifi_devices.inc.php:536
 msgid "If not specified, inherits zone properties."
@@ -291,7 +291,7 @@ msgstr ""
 
 #: guifi_devices.inc.php:561 guifi_domains.inc.php:312
 msgid "Comments"
-msgstr ""
+msgstr "Iruzkinak"
 
 #: guifi_devices.inc.php:563
 msgid "This text will be displayed as an information of the device."
@@ -375,7 +375,7 @@ msgstr ""
 
 #: guifi_devices.inc.php:1052 guifi_service.inc.php:280
 msgid "Download"
-msgstr "Télécharger"
+msgstr ""
 
 #: guifi_devices.inc.php:1055 guifi_service.inc.php:283
 msgid "Download bandwidth"
@@ -383,7 +383,7 @@ msgstr ""
 
 #: guifi_devices.inc.php:1059 guifi_service.inc.php:287
 msgid "Upload"
-msgstr "Transfert de fichiers"
+msgstr ""
 
 #: guifi_devices.inc.php:1062 guifi_service.inc.php:290
 msgid "Upload bandwidth"
@@ -463,7 +463,7 @@ msgstr ""
 
 #: guifi_devices.inc.php:1251;1399 guifi_ipv4.inc.php:249 guifi_node.inc.php:1195 guifi_service.inc.php:580;597;783
 msgid "type"
-msgstr ""
+msgstr "mota"
 
 #: guifi_devices.inc.php:1251;1387
 msgid "ip address"
@@ -539,7 +539,7 @@ msgstr ""
 
 #: guifi_devices.inc.php:1386;1387;1399;1469 guifi_node.inc.php:1297;1386 guifi.module:1566;1701
 msgid "kms."
-msgstr ""
+msgstr "km"
 
 #: guifi_devices.inc.php:1387 guifi_tools.inc.php:20;111
 msgid "interface"
@@ -551,11 +551,11 @@ msgstr ""
 
 #: guifi_devices.inc.php:1387 guifi_node.inc.php:1073 guifi_tools.inc.php:20;111
 msgid "node"
-msgstr ""
+msgstr "nodoa"
 
 #: guifi_devices.inc.php:1387;1399 guifi_node.inc.php:1197;1297 guifi_service.inc.php:724 guifi_zone.inc.php:1408
 msgid "status"
-msgstr ""
+msgstr "egoera"
 
 #: guifi_devices.inc.php:1387;1399
 msgid "routing"
@@ -735,7 +735,7 @@ msgstr ""
 
 #: guifi_domains.inc.php:780
 msgid "Alias"
-msgstr ""
+msgstr "Ezizena"
 
 #: guifi_domains.inc.php:780
 msgid "Ip Address"
@@ -755,7 +755,7 @@ msgstr ""
 
 #: guifi_gml.inc.php:12
 msgid "Links"
-msgstr "Liens"
+msgstr ""
 
 #: guifi_gml.inc.php:12
 msgid "export zone links in gml format"
@@ -855,11 +855,11 @@ msgstr ""
 
 #: guifi_hosts.inc.php:79
 msgid "Advanced settings"
-msgstr "Paramétrages avancés"
+msgstr ""
 
 #: guifi_hosts.inc.php:97
 msgid "Options"
-msgstr "Options"
+msgstr ""
 
 #: guifi_hosts.inc.php:112
 msgid "Delete host"
@@ -883,7 +883,7 @@ msgstr ""
 
 #: guifi_hosts.inc.php:170
 msgid "IP Address"
-msgstr "Adresse IP"
+msgstr ""
 
 #: guifi_hosts.inc.php:174
 msgid "Leave it blank if you want to use an alias to an external domain.<br> ex: hostname is an alias of hostname.dyndns.org."
@@ -933,7 +933,7 @@ msgstr ""
 
 #: guifi_includes.inc.php:486
 msgid "Filters"
-msgstr "Filtres"
+msgstr "Iragazkiak"
 
 #: guifi_includes.inc.php:495
 msgid "Distance from"
@@ -977,7 +977,7 @@ msgstr ""
 
 #: guifi_includes.inc.php:562;583
 msgid "All"
-msgstr "Tous / Toutes"
+msgstr ""
 
 #: guifi_includes.inc.php:570
 msgid "Status of the node"
@@ -1101,7 +1101,7 @@ msgstr ""
 
 #: guifi_interfaces.inc.php:43 guifi_service.inc.php:302
 msgid "Name"
-msgstr "Nom"
+msgstr "Izena"
 
 #: guifi_interfaces.inc.php:48
 msgid "Will rename the current interface name."
@@ -1129,7 +1129,7 @@ msgstr ""
 
 #: guifi_interfaces.inc.php:107 guifi_ipv4.inc.php:438
 msgid "Deleted"
-msgstr ""
+msgstr "Ezabatua"
 
 #: guifi_interfaces.inc.php:118
 msgid "Delete interface"
@@ -1185,15 +1185,15 @@ msgstr ""
 
 #: guifi_ipv4.inc.php:65 guifi_users.inc.php:90
 msgid "This action cannot be undone."
-msgstr "Cette action est irréversible."
+msgstr "Ekintza hau ezin da desegin."
 
 #: guifi_ipv4.inc.php:66 guifi_radios.inc.php:689 guifi_service.inc.php:783 guifi_users.inc.php:91;101;427;1003
 msgid "Delete"
-msgstr "Supprimer"
+msgstr "Ezabatu"
 
 #: guifi_ipv4.inc.php:67 guifi_users.inc.php:92
 msgid "Cancel"
-msgstr "Annuler"
+msgstr "Bertan behera utzi"
 
 #: guifi_ipv4.inc.php:84
 msgid "public - for any device available to everyone"
@@ -1217,7 +1217,7 @@ msgstr ""
 
 #: guifi_ipv4.inc.php:159 guifi_tools.inc.php:253
 msgid "Mask"
-msgstr ""
+msgstr "Maskara"
 
 #: guifi_ipv4.inc.php:163
 msgid "The mask of the network. The number of valid hosts of each masks is displayed in the list box."
@@ -1233,7 +1233,7 @@ msgstr ""
 
 #: guifi_ipv4.inc.php:182
 msgid "Submit"
-msgstr "Soumettre"
+msgstr ""
 
 #: guifi_ipv4.inc.php:201
 msgid "You must specify a base network for the zone."
@@ -1249,7 +1249,7 @@ msgstr ""
 
 #: guifi_ipv4.inc.php:212
 msgid "is"
-msgstr ""
+msgstr "da"
 
 #: guifi_ipv4.inc.php:222
 msgid "Network already in use."
@@ -1365,7 +1365,7 @@ msgstr ""
 
 #: guifi_node.inc.php:44 guifi_zone.inc.php:852
 msgid "Home"
-msgstr "Accueil"
+msgstr "Hasiera"
 
 #: guifi_node.inc.php:45 guifi_zone.inc.php:853
 msgid "Main menu"
@@ -1385,7 +1385,7 @@ msgstr ""
 
 #: guifi_node.inc.php:184 guifi_service.inc.php:119
 msgid "Contact"
-msgstr ""
+msgstr "Kontaktatu"
 
 #: guifi_node.inc.php:190
 msgid "Who did possible this node or who to contact with regarding this node if it is distinct of the owner of this page. Use valid emails, if you like to have more than one, separated by commas.'"
@@ -1939,7 +1939,7 @@ msgstr ""
 
 #: guifi_service.inc.php:175
 msgid "settings"
-msgstr "paramètres"
+msgstr ""
 
 #: guifi_service.inc.php:186
 msgid "Inbound mail server"
@@ -2015,7 +2015,7 @@ msgstr ""
 
 #: guifi_service.inc.php:316 guifi_tools.inc.php:261 guifi_traceroute.inc.php:510
 msgid "Type"
-msgstr "Type"
+msgstr "Mota"
 
 #: guifi_service.inc.php:324
 msgid "version"
@@ -2155,7 +2155,7 @@ msgstr ""
 
 #: guifi_service.inc.php:770
 msgid "Description"
-msgstr "Description"
+msgstr "Azalpena"
 
 #: guifi_service.inc.php:774;819;829
 msgid "service information"
@@ -2167,7 +2167,7 @@ msgstr ""
 
 #: guifi_service.inc.php:783
 msgid "Edit"
-msgstr "Éditer"
+msgstr "Editatu"
 
 #: guifi_service.inc.php:791 guifi.module:807
 msgid "edit domain"
@@ -2219,7 +2219,7 @@ msgstr ""
 
 #: guifi_stats.inc.php:141
 msgid "1 Growth chart"
-msgstr "1 Courbe de croissance"
+msgstr ""
 
 #: guifi_stats.inc.php:142
 msgid "2 Annual increment"
@@ -2259,11 +2259,11 @@ msgstr ""
 
 #: guifi_stats.inc.php:328;330
 msgid "Growth chart"
-msgstr "Courbe de croissance"
+msgstr ""
 
 #: guifi_stats.inc.php:332;432;794
 msgid "Years"
-msgstr "Ans"
+msgstr ""
 
 #: guifi_stats.inc.php:428;430
 msgid "Annual increment"
@@ -2391,7 +2391,7 @@ msgstr ""
 
 #: guifi_tools.inc.php:402
 msgid "Search"
-msgstr "Recherche"
+msgstr "Bilatu"
 
 #: guifi_tools.inc.php:422
 msgid "New e-mail address"
@@ -2407,7 +2407,7 @@ msgstr ""
 
 #: guifi_tools.inc.php:482
 msgid "User"
-msgstr "Utilisateur"
+msgstr "Erabiltzailea"
 
 #: guifi_tools.inc.php:539
 msgid "The notification %notify for %type %title has been CHANGED to %new by %user."
@@ -2439,7 +2439,7 @@ msgstr ""
 
 #: guifi_tools.inc.php:620 guifi_zone.inc.php:1363 guifi.module:1547;1682
 msgid "Total"
-msgstr ""
+msgstr "Guztira"
 
 #: guifi_tools.inc.php:620
 msgid "Dif"
@@ -2643,23 +2643,23 @@ msgstr ""
 
 #: guifi_users.inc.php:405
 msgid "Authoring information"
-msgstr ""
+msgstr "Egilearen informazioa"
 
 #: guifi_users.inc.php:412
 msgid "Authored by"
-msgstr ""
+msgstr "Honek egina:"
 
 #: guifi_users.inc.php:416
 msgid "Leave blank for %anonymous."
-msgstr ""
+msgstr "Hutsik utzi %anonymous -rentzat."
 
 #: guifi_users.inc.php:416
 msgid "Anonymous"
-msgstr "Anonyme"
+msgstr "Erabiltzaile anonimoa"
 
 #: guifi_users.inc.php:422;994
 msgid "Save"
-msgstr "Enregistrer"
+msgstr "Gorde"
 
 #: guifi_users.inc.php:487
 msgid "Invalid user name."
@@ -2707,7 +2707,7 @@ msgstr ""
 
 #: guifi_users.inc.php:843
 msgid "Username"
-msgstr "Nom d'utilisateur"
+msgstr "Erabiltzaile izena"
 
 #: guifi_users.inc.php:845
 msgid "User status"
@@ -2727,7 +2727,7 @@ msgstr ""
 
 #: guifi_users.inc.php:921
 msgid "Users"
-msgstr ""
+msgstr "Erabiltzaileak"
 
 #: guifi_users.inc.php:958;977
 msgid "Edit selected user"
@@ -2759,7 +2759,7 @@ msgstr ""
 
 #: guifi_users.inc.php:163;172
 msgid "user"
-msgstr "utilisateur"
+msgstr "erabiltzailea"
 
 #: guifi_users.inc.php:163
 msgid "Password mailed to %name for %email."
@@ -2811,7 +2811,7 @@ msgstr ""
 
 #: guifi_zone.inc.php:302;913
 msgid "Time zone"
-msgstr ""
+msgstr "Ordu zona"
 
 #: guifi_zone.inc.php:310
 msgid "Zone homepage"
@@ -3007,7 +3007,7 @@ msgstr ""
 
 #: guifi_zone.inc.php:908
 msgid "Mode"
-msgstr ""
+msgstr "Modoa"
 
 #: guifi_zone.inc.php:911
 msgid "OSPF zone"
@@ -3031,7 +3031,7 @@ msgstr ""
 
 #: guifi_zone.inc.php:1358 guifi.module:1155
 msgid "Zone name"
-msgstr ""
+msgstr "Zonaldearen izena"
 
 #: guifi_zone.inc.php:1359
 msgid "Online"
@@ -3039,15 +3039,15 @@ msgstr ""
 
 #: guifi_zone.inc.php:1360
 msgid "Planned"
-msgstr ""
+msgstr "Proiektatuak"
 
 #: guifi_zone.inc.php:1361
 msgid "Building"
-msgstr ""
+msgstr "Eraikitzen"
 
 #: guifi_zone.inc.php:1362
 msgid "Testing"
-msgstr ""
+msgstr "Probetan"
 
 #: guifi_zone.inc.php:1405
 msgid "nick (shortname)"
@@ -3063,7 +3063,7 @@ msgstr ""
 
 #: guifi_zone.inc.php:1411
 msgid "No"
-msgstr "Non"
+msgstr "Ez"
 
 #: guifi_zone.inc.php:1469
 msgid "add network"
@@ -3115,7 +3115,7 @@ msgstr ""
 
 #: guifi.module:1151
 msgid "guifi.net zone"
-msgstr ""
+msgstr "guifi.net zonaldea"
 
 #: guifi.module:1153;1196
 msgid "Create a community, area or zone. A typical zone hierarchy can be related to the territory (Country/Region/City...) but not have to, i.e. a single city can have many groups or communities with distinct IP addressing policies.<br />Every zone will have it's own page so it can be used as the homepage of that community.<br />The zones must belong at least to the root zone, but can also belong to other zones, so in that way a hierarchy is created.<br />Every zone have its own properties like maps or ip ranges and every node will have to be assigned to an existing zone, and will inherit the zone properties like his IP address and drawn in the corresponding map.<br />If zone properties are leaved blank, will inherit the parent zone properties."
@@ -3123,35 +3123,39 @@ msgstr ""
 
 #: guifi.module:1157
 msgid "Information about this zone"
-msgstr ""
+msgstr "Zonalde honi buruz informazioa"
 
 #: guifi.module:1160
 msgid "guifi.net node"
-msgstr ""
+msgstr "guifi.net nodoa"
 
 #: guifi.module:1167
 msgid "Location name"
-msgstr ""
+msgstr "Kokalekuaren izena"
 
 #: guifi.module:1169
 msgid "Information about this location"
-msgstr ""
+msgstr "Leku honi buruz informazioa"
 
 #: guifi.module:1172
 msgid "guifi.net service"
-msgstr ""
+msgstr "guifi.net zerbitzua"
 
 #: guifi.module:1174;1198
 msgid "Create a service. A service is any resource available on the network that should be listed in the content directory of the site, like a web server, internet proxy,ntp, instant messaging, voip gateway, etc... ."
 msgstr ""
+"Zerbitzu bat sortu. Zerbitzua sarean erabili daitekeen baliabide bat "
+"da eta lekuaren edukinen direktorioan zerrendatuta egon beharko "
+"litzateke, adibidez web-orri zerbitzari, internet proxy, berehalako "
+"mezularitza, voip aterabidea,..."
 
 #: guifi.module:1176
 msgid "Service name"
-msgstr ""
+msgstr "Zerbitzuaren izena"
 
 #: guifi.module:1178
 msgid "Information about this service"
-msgstr ""
+msgstr "Zerbitzu honi buruz informazioa"
 
 #: guifi.module:1188
 msgid "Manage the guifi.net, a mesh network community."
@@ -3183,7 +3187,7 @@ msgstr ""
 
 #: guifi.module:1235
 msgid "Block title"
-msgstr ""
+msgstr "Blokearen izenburua"
 
 #: guifi.module:1237
 msgid "Network statistics"
@@ -3195,7 +3199,7 @@ msgstr ""
 
 #: guifi.module:1245;105
 msgid "Forums"
-msgstr ""
+msgstr "Foroak"
 
 #: guifi.module:1250
 msgid "URL for the forums, leave it blank if none."
@@ -3247,7 +3251,7 @@ msgstr ""
 
 #: guifi.module:1301;1319
 msgid "Hourly"
-msgstr "Toutes les heures"
+msgstr ""
 
 #: guifi.module:1302;1320
 msgid "Every 2 hours"
@@ -3263,7 +3267,7 @@ msgstr ""
 
 #: guifi.module:1305;1323
 msgid "Daily"
-msgstr "Tous les jours"
+msgstr ""
 
 #: guifi.module:1306;1324
 msgid "Every other day"
@@ -3271,7 +3275,7 @@ msgstr ""
 
 #: guifi.module:1307;1325
 msgid "Weekly"
-msgstr ""
+msgstr "Astero"
 
 #: guifi.module:1308
 msgid "When the notification messages queue will be delivered, if set to \"Never\", no messages will be post at the queue."
@@ -3339,7 +3343,7 @@ msgstr ""
 
 #: guifi.module:1392
 msgid "Thousands separator"
-msgstr "Séparateur de milliers"
+msgstr ""
 
 #: guifi.module:1397
 msgid "Thousands separatos for formatting numbers"
@@ -3355,11 +3359,11 @@ msgstr ""
 
 #: guifi.module:1427
 msgid "List of guifi nodes"
-msgstr ""
+msgstr "guifi nodoen lista"
 
 #: guifi.module:1475;1614
 msgid "node list and maps..."
-msgstr ""
+msgstr "listak eta mapak..."
 
 #: guifi.module:1478;1617
 msgid "Go to the list of nodes root page and their maps."
@@ -3371,7 +3375,7 @@ msgstr ""
 
 #: guifi.module:1565;1700
 msgid "Wireless<br />links"
-msgstr ""
+msgstr "Wireless<br />loturak\n"
 
 #: guifi.module:1568
 msgid "Link counters obtained in %secs seconds"
@@ -3539,7 +3543,7 @@ msgstr ""
 
 #: guifi.module:55
 msgid "guifi.net main page"
-msgstr ""
+msgstr "guifi.net etxeko orrialdea"
 
 #: guifi.module:56;75
 msgid "Main menu for guifi.net network management and utilities"
@@ -3547,11 +3551,11 @@ msgstr ""
 
 #: guifi.module:74
 msgid "guifi.net menus"
-msgstr ""
+msgstr "guifi.net menuak"
 
 #: guifi.module:81
 msgid "Compact mode"
-msgstr ""
+msgstr "Modu trinkoa"
 
 #: guifi.module:89
 msgid "Main navigation options"
@@ -3559,7 +3563,7 @@ msgstr ""
 
 #: guifi.module:90
 msgid "The most important options to browse and use this site"
-msgstr ""
+msgstr "Leku hau erabiltzeko eta arakatzeko aukera garrantzitsuenak"
 
 #: guifi.module:96
 msgid "Browse the network"
@@ -3631,7 +3635,7 @@ msgstr ""
 
 #: guifi.module:174
 msgid "IP and Network management tools"
-msgstr ""
+msgstr "IP eta sarea kudeatzeko tresnak"
 
 #: guifi.module:175
 msgid "Utilities toolset for various network addressing and management"
@@ -3771,7 +3775,7 @@ msgstr ""
 
 #: guifi.module:338;339
 msgid "Statistics"
-msgstr "Statistiques"
+msgstr "Estatistikak"
 
 #: guifi.module:345
 msgid "History map"
@@ -3783,7 +3787,7 @@ msgstr ""
 
 #: guifi.module:353
 msgid "Node statistics"
-msgstr "Statistiques du nœud"
+msgstr ""
 
 #: guifi.module:361;368
 msgid "stats charts"
@@ -4376,4 +4380,3 @@ msgstr ""
 #: firmware/kamikaze/broadcom/kamikaze_ap.inc.php:337 firmware/kamikaze/ixp4xx/kamikaze_ap.inc.php:531
 msgid "File /etc/config/dhcp"
 msgstr ""
-
