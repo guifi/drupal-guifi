@@ -40,13 +40,14 @@ function guifi_service_load($node) {
     $k = $node;
 
   $node = db_fetch_object(db_query("SELECT * FROM {guifi_services} WHERE id = '%d'", $k));
+
+  if (!$node->id == NULL)
+    return FALSE;
+
   $node->var = unserialize($node->extra);
   $node->l = 'node/'.$node->id;
 
-  if (!$node->id == NULL)
-    return $node;
-
-  return FALSE;
+  return $node;
 }
 
 /**
