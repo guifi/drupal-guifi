@@ -217,7 +217,7 @@ function guifi_links_delete_submit(&$form,&$form_state) {
   $interface_id = array_pop($values);
   $dummy =  array_pop($values);
 
-  if ($values['0']=='radios') {
+  if ($values['0'] == 'radios') {
     $radio_id = array_pop($values);
     $fbase = &$form_state['values']['radios'][$radio_id];
     $fbase['unfold'] = TRUE;
@@ -244,10 +244,8 @@ function guifi_links_delete_submit(&$form,&$form_state) {
 
   // if P2P link or AP/Client link and radio is the client
   // delete also the local IP
-  if (
-       ($flink['ipv4']['netmask'] == '255.255.255.252') or
-       ($form_state['values']['radios'][$radio_id]['mode']=='client')
-     ) {
+  if (( $flink['ipv4']['netmask'] == '255.255.255.252' ) or  ($ipv4['netmask'] == '255.255.255.248') or  ($ipv4['netmask'] == '255.255.255.240') or
+      ( $form_state['values']['radios'][$radio_id]['mode'] == 'client' )) {
     $fipv4['deleted'] = TRUE;
   }
 
@@ -335,19 +333,19 @@ function guifi_links_check_overlap($overlap,&$form_state) {
   $new_broadcast = $net['broadcast'];
   $old_broadcast = $net_overlap['broadcast'];
 
-  // guifi_log(GUIFILOG_BASIC,'<br>Old Netid: '.$old_netid.'<br>New Netid: '.$new_netid.'<br>Old Netmask: '.$old_netmask.'<br>New NetMask: '.$new_netmask.'<br>Old broadcast: '.$old_broadcast.'<br>New Broadcast: '.$new_broadcast.'<br><br> ');
+  //guifi_log(GUIFILOG_BASIC,'<br>Old Netid: '.$old_netid.'<br>New Netid: '.$new_netid.'<br>Old Netmask: '.$old_netmask.'<br>New NetMask: '.$new_netmask.'<br>Old broadcast: '.$old_broadcast.'<br>New Broadcast: '.$new_broadcast.'<br><br> ');
   $sql = db_query("SELECT INET_ATON(ipv4) as ip FROM guifi_ipv4 WHERE ipv4 BETWEEN '%s' AND '%s' ", $old_broadcast, $new_broadcast);
 
   while ($item = db_fetch_array($sql)) {
     $ip = long2ip($item['ip']);
-    $s = ip2long($new_netid);
+    $s = ip2long($old_netid);
     $e = ip2long($new_broadcast);
     for($i = $s; $i < $e+1; $i++) {
       $ipnow = long2ip($i);
       if ($ip == $ipnow) {
         drupal_set_message(t('Ip address: %ip is already taken on another device!!', array('%ip' => $ip)),'error');
         $error = TRUE;
-        //   guifi_log(GUIFILOG_BASIC,'Ip en ús: '.$ip.'<br>');
+        //guifi_log(GUIFILOG_BASIC,'Tipus de check: Broadcast<br>');
       }
     }
     $count = $e-$s+1;
@@ -364,7 +362,7 @@ function guifi_links_check_overlap($overlap,&$form_state) {
       if ($ip == $ipnow) {
         drupal_set_message(t('Ip address: %ip is already taken on another device!!', array('%ip' => $ip)),'error');
         $error = TRUE;
-        //   guifi_log(GUIFILOG_BASIC,'Ip en ús: '.$ip.'<br>');
+         //guifi_log(GUIFILOG_BASIC,'Tipus de check: Netid<br>');
       }
     }
     $count = $e-$s+1;
