@@ -376,6 +376,21 @@ function guifi_menu() {
     'access arguments' => array('guifi module developer'),
     'file' => 'guifi_devel.inc.php'
   );
+  $items['guifi/menu/devel/parameter'] = array(
+    'title' => 'Generic Firmware Parameters',
+    'description' => 'A full list of Generic Firmware parameters that supports certain firmware used on our network, add, edit or delete it.',
+    'page callback' => 'guifi_devel_parameter',
+    'access arguments' => array('guifi module developer'),
+    'weight' => 10,
+    'file' => 'guifi_devel.inc.php'
+  );
+  $items['guifi/menu/devel/parameter/%/%'] = array(
+    'title' => 'Generic Firmware Parameters',
+    'page callback' => 'guifi_devel_parameter',
+    'page arguments' => array(4, 5),
+    'access arguments' => array('guifi module developer'),
+    'file' => 'guifi_devel.inc.php'
+  );
   $items['guifi/menu/devel/counters'] = array(
     'title' => 'counters',
     'description' => 'get statistics/counters from the network',

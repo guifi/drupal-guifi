@@ -752,4 +752,148 @@ function guifi_devel_manufacturer_delete_confirm_submit($form, &$form_state) {
     drupal_goto('guifi/menu/devel/manufacturer');
 }
 
+// Firmware Parameter output
+function guifi_devel_parameter($id , $op) {
+  switch($id) {
+    case 'add':
+      $id = 'New';
+      return drupal_get_form('guifi_devel_parameter_form',$id);
+  }
+  switch($op) {
+    case 'edit':
+      return drupal_get_form('guifi_devel_parameter_form',$id);
+    case 'delete':
+      guifi_log(GUIFILOG_TRACE,'guifi_devel_parameter_delete()',$id);
+      return drupal_get_form(
+      'guifi_devel_parameter_delete_confirm', $id);
+      guifi_devel_parameter_delete($id);
+  }
+  $rows = array();
+  $value = t('Add a new firmware parameter');
+  $output  = '<from>';
+  $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/parameter/add\'"/>';
+  $output .= '</form>';
+
+  $headers = array(t('ID'), t('Parameter'), t('Origen'), t('Edit'), t('Delete'));
+
+  $sql = db_query('SELECT * FROM {guifi_pfc_parametres}');
+  while ($parameter = db_fetch_object($sql)) {
+    $rows[] = array($parameter->id,
+                    $parameter->nom,
+                    $parameter->origen,
+    l(guifi_img_icon('edit.png'),'guifi/menu/devel/parameter/'.$parameter->id.'/edit',
+    array(
+              'html' => TRUE,
+              'title' => t('edit parameter'),
+    )).'</td><td>'.
+    l(guifi_img_icon('drop.png'),'guifi/menu/devel/parameter/'.$parameter->id.'/delete',
+    array(
+              'html' => TRUE,
+              'title' => t('delete parameter'),
+    )));
+  }
+
+  $output .= theme('table',$headers,$rows);
+  print theme('page',$output, FALSE);
+  return;
+}
+
+// Device Manufacturers Form
+function guifi_devel_parameter_form($form_state, $id) {
+
+  $sql = db_query('SELECT * FROM {guifi_pfc_parametres} WHERE id = %d', $id);
+  $parameter = db_fetch_object($sql);
+
+  if ($id == 'New' ) {
+    $form['new'] = array('#type' => 'hidden', '#value' => TRUE);
+  } else {
+    $form['id'] = array('#type' => 'hidden','#value' => $id);
+  }
+  $form['nom'] = array(
+    '#type' => 'textfield',
+    '#size' => 32,
+    '#maxlength' => 32,
+    '#title' => t('nom'),
+    '#required' => TRUE,
+    '#default_value' => $parameter->nom,
+    '#description' =>  t('Parameter name.'),
+  	'#prefix' => '<table><tr><td>',
+    '#suffix' => '</td>',
+  
+  );
+  $form['origen'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Parameter Origin'),
+    '#required' => TRUE,
+    '#default_value' => $parameter->origen,
+    '#size' => 32,
+    '#maxlength' => 32,
+    '#description' => t('Parameter name, please, use a clear and short description.'),
+    '#prefix' => '<td>',
+    '#suffix' => '</td></tr></table>',
+    '#weight' => 1,
+  );
+
+
+  $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
+
+  return $form;
+}
+
+function guifi_devel_parameter_form_submit($form, &$form_state) {
+  guifi_log(GUIFILOG_TRACE,'function guifi_devel_parameter_form_submit()',$form_state);
+
+  guifi_devel_parameter_save($form_state['values']);
+  drupal_goto('guifi/menu/devel/parameter');
+  return;
+}
+
+function guifi_devel_parameter_save($edit) {
+  global $user;
+
+  $to_mail = $edit->notification;
+  $log ='';
+
+  guifi_log(GUIFILOG_TRACE,'function guifi_devel_parameter_save()',$edit);
+
+  _guifi_db_sql('guifi_pfc_parametres',array('id' => $edit['id']),$edit,$log,$to_mail);
+
+  guifi_notify(
+  $to_mail,
+  t('The firmware parameter !parameter has been created / updated by !user.',array('!manufacturer' => $edit['name'], '!user' => $user->name)),
+  $log);
+}
+
+function guifi_devel_parameter_delete_confirm($form_state,$id) {
+  guifi_log(GUIFILOG_TRACE,'guifi_devel_parameter_delete_confirm()',$id);
+
+  $form['id'] = array('#type' => 'hidden', '#value' => $id);
+  $qry= db_fetch_object(db_query("SELECT nom FROM {guifi_pfc_parametres} WHERE id = %d", $id));
+  return confirm_form(
+  $form,
+  t('Are you sure you want to delete the firmware parameter " %parameter "?',
+  array('%parameter' => $qry->nom)),
+      'guifi/menu/devel/parameter',
+  t('This action cannot be undone.'),
+  t('Delete'),
+  t('Cancel'));
+}
+
+
+function guifi_devel_parameter_delete_confirm_submit($form, &$form_state) {
+
+  global $user;
+  $depth = 0;
+  if ($form_state['values']['op'] != t('Delete'))
+  return;
+
+  $to_mail = explode(',',$node->notification);
+  $log = _guifi_db_delete('guifi_pfc_parametres',array('id' => $form_state['values']['id']),$to_mail,$depth);
+  drupal_set_message($log);
+  guifi_notify(
+  $to_mail,
+  t('The firmware parameter %parametre has been DELETED by %user.',array('%parametre' => $form_state['values']['nom'], '%user' => $user->name)),
+  $log);
+  drupal_goto('guifi/menu/devel/parameter');
+}
 ?>
