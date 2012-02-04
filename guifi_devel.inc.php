@@ -897,6 +897,151 @@ function guifi_devel_parameter_delete_confirm_submit($form, &$form_state) {
   drupal_goto('guifi/menu/devel/parameter');
 }
 
+// Model Feature output
+function guifi_devel_modelfeature($id , $op) {
+  switch($id) {
+    case 'add':
+      $id = 'New';
+      return drupal_get_form('guifi_devel_modelfeature_form',$id);
+  }
+  switch($op) {
+    case 'edit':
+      return drupal_get_form('guifi_devel_modelfeature_form',$id);
+    case 'delete':
+      guifi_log(GUIFILOG_TRACE,'guifi_devel_modelfeature_delete()',$id);
+      return drupal_get_form(
+      'guifi_devel_modelfeature_delete_confirm', $id);
+      guifi_devel_modelfeature_delete($id);
+  }
+  $rows = array();
+  $value = t('Add a new model feature');
+  $output  = '<from>';
+  $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/feature/add\'"/>';
+  $output .= '</form>';
+
+  $headers = array(t('ID'), t('name'), t('type'));
+
+  $sql = db_query('SELECT * FROM {guifi_pfc_caracteristica}');
+  while ($feature = db_fetch_object($sql)) {
+    $rows[] = array($feature->id,
+    $feature->nom,
+    $feature->tipus,
+    l(guifi_img_icon('edit.png'),'guifi/menu/devel/feature/'.$feature->id.'/edit',
+    array(
+              'html' => TRUE,
+              'title' => t('edit feature'),
+    )).'</td><td>'.
+    l(guifi_img_icon('drop.png'),'guifi/menu/devel/feature/'.$feature->id.'/delete',
+    array(
+              'html' => TRUE,
+              'title' => t('delete feature'),
+    )));
+  }
+
+  $output .= theme('table',$headers,$rows);
+  print theme('page',$output, FALSE);
+  return;
+}
+
+// Model Feature Form
+function guifi_devel_modelfeature_form($form_state, $id) {
+
+  $sql = db_query('SELECT * FROM {guifi_pfc_caracteristica} WHERE id = %d', $id);
+  $feature = db_fetch_object($sql);
+
+  if ($id == 'New' ) {
+    $form['new'] = array('#type' => 'hidden', '#value' => TRUE);
+  } else {
+    $form['id'] = array('#type' => 'hidden','#value' => $id);
+  }
+  $form['nom'] = array(
+    '#type' => 'textfield',
+    '#size' => 32,
+    '#maxlength' => 32,
+    '#title' => t('name'),
+    '#required' => TRUE,
+    '#default_value' => $feature->nom,
+    '#description' =>  t('Feature name.'),
+  	'#prefix' => '<table><tr><td>',
+    '#suffix' => '</td>',
+
+  );
+  $form['tipus'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Feature Type'),
+    '#required' => TRUE,
+    '#default_value' => $feature->tipus,
+    '#size' => 32,
+    '#maxlength' => 32,
+    '#description' => t('Feature type, please, use a clear and short description.'),
+    '#prefix' => '<td>',
+    '#suffix' => '</td></tr></table>',
+    '#weight' => 1,
+  );
+
+
+  $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
+
+  return $form;
+}
+
+function guifi_devel_modelfeature_form_submit($form, &$form_state) {
+  guifi_log(GUIFILOG_TRACE,'function guifi_devel_modelfeature_form_submit()',$form_state);
+
+  guifi_devel_modelfeature_save($form_state['values']);
+  drupal_goto('guifi/menu/devel/feature');
+  return;
+}
+
+function guifi_devel_modelfeature_save($edit) {
+  global $user;
+
+  $to_mail = $edit->notification;
+  $log ='';
+
+  guifi_log(GUIFILOG_TRACE,'function guifi_devel_modelfeature_save()',$edit);
+
+  _guifi_db_sql('guifi_pfc_caracteristica',array('id' => $edit['id']),$edit,$log,$to_mail);
+
+  guifi_notify(
+  $to_mail,
+  t('The Model Feature !modelfeature has been created / updated by !user.',array('!modelfeature' => $edit['nom'], '!user' => $user->name)),
+  $log);
+}
+
+function guifi_devel_modelfeature_delete_confirm($form_state,$id) {
+  guifi_log(GUIFILOG_TRACE,'guifi_devel_modelfeature_delete_confirm()',$id);
+
+  $form['id'] = array('#type' => 'hidden', '#value' => $id);
+  $qry= db_fetch_object(db_query("SELECT nom FROM {guifi_pfc_caracteristica} WHERE id = %d", $id));
+  return confirm_form(
+  $form,
+  t('Are you sure you want to delete the Model Feature %modelfeature "?',
+  array('%modelfeature' => $qry->nom)),
+      'guifi/menu/devel/feature',
+  t('This action cannot be undone.'),
+  t('Delete'),
+  t('Cancel'));
+}
+
+
+function guifi_devel_modelfeature_delete_confirm_submit($form, &$form_state) {
+
+  global $user;
+  $depth = 0;
+  if ($form_state['values']['op'] != t('Delete'))
+  return;
+
+  $to_mail = explode(',',$node->notification);
+  $log = _guifi_db_delete('guifi_pfc_caracteristica',array('id' => $form_state['values']['id']),$to_mail,$depth);
+  drupal_set_message($log);
+  guifi_notify(
+  $to_mail,
+  t('The firmware parameter %parametre has been DELETED by %user.',array('%parametre' => $form_state['values']['nom'], '%user' => $user->name)),
+  $log);
+  drupal_goto('guifi/menu/devel/feature');
+}
+
 // Configuracio unsolclic output
 function guifi_devel_configuracio_usc($id , $op) {
   switch($id) {
@@ -1079,6 +1224,4 @@ function guifi_devel_configuracio_usc_delete_confirm_submit($form, &$form_state)
   $log);
   drupal_goto('guifi/menu/devel/configuraciousc');
 }
-?>
-
 ?>
