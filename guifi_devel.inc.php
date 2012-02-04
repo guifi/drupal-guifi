@@ -798,7 +798,7 @@ function guifi_devel_parameter($id , $op) {
   return;
 }
 
-// Device Manufacturers Form
+// FirmWare Parameter Form
 function guifi_devel_parameter_form($form_state, $id) {
 
   $sql = db_query('SELECT * FROM {guifi_pfc_parametres} WHERE id = %d', $id);
@@ -896,4 +896,189 @@ function guifi_devel_parameter_delete_confirm_submit($form, &$form_state) {
   $log);
   drupal_goto('guifi/menu/devel/parameter');
 }
+
+// Configuracio unsolclic output
+function guifi_devel_configuracio_usc($id , $op) {
+  switch($id) {
+    case 'add':
+      $id = 'New';
+      return drupal_get_form('guifi_devel_configuracio_usc_form',$id);
+  }
+  switch($op) {
+    case 'edit':
+      return drupal_get_form('guifi_devel_configuracio_usc_form',$id);
+    case 'delete':
+      guifi_log(GUIFILOG_TRACE,'guifi_devel_configuracio_usc_delete()',$id);
+      return drupal_get_form(
+      'guifi_devel_configuracio_usc_delete_confirm', $id);
+      guifi_devel_configuracio_usc_delete($id);
+  }
+  $rows = array();
+  $value = t('Add a new Configuracio UnSolclic');
+  $output  = '<from>';
+  $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/configuraciousc/add\'"/>';
+  $output .= '</form>';
+
+  $headers = array(t('ID'), t('mid'), t('fid'), t('enabled'), t('plantilla'), t('tipologia'), t('Edit'), t('Delete'));
+
+  $sql = db_query('SELECT * FROM {guifi_pfc_configuracioUnSolclic}');
+  while ($configuraciousc = db_fetch_object($sql)) {
+    $rows[] = array($configuraciousc->id,
+    $configuraciousc->mid,
+    $configuraciousc->fid,
+    $configuraciousc->enabled,
+    $configuraciousc->plantilla,
+    $configuraciousc->tipologia,
+    l(guifi_img_icon('edit.png'),'guifi/menu/devel/configuraciousc/'.$configuraciousc->id.'/edit',
+    array(
+              'html' => TRUE,
+              'title' => t('edit configuracio unsolclic'),
+    )).'</td><td>'.
+    l(guifi_img_icon('drop.png'),'guifi/menu/devel/configuraciousc/'.$configuraciousc->id.'/delete',
+    array(
+              'html' => TRUE,
+              'title' => t('delete configuracio unsolclic'),
+    )));
+  }
+
+  $output .= theme('table',$headers,$rows);
+  print theme('page',$output, FALSE);
+  return;
+}
+
+// Configuracio unsolclic Form
+function guifi_devel_configuracio_usc_form($form_state, $id) {
+
+  $sql = db_query('SELECT * FROM {guifi_pfc_configuracioUnSolclic} WHERE id = %d', $id);
+  $configuraciousc = db_fetch_object($sql);
+
+  if ($id == 'New' ) {
+    $form['new'] = array('#type' => 'hidden', '#value' => TRUE);
+  } else {
+    $form['id'] = array('#type' => 'hidden','#value' => $id);
+  }
+  $form['mid'] = array(
+    '#type' => 'textfield',
+    '#size' => 32,
+    '#maxlength' => 32,
+    '#title' => t('Model Id'),
+    '#required' => TRUE,
+    '#default_value' => $configuraciousc->mid,
+    '#description' =>  t('Model Id.'),
+  	'#prefix' => '<table><tr><td>',
+    '#suffix' => '</td>',
+  );
+  $form['fid'] = array(
+    '#type' => 'textfield',
+    '#size' => 32,
+    '#maxlength' => 32,
+    '#title' => t('Firmware Id'),
+    '#required' => TRUE,
+    '#default_value' => $configuraciousc->fid,
+    '#description' =>  t('Firmware Id.'),
+  	'#prefix' => '<table><tr><td>',
+    '#suffix' => '</td>',
+
+  );
+  $form['enabled'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Enabled'),
+    '#required' => TRUE,
+    '#default_value' => $configuraciousc->enabled,
+    '#size' => 32,
+    '#maxlength' => 32,
+    '#description' => t('Enabled'),
+    '#prefix' => '<td>',
+    '#suffix' => '</td></tr></table>',
+    '#weight' => 1,
+  );
+  $form['plantilla'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Template File'),
+    '#required' => TRUE,
+    '#default_value' => $configuraciousc->plantilla,
+    '#size' => 32,
+    '#maxlength' => 32,
+    '#description' => t('Template File'),
+    '#prefix' => '<td>',
+    '#suffix' => '</td></tr></table>',
+    '#weight' => 1,
+  );
+  $form['tipologia'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Tipology'),
+    '#required' => TRUE,
+    '#default_value' => $configuraciousc->tipologia,
+    '#size' => 32,
+    '#maxlength' => 32,
+    '#description' => t('Tipology'),
+    '#prefix' => '<td>',
+    '#suffix' => '</td></tr></table>',
+    '#weight' => 1,
+  );
+
+
+  $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
+
+  return $form;
+}
+
+function guifi_devel_configuracio_usc_form_submit($form, &$form_state) {
+  guifi_log(GUIFILOG_TRACE,'function guifi_devel_configuracio_usc_form_submit()',$form_state);
+
+  guifi_devel_configuracio_usc_save($form_state['values']);
+  drupal_goto('guifi/menu/devel/configuraciousc');
+  return;
+}
+
+function guifi_devel_configuracio_usc_save($edit) {
+  global $user;
+
+  $to_mail = $edit->notification;
+  $log ='';
+
+  guifi_log(GUIFILOG_TRACE,'function guifi_devel_configuracio_usc_save()',$edit);
+
+  _guifi_db_sql('guifi_pfc_configuracioUnSolclic',array('id' => $edit['id']),$edit,$log,$to_mail);
+
+  guifi_notify(
+  $to_mail,
+  t('The Configuracio Unsolclic !configuraciousc has been created / updated by !user.',array('!configuraciousc' => $edit['plantilla'], '!user' => $user->name)),
+  $log);
+}
+
+function guifi_devel_configuracio_usc_delete_confirm($form_state,$id) {
+  guifi_log(GUIFILOG_TRACE,'guifi_devel_configuracio_usc_delete_confirm()',$id);
+
+  $form['id'] = array('#type' => 'hidden', '#value' => $id);
+  $qry= db_fetch_object(db_query("SELECT plantilla FROM {guifi_pfc_configuracioUnSolclic} WHERE id = %d", $id));
+  return confirm_form(
+  $form,
+  t('Are you sure you want to delete the Configuracio Unsolclic " %configuraciousc "?',
+  array('%configuraciousc' => $qry->plantilla)),
+      'guifi/menu/devel/configuraciousc',
+  t('This action cannot be undone.'),
+  t('Delete'),
+  t('Cancel'));
+}
+
+
+function guifi_devel_configuracio_usc_delete_confirm_submit($form, &$form_state) {
+
+  global $user;
+  $depth = 0;
+  if ($form_state['values']['op'] != t('Delete'))
+  return;
+
+  $to_mail = explode(',',$node->notification);
+  $log = _guifi_db_delete('guifi_pfc_configuracioUnSolclic',array('id' => $form_state['values']['id']),$to_mail,$depth);
+  drupal_set_message($log);
+  guifi_notify(
+  $to_mail,
+  t('The Configuracio Unsolclic %configuraciousc has been DELETED by %user.',array('%configuraciousc' => $form_state['values']['plantilla'], '%user' => $user->name)),
+  $log);
+  drupal_goto('guifi/menu/devel/configuraciousc');
+}
+?>
+
 ?>

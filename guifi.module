@@ -391,6 +391,21 @@ function guifi_menu() {
     'access arguments' => array('guifi module developer'),
     'file' => 'guifi_devel.inc.php'
   );
+  $items['guifi/menu/devel/configuraciousc'] = array(
+    'title' => 'Configuracions UnSolclic',
+    'description' => 'A full list of Configuracions UnSolclic used on our network, add, edit or delete it.',
+    'page callback' => 'guifi_devel_configuracio_usc',
+    'access arguments' => array('guifi module developer'),
+    'weight' => 10,
+    'file' => 'guifi_devel.inc.php'
+  );
+  $items['guifi/menu/devel/configuraciousc/%/%'] = array(
+    'title' => 'Configuracions UnSolclic',
+    'page callback' => 'guifi_devel_configuracio_usc',
+    'page arguments' => array(4, 5),
+    'access arguments' => array('guifi module developer'),
+    'file' => 'guifi_devel.inc.php'
+  );  
   $items['guifi/menu/devel/counters'] = array(
     'title' => 'counters',
     'description' => 'get statistics/counters from the network',
