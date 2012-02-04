@@ -5,12 +5,14 @@ function guifi_unsolclic($dev, $format = 'html') {
   global $rc_startup;
   global $ospf_zone;
   global $otype;
+  
+  $paramPrefixes = array("zone", "node", "user", "device", "firmware", "radio", "interface", "ipv4", "link");
 
   $otype = $format;
 
   $dev = (object)$dev;
   
-  if($dev->id=='25638' ) {
+  if($dev->id=='25638' or $dev->id=='11111') {
     
     // FINAL. Treure el fitxer unsolclic resultant com a mime text/plain
     //drupal_set_header('Content-Type: text/plain; charset=utf-8');
@@ -30,13 +32,18 @@ function guifi_unsolclic($dev, $format = 'html') {
       // 1.c recollir les característiques del model
       $caractModel = guifi_get_caractmodel($modelId);
       
+      echo "<hr>";
+      echo "<br>modelId=". $modelId;
+      
     
     // 2. Recuperar informacio del firmware
       // 2.a Recuperar el id del firmware del trasto(del camp extra de device)
       $firmwareName = $dev->variable['firmware'];
+      echo "<br>firmwareName=". $firmwareName;
   
       // 2.b recollir de la BD la informacio del firmware
       $firmware = guifi_get_firmware($firmwareName);
+      echo "<br>firmware=". $firmware['id'];
       
       // 2.c recollir els parametres del firmware
       $paramsFirmware = guifi_get_paramsFirmware($firmware['id']);
@@ -52,19 +59,41 @@ function guifi_unsolclic($dev, $format = 'html') {
     fclose($handle);
     
     // 4. recuperar els parametres de la plantilla
+    echo "<br>uscId=". $uscId;
     $paramsconfiguracioUSC = guifi_get_paramsconfiguracioUSC($uscId);
-    var_dump($paramsconfiguracioUSC);
-    echo "<hr>";
-    
-    foreach ($paramsconfiguracioUSC as $tupla) {
-        $param = $tupla['nom'];
-        $valor = $tupla['valor'];
-        echo "<br>Replace \"{\$$param}\", $valor";
-        $plantilla = str_replace("{\$$param}", $valor, $plantilla);
+    if ($paramsconfiguracioUSC) {
+      var_dump($paramsconfiguracioUSC);
+      
+      echo "<hr>";
+      
+      // 5. substituir els parametres fixes de la plantilla
+      foreach ($paramsconfiguracioUSC as $tupla) {
+          $param = $tupla['nom'];
+          $valor = $tupla['valor'];
+          echo "<br>Replace \"{\$$param}\", $valor";
+          $plantilla = str_replace("{\$$param}", $valor, $plantilla);
+      }
+      echo "<hr>";
+      var_dump($plantilla);
     }
     echo "<hr>";
-    var_dump($plantilla);
     
+    // 6. recuperar TOTS els parametres variables associats al trasto
+    $paramsDevice = guifi_get_paramsDevice($dev->id);
+    //var_dump($paramsDevice);
+    
+    // 7. Indexar els els parametres variables associats al trasto
+    $indexedParamsDevice = guifi_indexa_paramsDevice($paramsDevice, $paramPrefixes);
+    echo "<hr>";
+    var_dump($indexedParamsDevice);
+    
+    // 8. substituir els parametres fixes de la plantilla
+    //foreach ($paramsconfiguracioUSC as $tupla) {
+    //  $param = $tupla['nom'];
+    //  $valor = $tupla['valor'];
+    //  echo "<br>Replace \"{\$$param}\", $valor";
+    //  $plantilla = str_replace("{\$$param}", $valor, $plantilla);
+    //}
     die;
     
     //echo $configuracioUSC['plantilla'];
@@ -96,7 +125,7 @@ function guifi_unsolclic($dev, $format = 'html') {
 
   foreach (glob(drupal_get_path('module', 'guifi') .'/firmware/*.inc.php', GLOB_BRACE) as $firm_inc_php){
     include_once("$firm_inc_php");
-    echo "<br>$firm_inc_php";
+   // echo "<br>$firm_inc_php";
   }
  if ($dev->radios[0]['mode'] == 'client') {
     $links = 0;
@@ -309,6 +338,7 @@ function guifi_get_paramsFirmware($fid) {
 
 function guifi_get_configuracioUSC($mid, $fid, $uscid) {
 
+ // var_dump("Call guifi_get_configuracioUSC($mid, $fid, $uscid)");
   $configuracioUSCInfo = db_fetch_array(db_query("select id, mid, fid, enabled, tipologia, plantilla from {guifi_pfc_configuracioUnSolclic} where mid=%d and fid=%d and id = %d limit 1",$mid, $fid, $uscid));
   if (!empty($configuracioUSCInfo)){
     //var_dump($configuracioUSCInfo);
@@ -327,5 +357,83 @@ function guifi_get_paramsconfiguracioUSC($uscid) {
   return $params;
 }
 
+function guifi_get_paramsDevice($device_id) {
+  $qry = db_query("select
+    z.title zone_name, z.dns_servers zone_dns_servers, z.ntp_servers zone_ntp_servers, z.graph_server zone_graph_server, z.ospf_zone zone_ospf_zone,  z.zone_mode zone_zone_mode, z.proxy_id zone_proxy_id, z.voip_id zone_voip_id,
+    n.nid node_id, n.title node_name, loc.lat node_lat, loc.lon node_lon, loc.graph_server node_node_graph_server,
+    u.uid user_id, u.name user_name, u.mail user_mail,
+    d.nick as device_name, d.type device_type,
+    r.radiodev_counter radio_order, r.ssid radio_ssid, r.mode radio_mode, r.protocol radio_protocol, r.channel radio_channel, r.antenna_gain radio_antenna_gain, r.antenna_angle radio_antenna_angle, r.antenna_azimuth radio_antenna_azimuth, r.clients_accepted radio_clients_accepted, r.antenna_mode radio_antenna_mode, r.ly_mb_in radio_ly_mb_in ,r.ly_mb_out radio_ly_mb_out,
+    i.id interface_id, i.interface_type, i.mac interface_mac,
+    ip.ipv4 ipv4_ip, ip.netmask ipv4_netmask, ip.ipv4_type,
+    l.link_type, l.routing link_routing,l.flag link_working
+    from
+    node n
 
+    JOIN guifi_devices d ON d.nid = n.nid
+    JOIN guifi_location loc ON loc.id = n.nid
+    JOIN guifi_zone z ON z.id = loc.zone_id
+    JOIN users u ON u.uid = n.uid
+    JOIN guifi_radios r ON r.id = d.id
+    JOIN guifi_interfaces i ON i.device_id = d.id
+    JOIN guifi_ipv4 ip ON ip.interface_id = i.id
+    JOIN guifi_links l ON l.interface_id = i.id
+    where
+    d.id = %d
+    order by radio_order asc, interface_type asc",$device_id);
+  while ($param = db_fetch_array($qry)) {
+    $params[] = $param;
+  }
+  //var_dump($params);
+  return $params;
+}
+
+function guifi_indexa_paramsDevice($arrayParametres, $paramPrefixes) {
+  echo "aqui estem<hr>";
+  
+  $index = 1;
+  foreach ($arrayParametres as $registre) {
+    //var_dump($registre);
+    //echo "<hr>";
+    
+    foreach ($registre as $clau=>$valor) {
+      // comprovar existencia del prefix a la clau
+      if (guifi_usc_comprova_clau_prefix($clau, $paramPrefixes)){
+        // comprovar que no sigui el mateix calor que el que hem guardat pel registre anterior
+        $previ = $index-1;
+        $inserir = true;
+        if (!array_key_exists($clau.$index, $resultat)){
+          // comprovem valor anterior
+          /*
+          if (isset($resultat[$clau.$previ])) {
+            echo "<br>Existeix l'anterior resultat[$clau$previ]";
+            if ($resultat[$clau.$previ]==$valor) {
+              echo " i son iguals! no inserim ";
+              $inserir = false;
+            }
+            else {
+              echo " i son DIFERENTS!";
+              $inserir = true;
+            }
+          }*/
+        }
+        //if ($inserir) {
+          //echo "<br>afegim resultat[$clau$index]";
+          $resultat[$clau.$index] = $valor;
+        //}
+      }
+    }
+    $index++;
+  }
+  
+  return $resultat;
+}
+
+function guifi_usc_comprova_clau_prefix($clau, $paramPrefixes) {
+  foreach ($paramPrefixes as $prefix) {
+    //echo "<br>buscant a ". $clau . " el ".$prefix;
+    if (stripos($clau, $prefix)!==false) return true;
+  }
+  return false;
+}
 ?>

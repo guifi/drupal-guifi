@@ -797,7 +797,7 @@ function guifi_node_distances_list($filters,$node) {
       $node->id);
 ***/
 
-  $result = db_query("SELECT n.id, n.lat, n.lon, n.nick, n.status_flag, n.zone_id, count(*) radios FROM {guifi_location} n LEFT JOIN {guifi_radios} r ON n.id = r.nid WHERE n.id !=%d AND (n.lat != '' AND n.lon != '')AND (n.lat != 0 AND n.lon != 0) GROUP BY 1",$node->id);
+  $result = db_query("SELECT n.id, n.lat, n.lon, n.nick, n.status_flag, n.zone_id, n.timestamp_changed, count(*) radios FROM {guifi_location} n LEFT JOIN {guifi_radios} r ON n.id = r.nid WHERE n.id !=%d AND (n.lat != '' AND n.lon != '')AND (n.lat != 0 AND n.lon != 0) GROUP BY 1",$node->id);
 
   $oGC = new GeoCalc();
   $nodes = array();
@@ -985,7 +985,7 @@ function guifi_node_distances_list($filters,$node) {
       '#type'=> 'item',
       '#parents'=> array('z',$nc,'d_distance'),
       '#title'=> $node['distance'].' '.t('kms'),
-      '#value'=> $node['status_flag'],
+      '#value'=> $node['status_flag']." (". date('d/m/Y',$node["timestamp_changed"]). ")",
       '#description'=> $dAz.'º - '.$dOr,
       '#prefix' => '<td>',
       '#suffix' => '</td>',
