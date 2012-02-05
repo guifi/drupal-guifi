@@ -410,7 +410,31 @@ function guifi_devel_firmware($firmid , $op) {
   }
   switch($op) {
     case 'edit':
-      return drupal_get_form('guifi_devel_firmware_form',$firmid);
+      $jquery1 = '
+      $().ready(function() {
+        $("#disponiblesButtonOne").click(function() {
+          return !$("#edit-parametres-disponibles option:selected").remove().appendTo("#edit-parametres-associats");
+        });
+        $("#associatsButtonOne").click(function() {
+          return !$("#edit-parametres-associats option:selected").remove().appendTo("#edit-parametres-disponibles");
+        });
+        $("#disponiblesButtonAll").click(function() {
+          return !$("#edit-parametres-disponibles option").remove().appendTo("#edit-parametres-associats");
+        });
+        $("#associatsButtonAll").click(function() {
+          return !$("#edit-parametres-associats option").remove().appendTo("#edit-parametres-disponibles");
+        });
+        
+        $("#guifi-devel-firmware-form").submit(function() {
+          $("#associatsButton option").each(function(i) {
+            $(this).attr("selected", "selected");
+          });
+        });
+      });';
+      
+      drupal_add_js("if (Drupal.jsEnabled) { $jquery1 }", 'inline');
+      $sortida = drupal_get_form('guifi_devel_firmware_form',$firmid);
+      return $sortida;
     case 'delete':
       guifi_log(GUIFILOG_TRACE,'guifi_devel_firmware_delete()',$firmid);
       return drupal_get_form(
@@ -476,7 +500,7 @@ function guifi_devel_firmware_form($form_state, $firmid) {
     '#description' => t('The firmware name, please, use a clear and short name. ex: "FirmwarevXX" where XX = version'),
     '#prefix' => '<table><tr><td>',
     '#suffix' => '</td>',
-    '#weight' => 2,
+    '#weight' => $form_weight++,
   );
   $form['description'] = array(
     '#type' => 'textfield',
@@ -488,31 +512,90 @@ function guifi_devel_firmware_form($form_state, $firmid) {
     '#description' => t('The firmware description, please, use a clear and short description. ex: "FirmwarevXX from creator"'),
     '#prefix' => '<td>',
     '#suffix' => '</td></tr>',
-    '#weight' => 3,
+    '#weight' => $form_weight++,
   );
 
+  $query = db_query(" select
+                          pf.fid, pf.pid, p.id, p.nom
+                      from
+                          guifi_pfc_parametresFirmware pf
+                      right join guifi_pfc_parametres p on p.id = pf.pid");
+  while ($parametres = db_fetch_array($query)) {
+    if ($parametres["pid"])
+      $params_associats[$parametres["pid"]] = $parametres["nom"];
+    else
+      $params_disponibles[$parametres["id"]] = $parametres["nom"];
+  }
+  
+  $form['parametres_associats'] = array(
+    '#type' => 'select',
+    '#title' => t('Parametres associats'),
+    '#default_value' => 0,
+    '#options' => $params_associats,
+    '#description' => t('Parametres disponibles per a definir aquest firmware'),
+    '#size' => 10,
+  	'#multiple' => true,
+    '#prefix' => '<tr><td class="mselects" align="center"><table><tr><td>',
+    '#suffix' => '</td><td>',
+    '#weight' => $form_weight++,
+    '#attributes'=>array('style'=>'width:300px')
+  );
+  
+//   $form['desassignar'] = array(
+//     '#type' => 'button',
+//     '#value' => t('>>'),
+//     '#weight' => $form_weight++,
+//   );
+//   $form['assignar'] = array(
+//       '#type' => 'button',
+//       '#value' => t('<<'),
+//       '#weight' => $form_weight++,
+//   );
+  $disponiblesButtonOne = '<input type="button" value=">" id="associatsButtonOne" class="selectButtons">';
+  $disponiblesButtonAll = '<input type="button" value=">>" id="associatsButtonAll" class="selectButtons">';
+  $associatsButtonOne = '<input type="button" value="<" id="disponiblesButtonOne" class="selectButtons">';
+  $associatsButtonAll = '<input type="button" value="<<" id="disponiblesButtonAll" class="selectButtons">';
+  $botons = $disponiblesButtonOne.'<br>';
+  $botons .= $disponiblesButtonAll.'<br>';
+  $botons .= $associatsButtonOne.'<br>';
+  $botons .= $associatsButtonAll.'<br>';
+  
+  $form['parametres_disponibles'] = array(
+      '#type' => 'select',
+      '#title' => t('Parametres disponibles'),
+      '#default_value' => 0,
+      '#options' => $params_disponibles,
+      '#description' => t('Parametres associats a la definició d\'aquest firmware.'),
+      '#size' => 10,
+      '#multiple' => true,
+      '#prefix' => $botons. '</td><td>',
+      '#suffix' => '</td></tr></table></td></tr>',
+      '#weight' => $form_weight++,
+      '#attributes'=>array('style'=>'width:300px')
+  );
+  
   $query = db_query(" SELECT mid, model FROM {guifi_model} " );
   $relations = explode('|',$firmware->relations);
   while ($models = db_fetch_array($query)) {
     $models_array[$models["mid"]] = $models["model"];
   }
-   foreach ($relations as $relation) {
-     foreach ($models_array as $id =>$mod) {
-       if ($relation == $mod) {
-         $value[$mod] = $id;
-       }
-     }
+  foreach ($relations as $relation) {
+    foreach ($models_array as $id =>$mod) {
+      if ($relation == $mod) {
+        $value[$mod] = $id;
+      }
+    }
   }
-
+  
   $form['relations'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Device model relations'),
-    '#required' => TRUE,
-    '#default_value' => $value,
-    '#options' => $models_array,
-    '#prefix' => '<tr><td>',
-    '#suffix' => '</td></tr></table>',
-    '#weight' => 4,
+      '#type' => 'checkboxes',
+      '#title' => t('Device model relations'),
+      '#required' => TRUE,
+      '#default_value' => $value,
+      '#options' => $models_array,
+      '#prefix' => '<tr><td>',
+      '#suffix' => '</td></tr></table>',
+      '#weight' => 8,
   );
 
   $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
