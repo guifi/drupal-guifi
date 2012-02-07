@@ -402,7 +402,6 @@ function guifi_devel_devices_delete_confirm_submit($form, &$form_state) {
 
 // Device Firmwares output
 function guifi_devel_firmware($firmid , $op) {
-
   switch($firmid) {
     case 'add':
      $firmid = 'New';
@@ -426,7 +425,7 @@ function guifi_devel_firmware($firmid , $op) {
         });
         
         $("#guifi-devel-firmware-form").submit(function() {
-          $("#associatsButton option").each(function(i) {
+          $("#edit-parametres-associats option").each(function(i) {
             $(this).attr("selected", "selected");
           });
         });
@@ -519,7 +518,7 @@ function guifi_devel_firmware_form($form_state, $firmid) {
                           pf.fid, pf.pid, p.id, p.nom
                       from
                           guifi_pfc_parametresFirmware pf
-                      right join guifi_pfc_parametres p on p.id = pf.pid");
+                      right join guifi_pfc_parametres p on p.id = pf.pid order by p.id asc");
   while ($parametres = db_fetch_array($query)) {
     if ($parametres["pid"])
       $params_associats[$parametres["pid"]] = $parametres["nom"];
@@ -534,23 +533,15 @@ function guifi_devel_firmware_form($form_state, $firmid) {
     '#options' => $params_associats,
     '#description' => t('Parametres disponibles per a definir aquest firmware'),
     '#size' => 10,
-  	'#multiple' => true,
+    '#multiple' => true,
+    '#required' => false,
+    '#validated' => true,
     '#prefix' => '<tr><td class="mselects" align="center"><table><tr><td>',
     '#suffix' => '</td><td>',
     '#weight' => $form_weight++,
     '#attributes'=>array('style'=>'width:300px')
   );
   
-//   $form['desassignar'] = array(
-//     '#type' => 'button',
-//     '#value' => t('>>'),
-//     '#weight' => $form_weight++,
-//   );
-//   $form['assignar'] = array(
-//       '#type' => 'button',
-//       '#value' => t('<<'),
-//       '#weight' => $form_weight++,
-//   );
   $disponiblesButtonOne = '<input type="button" value=">" id="associatsButtonOne" class="selectButtons">';
   $disponiblesButtonAll = '<input type="button" value=">>" id="associatsButtonAll" class="selectButtons">';
   $associatsButtonOne = '<input type="button" value="<" id="disponiblesButtonOne" class="selectButtons">';
@@ -568,6 +559,8 @@ function guifi_devel_firmware_form($form_state, $firmid) {
       '#description' => t('Parametres associats a la definició d\'aquest firmware.'),
       '#size' => 10,
       '#multiple' => true,
+      '#required' => false,
+      '#validated' => true,
       '#prefix' => $botons. '</td><td>',
       '#suffix' => '</td></tr></table></td></tr>',
       '#weight' => $form_weight++,
@@ -619,6 +612,29 @@ function guifi_devel_firmware_save($edit) {
   $log ='';
   $query = db_query(" SELECT mid, model FROM {guifi_model} " );
   $relations = $edit['relations'];
+  
+  // recollida de parametresFirmware actuals
+  $sql= db_query("SELECT distinct(pid) FROM {guifi_pfc_parametresFirmware} WHERE fid = %d order by pid asc", $edit['id']);
+  while ($oldParamsFirm = db_fetch_object($sql)) {
+    $alreadyPresent[] = $oldParamsFirm->pid;
+  }
+  
+  // recollida  de parametres del firmware
+  if (isset($edit['parametres_associats'])){
+    // de tots els que em passen, mirar si ja els tenia a la BD
+    foreach ($edit['parametres_associats'] as $parametre) {
+      if (!in_array($parametre, $alreadyPresent)) {
+        db_query("INSERT INTO  {guifi_pfc_parametresFirmware} (fid, pid) VALUES (%d, %d)", $edit['id'], $parametre);
+      }
+    }
+    // de tots els que tenia a la BD, mirar si me'ls han tret i esborrar-los
+    foreach ($alreadyPresent as $parametre) {
+      if (!in_array($parametre, $edit['parametres_associats'])) {
+        db_query("DELETE FROM {guifi_pfc_parametresFirmware} WHERE fid=%d and pid=%d ", $edit['id'], $parametre);
+      }
+    }
+  }
+
   while ($models = db_fetch_array($query)) {
     $models_array[$models["mid"]] = $models["model"];
   }
