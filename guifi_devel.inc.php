@@ -152,6 +152,9 @@ function guifi_devel_devices($devid , $op) {
   }
   switch($op) {
     case 'edit':
+      
+      $jquery1 = HelperMultipleSelect('guifi-devel-devices-form','firmwaresCompatibles', 'firmwaresTots');
+      drupal_add_js("if (Drupal.jsEnabled) { $jquery1 }", 'inline');
       return drupal_get_form('guifi_devel_devices_form',$devid);
     case 'delete':
       guifi_log(GUIFILOG_TRACE,'guifi_devel_devices_delete()',$devid);
@@ -217,6 +220,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#default_value' => $dev->notification,
     '#description' =>  t('Mailid where changes on the device will be notified, if many, separated by \',\'<br />used for network administration.')
   );
+  $form_weight=0;
   $form['fid'] = array(
     '#type' => 'select',
     '#title' => t('Manufacturer'),
@@ -225,7 +229,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#options' => $manuf_array,
     '#prefix' => '<table><tr><td>',
     '#suffix' => '</td>',
-    '#weight' => 1,
+    '#weight' => $form_weight++,
   );
   $form['model'] = array(
     '#type' => 'textfield',
@@ -237,7 +241,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#description' => t('Device model name, please, use a clear and short description.'),
     '#prefix' => '<td>',
     '#suffix' => '</td>',
-    '#weight' => 2,
+    '#weight' => $form_weight++,
   );
   $form['radiodev_max'] = array(
     '#type' => 'textfield',
@@ -249,7 +253,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#description' => t('Maximum number of radios that can handle this device.'),
     '#prefix' => '<td>',
     '#suffix' => '</td>',
-    '#weight' => 3,
+    '#weight' => $form_weight++,
   );
 
   $form['etherdev_max'] = array(
@@ -262,7 +266,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#description' => t('Number of ethernet ports on this device.'),
     '#prefix' => '<td>',
     '#suffix' => '</td></tr></table>',
-    '#weight' => 4,
+    '#weight' => $form_weight++,
   );
 
   $form['AP'] = array(
@@ -274,7 +278,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#description' => t('Select yes if this device can be an Access Point.'),
     '#prefix' => '<table><tr><td>',
     '#suffix' => '</td>',
-    '#weight' => 5,
+    '#weight' => $form_weight++,
   );
 
   $form['virtualAP'] = array(
@@ -286,7 +290,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#description' => t('Select yes if this device can be a Hostpot or can create vlans.'),
     '#prefix' => '<td>',
     '#suffix' => '</td>',
-    '#weight' => 6,
+    '#weight' => $form_weight++,
   );
 
   $form['client'] = array(
@@ -298,7 +302,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#description' => t('Select yes if this device can be a station.'),
     '#prefix' => '<td>',
     '#suffix' => '</td>',
-    '#weight' => 7,
+    '#weight' => $form_weight++,
   );
   $form['supported'] = array(
     '#type' => 'select',
@@ -309,7 +313,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#description' => t('Deprecated devices does not have any support and no appear on the device list select form.'),
     '#prefix' => '<td>',
     '#suffix' => '</td></tr></table>',
-    '#weight' => 8,
+    '#weight' => $form_weight++,
   );
   $form['interfaces'] = array(
     '#type' => 'textfield',
@@ -321,7 +325,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#description' => t('Device interface names for this device model. User | to split de the names, ex: wlan1|wlan2|ether1|ether2'),
     '#prefix' => '<table><tr><td>',
     '#suffix' => '</td></tr></table>',
-    '#weight' => 9,
+    '#weight' => $form_weight++,
   );
   $form['url'] = array(
     '#type' => 'textfield',
@@ -333,7 +337,71 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#description' => t('Url where we can see a specs from device model.'),
     '#prefix' => '<table><tr><td>',
     '#suffix' => '</td></tr></table>',
-    '#weight' => 10,
+    '#weight' => $form_weight++,
+  );
+  
+  $query = db_query("select
+                          usc.id, usc.mid, usc.fid, f.id as firmware_id, f.nom
+                      from
+                          guifi_pfc_configuracioUnSolclic usc
+                          right join guifi_pfc_firmware f on f.id = usc.fid");
+  
+  $query = db_query("select
+                    usc.id, usc.mid, usc.fid, f.id as firmware_id, f.nom
+                    from
+                    guifi_pfc_firmware f
+                    left join
+                    guifi_pfc_configuracioUnSolclic usc ON usc.fid = f.id  and usc.mid = %d order by nom asc", $devid);
+                    
+  
+  while ($firmwares = db_fetch_array($query)) {
+    //echo "<hr>firmwares[fid]=". $firmwares["fid"] ."firmwares[mid]=". $firmwares["mid"]. " firmwares[nom]=". $firmwares["nom"];
+    //echo "<br>firmwares[fid]=". firmwares["fid"];
+    if ($firmwares["mid"]==$devid)
+    $firms_compatibles[$firmwares["firmware_id"]] = $firmwares["nom"];
+    else
+    $firms_tots[$firmwares["firmware_id"]] = $firmwares["nom"];
+  }
+  
+  $form['firmwaresCompatibles'] = array(
+      '#type' => 'select',
+      '#title' => t('firmwares compatibles'),
+      '#default_value' => 0,
+      '#options' => $firms_compatibles,
+      '#description' => t('firmwares compatibles amb aquest model.'),
+      '#size' => 10,
+      '#multiple' => true,
+      '#required' => false,
+      '#validated' => true,
+      '#prefix' => '<tr><td class="mselects" align="center"><table><tr><td>',
+      '#suffix' => '</td><td>',
+      '#weight' => $form_weight++,
+      '#attributes'=>array('style'=>'width:300px')
+  );
+  
+  $disponiblesButtonOne = '<input type="button" value=">" id="associatsButtonOne" class="selectButtons">';
+  $disponiblesButtonAll = '<input type="button" value=">>" id="associatsButtonAll" class="selectButtons">';
+  $associatsButtonOne = '<input type="button" value="<" id="disponiblesButtonOne" class="selectButtons">';
+  $associatsButtonAll = '<input type="button" value="<<" id="disponiblesButtonAll" class="selectButtons">';
+  $botons = $disponiblesButtonOne.'<br>';
+  $botons .= $disponiblesButtonAll.'<br>';
+  $botons .= $associatsButtonOne.'<br>';
+  $botons .= $associatsButtonAll.'<br>';
+  
+  $form['firmwaresTots'] = array(
+        '#type' => 'select',
+        '#title' => t('Tots els firmwares'),
+        '#default_value' => 0,
+        '#options' => $firms_tots,
+        '#description' => t('Tots els firmwares.'),
+        '#size' => 10,
+        '#multiple' => true,
+        '#required' => false,
+        '#validated' => true,
+        '#prefix' => $botons. '</td><td>',
+        '#suffix' => '</td></tr></table></td></tr>',
+        '#weight' => $form_weight++,
+        '#attributes'=>array('style'=>'width:300px')
   );
 
   $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
@@ -357,6 +425,34 @@ function guifi_devel_devices_save($edit) {
   $log ='';
 
   guifi_log(GUIFILOG_TRACE,'function guifi_devel_devices_save()',$edit);
+
+  // recollida de parametresFirmware actuals
+  $sql= db_query("SELECT distinct(fid) FROM {guifi_pfc_configuracioUnSolclic} WHERE mid = %d order by fid asc", $edit['mid']);
+  while ($oldFirms = db_fetch_object($sql)) {
+    $alreadyPresent[] = $oldFirms->fid;
+  }
+  
+  //echo "<pre>";var_dump($alreadyPresent);echo "</pre>";
+  
+  // recollida  de firmwares compatibles
+  if (isset($edit['firmwaresCompatibles'])){
+    // de tots els que em passen, mirar si ja els tenia a la BD
+    foreach ($edit['firmwaresCompatibles'] as $firmware) {
+      if (!in_array($firmware, $alreadyPresent)) {
+        db_query("INSERT INTO  {guifi_pfc_configuracioUnSolclic} (mid, fid) VALUES (%d, %d)", $edit['mid'], $firmware);
+        //echo "<pre>Inserim </pre>";
+      }
+    }
+    
+
+    // de tots els que tenia a la BD, mirar si me'ls han tret i esborrar-los
+    foreach ($alreadyPresent as $firmware) {
+      if (!in_array($firmware, $edit['firmwaresCompatibles'])) {
+        db_query("DELETE FROM {guifi_pfc_configuracioUnSolclic} WHERE mid=%d and fid=%d ", $edit['mid'], $firmware);
+      }
+    }
+  }
+  
 
   _guifi_db_sql('guifi_model',array('mid' => $edit['mid']),$edit,$log,$to_mail);
 
@@ -409,28 +505,7 @@ function guifi_devel_firmware($firmid , $op) {
   }
   switch($op) {
     case 'edit':
-      $jquery1 = '
-      $().ready(function() {
-        $("#disponiblesButtonOne").click(function() {
-          return !$("#edit-parametres-disponibles option:selected").remove().appendTo("#edit-parametres-associats");
-        });
-        $("#associatsButtonOne").click(function() {
-          return !$("#edit-parametres-associats option:selected").remove().appendTo("#edit-parametres-disponibles");
-        });
-        $("#disponiblesButtonAll").click(function() {
-          return !$("#edit-parametres-disponibles option").remove().appendTo("#edit-parametres-associats");
-        });
-        $("#associatsButtonAll").click(function() {
-          return !$("#edit-parametres-associats option").remove().appendTo("#edit-parametres-disponibles");
-        });
-        
-        $("#guifi-devel-firmware-form").submit(function() {
-          $("#edit-parametres-associats option").each(function(i) {
-            $(this).attr("selected", "selected");
-          });
-        });
-      });';
-      
+      $jquery1 = HelperMultipleSelect('guifi-devel-firmware-form', 'parametres-associats', 'parametres-disponibles');
       drupal_add_js("if (Drupal.jsEnabled) { $jquery1 }", 'inline');
       $sortida = drupal_get_form('guifi_devel_firmware_form',$firmid);
       return $sortida;
@@ -1323,4 +1398,31 @@ function guifi_devel_configuracio_usc_delete_confirm_submit($form, &$form_state)
   $log);
   drupal_goto('guifi/menu/devel/configuraciousc');
 }
+
+function HelperMultipleSelect($formName, $nomSelectAssignats='assignats', $nomSelectDisponibles='disponibles') {
+  
+  $jquery1 = '
+        $().ready(function() {
+          $("#disponiblesButtonOne").click(function() {
+            return !$("#edit-'.$nomSelectDisponibles.' option:selected").remove().appendTo("#edit-'.$nomSelectAssignats.'");
+          });
+          $("#associatsButtonOne").click(function() {
+            return !$("#edit-'.$nomSelectAssignats.' option:selected").remove().appendTo("#edit-'.$nomSelectDisponibles.'");
+          });
+          $("#disponiblesButtonAll").click(function() {
+            return !$("#edit-'.$nomSelectDisponibles.' option").remove().appendTo("#edit-'.$nomSelectAssignats.'");
+          });
+          $("#associatsButtonAll").click(function() {
+            return !$("#edit-'.$nomSelectAssignats.' option").remove().appendTo("#edit-'.$nomSelectDisponibles.'");
+          });
+          
+          $("#'.$formName.'").submit(function() {
+            $("#edit-'.$nomSelectAssignats.' option").each(function(i) {
+              $(this).attr("selected", "selected");
+            });
+          });
+        });';
+  return $jquery1;
+}
+
 ?>
