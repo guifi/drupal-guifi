@@ -1233,22 +1233,29 @@ function guifi_devel_configuracio_usc($id , $op) {
       guifi_devel_configuracio_usc_delete($id);
   }
   $rows = array();
-  $value = t('Add a new Configuracio UnSolclic');
-  $output  = '<from>';
-  $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/configuraciousc/add\'"/>';
-  $output .= '</form>';
+//   $value = t('Add a new Configuracio UnSolclic');
+//   $output  = '<from>';
+//   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/configuraciousc/add\'"/>';
+//   $output .= '</form>';
 
-  $headers = array(t('ID'), t('mid'), t('fid'), t('enabled'), t('plantilla'), t('tipologia'), t('Edit'), t('Delete'));
+  $headers = array(t('Manufacturer'), t('Model'), t('FirmWare'), t('enabled'), t('Edit'), t('Delete'));
 
-  $sql = db_query('SELECT * FROM {guifi_pfc_configuracioUnSolclic}');
+  $sql = db_query('SELECT
+        usc.id, usc.mid, usc.fid, usc.enabled, usc.plantilla,  mf.name as fabricant, m.model, f.nom as nomfirmware
+    FROM
+        {guifi_pfc_configuracioUnSolclic} usc
+        inner {join guifi_pfc_firmware} f on f.id = usc.fid
+        inner {join guifi_model} m on m.mid = usc.mid
+        inner {join guifi_manufacturer} mf on mf.fid = m.fid
+     order by usc.enabled desc, fabricant asc, model asc, nomfirmware asc
+  ');
   while ($configuraciousc = db_fetch_object($sql)) {
-    $rows[] = array($configuraciousc->id,
-    $configuraciousc->mid,
-    $configuraciousc->fid,
-    $configuraciousc->enabled,
-    $configuraciousc->plantilla,
-    $configuraciousc->tipologia,
-    l(guifi_img_icon('edit.png'),'guifi/menu/devel/configuraciousc/'.$configuraciousc->id.'/edit',
+    $rows[] = array(
+      $configuraciousc->fabricant,
+      $configuraciousc->model,
+      $configuraciousc->nomfirmware,
+      $configuraciousc->enabled,
+      l(guifi_img_icon('edit.png'),'guifi/menu/devel/configuraciousc/'.$configuraciousc->id.'/edit',
     array(
               'html' => TRUE,
               'title' => t('edit configuracio unsolclic'),
@@ -1268,7 +1275,14 @@ function guifi_devel_configuracio_usc($id , $op) {
 // Configuracio unsolclic Form
 function guifi_devel_configuracio_usc_form($form_state, $id) {
 
-  $sql = db_query('SELECT * FROM {guifi_pfc_configuracioUnSolclic} WHERE id = %d', $id);
+  $sql = db_query('SELECT
+      usc.id, usc.mid, usc.fid, usc.enabled, usc.plantilla, mf.name as manufacturer, m.model, f.nom as nomfirmware
+  FROM
+      guifi_pfc_configuracioUnSolclic usc
+      inner join guifi_pfc_firmware f on f.id = usc.fid
+      inner join guifi_model m on m.mid = usc.mid
+      inner join guifi_manufacturer mf on mf.fid = m.fid
+   where usc.id= %d', $id);
   $configuraciousc = db_fetch_object($sql);
 
   if ($id == 'New' ) {
@@ -1276,66 +1290,51 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
   } else {
     $form['id'] = array('#type' => 'hidden','#value' => $id);
   }
+  
+  $manufacturerName = $configuraciousc->manufacturer;
+  $modelName = $configuraciousc->model;
   $form['mid'] = array(
-    '#type' => 'textfield',
+    '#type' => 'hidden',
     '#size' => 32,
     '#maxlength' => 32,
     '#title' => t('Model Id'),
     '#required' => TRUE,
     '#default_value' => $configuraciousc->mid,
     '#description' =>  t('Model Id.'),
-  	'#prefix' => '<table><tr><td>',
-    '#suffix' => '</td>',
   );
   $form['fid'] = array(
-    '#type' => 'textfield',
+    '#type' => 'hidden',
     '#size' => 32,
     '#maxlength' => 32,
     '#title' => t('Firmware Id'),
     '#required' => TRUE,
     '#default_value' => $configuraciousc->fid,
     '#description' =>  t('Firmware Id.'),
-  	'#prefix' => '<table><tr><td>',
-    '#suffix' => '</td>',
-
   );
+  $form_weight=0;
   $form['enabled'] = array(
-    '#type' => 'textfield',
+    '#type' => 'checkbox',
     '#title' => t('Enabled'),
-    '#required' => TRUE,
     '#default_value' => $configuraciousc->enabled,
-    '#size' => 32,
-    '#maxlength' => 32,
-    '#description' => t('Enabled'),
-    '#prefix' => '<td>',
-    '#suffix' => '</td></tr></table>',
-    '#weight' => 1,
+    '#prefix' => "<table><tr><th>$manufacturerName</th><th>$modelName</th><th>",
+    '#suffix' => '</th></tr>',
+    '#weight' => $form_weight++,
   );
+  
   $form['plantilla'] = array(
-    '#type' => 'textfield',
+    '#type' => 'textarea',
     '#title' => t('Template File'),
     '#required' => TRUE,
     '#default_value' => $configuraciousc->plantilla,
-    '#size' => 32,
-    '#maxlength' => 32,
+//     '#size' => 32,
+//     '#maxlength' => 32,
     '#description' => t('Template File'),
-    '#prefix' => '<td>',
+    '#prefix' => '<tr><td colspan="3">',
     '#suffix' => '</td></tr></table>',
-    '#weight' => 1,
+    '#weight' => $form_weight++,
+    '#cols' => 60,
+    '#rows' => 30,
   );
-  $form['tipologia'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Tipology'),
-    '#required' => TRUE,
-    '#default_value' => $configuraciousc->tipologia,
-    '#size' => 32,
-    '#maxlength' => 32,
-    '#description' => t('Tipology'),
-    '#prefix' => '<td>',
-    '#suffix' => '</td></tr></table>',
-    '#weight' => 1,
-  );
-
 
   $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
 
