@@ -30,6 +30,8 @@ function guifi_unsolclic($dev, $format = 'html') {
       $model = guifi_get_model($modelId);
       
       // 1.c recollir les característiques del model
+      
+      // aixo no es fa servir per res!!!!
       $caractModel = guifi_get_caractmodel($modelId);
       
       echo "<hr>";
@@ -46,6 +48,7 @@ function guifi_unsolclic($dev, $format = 'html') {
       echo "<br>firmware=". $firmware['id'];
       
       // 2.c recollir els parametres del firmware
+      // tampoc es fa servir per RES!!!!!!
       $paramsFirmware = guifi_get_paramsFirmware($firmware['id']);
 
     // 3. Recuperar la configuracióUnSolClic tq modelid i firmware:id
@@ -53,10 +56,6 @@ function guifi_unsolclic($dev, $format = 'html') {
     
     // 3.a recuperar la plantilla de la configuracio
     $plantilla = $configuracioUSC['plantilla'];    // a plantilla hi ha el nom de la tpl de la carpeta de la ruta de sota
-    $File = '/home/albert/workspace/guifinet/drupal-6.22/sites/all/modules/guifi/firmware/plantillesUSC/'. $plantilla;
-    $handle = fopen($File, "r");
-    $plantilla = fread($handle, filesize($File));
-    fclose($handle);
     
     // 4. recuperar els parametres de la plantilla
     echo "<br>uscId=". $uscId;

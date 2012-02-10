@@ -237,7 +237,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#required' => TRUE,
     '#default_value' => $dev->model,
     '#size' => 32,
-    '#maxlength' => 32,
+    '#maxlength' => 50,
     '#description' => t('Device model name, please, use a clear and short description.'),
     '#prefix' => '<td>',
     '#suffix' => '</td>',
@@ -522,18 +522,14 @@ function guifi_devel_firmware($firmid , $op) {
   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/firmware/add\'"/>';
   $output .= '</form>';
 
-  $headers = array(t('ID'), t('Name'), t('Description'), t('Relations'), t('Edit'), t('Delete'));
+  $headers = array(t('ID'), t('Name'), t('Description'), t('Edit'), t('Delete'));
 
-  $sql= db_query("SELECT id, text, description, relations FROM {guifi_types} WHERE type='firmware'");
-
+  $sql= db_query('select id, nom, descripcio, relations from {guifi_pfc_firmware} order by nom asc');
 
   while ($firmware = db_fetch_object($sql)) {
-  $relations = explode('|',$firmware->relations);
-  $relations2 = implode(' | ',$relations);
     $rows[] = array($firmware->id,
-                    $firmware->text,
-                    $firmware->description,
-                    $relations2,
+                    $firmware->nom,
+                    $firmware->descripcio,
                     l(guifi_img_icon('edit.png'),'guifi/menu/devel/firmware/'.$firmware->id.'/edit',
             array(
               'html' => TRUE,
@@ -554,37 +550,46 @@ function guifi_devel_firmware($firmid , $op) {
 // Firmwares Form
 function guifi_devel_firmware_form($form_state, $firmid) {
 
-  $sql = db_query('SELECT * FROM {guifi_types} WHERE id = %d AND type = \'firmware\'', $firmid);
+  $sql= db_query('SELECT id, nom, descripcio, relations FROM {guifi_pfc_firmware} WHERE id = %d', $firmid);
   $firmware = db_fetch_object($sql);
 
   if ($firmid == 'New' ) {
    $form['new'] = array('#type' => 'hidden', '#value' => TRUE);
-   $form['type'] = array('#type' => 'hidden', '#value' => 'firmware');
   } else {
     $form['id'] = array('#type' => 'hidden','#value' => $firmid);
-    $form['type'] = array('#type' => 'hidden', '#value' => $firmware->type);
 }
-  $form['text'] = array(
+  $form['relations'] = array('#type' => 'hidden', '#value' => $firmware->relations);
+  $form['nom'] = array(
     '#type' => 'textfield',
     '#title' => t('Firmware short name'),
     '#required' => TRUE,
-    '#default_value' => $firmware->text,
+    '#default_value' => $firmware->nom,
     '#size' => 32,
     '#maxlength' => 32,
     '#description' => t('The firmware name, please, use a clear and short name. ex: "FirmwarevXX" where XX = version'),
     '#prefix' => '<table><tr><td>',
-    '#suffix' => '</td>',
+    '#suffix' => '',
     '#weight' => $form_weight++,
   );
-  $form['description'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Firmware long name'),
+  
+  $form['enabled'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Enabled'),
+      '#default_value' => $firmware->enabled,
+      '#prefix' => '',
+      '#suffix' => '</td></tr>',
+      '#weight' => $form_weight++,
+  );
+  
+  $form['descripcio'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Firmware Description'),
     '#required' => TRUE,
-    '#default_value' => $firmware->description,
+    '#default_value' => $firmware->descripcio,
     '#size' => 64,
     '#maxlength' => 64,
     '#description' => t('The firmware description, please, use a clear and short description. ex: "FirmwarevXX from creator"'),
-    '#prefix' => '<td>',
+    '#prefix' => '<tr><td>',
     '#suffix' => '</td></tr>',
     '#weight' => $form_weight++,
   );
@@ -637,36 +642,12 @@ function guifi_devel_firmware_form($form_state, $firmid) {
       '#required' => false,
       '#validated' => true,
       '#prefix' => $botons. '</td><td>',
-      '#suffix' => '</td></tr></table></td></tr>',
+      '#suffix' => '</td></tr></table></td></tr></table>',
       '#weight' => $form_weight++,
       '#attributes'=>array('style'=>'width:300px')
   );
   
-  $query = db_query(" SELECT mid, model FROM {guifi_model} " );
-  $relations = explode('|',$firmware->relations);
-  while ($models = db_fetch_array($query)) {
-    $models_array[$models["mid"]] = $models["model"];
-  }
-  foreach ($relations as $relation) {
-    foreach ($models_array as $id =>$mod) {
-      if ($relation == $mod) {
-        $value[$mod] = $id;
-      }
-    }
-  }
-  
-  $form['relations'] = array(
-      '#type' => 'checkboxes',
-      '#title' => t('Device model relations'),
-      '#required' => TRUE,
-      '#default_value' => $value,
-      '#options' => $models_array,
-      '#prefix' => '<tr><td>',
-      '#suffix' => '</td></tr></table>',
-      '#weight' => 8,
-  );
-
-  $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
+  $form['submit'] = array('#type' => 'submit',    '#weight' => $form_weight, '#value' => t('Save'));
 
   return $form;
 }
@@ -685,8 +666,7 @@ function guifi_devel_firmware_save($edit) {
 
   $to_mail = $edit->notification;
   $log ='';
-  $query = db_query(" SELECT mid, model FROM {guifi_model} " );
-  $relations = $edit['relations'];
+  $query = db_query(" SELECT id, nom, descripcio, relations, enabled FROM {guifi_pfc_firmware} " );
   
   // recollida de parametresFirmware actuals
   $sql= db_query("SELECT distinct(pid) FROM {guifi_pfc_parametresFirmware} WHERE fid = %d order by pid asc", $edit['id']);
@@ -710,26 +690,13 @@ function guifi_devel_firmware_save($edit) {
     }
   }
 
-  while ($models = db_fetch_array($query)) {
-    $models_array[$models["mid"]] = $models["model"];
-  }
-   if ($relations != '0')
-   foreach ($relations as $relation) {
-     foreach ($models_array as $id =>$mod) {
-       if ($relation == $id) {
-         $value[$id] = $mod;
-       }
-     }
-  }
 
+  //guifi_log(GUIFILOG_TRACE,'function guifi_devel_firmware_save()',$edit);
+  _guifi_db_sql('guifi_pfc_firmware',array('id' => $edit['id']),$edit,$log,$to_mail);
+  
 
-
-
-$edit['relations'] = implode('|',$value);
-  guifi_log(GUIFILOG_TRACE,'function guifi_devel_firmware_save()',$edit);
-
-  _guifi_db_sql('guifi_types',array('id' => $edit['id'],'type' => $edit['type']),$edit,$log,$to_mail);
-drupal_set_message( $edit['relations']);
+ //_guifi_db_sql('guifi_types',array('id' => $edit['id'],'type' => $edit['type']),$edit,$log,$to_mail);
+drupal_set_message( $edit['nom']);
   guifi_notify(
     $to_mail,
     t('The firmware !firmware has been created / updated by !user.',array('!firmware' => $edit['text'], '!user' => $user->name)),

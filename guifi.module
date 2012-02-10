@@ -392,7 +392,7 @@ function guifi_menu() {
     'file' => 'guifi_devel.inc.php'
   );
   $items['guifi/menu/devel/feature'] = array(
-    'title' => 'Model Features',
+    'title' => 'Device Model Features',
     'description' => 'A full list of Model Features used on our network, add, edit or delete it.',
     'page callback' => 'guifi_devel_modelfeature',
     'access arguments' => array('guifi module developer'),
@@ -400,7 +400,7 @@ function guifi_menu() {
     'file' => 'guifi_devel.inc.php'
   );
   $items['guifi/menu/devel/feature/%/%'] = array(
-    'title' => 'Model Features',
+    'title' => 'Device Model Features',
     'page callback' => 'guifi_devel_modelfeature',
     'page arguments' => array(4, 5),
     'access arguments' => array('guifi module developer'),
