@@ -80,7 +80,9 @@ function guifi_unsolclic($dev, $format = 'html') {
           }
       }
     }
-    var_dump($plantilla);
+    $plantilla = str_replace("\n", "<br>\n", $plantilla);
+    echo $plantilla;
+    die;
   }
   
   if ($dev->variable['firmware'] == 'n/a') {
