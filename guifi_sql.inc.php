@@ -121,6 +121,17 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 	        $next_id['id'] = 1;
 	      $data['id']=$next_id['id'];
 	    }
+	    case 'guifi_pfc_caracteristica':
+	    case 'guifi_pfc_caracteristiquesModel':
+	    case 'guifi_pfc_configuracioUnSolclic':
+	    case 'guifi_pfc_firmware':
+	    case 'guifi_pfc_parametres':
+	    case 'guifi_pfc_parametresConfiguracioUnsolclic':
+	    case 'guifi_pfc_parametresFirmware':
+	      $new_id=db_fetch_array(db_query("SELECT max(id)+1 id FROM {$table}"));
+	      $data['id']=$new_id['id'];
+	      $data['user_created'] = $user->uid;
+	      $data['timestamp_created'] = time();
 	    break;
 	  } // insert triggers switch table
   }
@@ -135,6 +146,14 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
       case 'guifi_dns_hosts':
       case 'guifi_users':
       case 'guifi_model':
+      case 'guifi_manufacturer':
+      case 'guifi_pfc_caracteristica':
+      case 'guifi_pfc_caracteristiquesModel':
+      case 'guifi_pfc_configuracioUnSolclic':
+      case 'guifi_pfc_firmware':
+      case 'guifi_pfc_parametres':
+      case 'guifi_pfc_parametresConfiguracioUnsolclic':
+      case 'guifi_pfc_parametresFirmware':
       case 'guifi_manufacturer':
         $data['user_changed'] = $user->uid;
         $data['timestamp_changed'] = time();

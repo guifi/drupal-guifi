@@ -421,7 +421,7 @@ function guifi_devel_devices_form_submit($form, &$form_state) {
 function guifi_devel_devices_save($edit) {
   global $user;
 
-  $to_mail = $edit->notification;
+  $to_mail = $edit['notification'];
   $log ='';
 
   guifi_log(GUIFILOG_TRACE,'function guifi_devel_devices_save()',$edit);
@@ -432,19 +432,20 @@ function guifi_devel_devices_save($edit) {
     $alreadyPresent[] = $oldFirms->fid;
   }
   
-  //echo "<pre>";var_dump($alreadyPresent);echo "</pre>";
-  
   // recollida  de firmwares compatibles
   if (isset($edit['firmwaresCompatibles'])){
     // de tots els que em passen, mirar si ja els tenia a la BD
     foreach ($edit['firmwaresCompatibles'] as $firmware) {
       if (!in_array($firmware, $alreadyPresent)) {
-        db_query("INSERT INTO  {guifi_pfc_configuracioUnSolclic} (mid, fid) VALUES (%d, %d)", $edit['mid'], $firmware);
-        //echo "<pre>Inserim </pre>";
+        $params = array(
+          'mid' => $edit['mid'],
+          'fid'=> $firmware,
+          'notification' => $edit['notification'],
+          'new' => true
+        );
+         _guifi_db_sql('guifi_pfc_configuracioUnSolclic',array('mid' => $params['mid']),$params,$log,$to_mail);
       }
     }
-    
-
     // de tots els que tenia a la BD, mirar si me'ls han tret i esborrar-los
     foreach ($alreadyPresent as $firmware) {
       if (!in_array($firmware, $edit['firmwaresCompatibles'])) {
@@ -664,7 +665,7 @@ function guifi_devel_firmware_form_submit($form, &$form_state) {
 function guifi_devel_firmware_save($edit) {
   global $user;
 
-  $to_mail = $edit->notification;
+  $to_mail = $user->mail;
   $log ='';
   $query = db_query(" SELECT id, nom, descripcio, relations, enabled FROM {guifi_pfc_firmware} " );
   
@@ -679,7 +680,13 @@ function guifi_devel_firmware_save($edit) {
     // de tots els que em passen, mirar si ja els tenia a la BD
     foreach ($edit['parametres_associats'] as $parametre) {
       if (!in_array($parametre, $alreadyPresent)) {
-        db_query("INSERT INTO  {guifi_pfc_parametresFirmware} (fid, pid) VALUES (%d, %d)", $edit['id'], $parametre);
+        $params = array(
+          'fid'=> $edit['id'],
+          'pid'=> $parametre,
+          'notification' => $to_mail,
+          'new' => true
+        );
+        _guifi_db_sql('guifi_pfc_parametresFirmware',array('mid' => $params['mid']),$params,$log,$to_mail);
       }
     }
     // de tots els que tenia a la BD, mirar si me'ls han tret i esborrar-los
@@ -992,7 +999,7 @@ function guifi_devel_parameter_form_submit($form, &$form_state) {
 function guifi_devel_parameter_save($edit) {
   global $user;
 
-  $to_mail = $edit->notification;
+  $to_mail = $user->mail;
   $log ='';
 
   guifi_log(GUIFILOG_TRACE,'function guifi_devel_parameter_save()',$edit);
@@ -1137,7 +1144,7 @@ function guifi_devel_modelfeature_form_submit($form, &$form_state) {
 function guifi_devel_modelfeature_save($edit) {
   global $user;
 
-  $to_mail = $edit->notification;
+  $to_mail = $user->mail;
   $log ='';
 
   guifi_log(GUIFILOG_TRACE,'function guifi_devel_modelfeature_save()',$edit);
@@ -1205,10 +1212,12 @@ function guifi_devel_configuracio_usc($id , $op) {
 //   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/configuraciousc/add\'"/>';
 //   $output .= '</form>';
 
-  $headers = array(t('Manufacturer'), t('Model'), t('FirmWare'), t('enabled'), t('Edit'), t('Delete'));
+  $headers = array(t('Manufacturer'), t('Model'), t('FirmWare'), t('enabled'), t('type'), t('Edit'), t('Delete'));
 
   $sql = db_query('SELECT
-        usc.id, usc.mid, usc.fid, usc.enabled, usc.plantilla,  mf.name as fabricant, m.model, f.nom as nomfirmware
+        usc.id, usc.mid, usc.fid, usc.enabled, usc.plantilla, usc.tipologia,
+        mf.name as fabricant, m.model,
+        f.nom as nomfirmware
     FROM
         {guifi_pfc_configuracioUnSolclic} usc
         inner {join guifi_pfc_firmware} f on f.id = usc.fid
@@ -1216,12 +1225,18 @@ function guifi_devel_configuracio_usc($id , $op) {
         inner {join guifi_manufacturer} mf on mf.fid = m.fid
      order by usc.enabled desc, fabricant asc, model asc, nomfirmware asc
   ');
+  
+  $radioMode  = array(0 => "Ap or AP with WDS",
+                      1 => "Wireless Client",
+                      2 => "Wireless Bridge",
+                      3 => "Routed Client");
   while ($configuraciousc = db_fetch_object($sql)) {
     $rows[] = array(
       $configuraciousc->fabricant,
       $configuraciousc->model,
       $configuraciousc->nomfirmware,
       $configuraciousc->enabled,
+      $radioMode[$configuraciousc->tipologia],
       l(guifi_img_icon('edit.png'),'guifi/menu/devel/configuraciousc/'.$configuraciousc->id.'/edit',
     array(
               'html' => TRUE,
@@ -1319,7 +1334,7 @@ function guifi_devel_configuracio_usc_form_submit($form, &$form_state) {
 function guifi_devel_configuracio_usc_save($edit) {
   global $user;
 
-  $to_mail = $edit->notification;
+  $to_mail = $user->mail;
   $log ='';
 
   guifi_log(GUIFILOG_TRACE,'function guifi_devel_configuracio_usc_save()',$edit);
