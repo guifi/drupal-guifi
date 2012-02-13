@@ -598,8 +598,11 @@ function guifi_devel_firmware_form($form_state, $firmid) {
   $query = db_query(" select
                           pf.fid, pf.pid, p.id, p.nom
                       from
-                          guifi_pfc_parametresFirmware pf
-                      right join guifi_pfc_parametres p on p.id = pf.pid order by p.id asc");
+                          guifi_pfc_parametres p
+                              left join
+                          guifi_pfc_parametresFirmware pf ON pf.pid = p.id and pf.fid = %d
+                      order by p.nom asc",$firmid);
+  
   while ($parametres = db_fetch_array($query)) {
     if ($parametres["pid"])
       $params_associats[$parametres["pid"]] = $parametres["nom"];
@@ -1207,10 +1210,6 @@ function guifi_devel_configuracio_usc($id , $op) {
       guifi_devel_configuracio_usc_delete($id);
   }
   $rows = array();
-//   $value = t('Add a new Configuracio UnSolclic');
-//   $output  = '<from>';
-//   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/configuraciousc/add\'"/>';
-//   $output .= '</form>';
 
   $headers = array(t('Manufacturer'), t('Model'), t('FirmWare'), t('enabled'), t('type'), t('Edit'), t('Delete'));
 
@@ -1275,6 +1274,12 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
   
   $manufacturerName = $configuraciousc->manufacturer;
   $modelName = $configuraciousc->model;
+  $firmwareName = $configuraciousc->nomfirmware;
+  
+  $manufacturerLink = '<a href="'.base_path().'guifi/menu/devel/device/'.$configuraciousc->mfid.'/edit">'.$configuraciousc->manufacturer.'</a>';
+  $modelLink = '<a href="'.base_path().'guifi/menu/devel/model/'.$configuraciousc->mid.'/edit">'.$configuraciousc->model.'</a>';
+  $firmwareLink = '<a href="'.base_path().'guifi/menu/devel/firmware/'.$configuraciousc->fid.'/edit">'.$configuraciousc->nomfirmware.'</a>';
+  
   $form['mid'] = array(
     '#type' => 'hidden',
     '#size' => 32,
@@ -1298,7 +1303,7 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
     '#type' => 'checkbox',
     '#title' => t('Enabled'),
     '#default_value' => $configuraciousc->enabled,
-    '#prefix' => "<table><tr><th>$manufacturerName</th><th>$modelName</th><th>",
+    '#prefix' => "<table><tr><th>$manufacturerLink</th><th>$modelLink</th><th>$firmwareLink</th><th>",
     '#suffix' => '</th></tr>',
     '#weight' => $form_weight++,
   );
@@ -1308,10 +1313,8 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
     '#title' => t('Template File'),
     '#required' => TRUE,
     '#default_value' => $configuraciousc->plantilla,
-//     '#size' => 32,
-//     '#maxlength' => 32,
     '#description' => t('Template File'),
-    '#prefix' => '<tr><td colspan="3">',
+    '#prefix' => '<tr><td colspan="4">',
     '#suffix' => '</td></tr></table>',
     '#weight' => $form_weight++,
     '#cols' => 60,

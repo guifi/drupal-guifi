@@ -12,7 +12,7 @@ function guifi_unsolclic($dev, $format = 'html') {
 
   $dev = (object)$dev;
   
-  if($dev->id=='25638' or $dev->id=='11111') {
+  if ((isValidConfiguracioUSC($dev->usc_id))||($dev->id=='315')) {
 
     // FINAL. Treure el fitxer unsolclic resultant com a mime text/plain
     //drupal_set_header('Content-Type: text/plain; charset=utf-8');
@@ -52,13 +52,17 @@ function guifi_unsolclic($dev, $format = 'html') {
     // 4. recuperar TOTS els parametres variables associats al trasto
     //$paramsDevice = guifi_get_paramsDevice($dev->id);
     $paramsDevice = guifi_get_paramsClientDevice($dev->id);
-    //var_dump($paramsDevice);die;
 
     // 5. Indexar els els parametres variables associats al trasto
     $indexedParamsDevice = guifi_indexa_paramsDevice($paramsDevice, $paramPrefixes);
 
     // 6. recuperar els parametres de la plantilla
     $paramsconfiguracioUSC = guifi_get_paramsconfiguracioUSC($uscId);
+    
+    // 6.B. recuperar els la informacio de la configuracio de fabricant-model-firmware
+    $paramsMMF = guifi_get_paramsMMF($dev->id);
+    
+    $totalParameters = array_merge($indexedParamsDevice, $paramsMMF);
     if ($paramsconfiguracioUSC) {
 
       // 7. substituir els parametres a la plantilla
@@ -70,7 +74,7 @@ function guifi_unsolclic($dev, $format = 'html') {
 
           if($dinamic==true) {
             // DINAMIC s'ha de fer una segona passatda per buscar el origen de veritat
-            $valor = $indexedParamsDevice[$origen];
+            $valor = $totalParameters[$origen];
           }
           $toreplace = "{{ $param }}";
           $pos = strpos($plantilla, $toreplace);
@@ -313,7 +317,7 @@ function guifi_get_configuracioUSC($mid, $fid, $uscid) {
   $configuracioUSCInfo = db_fetch_array(db_query("select id, mid, fid, enabled, tipologia, plantilla from {guifi_pfc_configuracioUnSolclic} where mid=%d and fid=%d and id = %d limit 1",$mid, $fid, $uscid));
   if (!empty($configuracioUSCInfo)){
     //var_dump($configuracioUSCInfo);
-  } else var_dump("NO m'arriba cap plantilla!!!!");
+  } else var_dump("NO m'arriba cap plantilla  per a Model:$mid Firmware:$fid USCid:$uscid !!!!");
   return $configuracioUSCInfo;
 }
 function guifi_get_paramsconfiguracioUSC($uscid) {
@@ -326,6 +330,27 @@ function guifi_get_paramsconfiguracioUSC($uscid) {
   }
   //w($params);
   return $params;
+}
+
+function guifi_get_paramsMMF($devId) {
+  $qry = db_query(" select
+                        d.usc_id,
+                        usc.tipologia, usc.enabled  ,
+                        u.name usc_creator_nick,
+                        m.model model_name,
+                        mf.name as manufacturer_name,
+                        f.nom as firmware_name
+                    from
+                        guifi_devices d
+                        JOIN guifi_pfc_configuracioUnSolclic usc on usc.id = d.usc_id
+                        JOIN users u ON u.uid = usc.user_created
+                        JOIN guifi_model m on m.mid = usc.mid
+                        JOIN guifi_manufacturer mf on mf.fid = m.fid
+                        JOIN guifi_pfc_firmware f on f.id = usc.fid
+                    
+                    where d.id = %d",$devId);
+  $param = db_fetch_array($qry);
+  return $param;
 }
 
 function guifi_get_paramsDevice($device_id) {
@@ -367,7 +392,7 @@ function guifi_get_paramsClientDevice($device_id) {
               z.title zone_name, z.dns_servers zone_dns_servers, z.ntp_servers zone_ntp_servers, z.graph_server zone_graph_server, z.ospf_zone zone_ospf_zone,  z.zone_mode zone_zone_mode, z.proxy_id zone_proxy_id, z.voip_id zone_voip_id,
               n.nid node_id, n.title node_name, loc.lat node_lat, loc.lon node_lon, loc.graph_server node_node_graph_server,
               u.uid user_id, u.name user_name, u.mail user_mail,
-              d.nick as device_name, d.type device_type,
+              d.nick as device_name, d.type device_type, d.id as device_id,
               r.radiodev_counter radio_order, r.ssid radio_ssid, r.mode radio_mode, r.protocol radio_protocol, r.channel radio_channel, r.antenna_gain radio_antenna_gain, r.antenna_angle radio_antenna_angle, r.antenna_azimuth radio_antenna_azimuth, r.clients_accepted radio_clients_accepted, r.antenna_mode radio_antenna_mode, r.ly_mb_in radio_ly_mb_in ,r.ly_mb_out radio_ly_mb_out,
               i.id interface_id, i.interface_type, i.mac interface_mac, i.radiodev_counter interface_radiodev_counter,
               ip.ipv4 ipv4_ip, ip.netmask ipv4_netmask, ip.ipv4_type ,
@@ -449,4 +474,13 @@ function guifi_usc_comprova_clau_prefix($clau, $paramPrefixes) {
   }
   return false;
 }
+
+function isValidConfiguracioUSC($uscid){
+  $result = db_fetch_object(db_query("SELECT id, enabled FROM {guifi_pfc_configuracioUnSolclic} WHERE  id = %d AND enabled = 1 LIMIT 1",$uscid));
+  if (!empty($result->enabled)) return true;
+  
+  return false;
+}
+    
+
 ?>
