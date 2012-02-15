@@ -170,26 +170,29 @@ function guifi_devel_devices($devid , $op) {
 
   $headers = array(t('ID Model'), t('Manufacturer'), t('Model'), t('Edit'), t('Delete'));
 
-  $sql = db_query('SELECT * FROM {guifi_model} ORDER BY mid ASC');
-
+  $sql = db_query('SELECT
+                        m.mid, m.url as model_url , m.model,  mf.name as manufacturer_name, mf.url as manufacturer_url
+                    FROM
+                        {guifi_model} m
+                        left {join guifi_manufacturer} mf on mf.fid  = m.fid
+                    ORDER BY mf.name asc , m.model ASC');
+  
   while ($dev = db_fetch_object($sql)) {
-    $query = db_query('SELECT * FROM {guifi_manufacturer} WHERE fid = %d', $dev->fid);
-    $manufacturer = db_fetch_object($query);
     $rows[] = array($dev->mid,
-                    '<a href="'.$manufacturer->url.'">'.$manufacturer->name.'</a>',
-                    '<a href="'.$dev->url.'">'.$dev->model.'</a>',
-                    l(guifi_img_icon('edit.png'),'guifi/menu/devel/device/'.$dev->mid.'/edit',
-            array(
-              'html' => TRUE,
-              'title' => t('edit device'),
-              )).'</td><td>'.
-                 l(guifi_img_icon('drop.png'),'guifi/menu/devel/device/'.$dev->mid.'/delete',
-            array(
-              'html' => TRUE,
-              'title' => t('delete device'),
-              )));
+                      '<a href="'.$dev->manufacturer_url.'">'.$dev->manufacturer_name.'</a>',
+                      '<a href="'.$dev->model_url.'">'.$dev->model.'</a>',
+    l(guifi_img_icon('edit.png'),'guifi/menu/devel/device/'.$dev->mid.'/edit',
+    array(
+                'html' => TRUE,
+                'title' => t('edit device'),
+    )).'</td><td>'.
+    l(guifi_img_icon('drop.png'),'guifi/menu/devel/device/'.$dev->mid.'/delete',
+    array(
+                'html' => TRUE,
+                'title' => t('delete device'),
+    )));
   }
-
+  
   $output .= theme('table',$headers,$rows);
   print theme('page',$output, FALSE);
   return;
@@ -210,16 +213,6 @@ function guifi_devel_devices_form($form_state, $devid) {
   while ($manufacturers = db_fetch_array($query)) {
      $manuf_array[$manufacturers["fid"]] = $manufacturers["name"];
   }
-  $form['notification'] = array(
-    '#type' => 'textfield',
-    '#size' => 60,
-    '#maxlength' => 1024,
-    '#title' => t('contact'),
-    '#required' => TRUE,
-    '#element_validate' => array('guifi_emails_validate'),
-    '#default_value' => $dev->notification,
-    '#description' =>  t('Mailid where changes on the device will be notified, if many, separated by \',\'<br />used for network administration.')
-  );
   $form_weight=0;
   $form['fid'] = array(
     '#type' => 'select',
@@ -227,6 +220,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#required' => TRUE,
     '#default_value' => $dev->fid,
     '#options' => $manuf_array,
+    '#description' => t('Select Device Manufacturer.'),
     '#prefix' => '<table><tr><td>',
     '#suffix' => '</td>',
     '#weight' => $form_weight++,
@@ -243,6 +237,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#suffix' => '</td>',
     '#weight' => $form_weight++,
   );
+  /*
   $form['radiodev_max'] = array(
     '#type' => 'textfield',
     '#title' => t('Max Radios'),
@@ -326,7 +321,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#prefix' => '<table><tr><td>',
     '#suffix' => '</td></tr></table>',
     '#weight' => $form_weight++,
-  );
+  );*/
   $form['url'] = array(
     '#type' => 'textfield',
     '#title' => t('URL'),
@@ -335,16 +330,11 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#size' => 64,
     '#maxlength' => 128,
     '#description' => t('Url where we can see a specs from device model.'),
-    '#prefix' => '<table><tr><td>',
-    '#suffix' => '</td></tr></table>',
+    '#prefix' => '<tr><td colspan="2" align="left">',
+    '#suffix' => '</td></tr>',
     '#weight' => $form_weight++,
   );
-  
-  $query = db_query("select
-                          usc.id, usc.mid, usc.fid, f.id as firmware_id, f.nom
-                      from
-                          guifi_pfc_configuracioUnSolclic usc
-                          right join guifi_pfc_firmware f on f.id = usc.fid");
+
   
   $query = db_query("select
                     usc.id, usc.mid, usc.fid, f.id as firmware_id, f.nom
@@ -373,16 +363,16 @@ function guifi_devel_devices_form($form_state, $devid) {
       '#multiple' => true,
       '#required' => false,
       '#validated' => true,
-      '#prefix' => '<tr><td class="mselects" align="center"><table><tr><td>',
-      '#suffix' => '</td><td>',
+      '#prefix' => '<tr><td class="mselects" align="left" colspan="2"><table style="width:575px"><tr><td style="width:250px">',
+      '#suffix' => '</td><td  style="width:50px">',
       '#weight' => $form_weight++,
-      '#attributes'=>array('style'=>'width:300px')
+      '#attributes'=>array('style'=>'width:250px;height:350px')
   );
   
-  $disponiblesButtonOne = '<input type="button" value=">" id="associatsButtonOne" class="selectButtons">';
-  $disponiblesButtonAll = '<input type="button" value=">>" id="associatsButtonAll" class="selectButtons">';
-  $associatsButtonOne = '<input type="button" value="<" id="disponiblesButtonOne" class="selectButtons">';
-  $associatsButtonAll = '<input type="button" value="<<" id="disponiblesButtonAll" class="selectButtons">';
+  $disponiblesButtonOne = '<input type="button" value=">" id="associatsButtonOne" class="selectButtons" style="width:40px;margin:5px 0;">';
+  $disponiblesButtonAll = '<input type="button" value=">>" id="associatsButtonAll" class="selectButtons" style="width:40px;margin:5px 0;">';
+  $associatsButtonOne = '<input type="button" value="<" id="disponiblesButtonOne" class="selectButtons" style="width:40px;margin:5px 0;">';
+  $associatsButtonAll = '<input type="button" value="<<" id="disponiblesButtonAll" class="selectButtons" style="width:40px;margin:5px 0;">';
   $botons = $disponiblesButtonOne.'<br>';
   $botons .= $disponiblesButtonAll.'<br>';
   $botons .= $associatsButtonOne.'<br>';
@@ -398,13 +388,32 @@ function guifi_devel_devices_form($form_state, $devid) {
         '#multiple' => true,
         '#required' => false,
         '#validated' => true,
-        '#prefix' => $botons. '</td><td>',
+        '#prefix' => $botons. '</td><td  style="width:250px">',
         '#suffix' => '</td></tr></table></td></tr>',
         '#weight' => $form_weight++,
-        '#attributes'=>array('style'=>'width:300px')
+        '#attributes'=>array('style'=>'width:250px;height:350px')
+  );
+  
+  $form['notification'] = array(
+      '#type' => 'textfield',
+      '#size' => 60,
+      '#maxlength' => 1024,
+      '#title' => t('contact'),
+      '#required' => TRUE,
+      '#element_validate' => array('guifi_emails_validate'),
+      '#default_value' => $dev->notification,
+      '#weight' => $form_weight++,
+      '#description' =>  t('Mailid where changes on the device will be notified, if many, separated by \',\'<br />used for network administration.'),
+      '#prefix' => '<tr><td colspan="2">',
+      '#suffix' => '</td></tr>',
+  
   );
 
-  $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
+  $form['submit'] = array(
+  '#type' => 'submit',
+  '#prefix' => '<tr><td colspan="2">',
+        '#suffix' => '</td></tr></table>',
+  '#weight' => 99, '#value' => t('Save'));
 
   return $form;
 }
@@ -444,6 +453,13 @@ function guifi_devel_devices_save($edit) {
           'new' => true
         );
          _guifi_db_sql('guifi_pfc_configuracioUnSolclic',array('mid' => $params['mid']),$params,$log,$to_mail);
+         
+         // recuperem el id del uscid que acabem de crear
+         $uscid = db_fetch_array(db_query("SELECT max(id) mid FROM {guifi_pfc_configuracioUnSolclic} "));
+         
+         // aqui cal agafar tots els parametres del firmware i entrarlos a la taula guifi_pfc_parametresConfiguracioUnsolclic
+         crearParametresConfiguracioUSC($uscid['mid'], $firmware, $to_mail, $user->id);
+         
       }
     }
     // de tots els que tenia a la BD, mirar si me'ls han tret i esborrar-los
@@ -551,7 +567,7 @@ function guifi_devel_firmware($firmid , $op) {
 // Firmwares Form
 function guifi_devel_firmware_form($form_state, $firmid) {
 
-  $sql= db_query('SELECT id, nom, descripcio, relations FROM {guifi_pfc_firmware} WHERE id = %d', $firmid);
+  $sql= db_query('SELECT id, nom, descripcio, relations, notification FROM {guifi_pfc_firmware} WHERE id = %d', $firmid);
   $firmware = db_fetch_object($sql);
 
   if ($firmid == 'New' ) {
@@ -577,6 +593,7 @@ function guifi_devel_firmware_form($form_state, $firmid) {
       '#type' => 'checkbox',
       '#title' => t('Enabled'),
       '#default_value' => $firmware->enabled,
+      '#description' => t('Check if firmware is avialable for use'),
       '#prefix' => '',
       '#suffix' => '</td></tr>',
       '#weight' => $form_weight++,
@@ -615,43 +632,65 @@ function guifi_devel_firmware_form($form_state, $firmid) {
     '#title' => t('Parametres associats'),
     '#default_value' => 0,
     '#options' => $params_associats,
-    '#description' => t('Parametres disponibles per a definir aquest firmware'),
+    '#description' => t('Parametres associats a la definició d\'aquest firmware.'),
     '#size' => 10,
     '#multiple' => true,
     '#required' => false,
     '#validated' => true,
-    '#prefix' => '<tr><td class="mselects" align="center"><table><tr><td>',
-    '#suffix' => '</td><td>',
+    '#prefix' => '<tr><td class="mselects" align="left" colspan="2"><table style="width:575px"><tr><td style="width:250px">',
+    '#suffix' => '</td><td  style="width:50px">',
     '#weight' => $form_weight++,
-    '#attributes'=>array('style'=>'width:300px')
+    '#attributes'=>array('style'=>'width:250px;height:350px')
   );
   
-  $disponiblesButtonOne = '<input type="button" value=">" id="associatsButtonOne" class="selectButtons">';
-  $disponiblesButtonAll = '<input type="button" value=">>" id="associatsButtonAll" class="selectButtons">';
-  $associatsButtonOne = '<input type="button" value="<" id="disponiblesButtonOne" class="selectButtons">';
-  $associatsButtonAll = '<input type="button" value="<<" id="disponiblesButtonAll" class="selectButtons">';
+  $disponiblesButtonOne = '<input type="button" value=">" id="associatsButtonOne" class="selectButtons" style="width:40px;margin:5px 0;">';
+  $disponiblesButtonAll = '<input type="button" value=">>" id="associatsButtonAll" class="selectButtons" style="width:40px;margin:5px 0;">';
+  $associatsButtonOne = '<input type="button" value="<" id="disponiblesButtonOne" class="selectButtons" style="width:40px;margin:5px 0;">';
+  $associatsButtonAll = '<input type="button" value="<<" id="disponiblesButtonAll" class="selectButtons" style="width:40px;margin:5px 0;">';
   $botons = $disponiblesButtonOne.'<br>';
   $botons .= $disponiblesButtonAll.'<br>';
   $botons .= $associatsButtonOne.'<br>';
   $botons .= $associatsButtonAll.'<br>';
   
   $form['parametres_disponibles'] = array(
-      '#type' => 'select',
-      '#title' => t('Parametres disponibles'),
-      '#default_value' => 0,
-      '#options' => $params_disponibles,
-      '#description' => t('Parametres associats a la definició d\'aquest firmware.'),
-      '#size' => 10,
-      '#multiple' => true,
-      '#required' => false,
-      '#validated' => true,
-      '#prefix' => $botons. '</td><td>',
-      '#suffix' => '</td></tr></table></td></tr></table>',
-      '#weight' => $form_weight++,
-      '#attributes'=>array('style'=>'width:300px')
+    '#type' => 'select',
+    '#title' => t('Parametres disponibles'),
+    '#default_value' => 0,
+    '#options' => $params_disponibles,
+    '#description' => t('Parametres disponibles per a definir aquest firmware'),
+    '#size' => 10,
+    '#multiple' => true,
+    '#required' => false,
+    '#validated' => true,
+    '#prefix' => $botons. '</td><td>',
+    '#suffix' => '</td></tr></table></td></tr>',
+    '#weight' => $form_weight++,
+    '#attributes'=>array('style'=>'width:250px;height:350px')
   );
   
-  $form['submit'] = array('#type' => 'submit',    '#weight' => $form_weight, '#value' => t('Save'));
+  
+  $form['notification'] = array(
+        '#type' => 'textfield',
+        '#size' => 60,
+        '#maxlength' => 1024,
+        '#title' => t('contact'),
+        '#required' => TRUE,
+        '#element_validate' => array('guifi_emails_validate'),
+        '#default_value' => $firmware->notification,
+        '#weight' => $form_weight++,
+        '#description' =>  t('Mailid where changes on the device will be notified, if many, separated by \',\'<br />used for network administration.'),
+        '#prefix' => '<tr><td colspan="2">',
+        '#suffix' => '</td></tr>',
+  
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#prefix' => '<tr><td>',
+          '#suffix' => '</td></tr></table>',
+    '#weight' => 99, '#value' => t('Save'));
+  
+  //$form['submit'] = array('#type' => 'submit',    '#weight' => $form_weight, '#value' => t('Save'));
 
   return $form;
 }
@@ -771,7 +810,7 @@ function guifi_devel_manufacturer($mid , $op) {
 
   $headers = array(t('ID'), t('Manufacturer'), t('URL'), t('Edit'), t('Delete'));
 
-  $sql = db_query('SELECT * FROM {guifi_manufacturer}');
+  $sql = db_query('SELECT * FROM {guifi_manufacturer} order by name asc	');
 
   while ($mfr = db_fetch_object($sql)) {
     $rows[] = array($mfr->fid,
@@ -1407,6 +1446,20 @@ function HelperMultipleSelect($formName, $nomSelectAssignats='assignats', $nomSe
           });
         });';
   return $jquery1;
+}
+
+function crearParametresConfiguracioUSC($uscid, $fid, $notification, $userid) {
+  $sql = db_query("SELECT
+                        p.id, %d, p.nom, '0'
+                     FROM
+                      guifi_pfc_parametres p
+                     INNER JOIN guifi_pfc_parametresFirmware pf ON pf.pid = p.id  AND pf.fid = %d", $uscid,  $fid);
+  
+  while ($paramsFirmware = db_fetch_object($sql)) {
+    db_query("INSERT INTO  {guifi_pfc_parametresConfiguracioUnsolclic} (pid, uscid, dinamic, notification, user_created)
+    VALUES (%d, %d, 0,'%s', %d)", $paramsFirmware->id, $uscid, $notification, $userid);
+  }
+  return true;
 }
 
 ?>
