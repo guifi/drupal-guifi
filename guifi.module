@@ -421,6 +421,13 @@ function guifi_menu() {
     'access arguments' => array('guifi module developer'),
     'file' => 'guifi_devel.inc.php'
   );  
+  $items['guifi/menu/devel/paramusc/%/%'] = array(
+    'title' => 'Configuracions UnSolclic',
+    'page callback' => 'guifi_devel_paramusc',
+    'page arguments' => array(4, 5),
+    'access arguments' => array('guifi module developer'),
+    'file' => 'guifi_devel.inc.php'
+  );  
   $items['guifi/menu/devel/counters'] = array(
     'title' => 'counters',
     'description' => 'get statistics/counters from the network',
