@@ -168,19 +168,28 @@ function guifi_devel_devices($devid , $op) {
   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/device/add\'"/>';
   $output .= '</form>';
 
-  $headers = array(t('ID Model'), t('Manufacturer'), t('Model'), t('Edit'), t('Delete'));
+  $headers = array(t('ID Model'), t('Manufacturer'), t('Model'), t('Enabled Firms'), t('Edit'), t('Delete'));
 
   $sql = db_query('SELECT
                         m.mid, m.url as model_url , m.model,  mf.name as manufacturer_name, mf.url as manufacturer_url
                     FROM
                         {guifi_model} m
-                        left {join guifi_manufacturer} mf on mf.fid  = m.fid
+                        inner join {guifi_manufacturer} mf on mf.fid  = m.fid
                     ORDER BY mf.name asc , m.model ASC');
+  $sql = db_query('SELECT
+                          m.mid, m.url as model_url , m.model,  mf.name as manufacturer_name, mf.url as manufacturer_url, count(usc.id) as enabledUSCs
+                      FROM
+                          {guifi_model} m
+                          inner join {guifi_manufacturer} mf on mf.fid  = m.fid
+                          left join {guifi_pfc_configuracioUnSolclic} usc on usc.mid = m.mid and usc.enabled = 1
+                      GROUP BY  m.mid, model_url, m.model,manufacturer_name, manufacturer_url
+                      ORDER BY enabledUSCs desc , mf.name asc , m.model ASC');
   
   while ($dev = db_fetch_object($sql)) {
     $rows[] = array($dev->mid,
                       '<a href="'.$dev->manufacturer_url.'">'.$dev->manufacturer_name.'</a>',
                       '<a href="'.$dev->model_url.'">'.$dev->model.'</a>',
+                      $dev->enabledUSCs,
     l(guifi_img_icon('edit.png'),'guifi/menu/devel/device/'.$dev->mid.'/edit',
     array(
                 'html' => TRUE,
@@ -469,18 +478,57 @@ function guifi_devel_devices_save($edit) {
          crearParametresConfiguracioUSC($uscid['mid'], $firmware, $to_mail, $user->id);
          
       }
+      // guardem els firmwares qeu hem afegit
+      $kept[] = $firmware;
     }
     // de tots els que tenia a la BD, mirar si me'ls han tret i esborrar-los
+    
+    
     foreach ($alreadyPresent as $firmware) {
       if (!in_array($firmware, $edit['firmwaresCompatibles'])) {
-        db_query("DELETE FROM {guifi_pfc_configuracioUnSolclic} WHERE mid=%d and fid=%d ", $edit['mid'], $firmware);
+        // IMPORTANT abans de esborrar comprovar que no tinguin configuracions USC validades
+        
+        $sql = db_query('SELECT id as uscid, enabled  FROM {guifi_pfc_configuracioUnSolclic} WHERE mid=%d and fid=%d ', $edit['mid'], $firmware);
+        $configuracions = db_fetch_object($sql);
+        
+        
+        // si la configuracion USC no esta enabled la borrem
+        if (!$configuracions->enabled) {
+          
+          // si esborrem la configuracio USC tambe hauriem d'esborrarli els parametres associats
+          db_query("DELETE FROM {guifi_pfc_configuracioUnSolclic} WHERE mid=%d and fid=%d ", $edit['mid'], $firmware);
+          
+          // si esborrem la configuracio USC tambe hauriem d'esborrarli els parametres associats
+          db_query("DELETE FROM {guifi_pfc_parametresConfiguracioUnsolclic} WHERE uscid=%d", $configuracions->uscid);
+          
+          
+          $deleted[] = $firmware;
+        } else {
+          
+          // si la configuracio USC estava enabled la desem per notificar que no s'ha esobrrat
+          $kept[] = $firmware;
+        
+        }
       }
     }
+    if (count($kept)>0) {
+      $guardats = implode(', ', $kept);
+      $strGuardats = ' Firmwares guardats '. $guardats;
+    }
+    if (count($deleted)>0) {
+      $borrats = implode(', ', $deleted);
+      $strBorrats = ' Firmwares borrats '. $borrats;
+    }
+//     var_dump($kept);
+//     var_dump($deleted);
+//     DIE ;
   }
   
 
   _guifi_db_sql('guifi_model',array('mid' => $edit['mid']),$edit,$log,$to_mail);
 
+  drupal_set_message( 'Model Actualitzat : '. $strGuardats . $strBorrats);
+  
   guifi_notify(
     $to_mail,
     t('The device model !device has been created / updated by !user.',array('!device' => $edit['model'], '!user' => $user->name)),
