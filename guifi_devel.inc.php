@@ -491,7 +491,6 @@ function guifi_devel_devices_save($edit) {
         $sql = db_query('SELECT id as uscid, enabled  FROM {guifi_pfc_configuracioUnSolclic} WHERE mid=%d and fid=%d ', $edit['mid'], $firmware);
         $configuracions = db_fetch_object($sql);
         
-        
         // si la configuracion USC no esta enabled la borrem
         if (!$configuracions->enabled) {
           
@@ -519,9 +518,6 @@ function guifi_devel_devices_save($edit) {
       $borrats = implode(', ', $deleted);
       $strBorrats = ' Firmwares borrats '. $borrats;
     }
-//     var_dump($kept);
-//     var_dump($deleted);
-//     DIE ;
   }
   
 
@@ -786,17 +782,44 @@ function guifi_devel_firmware_save($edit) {
         );
         _guifi_db_sql('guifi_pfc_parametresFirmware',array('mid' => $params['mid']),$params,$log,$to_mail);
         
-        // TODO si estem afegint parametres nous al firmwae, mirar quins models tenen suportat aquest parametre i afegir-li a la configuracio unscolclic que pertoqui
-        db_query("INSERT INTO  {guifi_pfc_parametresConfiguracioUnsolclic} (pid, uscid, dinamic, notification, user_created)
-        VALUES (%d, %d, 0,'%s', %d)", $parametre, $uscid, $to_mail, $user->id);
-        
+        // aqui cal agafar tots els unsolclic que funcionen amb aquest firmware i a cadascun afegir-li el parametre nou.
+        afegirParametreConfiguracionsUSC($edit['id'], $parametre, $to_mail, $user->id);
       }
     }
     // de tots els que tenia a la BD, mirar si me'ls han tret i esborrar-los
     foreach ($alreadyPresent as $parametre) {
       if (!in_array($parametre, $edit['parametres_associats'])) {
-        db_query("DELETE FROM {guifi_pfc_parametresFirmware} WHERE fid=%d and pid=%d ", $edit['id'], $parametre);
+        
+        // IMPORTANT abans de esborrar comprovar que no formin part de tinguin configuracions USC validades
+        $sql = db_query('select
+                                  pusc.pid, p
+                              from
+                                  guifi_pfc_parametresConfiguracioUnsolclic pusc
+                                  inner join guifi_pfc_configuracioUnSolclic usc on usc.id = pusc.uscid
+                                  inner join guifi_pfc_firmware f on f.id = usc.fid
+                              where and usc.fid = ? and pusc.pid = ? ', $edit['id'], $parametre);
+        $parametres = db_fetch_object($sql);
+        
+        if (!$configuracions->enabled) {
+        
+          db_query("DELETE FROM {guifi_pfc_parametresFirmware} WHERE fid=%d and pid=%d ", $edit['id'], $parametre);
+          
+          $deleted[] = $firmware;
+        } else {
+          
+          // si la configuracio USC estava enabled la desem per notificar que no s'ha esobrrat
+          $kept[] = $firmware;
+        
+        }
       }
+    }
+    if (count($kept)>0) {
+      $guardats = implode(', ', $kept);
+      $strGuardats = ' Parametres guardats '. $guardats;
+    }
+    if (count($deleted)>0) {
+      $borrats = implode(', ', $deleted);
+      $strBorrats = ' Parametres borrats '. $borrats;
     }
   }
 
@@ -804,9 +827,7 @@ function guifi_devel_firmware_save($edit) {
   //guifi_log(GUIFILOG_TRACE,'function guifi_devel_firmware_save()',$edit);
   _guifi_db_sql('guifi_pfc_firmware',array('id' => $edit['id']),$edit,$log,$to_mail);
   
-
- //_guifi_db_sql('guifi_types',array('id' => $edit['id'],'type' => $edit['type']),$edit,$log,$to_mail);
-drupal_set_message( $edit['nom']);
+drupal_set_message( $edit['nom'].' Actualitzat : '. $strGuardats . $strBorrats);
   guifi_notify(
     $to_mail,
     t('The firmware !firmware has been created / updated by !user.',array('!firmware' => $edit['text'], '!user' => $user->name)),
@@ -1732,6 +1753,29 @@ function crearParametresConfiguracioUSC($uscid, $fid, $notification, $userid) {
     
     //db_query("INSERT INTO  {guifi_pfc_parametresConfiguracioUnsolclic} (pid, uscid, dinamic, notification, user_created)
     //VALUES (%d, %d, 0,'%s', %d)", $paramsFirmware->id, $uscid, $notification, $userid);
+  }
+  return true;
+}
+/**
+ *
+ * Ressegueix tots els unsolclics que te un firmware i li afegeix un parametre
+ * @param int $fid
+ * @param int $parametre
+ * @param string $notification
+ * @param int $userid
+ */
+function afegirParametreConfiguracionsUSC($fid, $parametre, $notification, $userid) {
+  $sql = db_query("select id , enabled from guifi_pfc_configuracioUnSolclic where fid = %d", $fid);
+  while ($configuracioUSC = db_fetch_object($sql)) {
+    $params = array(
+              'pid' => $parametre,
+              'uscid' => $configuracioUSC->id,
+              'dinamic' => 0,
+              'notification' => $notification,
+              'user_created' => $userid,
+              'new' => true
+    );
+    _guifi_db_sql('guifi_pfc_parametresConfiguracioUnsolclic',array('id' => $params['id']),$params,$log,$notification);
   }
   return true;
 }
