@@ -1,5 +1,8 @@
 <?php
 
+// carreguem el Twig
+include_once('libs/twig_1.6/lib/Twig/Autoloader.php');
+
 // Generador dels unsolclic
 function guifi_unsolclic($dev, $format = 'html') {
   global $rc_startup;
@@ -76,13 +79,24 @@ function guifi_unsolclic($dev, $format = 'html') {
             // DINAMIC s'ha de fer una segona passatda per buscar el origen de veritat
             $valor = $totalParameters[$origen];
           }
-          $toreplace = "{{ $param }}";
-          $pos = strpos($plantilla, $toreplace);
+          $twigArray[$param] = $valor;
+//           $toreplace = "{{ $param }}";
+//           $pos = strpos($plantilla, $toreplace);
 
-          if ($pos !== false) {
-            $plantilla = str_replace($toreplace, $valor, $plantilla);
-          }
+//           if ($pos !== false) {
+//             $plantilla = str_replace($toreplace, $valor, $plantilla);
+//           }
       }
+
+      Twig_Autoloader::register();
+      
+      $loader = new Twig_Loader_String();
+      $twig = new Twig_Environment($loader);
+      
+//      var_dump($twig);die;
+      //var_dump($twigArray);
+      //echo $twig->render('Hello {{ name }}!', array('name' => 'Fabien'));
+      $plantilla  = $twig->render($plantilla, $twigArray);
     }
     $plantilla = str_replace("\n", "<br>\n", $plantilla);
     echo $plantilla;
