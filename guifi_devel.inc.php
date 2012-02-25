@@ -246,7 +246,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#suffix' => '</td>',
     '#weight' => $form_weight++,
   );
-  /*
+
   $form['radiodev_max'] = array(
     '#type' => 'textfield',
     '#title' => t('Max Radios'),
@@ -330,7 +330,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#prefix' => '<table><tr><td>',
     '#suffix' => '</td></tr></table>',
     '#weight' => $form_weight++,
-  );*/
+  );
   $form['url'] = array(
     '#type' => 'textfield',
     '#title' => t('URL'),
@@ -1048,7 +1048,7 @@ function guifi_devel_parameter($id , $op) {
 
   $headers = array(t('ID'), t('Parameter'), t('Origen'), t('Edit'), t('Delete'));
 
-  $sql = db_query('SELECT * FROM {guifi_pfc_parametres}');
+  $sql = db_query('SELECT * FROM {guifi_pfc_parametres} order by nom ASC');
   while ($parameter = db_fetch_object($sql)) {
     $rows[] = array($parameter->id,
                     $parameter->nom,
@@ -1429,18 +1429,6 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
     '#weight' => $form_weight++,
   );
   
-  $form['plantilla'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Template File'),
-    '#required' => TRUE,
-    '#default_value' => $configuraciousc->plantilla,
-    '#description' => t('Template File'),
-    '#prefix' => '<tr><td colspan="4">',
-    '#suffix' => '</td></tr><tr><td colspan="4">Paràmetres Associats al USC<br>',
-    '#weight' => $form_weight++,
-    '#cols' => 60,
-    '#rows' => 30,
-  );
   
   $sql = db_query('select
                         usc.id, usc.pid, usc.valor, usc.dinamic, p.nom, p.origen
@@ -1450,6 +1438,7 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
                     where
                         usc.uscid = %d
                     order by usc.dinamic asc, p.nom asc', $id);
+  $totalParams = 0;
   while ($paramUSC = db_fetch_object($sql)) {
     $rows[] = array(
     $paramUSC->nom,
@@ -1470,8 +1459,21 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
                 'title' => t('delete paramusc'),
       ))
     );
+    $totalParams++;
   }
-
+  
+  $form['plantilla'] = array(
+      '#type' => 'textarea',
+      '#title' => t('Template File'),
+      '#required' => TRUE,
+      '#default_value' => $configuraciousc->plantilla,
+      '#description' => t('Template File'),
+      '#prefix' => '<tr><td colspan="4">',
+      '#suffix' => '</td></tr><tr><td colspan="4">Paràmetres Associats al USC : '. $totalParams .'<br>',
+      '#weight' => $form_weight++,
+      '#cols' => 60,
+      '#rows' => 30,
+  );
   //$form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
   $headers = array(t('Parametre'), t('Dinamic'), t('Origen'), t('Valor Fixe'),t('Edit'), t('Delete'));
   $output .= theme('table',$headers,$rows);
@@ -1770,7 +1772,7 @@ function afegirParametreConfiguracionsUSC($fid, $parametre, $notification, $user
     $params = array(
               'pid' => $parametre,
               'uscid' => $configuracioUSC->id,
-              'dinamic' => 0,
+              'dinamic' => 1,
               'notification' => $notification,
               'user_created' => $userid,
               'new' => true
