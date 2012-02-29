@@ -87,10 +87,15 @@ function guifi_device_load($id,$ret = 'array') {
           $iparr[$a['id']] = $a;
         }
         asort($ipdec);
+        $zone = node_load(array('nid' => $iparr[0]['zone_id']));
+        $iparr[0]['ospf_zone'] = guifi_get_ospf_zone($zone);
 
         foreach($ipdec as $ka => $foo) {
           $a = $iparr[$ka];
+          $item = _ipcalc($a['ipv4'],$a['netmask']);
           $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']] = $a;
+          // barrejem el qeu em ve de ipcalc aixi tinc totes les propietats de les ips definides a dins de (dev)
+          $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']] = array_merge($device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']],$item);
           // get linked devices
           $qlsql = sprintf('
             SELECT l2.*
@@ -134,6 +139,8 @@ function guifi_device_load($id,$ret = 'array') {
           asort($ipdec2);
           foreach ($ipdec2 as $ka2 => $foo) {
             $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']] = $iparr2[$ka2];
+            $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']]['interface']['ipv4'] = array_merge($device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']]['interface']['ipv4'],array('host_name' => guifi_get_hostname($device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']]['interface']['device_id'])));
+            
           }
         }
       }

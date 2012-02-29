@@ -13,9 +13,9 @@ function guifi_unsolclic($dev, $format = 'html') {
 
   $otype = $format;
 
-  $dev = (object)$dev;
+  $dev = (object)$dev;//var_dump($dev);die;
   
-  if ((isValidConfiguracioUSC($dev->usc_id))||($dev->id=='315')) {
+  if ((isValidConfiguracioUSC($dev->usc_id))||($dev->id=='315') and 1 == 2) {
 
     // FINAL. Treure el fitxer unsolclic resultant com a mime text/plain
     //drupal_set_header('Content-Type: text/plain; charset=utf-8');
@@ -79,24 +79,28 @@ function guifi_unsolclic($dev, $format = 'html') {
             // DINAMIC s'ha de fer una segona passatda per buscar el origen de veritat
             $valor = $totalParameters[$origen];
           }
-          $twigArray[$param] = $valor;
-//           $toreplace = "{{ $param }}";
-//           $pos = strpos($plantilla, $toreplace);
-
-//           if ($pos !== false) {
-//             $plantilla = str_replace($toreplace, $valor, $plantilla);
-//           }
+          //echo "\nparam=$param = $valor $origen";
+          $twigVars[$param] = $valor;
       }
 
       Twig_Autoloader::register();
       
-      $loader = new Twig_Loader_String();
+      //$loader = new Twig_Loader_String();
+      $loader = new Twig_Loader_Filesystem('/home/albert/workspace/guifinet/drupal-6.22/sites/all/modules/guifi/firmware');
       $twig = new Twig_Environment($loader);
       
-//      var_dump($twig);die;
+      // proves de twig
+      $twigVars['dev'] = $dev;
+      $twigVars['all'] = $totalParameters;
+      
+      
+      //var_dump($twigVars);
       //var_dump($twigArray);
       //echo $twig->render('Hello {{ name }}!', array('name' => 'Fabien'));
-      $plantilla  = $twig->render($plantilla, $twigArray);
+      //
+      $twig->addFunction('ip2long', new Twig_Function_Function('ip2long'));
+      $twig->addFunction('long2ip', new Twig_Function_Function('long2ip'));
+      $plantilla  = $twig->render($configuracioUSC['template_file'], $twigVars);
     }
     $plantilla = str_replace("\n", "<br>\n", $plantilla);
     echo $plantilla;
@@ -328,7 +332,7 @@ function guifi_get_paramsFirmware($fid) {
 function guifi_get_configuracioUSC($mid, $fid, $uscid) {
 
   //var_dump("Call guifi_get_configuracioUSC($mid, $fid, $uscid)");
-  $configuracioUSCInfo = db_fetch_array(db_query("select id, mid, fid, enabled, tipologia, plantilla from {guifi_pfc_configuracioUnSolclic} where mid=%d and fid=%d and id = %d limit 1",$mid, $fid, $uscid));
+  $configuracioUSCInfo = db_fetch_array(db_query("select id, mid, fid, enabled, tipologia, plantilla, template_file from {guifi_pfc_configuracioUnSolclic} where mid=%d and fid=%d and id = %d limit 1",$mid, $fid, $uscid));
   if (!empty($configuracioUSCInfo)){
     //var_dump($configuracioUSCInfo);
   } else var_dump("NO m'arriba cap plantilla  per a Model:$mid Firmware:$fid USCid:$uscid !!!!");
@@ -367,9 +371,10 @@ function guifi_get_paramsMMF($devId) {
   return $param;
 }
 
+// DEPRECATED!!!
 function guifi_get_paramsDevice($device_id) {
   $qry = db_query("select
-    z.title zone_name, z.dns_servers zone_dns_servers, z.ntp_servers zone_ntp_servers, z.graph_server zone_graph_server, z.ospf_zone zone_ospf_zone,  z.zone_mode zone_zone_mode, z.proxy_id zone_proxy_id, z.voip_id zone_voip_id,
+    z.id zone_id, z.title zone_name, z.dns_servers zone_dns_servers, z.ntp_servers zone_ntp_servers, z.graph_server zone_graph_server, z.ospf_zone zone_ospf_zone,  z.zone_mode zone_zone_mode, z.proxy_id zone_proxy_id, z.voip_id zone_voip_id,
     n.nid node_id, n.title node_name, loc.lat node_lat, loc.lon node_lon, loc.graph_server node_node_graph_server,
     u.uid user_id, u.name user_name, u.mail user_mail,
     d.nick as device_name, d.type device_type,
@@ -471,7 +476,15 @@ function guifi_indexa_paramsDevice($arrayParametres, $paramPrefixes) {
         }
         //if ($inserir) {
           //echo "<br>afegim resultat[$clau$index]";
-          $resultat[$clau.".".$index] = $valor;
+          
+        // indexant
+        //$resultat[$clau.".".$index] = $valor;
+        
+        // sense indexar
+        $resultat[$clau] = $valor;
+        
+        
+        
         //}
       }
     }
