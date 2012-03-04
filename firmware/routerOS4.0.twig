@@ -1,17 +1,15 @@
 {% macro bgp_peer(id, host_name, ipv4, disabled) %}
 / routing bgp peer
 :foreach i in [find name={{ host_name }}] do={/routing bgp peer remove $i;}
-add name="{{ host_name }}" instance=default remote-address={{ ipv4 }} remote-as={{ id }} \ 
-multihop=no route-reflect=no ttl=default in-filter=ebgp-in out-filter=ebgp-out disabled={{ disabled }}
-{% endmacro %}
+add name="{{ host_name }}" instance=default remote-address={{ ipv4 }} remote-as={{ id }} \
+multihop=no route-reflect=no ttl=default in-filter=ebgp-in out-filter=ebgp-out disabled={{ disabled }}{% endmacro %}
 {% macro ospf_interface(iname, netid, maskbits, ospf_name , ospf_zone, ospf_id, disabled) %}
 / routing ospf interface
-:foreach i in [/routing ospf interface find interface={{ iname }} ] do={/routing ospf interface remove $i;}
+:foreach i in [/routing ospf interface find interface={{ iname }}] do={/routing ospf interface remove $i;}
 add interface={{ iname }}
-/ routing ospf network');
+/ routing ospf network
 :foreach i in [/routing ospf network find network={{ netid }}/{{ maskbits }}] do={/routing ospf network remove $i;}
-add network={{ netid }}/{{ maskbits }} area={{ ospf_name }} disabled={{ disabled }}
-{% endmacro %}
+add network={{ netid }}/{{ maskbits }} area={{ ospf_name }} disabled={{ disabled }}{% endmacro %}
 # Generat per a:
 # {{ firmware_name }}
 :log info "Unsolclic for {{ dev.id }}-{{ dev.nick }} going to be executed."
@@ -49,7 +47,7 @@ add network={{ netid }}/{{ maskbits }} area={{ ospf_name }} disabled={{ disabled
 # &nbsp;&nbsp;to the router with no danger of damage but able to see the config.
 # -Be sure that all packages are activated.
 # -Don't run the script from telnet and being connected through an IP connection at
-# &nbsp;&nbsp;the wLan/Lan interface: This interface will be destroyed during the script. 
+# &nbsp;&nbsp;the wLan/Lan interface: This interface will be destroyed during the script.
 #
 / system identity set name={{ dev.nick }}
 #
@@ -77,7 +75,7 @@ add network={{ netid }}/{{ maskbits }} area={{ ospf_name }} disabled={{ disabled
 #
 # Guest user
 /user
-:foreach i in [find group=read] do={/user remove $i;} 
+:foreach i in [find group=read] do={/user remove $i;}
 add name="guest" group=read address=0.0.0.0/0 comment="" disabled=no
 #
 # Graphing
@@ -147,9 +145,9 @@ frequency={{ channel }} \
     {% endif %}
     {% if ((radio.1.band == '5ghz' or '5ghz-a') and (channel == 5000 )) or
          ((radio.1.band == '2.4ghz-b' or '2ghz-b') and (channel == 0 )) %}
- dfs-mode=radar-detect \ 
+ dfs-mode=radar-detect \
     {% else %}
- dfs-mode=none \ 
+ dfs-mode=none \
     {% endif %}
     {% if radio.antenna_mode =='' %}
  wds-mode=static wds-default-bridge=none wds-default-cost=100 \
@@ -159,7 +157,7 @@ frequency={{ channel }} \
       {% else %}
          {% set antenna_mode = 'ant-a' %}
       {% endif %}
- antenna-mode={{ antenna_mode }} wds-mode=static wds-default-bridge=none wds-default-cost=100 \ 
+ antenna-mode={{ antenna_mode }} wds-mode=static wds-default-bridge=none wds-default-cost=100 \
     {% endif %}
  wds-cost-range=50-150 wds-ignore-ssid=yes hide-ssid=no
     {% for interface_id, interface in radio.interfaces %}
@@ -167,10 +165,10 @@ frequency={{ channel }} \
 # Type: {{ interface.interface_type }}
       {% if interface.interface_type == 'wds/p2p' %}
 # Remove all existing wds interfaces
-:foreach i in [/interface wireless wds find master-interface=wlan{{ radio.radiodev_counter+1 }}] \ 
-do={:foreach n in [/interface wireless wds get $i name] \ 
-do={:foreach inum in [/ip address find interface=$n] \ 
-do={/ip address remove $inum;};}; \ 
+:foreach i in [/interface wireless wds find master-interface=wlan{{ radio.radiodev_counter+1 }}] \
+do={:foreach n in [/interface wireless wds get $i name] \
+do={:foreach inum in [/ip address find interface=$n] \
+do={/ip address remove $inum;};}; \
 /interface wireless wds remove $i;}
         {% if interface.ipv4 %}
           {% for ipv4_id,ipv4 in interface.ipv4 %}
@@ -185,30 +183,29 @@ do={/ip address remove $inum;};}; \
                         {% if not link.interface.mac %}
                           {% set link_mac = 'FF:FF:FF:FF:FF:FF' %}
                         {% else %}
-                          {% set link_mac = link.mac %}
+                          {% set link_mac = link.interface.mac %}
                         {% endif %}
 / interface wireless wds
-add name="{{ wds_name }}" master-interface=wlan{{ radio_id+1 }} wds-address={{ link_mac }} disabled={{ disabled }}
-/ ip address add address={{ ipv4.netid }}/{{ ipv4.maskbits }} network={{ ipv4.netid }} broadcast={{ ipv4.broadcast }} interface={{ wds_name }} disabled={{ disabled }} comment="{{ wds_name }}"
-                        {% if link.routing == 'OSPF' %}
-                          {{ _self.ospf_interface(wds_name , ipv4.netid , ipv4.maskbits , ospf_name , ospf_zone, ospf_id, 'no') }}
-                          {{ _self.bgp_peer(link.device_id, link.interface.ipv4.host_name, link.interface.ipv4.ipv4, 'yes') }}
+add name="wds_{{ link.interface.ipv4.host_name }}" master-interface=wlan{{ radio_id+1 }} wds-address={{ link_mac }} disabled={{ disabled }}
+/ ip address add address={{ ipv4.ipv4 }}/{{ ipv4.maskbits }} network={{ ipv4.netid }} broadcast={{ ipv4.broadcast }} interface=wds_{{ link.interface.ipv4.host_name }} disabled={{ disabled }} comment="wds_{{ link.interface.ipv4.host_name }}"
+                        {% if link.routing == 'OSPF' %}{% spaceless %}
+                          {{ _self.ospf_interface('wds_' ~ link.interface.ipv4.host_name , ipv4.netid , ipv4.maskbits , ospf_name , ospf_zone, ospf_id, 'no') }}
+                          {{ _self.bgp_peer(link.device_id, link.interface.ipv4.host_name, link.interface.ipv4.ipv4, 'yes') }}{% endspaceless %}
                         {% else %}
-                          {{ _self.ospf_interface(wds_name , ipv4.netid , ipv4.maskbits , ospf_name , ospf_zone, ospf_id, 'yes') }}
+                          {{ _self.ospf_interface('wds_' ~ link.interface.ipv4.host_name , ipv4.netid , ipv4.maskbits , ospf_name , ospf_zone, ospf_id, 'yes') }}
                           {{ _self.bgp_peer(link.device_id, link.interface.ipv4.host_name, link.interface.ipv4.ipv4, 'no') }}
                         {% endif %}
                       {% endfor %}
                     {% endif %}
-
-          
           {% endfor %}
         {% endif %}
       {% else %}
+          {# // wLan, wLan/Lan, Hotspot or client #}
           {% if interface.ipv4 %}
              {% for ipv4_id,ipv4 in interface.ipv4 %}
                 {# aixo a l'original no es ben be aixi #}
                 {% set ospf_routerid = ipv4.ipv4 %}
-                {% if interface.interface_type == 'wds/p2p' %}
+                {% if interface.interface_type == 'wLan/Lan' %}
                   {% set iname = interface.interface_type %}
                   {% set ospf_routerid = ipv4.ipv4 %}
                 {% else  %}
@@ -239,8 +236,8 @@ add interface={{ iname }}
 add network={{ ipv4.netid }}/{{ ipv4.maskbits }} area={{ ipv4.ospf_name }} disabled=yes
                 {% endif %}
                 {% if interface.interface_type == 'HotSpot' %}
-# 
-# HotSpot 
+#
+# HotSpot
 /interface wireless
 :foreach i in [find name=hotspot{{ radio.id+1 }}] do={remove $i}
 add name="hotspot{{ radio.id+1 }}" arp=enabled master-interface=wlan{{ radio.id+1 }} ssid="guifi.net-{{ hotspot_ssid}}" disabled="no"
@@ -310,16 +307,16 @@ add address={{ link.interface.ipv4.ipv4 }} mac-address={{ rmac }} client-id={{ l
     {% endfor %}
 {% endspaceless %}
 
-# 
+#
 :delay 1
-# 
+#
   {% endfor %} {# end for radio #}
 {% endif %}
 {% if firewall %}
 {% endif %}
 # Routed device
 #
-# Other cable connections
+# {{ t('Other cable connections') }}
 {% if dev.interfaces %}
   {% for interface_i, interface in dev.interfaces %}
     {% if interface.interface_type == 'vlan' %}
@@ -348,7 +345,7 @@ add chain=srcnat src-address="192.168.0.0/16" dst-address=!192.168.0.0/16 action
 add chain=srcnat src-address="192.168.0.0/16" dst-address=!192.168.0.0/16 action=src-nat to-addresses={{ ospf_routerid }} comment="" disabled=no
 add chain=srcnat src-address="172.16.0.0/12" dst-address=!172.16.0.0/12 protocol=!ospf action=src-nat to-addresses={{ ospf_routerid }} comment="" disabled=no
 {% endif  %}
-# 
+#
 # Enrutament BGP
 # BGP & OSPF Filters
 :foreach i in [/routing filter find chain=ospf-in] do={/routing filter remove $i;}
@@ -365,25 +362,25 @@ add action=accept chain=ospf-out comment="6. Allow send 10.x routes to OSPF neig
 add action=accept chain=ospf-out comment="7. Allow send 172.x routes to OSPF neighbor" disabled=no invert-match=no prefix=172.16.0.0/12 prefix-length=8-32
 add action=discard chain=ospf-out comment="8. Discard send non 10.x and 172.x to OSPF neighbor" disabled=no invert-match=no
 #
-#BGP instance
+# {{ t('BGP instance') }}
 / routing bgp instance
-set default name="default" as={{ dev.id }} router-id={{ ospf_routerid }} \ 
+set default name="default" as={{ dev.id }} router-id={{ ospf_routerid }} \
 {% if firmware_name == 'RouterOSv4.0+' or firmware_name == 'RouterOSv4.7+' or firmware_name == 'RouterOSv5.x' %}
-redistribute-connected=no redistribute-static=no redistribute-rip=no \ 
+redistribute-connected=no redistribute-static=no redistribute-rip=no \
 {% else %}
-redistribute-connected=yes redistribute-static=yes redistribute-rip=yes \ 
+redistribute-connected=yes redistribute-static=yes redistribute-rip=yes \
 {% endif  %}
-redistribute-ospf=yes redistribute-other-bgp=yes out-filter=ebgp-out \ 
+redistribute-ospf=yes redistribute-other-bgp=yes out-filter=ebgp-out \
 client-to-client-reflection=yes comment="" disabled=no
 #
-# OSPF Routing
+# {{ t('OSPF Routing') }}
 {% if firmware_name == 'RouterOSv2.9' or firmware_name == 'RouterOSv3.x' or firmware_name == 'RouterOSv5.x' %}
-/routing ospf set router-id={{ ospf_routerid }} distribute-default=never redistribute-connected=no \ 
+/routing ospf set router-id={{ ospf_routerid }} distribute-default=never redistribute-connected=no \
 redistribute-static=no redistribute-rip=no redistribute-bgp=as-type-1
 {% else %}
-/routing ospf instance set default name=default router-id={{ ospf_routerid }} comment="" disabled=no distribute-default=never \ 
+/routing ospf instance set default name=default router-id={{ ospf_routerid }} comment="" disabled=no distribute-default=never \
 redistribute-bgp=as-type-1 redistribute-connected=no redistribute-other-ospf=no redistribute-rip=no redistribute-static=no in-filter=ospf-in out-filter=ospf-out
 {% endif  %}
 #
-#:log info "Unsolclic for {{ dev.id}}-{{ dev.nick }} executed."
+:log info "Unsolclic for {{ dev.id}}-{{ dev.nick }} executed."
 /

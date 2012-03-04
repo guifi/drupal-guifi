@@ -15,7 +15,7 @@ function guifi_unsolclic($dev, $format = 'html') {
 
   $dev = (object)$dev;//var_dump($dev);die;
   
-  if ((isValidConfiguracioUSC($dev->usc_id))||($dev->id=='315') and 1 == 2) {
+  if (isValidConfiguracioUSC($dev->usc_id)) {
 
     // FINAL. Treure el fitxer unsolclic resultant com a mime text/plain
     //drupal_set_header('Content-Type: text/plain; charset=utf-8');
@@ -91,16 +91,14 @@ function guifi_unsolclic($dev, $format = 'html') {
       
       // proves de twig
       $twigVars['dev'] = $dev;
+      $twigVars['ospf_name'] = 'backbone';
       $twigVars['all'] = $totalParameters;
       
-      
-      //var_dump($twigVars);
-      //var_dump($twigArray);
-      //echo $twig->render('Hello {{ name }}!', array('name' => 'Fabien'));
-      //
       $twig->addFunction('ip2long', new Twig_Function_Function('ip2long'));
       $twig->addFunction('long2ip', new Twig_Function_Function('long2ip'));
-      $plantilla  = $twig->render($configuracioUSC['template_file'], $twigVars);
+      $twig->addFunction('t', new Twig_Function_Function('t'));
+      
+       $plantilla  = $twig->render($configuracioUSC['template_file'], $twigVars);
     }
     $plantilla = str_replace("\n", "<br>\n", $plantilla);
     echo $plantilla;
