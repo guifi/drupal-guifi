@@ -1,7 +1,7 @@
 <?php
 
 // carreguem el Twig
-include_once('libs/twig_1.6/lib/Twig/Autoloader.php');
+include_once('contrib/twig_1.6/lib/Twig/Autoloader.php');
 
 // Generador dels unsolclic
 function guifi_unsolclic($dev, $format = 'html') {
