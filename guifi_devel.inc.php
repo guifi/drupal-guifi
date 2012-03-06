@@ -156,6 +156,10 @@ function guifi_devel_devices($devid , $op) {
       $jquery1 = HelperMultipleSelect('guifi-devel-devices-form','firmwaresCompatibles', 'firmwaresTots');
       drupal_add_js("if (Drupal.jsEnabled) { $jquery1 }", 'inline');
       return drupal_get_form('guifi_devel_devices_form',$devid);
+      
+    case 'duplicate':
+      return drupal_get_form('guifi_devel_devices_duplicate_form',$devid);
+      
     case 'delete':
       guifi_log(GUIFILOG_TRACE,'guifi_devel_devices_delete()',$devid);
       return drupal_get_form(
@@ -168,7 +172,7 @@ function guifi_devel_devices($devid , $op) {
   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/device/add\'"/>';
   $output .= '</form>';
 
-  $headers = array(t('ID Model'), t('Manufacturer'), t('Model'), t('Enabled Firms'), t('Edit'), t('Delete'));
+  $headers = array(t('ID Model'), t('Manufacturer'), t('Model'), t('Enabled Firms'), t('Edit'), t('Delete'), t('Duplicate'));
 
   $sql = db_query('SELECT
                         m.mid, m.url as model_url , m.model,  mf.name as manufacturer_name, mf.url as manufacturer_url
@@ -199,12 +203,49 @@ function guifi_devel_devices($devid , $op) {
     array(
                 'html' => TRUE,
                 'title' => t('delete device'),
-    )));
+    )).'</td><td>'.
+    l(guifi_img_icon('edit.png'),'guifi/menu/devel/device/'.$dev->mid.'/duplicate',
+    array(
+                'html' => TRUE,
+                'title' => t('duplicatedevice')
+    ))
+    );
   }
   
   $output .= theme('table',$headers,$rows);
   print theme('page',$output, FALSE);
   return;
+}
+
+// Duplicate Device Form
+function guifi_devel_devices_duplicate_form($form_state, $devid) {
+
+  $sql = db_query('SELECT * FROM {guifi_model} WHERE mid = %d', $devid);
+  $dev = db_fetch_object($sql);
+
+  // indicador de new pq volem insertar
+  $form['new'] = array('#type' => 'hidden', '#value' => TRUE);
+
+  // id del que volem copiar les propietats
+  $form['originalmid'] = array('#type' => 'hidden','#value' => $devid);
+
+  $form['model'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Model Name'),
+    '#required' => TRUE,
+    '#default_value' => 'Copy of '. $dev->model,
+    '#size' => 32,
+    '#maxlength' => 50,
+    '#description' => t('Device model name, please, use a clear and short description.<br />
+        All Other properties will be automatically transferred.'),
+    '#prefix' => '<td>',
+    '#suffix' => '</td>',
+    '#weight' => $form_weight++,
+  );
+
+  $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
+
+  return $form;
 }
 
 // Device Models Form
@@ -440,8 +481,44 @@ function guifi_devel_devices_form_submit($form, &$form_state) {
   guifi_log(GUIFILOG_TRACE,'function guifi_devel_devices_form_submit()',$form_state);
 
   guifi_devel_devices_save($form_state['values']);
+  
   drupal_goto('guifi/menu/devel/device');
    return;
+}
+
+function guifi_devel_devices_duplicate_form_submit($form, &$form_state) {
+  guifi_log(GUIFILOG_TRACE,'function guifi_devel_devices_duplicate_form_submit()',$form_state);
+
+  $originalmid = $form_state['values']['originalmid'];
+  
+  $sql = db_query('SELECT * FROM {guifi_model} WHERE mid = %d', $originalmid);
+  $originaldev = db_fetch_object($sql);
+  
+  foreach($originaldev as $property => $value)  {
+    
+    // el nom del model no el volem duplicar
+    if ($property!='model') $form_state['values'][$property] = $value;
+  }
+  
+  // eliminem els camps addicionals del control de formularis
+  unset($form_state['values']['originalmid']);
+  unset($form_state['values']['op']);
+  unset($form_state['values']['submit']);
+  unset($form_state['values']['form_build_id']);
+  unset($form_state['values']['form_token']);
+  unset($form_state['values']['form_id']);
+  
+  // recuperar els firmwares suportats del model original
+  $sql= db_query("SELECT distinct(fid) FROM {guifi_pfc_configuracioUnSolclic} WHERE mid = %d order by fid asc", $originalmid);
+  while ($originalFirms = db_fetch_object($sql)) {
+    $form_state['values']['firmwaresCompatibles'][$originalFirms->fid] = $originalFirms->fid;
+  }
+  
+  // desar el nou device
+  guifi_devel_devices_save($form_state['values']);
+
+  drupal_goto('guifi/menu/devel/device');
+  return;
 }
 
 function guifi_devel_devices_save($edit) {
@@ -451,26 +528,30 @@ function guifi_devel_devices_save($edit) {
   $log ='';
 
   guifi_log(GUIFILOG_TRACE,'function guifi_devel_devices_save()',$edit);
-
+  
+  // guardem primer perque si vinc de un insert  poder tenir el id i operar amb els camps relacionats
+  $edit2 = _guifi_db_sql('guifi_model',array('mid' => $edit['mid']),$edit,$log,$to_mail);
+  
   // recollida de parametresFirmware actuals
-  $sql= db_query("SELECT distinct(fid) FROM {guifi_pfc_configuracioUnSolclic} WHERE mid = %d order by fid asc", $edit['mid']);
+  $sql= db_query("SELECT distinct(fid) FROM {guifi_pfc_configuracioUnSolclic} WHERE mid = %d order by fid asc", $edit2['mid']);
   while ($oldFirms = db_fetch_object($sql)) {
     $alreadyPresent[] = $oldFirms->fid;
   }
-  
+
   // recollida  de firmwares compatibles
   if (isset($edit['firmwaresCompatibles'])){
     // de tots els que em passen, mirar si ja els tenia a la BD
     foreach ($edit['firmwaresCompatibles'] as $firmware) {
       if (!in_array($firmware, $alreadyPresent)) {
         $params = array(
-          'mid' => $edit['mid'],
+          'mid' => $edit2['mid'],
           'fid'=> $firmware,
           'notification' => $edit['notification'],
           'new' => true
         );
-         _guifi_db_sql('guifi_pfc_configuracioUnSolclic',array('mid' => $params['mid']),$params,$log,$to_mail);
+         $params = _guifi_db_sql('guifi_pfc_configuracioUnSolclic',array('mid' => $params['mid']),$params,$log,$to_mail);
          
+         // TODO si fem el params = de sobre aleshores no cal tornar a el ultim mid, ja em ve del insert!
          // recuperem el id del uscid que acabem de crear
          $uscid = db_fetch_array(db_query("SELECT max(id) mid FROM {guifi_pfc_configuracioUnSolclic} "));
          
@@ -483,7 +564,7 @@ function guifi_devel_devices_save($edit) {
     }
     // de tots els que tenia a la BD, mirar si me'ls han tret i esborrar-los
     
-    
+
     foreach ($alreadyPresent as $firmware) {
       if (!in_array($firmware, $edit['firmwaresCompatibles'])) {
         // IMPORTANT abans de esborrar comprovar que no tinguin configuracions USC validades
@@ -520,8 +601,6 @@ function guifi_devel_devices_save($edit) {
     }
   }
   
-
-  _guifi_db_sql('guifi_model',array('mid' => $edit['mid']),$edit,$log,$to_mail);
 
   drupal_set_message( 'Model Actualitzat : '. $strGuardats . $strBorrats);
   
