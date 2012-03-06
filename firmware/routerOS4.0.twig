@@ -208,26 +208,26 @@ add name="wds_{{ link.interface.ipv4.host_name }}" master-interface=wlan{{ radio
           {% if interface.ipv4 %}
              {% for ipv4_id,ipv4 in interface.ipv4 %}
                 {# aixo a l'original no es ben be aixi #}
-                {% set ospf_routerid = ipv4.ipv4 %}
                 {% if interface.interface_type == 'wLan/Lan' %}
                   {% set iname = interface.interface_type %}
                   {% set ospf_routerid = ipv4.ipv4 %}
                 {% else  %}
-                  {% set iname = 'wlan' ~ radio_id+1 %}
+                  {% set radioindex = radio_id+1 %}
+                  {% set iname = 'wlan' ~ radioindex %}
                 {% endif %}
 /ip address
                 {% if interface.interface_type == 'Wan'%}
 :foreach i in [find interface={{ iname }}] do={remove $i}
                 {% endif  %}
 :foreach i in [find address="{{ ipv4.ipv4 }}/{{ ipv4.maskbits }}"] do={remove $i}
-/ ip address add address={{ ipv4.ipv4 }}/{{ ipv4.maskbits }} network={{ ipv4.netid }} broadcast={{ ipv4.broadcast }} interface={{ interface.interface_type }} disabled=no
+/ ip address add address={{ ipv4.ipv4 }}/{{ ipv4.maskbits }} network={{ ipv4.netid }} broadcast={{ ipv4.broadcast }} interface={{ iname }} disabled=no
 / routing bgp network
 :foreach i in [/routing bgp network find network={{ ipv4.netid }}/{{ ipv4.maskbits }}] do={/routing bgp network remove $i;}
 add network={{ ipv4.netid }}/{{ ipv4.maskbits }} disabled=no
                 {% if dev.mode != 'client' %}
 / routing ospf interface
-:foreach i in [/routing ospf interface find interface={{ interface.interface_type }}] do={/routing ospf interface remove $i;}
-add interface={{ interface.interface_type }}
+:foreach i in [/routing ospf interface find interface={{ iname }}] do={/routing ospf interface remove $i;}
+add interface={{ iname }}
 / routing ospf network
 :foreach i in [/routing ospf network find network={{ ipv4.netid }}/{{ ipv4.maskbits }}] do={/routing ospf network remove $i;}
 add network={{ ipv4.netid }}/{{ ipv4.maskbits }} area={%if ipv4.ospf_name=='' %}backbone{% else %}{{ ipv4.ospf_name }}{% endif %} disabled=no
@@ -280,12 +280,12 @@ end of HotSpot
                     {% endif %}
 #
 # DHCP
-:foreach i in [/ip pool find name=dhcp-{{ interface.interface_type }}] do={/ip pool remove $i;}
-/ip pool add name=dhcp-{{ interface.interface_type }} ranges={{ long2ip(maxip) }}-{{ ipv4.netend }}
-:foreach i in [/ip dhcp-server find name=dhcp-{{ interface.interface_type }}] do={/ip dhcp-server remove $i;}
-/ip dhcp-server add name=dhcp-{{ interface.interface_type }} interface={{ interface.interface_type }} address-pool=dhcp-{{ interface.interface_type }} disabled={{ dhcpDisabled }}
+:foreach i in [/ip pool find name=dhcp-{{ iname }}] do={/ip pool remove $i;}
+/ip pool add name=dhcp-{{ iname }} ranges={{ long2ip(maxip) }}-{{ ipv4.netend }}
+:foreach i in [/ip dhcp-server find name=dhcp-{{ iname }}] do={/ip dhcp-server remove $i;}
+/ip dhcp-server add name=dhcp-{{ iname }} interface={{ iname }} address-pool=dhcp-{{ iname }} disabled={{ dhcpDisabled }}
 :foreach i in [/ip dhcp-server network find address="{{ ipv4.netid }}/{{ ipv4.maskbits }}"] do={/ip dhcp-server network remove $i;}
-/ip dhcp-server network add address={{ ipv4.netid }}/{{ ipv4.maskbits }} gateway={{ ipv4.netstart }} domain=guifi.net comment=dhcp-{{ interface.interface_type }}
+/ip dhcp-server network add address={{ ipv4.netid }}/{{ ipv4.maskbits }} gateway={{ ipv4.netstart }} domain=guifi.net comment=dhcp-{{ iname }}
 /ip dhcp-server lease
 :foreach i in [find comment=""] do={remove $i;}
 :delay 1
@@ -299,7 +299,7 @@ end of HotSpot
                         {% else %}
                           {% set rmac = link.interface.mac  %}
                         {% endif %}
-add address={{ link.interface.ipv4.ipv4 }} mac-address={{ rmac }} client-id={{ link.interface.ipv4.host_name }} server=dhcp-{{ interface.interface_type }}
+add address={{ link.interface.ipv4.ipv4 }} mac-address={{ rmac }} client-id={{ link.interface.ipv4.host_name }} server=dhcp-{{ iname }}
                       {% endfor %}
                       #
                     {% endif %}
@@ -339,7 +339,7 @@ add address={{ link.interface.ipv4.ipv4 }} mac-address={{ rmac }} client-id={{ l
   {% endfor %}
 {% endif  %}
 #
-# Internal addresses NAT
+# {{ t('Internal addresses NAT') }}
 :foreach i in [/ip firewall nat find src-address="172.16.0.0/12"] do={/ip firewall nat remove $i;}
 :foreach i in [/ip firewall nat find src-address="192.168.0.0/16"] do={/ip firewall nat remove $i;}
 /ip firewall nat
@@ -350,8 +350,8 @@ add chain=srcnat src-address="192.168.0.0/16" dst-address=!192.168.0.0/16 action
 add chain=srcnat src-address="172.16.0.0/12" dst-address=!172.16.0.0/12 protocol=!ospf action=src-nat to-addresses={{ ospf_routerid }} comment="" disabled=no
 {% endif  %}
 #
-# Enrutament BGP
-# BGP & OSPF Filters
+# {{ t('BGP Routing') }}
+# {{ t('BGP & OSPF Filters') }}
 :foreach i in [/routing filter find chain=ospf-in] do={/routing filter remove $i;}
 :foreach i in [/routing filter find chain=ospf-out] do={/routing filter remove $i;}
 :foreach i in [/routing filter find chain=ebgp-in] do={/routing filter remove $i;}
