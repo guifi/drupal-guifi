@@ -11,7 +11,7 @@ function guifi_device_load($id,$ret = 'array') {
   guifi_log(GUIFILOG_FULL,'function guifi_device_load()');
 
   $device = db_fetch_array(db_query('
-    SELECT d.*, z.zone_mode
+    SELECT d.*, z.zone_mode, l.nick as node_nick
     FROM {guifi_devices} d, {guifi_location} l, {guifi_zone} z
     WHERE d.id = %d
      AND d.nid = l.id AND l.zone_id=z.id',

@@ -52,18 +52,22 @@ add network={{ netid }}/{{ maskbits }} area={{ ospf_name }} disabled={{ disabled
 / system identity set name={{ dev.nick }}
 #
 # DNS (client & server cache) zone: {{ all.zone_id }}
-{% if not all.secondarydns is null  %}
-/ip dns set primary-dns={{ all.zone_dns_servers }},{{ all.secondarydns }} allow-remote-requests=yes
+{% if all.zone_primary_dns %}
+{% if all.zone_secondary_dns %}
+/ip dns set primary-dns={{ all.zone_primary_dns }} secondary-dns={{ all.zone_secondary_dns }} allow-remote-requests=yes
 {% else %}
-/ip dns set primary-dns={{ all.zone_dns_servers }} allow-remote-requests=yes
+/ip dns set primary-dns={{ all.zone_primary_dns }} allow-remote-requests=yes
+{% endif %}
 {% endif %}
 :delay 1
 #
 # NTP (client & server cache) zone:  {{ all.zone_id }}
-{% if all.zone_secondary_ntp_servers %}
-/system ntp client set enabled=yes mode=unicast primary-ntp={{ all.zone_ntp_servers }} secondary-ntp={{ all.zone_secondary_ntp_servers }}
+{% if all.zone_primary_ntp %}
+{% if all.zone_secondary_ntp %}
+/system ntp client set enabled=yes mode=unicast primary-ntp={{all.zone_primary_ntp }} secondary-ntp={{ all.zone_secondary_ntp }}
 {% else %}
-/system ntp client set enabled=yes mode=unicast primary-ntp={{ all.zone_ntp_servers }}
+/system ntp client set enabled=yes mode=unicast primary-ntp={{ all.zone_primary_ntp }}
+{% endif %}
 {% endif %}
 :delay 1
 #
@@ -71,7 +75,7 @@ add network={{ netid }}/{{ maskbits }} area={{ ospf_name }} disabled={{ disabled
 / tool bandwidth-server set enabled=yes authenticate=no allocate-udp-ports-from=2000
 #
 # SNMP
-/snmp set contact="guifi@guifi.net" enabled=yes location="{{ all.node_name|replace({' ': ''})  }}"
+/snmp set contact="guifi@guifi.net" enabled=yes location="{{ dev.node_nick }}"
 #
 # Guest user
 /user
@@ -118,7 +122,7 @@ add interface=wlan1 bridge=wLan/Lan
 radio-name="{{ radio.ssid }}" mode={{ radio.mode }}-bridge ssid="guifi.net-{{ radio.ssid }}" \
 {% if radio.mode == 'ap' %}
    {% set mode = 'ap-bridge' %}
-    {% if radio.channel != 5000 %}
+    {% if radio.channel < 5000 %}
       {% set band = '2.4ghz-b' %}
     {% else %}
       {% set band = '5ghz' %}
@@ -188,9 +192,9 @@ do={/ip address remove $inum;};}; \
 / interface wireless wds
 add name="wds_{{ link.interface.ipv4.host_name }}" master-interface=wlan{{ radio_id+1 }} wds-address={{ link_mac }} disabled={{ disabled }}
 / ip address add address={{ ipv4.ipv4 }}/{{ ipv4.maskbits }} network={{ ipv4.netid }} broadcast={{ ipv4.broadcast }} interface=wds_{{ link.interface.ipv4.host_name }} disabled={{ disabled }} comment="wds_{{ link.interface.ipv4.host_name }}"
-                        {% if link.routing == 'OSPF' %}{% spaceless %}
+                        {% if link.routing == 'OSPF' %}
                           {{ _self.ospf_interface('wds_' ~ link.interface.ipv4.host_name , ipv4.netid , ipv4.maskbits , ospf_name , ospf_zone, ospf_id, 'no') }}
-                          {{ _self.bgp_peer(link.device_id, link.interface.ipv4.host_name, link.interface.ipv4.ipv4, 'yes') }}{% endspaceless %}
+                          {{ _self.bgp_peer(link.device_id, link.interface.ipv4.host_name, link.interface.ipv4.ipv4, 'yes') }}
                         {% else %}
                           {{ _self.ospf_interface('wds_' ~ link.interface.ipv4.host_name , ipv4.netid , ipv4.maskbits , ospf_name , ospf_zone, ospf_id, 'yes') }}
                           {{ _self.bgp_peer(link.device_id, link.interface.ipv4.host_name, link.interface.ipv4.ipv4, 'no') }}

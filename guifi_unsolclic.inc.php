@@ -85,20 +85,36 @@ function guifi_unsolclic($dev, $format = 'html') {
 
       Twig_Autoloader::register();
       
-      //$loader = new Twig_Loader_String();
-      $loader = new Twig_Loader_Filesystem('/home/albert/workspace/guifinet/drupal-6.22/sites/all/modules/guifi/firmware');
+      $loader = new Twig_Loader_String();
+      //$loader = new Twig_Loader_Filesystem('/home/albert/workspace/guifinet/drupal-6.22/sites/all/modules/guifi/firmware');
       $twig = new Twig_Environment($loader);
       
       // proves de twig
+      $zone = guifi_zone_load($totalParameters['zone_id']);
+      list($primary_dns,$secondary_dns) = explode(' ',guifi_get_dns($zone,2));
+      $totalParameters['zone_primary_dns'] = $primary_dns;
+      $totalParameters['zone_secondary_dns'] = $secondary_dns;
+      
+      list($primary_ntp,$secondary_ntp) = explode(' ',guifi_get_ntp($zone));
+      $totalParameters['zone_primary_ntp'] = $primary_ntp;
+      $totalParameters['zone_secondary_ntp'] = $secondary_ntp;
+      
+//       var_dump( $primary_dns);
+//       var_dump($secondary_dns);
+//       var_dump($totalParameters);
+      
       $twigVars['dev'] = $dev;
       $twigVars['ospf_name'] = 'backbone';
       $twigVars['all'] = $totalParameters;
+
       
       $twig->addFunction('ip2long', new Twig_Function_Function('ip2long'));
       $twig->addFunction('long2ip', new Twig_Function_Function('long2ip'));
       $twig->addFunction('t', new Twig_Function_Function('t'));
       
-       $plantilla  = $twig->render($configuracioUSC['template_file'], $twigVars);
+       //$plantilla  = $twig->render($configuracioUSC['template_file'], $twigVars);
+       $plantilla  = $twig->render($plantilla, $twigVars);
+//
     }
     $plantilla = str_replace("\n", "<br>\n", $plantilla);
     echo $plantilla;
