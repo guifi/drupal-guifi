@@ -515,13 +515,14 @@ function guifi_devel_devices_duplicate_form_submit($form, &$form_state) {
   }
   
   // desar el nou device
-  guifi_devel_devices_save($form_state['values']);
+  guifi_devel_devices_save($form_state['values'], $originalmid);
 
   drupal_goto('guifi/menu/devel/device');
   return;
 }
 
-function guifi_devel_devices_save($edit) {
+// El parametre OPCIONAL $originalmid serveix per si estem copiant un model , poder aplicar al nou model algunes de les seves propietats
+function guifi_devel_devices_save($edit, $originalmid=null) {
   global $user;
 
   $to_mail = $edit['notification'];
@@ -532,24 +533,37 @@ function guifi_devel_devices_save($edit) {
   // guardem primer perque si vinc de un insert  poder tenir el id i operar amb els camps relacionats
   $edit2 = _guifi_db_sql('guifi_model',array('mid' => $edit['mid']),$edit,$log,$to_mail);
   
+  // si estic fent un model nou, copia de $originalmid vull qeu la consulta dels firmwares es basi en les de l'original
+  $midFirms = $edit2['mid'];
+  if ($originalmid){
+    $midFirms = $originalmid;
+  }
+  
   // recollida de parametresFirmware actuals
-  $sql= db_query("SELECT distinct(fid) FROM {guifi_pfc_configuracioUnSolclic} WHERE mid = %d order by fid asc", $edit2['mid']);
+  $sql= db_query("SELECT distinct(fid), plantilla FROM {guifi_pfc_configuracioUnSolclic} WHERE mid = %d order by fid asc", $midFirms);
   while ($oldFirms = db_fetch_object($sql)) {
     $alreadyPresent[] = $oldFirms->fid;
+    $plantilles[$oldFirms->fid] =  $oldFirms->plantilla;
   }
 
   // recollida  de firmwares compatibles
   if (isset($edit['firmwaresCompatibles'])){
     // de tots els que em passen, mirar si ja els tenia a la BD
     foreach ($edit['firmwaresCompatibles'] as $firmware) {
-      if (!in_array($firmware, $alreadyPresent)) {
+
+      // si ja el teniem abans no l'insertem, pero si estem fent una copia aleshores si (quan $originalmid != null)
+      if (!in_array($firmware, $alreadyPresent)||$originalmid) {
+       
         $params = array(
           'mid' => $edit2['mid'],
           'fid'=> $firmware,
           'notification' => $edit['notification'],
+          'plantilla' => $plantilles[$firmware],
+          'enabled' => 0,
           'new' => true
         );
-         $params = _guifi_db_sql('guifi_pfc_configuracioUnSolclic',array('mid' => $params['mid']),$params,$log,$to_mail);
+        // insertem una nova configuracio USC
+        $params = _guifi_db_sql('guifi_pfc_configuracioUnSolclic',array('mid' => $params['mid']),$params,$log,$to_mail);
          
          // TODO si fem el params = de sobre aleshores no cal tornar a el ultim mid, ja em ve del insert!
          // recuperem el id del uscid que acabem de crear
@@ -559,12 +573,11 @@ function guifi_devel_devices_save($edit) {
          crearParametresConfiguracioUSC($uscid['mid'], $firmware, $to_mail, $user->id);
          
       }
-      // guardem els firmwares qeu hem afegit
+      // guardem els firmwares que hem afegit
       $kept[] = $firmware;
     }
-    // de tots els que tenia a la BD, mirar si me'ls han tret i esborrar-los
     
-
+    // de tots els que tenia a la BD, mirar si me'ls han tret i esborrar-los
     foreach ($alreadyPresent as $firmware) {
       if (!in_array($firmware, $edit['firmwaresCompatibles'])) {
         // IMPORTANT abans de esborrar comprovar que no tinguin configuracions USC validades
@@ -580,7 +593,6 @@ function guifi_devel_devices_save($edit) {
           
           // si esborrem la configuracio USC tambe hauriem d'esborrarli els parametres associats
           db_query("DELETE FROM {guifi_pfc_parametresConfiguracioUnsolclic} WHERE uscid=%d", $configuracions->uscid);
-          
           
           $deleted[] = $firmware;
         } else {
@@ -600,7 +612,6 @@ function guifi_devel_devices_save($edit) {
       $strBorrats = ' Firmwares borrats '. $borrats;
     }
   }
-  
 
   drupal_set_message( 'Model Actualitzat : '. $strGuardats . $strBorrats);
   
