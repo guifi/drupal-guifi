@@ -558,10 +558,12 @@ function guifi_devel_devices_save($edit, $originalmid=null) {
           'mid' => $edit2['mid'],
           'fid'=> $firmware,
           'notification' => $edit['notification'],
-          'plantilla' => $plantilles[$firmware],
+          'plantilla' => unsolclicDefaultTemplate($edit2['model'], $firmwareName),
           'enabled' => 0,
           'new' => true
         );
+        // per copiar el valor de la plantilla origen  'planitlla' => $plantilles[$firmware]
+        
         // insertem una nova configuracio USC
         $params = _guifi_db_sql('guifi_pfc_configuracioUnSolclic',array('mid' => $params['mid']),$params,$log,$to_mail);
          
@@ -1422,19 +1424,24 @@ function guifi_devel_configuracio_usc($id , $op) {
   }
   $rows = array();
 
-  $headers = array(t('Manufacturer'), t('Model'), t('FirmWare'), t('enabled'), t('type'), t('Edit'), t('Delete'));
+  $headers = array(t('Manufacturer'), t('Model'), t('FirmWare'), t('enabled'), t('#parameters'), t('Edit'), t('Delete'));
 
   $sql = db_query('SELECT
-        usc.id, usc.mid, usc.fid, usc.enabled, usc.plantilla, usc.tipologia,
+        usc.id, usc.mid, usc.fid, usc.enabled, usc.tipologia,
         mf.name as fabricant, m.model,
-        f.nom as nomfirmware
+        f.nom as nomfirmware,
+        count(pusc.id) as numparameters
     FROM
         {guifi_pfc_configuracioUnSolclic} usc
         inner {join guifi_pfc_firmware} f on f.id = usc.fid
         inner {join guifi_model} m on m.mid = usc.mid
         inner {join guifi_manufacturer} mf on mf.fid = m.fid
+        inner {join guifi_pfc_parametresConfiguracioUnsolclic} pusc on pusc.uscid = usc.id
+     group by usc.id, usc.mid, usc.fid, usc.enabled, usc.tipologia
      order by usc.enabled desc, fabricant asc, model asc, nomfirmware asc
   ');
+  
+  
   
   $radioMode  = array(0 => "Ap or AP with WDS",
                       1 => "Wireless Client",
@@ -1446,7 +1453,8 @@ function guifi_devel_configuracio_usc($id , $op) {
       $configuraciousc->model,
       $configuraciousc->nomfirmware,
       $configuraciousc->enabled,
-      $radioMode[$configuraciousc->tipologia],
+      //$radioMode[$configuraciousc->tipologia],
+      $configuraciousc->numparameters,
       l(guifi_img_icon('edit.png'),'guifi/menu/devel/configuraciousc/'.$configuraciousc->id.'/edit',
     array(
               'html' => TRUE,
@@ -1890,6 +1898,29 @@ function getUSCid($model, $firmware){
   $usc = db_fetch_object($sql);
   
   return $uscId->id;
+}
+
+function unsolclicDefaultTemplate($model, $firmware) {
+  $version = "vX.XX-TODO";
+  $listsURL = 'https://lists.guifi.net/listinfo/guifi-rdes';
+  $sourceURL = 'https://gitorious.org/guifi/drupal-guifi';
+  $getStartedURL = 'http://wiki.guifi.net/wiki/Documentaci%C3%B3_de_guifi.net';
+
+  $output  = _outln_comment_get();
+  $output .= _outln_comment_get($model);
+  $output .= _outln_comment_get($firmware. 'unsolclic version: '.$version);
+  $output .= _outln_comment_get();
+  $output .= _outln_comment_get(t("This firmware configuration is under construction or not yet started development."));
+  $output .= _outln_comment_get(t("If you want to collaborate and contribute with code to make it work,"));
+  $output .= _outln_comment_get(t("please subscibre to our development lists at:"));
+  $output .= _outln_comment_get($listsURL);
+  $output .= _outln_comment_get(t("The source for this application can be downloaded from the GIT repository:"));
+  $output .= _outln_comment_get($sourceURL);
+  $output .= _outln_comment_get(t("To get started with guifi.net development visit the documentation :"));
+  $output .= _outln_comment_get($getStartedURL);
+  $output .= _outln_comment_get(t("Contributions are always welcome!"));
+  $output .= _outln_comment();
+  return $output;
 }
 
 ?>

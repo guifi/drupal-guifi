@@ -217,6 +217,14 @@ function _outln_comment($string = '') {
   print "# ".$string;
   if ($otype == 'html') print "\n<br />"; else print "\n";
 }
+function _outln_comment_get($string = '') {
+  global $otype;
+
+  $output = "# $string \n";
+  if ($otype == 'html') $output .= "<br />";
+  return $output;
+}
+
 
 function _outln_nvram($parameter, $value) {
   global $otype;
