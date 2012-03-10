@@ -872,7 +872,8 @@ function guifi_devel_firmware_save($edit) {
   
   // recollida  de parametres del firmware
   if (isset($edit['parametres_associats'])){
-    // de tots els que em passen, mirar si ja els tenia a la BD
+    
+    // de tots els que em passen, si encara no els tenia afegir-los
     foreach ($edit['parametres_associats'] as $parametre) {
       if (!in_array($parametre, $alreadyPresent)) {
         $params = array(
@@ -891,25 +892,26 @@ function guifi_devel_firmware_save($edit) {
     foreach ($alreadyPresent as $parametre) {
       if (!in_array($parametre, $edit['parametres_associats'])) {
         
-        // IMPORTANT abans de esborrar comprovar que no formin part de tinguin configuracions USC validades
+        // IMPORTANT abans de esborrar comprovar que no formin part de configuracions USC validades
         $sql = db_query('select
-                                  pusc.pid, p
+                                  pusc.pid, usc.enabled, usc.id uscid
                               from
-                                  guifi_pfc_parametresConfiguracioUnsolclic pusc
-                                  inner join guifi_pfc_configuracioUnSolclic usc on usc.id = pusc.uscid
-                                  inner join guifi_pfc_firmware f on f.id = usc.fid
-                              where and usc.fid = ? and pusc.pid = ? ', $edit['id'], $parametre);
-        $parametres = db_fetch_object($sql);
+                                  {guifi_pfc_parametresConfiguracioUnsolclic} pusc
+                                  inner join {guifi_pfc_configuracioUnSolclic} usc on usc.id = pusc.uscid
+                              where usc.fid = %d and pusc.pid = %d ', $edit['id'], $parametre);
+        
+        $configuracions = db_fetch_object($sql);
         
         if (!$configuracions->enabled) {
         
           db_query("DELETE FROM {guifi_pfc_parametresFirmware} WHERE fid=%d and pid=%d ", $edit['id'], $parametre);
+          db_query("DELETE FROM {guifi_pfc_parametresConfiguracioUnsolclic} WHERE uscid=%d and pid=%d ", $configuracions->uscid, $parametre);
           
-          $deleted[] = $firmware;
+          $deleted[] = $parametre;
         } else {
           
           // si la configuracio USC estava enabled la desem per notificar que no s'ha esobrrat
-          $kept[] = $firmware;
+          $kept[] = $parametre;
         
         }
       }
