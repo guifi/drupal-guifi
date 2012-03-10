@@ -1149,12 +1149,14 @@ function guifi_devel_parameter($id , $op) {
   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/parameter/add\'"/>';
   $output .= '</form>';
 
-  $headers = array(t('ID'), t('Parameter'), t('Origen'), t('Edit'), t('Delete'));
+  $headers = array(t('ID'), t('Parameter'), t('Default Value'), t('Dynamic'), t('Origen'), t('Edit'), t('Delete'));
 
   $sql = db_query('SELECT * FROM {guifi_pfc_parametres} order by nom ASC');
   while ($parameter = db_fetch_object($sql)) {
     $rows[] = array($parameter->id,
                     $parameter->nom,
+                    $parameter->default_value,
+                    $parameter->dinamic,
                     $parameter->origen,
     l(guifi_img_icon('edit.png'),'guifi/menu/devel/parameter/'.$parameter->id.'/edit',
     array(
@@ -1192,10 +1194,11 @@ function guifi_devel_parameter_form($form_state, $id) {
     '#required' => TRUE,
     '#default_value' => $parameter->nom,
     '#description' =>  t('Parameter name.'),
-  	'#prefix' => '<table><tr><td>',
-    '#suffix' => '</td>',
-  
+    '#prefix' => '<table><tr><td>',
+    '#suffix' => '</td></tr>',
+    '#weight' => $form_weight++
   );
+  
   $form['origen'] = array(
     '#type' => 'textfield',
     '#title' => t('Parameter Origin'),
@@ -1204,14 +1207,38 @@ function guifi_devel_parameter_form($form_state, $id) {
     '#size' => 32,
     '#maxlength' => 32,
     '#description' => t('Parameter name, please, use a clear and short description.'),
-    '#prefix' => '<td>',
-    '#suffix' => '</td></tr></table>',
-    '#weight' => 1,
+    '#prefix' => '<tr><td>',
+    '#suffix' => '</td></tr>',
+    '#weight' => $form_weight++
   );
-
-
-  $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
-
+  
+  $form['default_value'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Default Value'),
+    '#required' => TRUE,
+    '#default_value' => $parameter->default_value,
+    '#size' => 32,
+    '#maxlength' => 32,
+    '#description' => t('Parameter default value'),
+    '#prefix' => '<tr><td>',
+    '#suffix' => '</td></tr>',
+    '#weight' => $form_weight++
+  );
+  
+  $form['dinamic'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Dinamic'),
+    '#default_value' => $parameter->dinamic,
+    '#prefix' => '<tr><td>',
+    '#suffix' => '</td></tr>',
+    '#weight' => $form_weight++
+  );
+  $form['submit'] = array(
+      '#type' => 'submit',
+      '#prefix' => '<tr><td>',
+      '#suffix' => '</td></tr></table>',
+      '#weight' => 99, '#value' => t('Save'));
+  
   return $form;
 }
 
