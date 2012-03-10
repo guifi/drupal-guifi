@@ -683,14 +683,23 @@ function guifi_devel_firmware($firmid , $op) {
   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/firmware/add\'"/>';
   $output .= '</form>';
 
-  $headers = array(t('ID'), t('Name'), t('Description'), t('Edit'), t('Delete'));
+  $headers = array(t('ID'), t('Name'), t('Description'), t('Enabled'), t('used on #USC'),  t('Edit'), t('Delete'));
 
-  $sql= db_query('select id, nom, descripcio, relations from {guifi_pfc_firmware} order by nom asc');
+  $sql= db_query('select
+                      f.id, f.nom, f.descripcio, f.relations, f.enabled,
+                      count(usc.fid) as enabledUSC
+                  from
+                      {guifi_pfc_firmware{ f
+                      left join {guifi_pfc_configuracioUnSolclic} usc on usc.fid = f.id and usc.enabled = 1
+                  group by f.id, f.nom, f.descripcio, f.relations, f.enabled
+                  order by enabled desc ,nom asc');
 
   while ($firmware = db_fetch_object($sql)) {
     $rows[] = array($firmware->id,
                     $firmware->nom,
                     $firmware->descripcio,
+                    $firmware->enabled,
+                    $firmware->enabledUSC,
                     l(guifi_img_icon('edit.png'),'guifi/menu/devel/firmware/'.$firmware->id.'/edit',
             array(
               'html' => TRUE,
