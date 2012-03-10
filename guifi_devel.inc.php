@@ -393,14 +393,6 @@ function guifi_devel_devices_form($form_state, $devid) {
                     left join
                     guifi_pfc_configuracioUnSolclic usc ON usc.fid = f.id  and usc.mid = %d order by nom asc", $devid);
 
-//   $query = db_query(" select
-//                             pf.fid, pf.pid, p.id, p.nom
-//                         from
-//                             guifi_pfc_parametres p
-//                                 left join
-//                             guifi_pfc_parametresFirmware pf ON pf.pid = p.id and pf.fid = %d
-//                         order by p.nom asc",$devid);
-    
   
   while ($firmwares = db_fetch_array($query)) {
     //echo "<hr>firmwares[fid]=". $firmwares["fid"] ."firmwares[mid]=". $firmwares["mid"]. " firmwares[nom]=". $firmwares["nom"];
@@ -884,8 +876,12 @@ function guifi_devel_firmware_save($edit) {
         );
         _guifi_db_sql('guifi_pfc_parametresFirmware',array('mid' => $params['mid']),$params,$log,$to_mail);
         
+        // busquem les propietats d'aquest nou parametre, dinamic i default_value
+        $sql = db_query('SELECT id, dinamic, default_value FROM {guifi_pfc_parametres} WHERE id = %d',$parametre);
+        $paramInfo = db_fetch_array($sql);
+        
         // aqui cal agafar tots els unsolclic que funcionen amb aquest firmware i a cadascun afegir-li el parametre nou.
-        afegirParametreConfiguracionsUSC($edit['id'], $parametre, $to_mail, $user->id);
+        afegirParametreConfiguracionsUSC($edit['id'], $paramInfo, $to_mail, $user->id);
       }
     }
     // de tots els que tenia a la BD, mirar si me'ls han tret i esborrar-los
@@ -1202,7 +1198,7 @@ function guifi_devel_parameter_form($form_state, $id) {
   $form['origen'] = array(
     '#type' => 'textfield',
     '#title' => t('Parameter Origin'),
-    '#required' => TRUE,
+    '#required' => false,
     '#default_value' => $parameter->origen,
     '#size' => 32,
     '#maxlength' => 32,
@@ -1567,7 +1563,7 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
   
   
   $sql = db_query('select
-                        usc.id, usc.pid, usc.valor, usc.dinamic, p.nom, p.origen
+                        usc.id, usc.pid, usc.valor, p.dinamic, p.nom, p.origen
                     from
                         guifi_pfc_parametresConfiguracioUnsolclic usc
                         inner join guifi_pfc_parametres p on p.id = usc.pid
@@ -1578,7 +1574,6 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
   while ($paramUSC = db_fetch_object($sql)) {
     $rows[] = array(
     $paramUSC->nom,
-    $paramUSC->dinamic,
     ($paramUSC->dinamic)?$paramUSC->origen:' - ',
     ($paramUSC->dinamic)?' - ':$paramUSC->valor,
     ((!$paramUSC->dinamic)?l(
@@ -1611,7 +1606,7 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
       '#rows' => 30,
   );
   //$form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
-  $headers = array(t('Parametre'), t('Dinamic'), t('Origen'), t('Valor Fixe'),t('Edit'), t('Delete'));
+  $headers = array(t('Parametre'), t('Origen'), t('Valor Fixe'),t('Edit'), t('Delete'));
   $output .= theme('table',$headers,$rows);
   $form['submit'] = array(
     '#type' => 'submit',
@@ -1869,7 +1864,7 @@ function HelperMultipleSelect($formName, $nomSelectAssignats='assignats', $nomSe
 
 function crearParametresConfiguracioUSC($uscid, $fid, $notification, $userid) {
   $sql = db_query("SELECT
-                        p.id, %d, p.nom, '0'
+                        p.id, %d, p.nom, dinamic, default_value
                      FROM
                       guifi_pfc_parametres p
                      INNER JOIN guifi_pfc_parametresFirmware pf ON pf.pid = p.id  AND pf.fid = %d", $uscid,  $fid);
@@ -1880,7 +1875,8 @@ function crearParametresConfiguracioUSC($uscid, $fid, $notification, $userid) {
     $params = array(
               'pid' => $paramsFirmware->id,
               'uscid' => $uscid,
-              'dinamic' => 1,
+              'dinamic' => $paramsFirmware->dinamic,
+              'valor' => $paramsFirmware->default_value,
               'notification' => $notification,
               'user_created' => $userid,
               'new' => true
@@ -1906,9 +1902,10 @@ function afegirParametreConfiguracionsUSC($fid, $parametre, $notification, $user
   $sql = db_query("select id , enabled from guifi_pfc_configuracioUnSolclic where fid = %d", $fid);
   while ($configuracioUSC = db_fetch_object($sql)) {
     $params = array(
-              'pid' => $parametre,
+              'pid' => $parametre['id'],
               'uscid' => $configuracioUSC->id,
-              'dinamic' => 1,
+              'dinamic' => $parametre['dinamic'],
+              'valor' => $parametre['default_value'],
               'notification' => $notification,
               'user_created' => $userid,
               'new' => true
