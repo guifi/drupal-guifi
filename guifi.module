@@ -452,6 +452,14 @@ function guifi_menu() {
     'access arguments' => array('access devel information'),
     'weight' => 4,
   );
+    $items['guifi/menu/devel/initdevices'] = array(
+    'title' => 'Update Device Properties',
+    'description' => 'Update devices with info from old extra field',
+    'page callback' => 'guifi_update_devices_fromExtraInfo',
+    'page arguments' => array('TRUE'),
+    'access arguments' => array('access devel information'),
+    'weight' => 5,
+  );
   // Statistics
   $items['guifi/menu/stats'] = array(
     'title' => 'Statistics',
@@ -2210,6 +2218,62 @@ _guifi_db_delete('guifi_links', array('id' => $r->id, 'device_id' => $r->device_
       number_format(microtime(TRUE)-$tstart, 4)));
 
 }
+
+function guifi_update_devices_fromExtraInfo ( $verbose = FALSE) {
+  $tstart = microtime(TRUE);
+  $array = array();
+
+  // inicialitzem un array amb tots els firmwares indexats per nom  
+  $firmsByName = guifi_get_AllfirmwaresByName();
+  var_dump($firmsByName);
+  
+  $query = db_query("select id, extra, usc_id, mid, fid   from {guifi_devices}  where (usc_id = 0 or mid = 0 or fid = 0) and extra is not null");
+  
+  $to_mail = $user->mail;
+  $log ='';
+
+  while ( $device = db_fetch_object($query) ) {
+  
+    $extraInfo = unserialize($device->extra);
+    echo "<br><br><br><br>";var_dump( $extraInfo);
+    echo "<br><br><br><br>". array_key_exists($extraInfo['firmware'], firmsByName);
+    // comprovem que el nom que tinc a extra correspon amb un id de la taula de firms
+    if (array_key_exists($extraInfo['firmware'], $firmsByName)) {
+      $params = array(
+        'id'=> $device->id,
+        'mid'=> $extraInfo['model_id'],
+        'fid'=> $firmsByName[$extraInfo['firmware']]
+      );
+     _guifi_db_sql('guifi_devices',array('id' => $params['id']),$params,$log,$to_mail);
+    }
+  }
+    return t('Update Devices from extra Info in %secs', array('%secs' =>
+      number_format(microtime(TRUE)-$tstart, 4)));
+}
+
+/**
+ * Gets an array with Firmware Names as keys and Firmware id's as values to reverse serialized Info  
+ * on the extra field of the devices table. If a $firmwareName is supplied gets a unique item 
+ * @param string $firmwareName 
+ * @return
+ *   Array
+ */
+function guifi_get_AllfirmwaresByName($firmwareName=null) {
+  $query = db_query('select id, nom from guifi_pfc_firmware order by id asc');
+
+  $firms_tots = null;
+  while ($firmware = db_fetch_array($query)) {
+    // si no em demanen un concret
+    if (!$firmwareName) {
+      $firms_tots[$firmware['nom']] = $firmware['id'];
+    } else {
+      // comprovar que el nom es el que em demanen 
+      if ($firmwareName==$firmwares['nom']) $firms_tots[$firmwares['nom']] = $firmwares['id'];
+    }
+  }
+  return $firms_tots;
+}
+
 
 /**
  * Provide a single block from the administration menu as a page.
