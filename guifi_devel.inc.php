@@ -1445,7 +1445,7 @@ function guifi_devel_configuracio_usc($id , $op) {
         inner {join guifi_pfc_firmware} f on f.id = usc.fid
         inner {join guifi_model} m on m.mid = usc.mid
         inner {join guifi_manufacturer} mf on mf.fid = m.fid
-        inner {join guifi_pfc_parametresConfiguracioUnsolclic} pusc on pusc.uscid = usc.id
+        left {join guifi_pfc_parametresConfiguracioUnsolclic} pusc on pusc.uscid = usc.id
      group by usc.id, usc.mid, usc.fid, usc.enabled, usc.tipologia
      order by usc.enabled desc, fabricant asc, model asc, nomfirmware asc
   ');
