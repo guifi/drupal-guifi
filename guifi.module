@@ -460,6 +460,15 @@ function guifi_menu() {
     'access arguments' => array('access devel information'),
     'weight' => 5,
   );
+    $items['guifi/menu/devel/checkunsolclics'] = array(
+    'title' => 'Check UnSolclics',
+    'description' => 'Check local UnsolClics against a trusted remote server ',
+    'page callback' => 'guifi_check_unsolclics',
+    'page arguments' => array('TRUE'),
+    'access arguments' => array('access devel information'),
+    'weight' => 5,
+  );
+  
   // Statistics
   $items['guifi/menu/stats'] = array(
     'title' => 'Statistics',
@@ -2225,7 +2234,6 @@ function guifi_update_devices_fromExtraInfo ( $verbose = FALSE) {
 
   // inicialitzem un array amb tots els firmwares indexats per nom  
   $firmsByName = guifi_get_AllfirmwaresByName();
-  var_dump($firmsByName);
   
   $query = db_query("select id, extra, usc_id, mid, fid   from {guifi_devices}  where (usc_id = 0 or mid = 0 or fid = 0) and extra is not null");
   
@@ -2235,8 +2243,6 @@ function guifi_update_devices_fromExtraInfo ( $verbose = FALSE) {
   while ( $device = db_fetch_object($query) ) {
   
     $extraInfo = unserialize($device->extra);
-    echo "<br><br><br><br>";var_dump( $extraInfo);
-    echo "<br><br><br><br>". array_key_exists($extraInfo['firmware'], firmsByName);
     // comprovem que el nom que tinc a extra correspon amb un id de la taula de firms
     if (array_key_exists($extraInfo['firmware'], $firmsByName)) {
       $params = array(
@@ -2274,6 +2280,101 @@ function guifi_get_AllfirmwaresByName($firmwareName=null) {
   return $firms_tots;
 }
 
+function guifi_check_unsolclics( $verbose = FALSE) {
+  $tstart = microtime(TRUE);
+  $array = array();
+  
+  $trustedSite = 'http://guifi.net';
+  $localSite = 'http://guifilocal';
+  
+  
+
+  // buscar les configuracions unsolclic validades
+  $sql= db_query("select id, mid, fid, enabled from  guifi_pfc_configuracioUnSolclic where enabled = 1 order by id asc ");
+  while ($configuracio = db_fetch_object($sql)) {
+    $unsolclics[$configuracio->id]['mid'] = $configuracio->mid;
+    $unsolclics[$configuracio->id]['fid'] = $configuracio->fid;
+  }
+  
+  //var_dump($unsolclics);
+  $totaldevices = 0;
+  $devicesFail = 0;
+  $devicesOK = 0;
+  foreach ($unsolclics as $confkey => $confValues) {
+  
+    $output .= "<br>Configuració UnSolClic #". $confkey . "<br>";
+    
+    // buscar tots els devices que tenen un model i firmware cobert per les USC validades 
+    $sql= db_query("select d.id, d.nid, d.nick from guifi_pfc_configuracioUnSolclic  usc
+                    inner join guifi_devices d on d.mid = usc.mid and d.fid = usc.fid and d.flag = 'Working'
+                    where usc.id = %d", $confkey);
+    while ($configuracio = db_fetch_object($sql)) {
+      if ($totaldevices>15) break;
+      //var_dump($configuracio->id);
+      $trustedURL = $trustedSite . '/ca/guifi/device/'. $configuracio->nid .'/view/unsolclic';
+      $localURL = $localSite. '/ca/guifi/device/'. $configuracio->nid .'/view/unsolclic';
+
+      $resultat = check_unsolclicURL($configuracio->nid,$localURL,$trustedURL);
+      
+      $output .= "<br>Checking device ". $configuracio->nid  . " ---  " ;
+      
+      if ($resultat) {
+        $output .=' [OK]';
+        $devicesOK++;
+      } else {
+        $output .=' [FAIL]';
+        $devicesFail++;
+      }
+      $output .= " <a href=' $localURL'> $localURL</a>";      
+      $output .= " | <a href='$trustedURL'>$trustedURL</a>";
+      $totaldevices++;
+    }
+    $output .= "<br>";
+  }
+  
+  // per cadascun dels devices, comprovar la versio local del unsolclic contra la oficial
+  
+  // guardar els resultats dels correctes i dels incorrectes  
+  
+    return $output ."<br>". t('Checked %unsolclics Unsolclics for %totaldevices devices([OK] %devicesOK - [FAIL] %devicesFAIL) in %secs ', 
+                              array('%unsolclics' => count($unsolclics),
+                                    '%totaldevices' => $totaldevices,
+                                    '%devicesOK' => $devicesOK,
+                                    '%devicesFAIL' => $devicesFail,
+                                    '%secs' => number_format(microtime(TRUE)-$tstart, 4)));
+}
+
+function check_unsolclicURL($nid, ·$localUrl, $trustedUrl) {
+
+  //return true;
+  // si no tenen la mateixa longitud, cagada, sortim
+  if (strlen(getURLcontents($localUrl))<>strlen(getURLcontents($trustedUrl))){
+    return false;
+  } else {
+    // si la longitud és igual cal comparar una mica més no fos per xiripa
+  }
+  return true;
+}
+
+function getURLcontents($url){
+  if (function_exists('curl_init')) {
+    $cs = curl_init(); // curl session
+    curl_setopt($cs, CURLOPT_URL, $url);
+    curl_setopt($cs, CURLOPT_BINARYTRANSFER, true);
+    curl_setopt($cs, CURLOPT_FAILONERROR, true);
+    curl_setopt($cs, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($cs, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($cs, CURLOPT_CONNECTTIMEOUT, 5);
+    curl_setopt($cs, CURLOPT_TIMEOUT, 30);
+    curl_setopt($cs, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($cs, CURLOPT_SSL_VERIFYHOST, false);
+    curl_setopt($cs, CURLOPT_USERAGENT, 'TCPDF');
+    $output = curl_exec($cs);
+    curl_close($cs);
+    
+    return $output;
+  }
+}
 
 /**
  * Provide a single block from the administration menu as a page.
