@@ -38,16 +38,17 @@ function guifi_unsolclic($dev, $format = 'html') {
     // 2. Recuperar informacio del firmware
     // 2.a Recuperar el id del firmware del trasto(del camp extra de device)
     $firmwareName = $dev->variable['firmware'];
+    $firmwareId = $dev->fid;
 
     // 2.b recollir de la BD la informacio del firmware
     $firmware = guifi_get_firmware($firmwareName);
 
     // 2.c recollir els parametres del firmware
     // tampoc es fa servir per RES!!!!!!
-    $paramsFirmware = guifi_get_paramsFirmware($firmware['id']);
+    $paramsFirmware = guifi_get_paramsFirmware($firmwareId);
 
     // 3. Recuperar la configuracióUnSolClic tq modelid i firmware:id
-    $configuracioUSC = guifi_get_configuracioUSC($modelId,$firmware['id'],$uscId);
+    $configuracioUSC = guifi_get_configuracioUSC($modelId,$firmwareId,$uscId);
 
     // 3.a recuperar la plantilla de la configuracio
     $plantilla = $configuracioUSC['plantilla'];    // a plantilla hi ha el contingut de la plantilla del unsolclic
@@ -107,7 +108,6 @@ function guifi_unsolclic($dev, $format = 'html') {
       $twigVars['ospf_name'] = 'backbone';
       $twigVars['all'] = $totalParameters;
 
-      
       $twig->addFunction('ip2long', new Twig_Function_Function('ip2long'));
       $twig->addFunction('long2ip', new Twig_Function_Function('long2ip'));
       $twig->addFunction('t', new Twig_Function_Function('t'));
@@ -116,7 +116,7 @@ function guifi_unsolclic($dev, $format = 'html') {
        $plantilla  = $twig->render($plantilla, $twigVars);
 //
     }
-    $plantilla = str_replace("\n", "<br>\n", $plantilla);
+    $plantilla = str_replace("\n", "\n<br />", $plantilla);
     echo $plantilla;
     die;
   }
@@ -356,7 +356,6 @@ function guifi_get_configuracioUSC($mid, $fid, $uscid) {
   //var_dump("Call guifi_get_configuracioUSC($mid, $fid, $uscid)");
   $configuracioUSCInfo = db_fetch_array(db_query("select id, mid, fid, enabled, tipologia, plantilla, template_file from {guifi_pfc_configuracioUnSolclic} where mid=%d and fid=%d and id = %d limit 1",$mid, $fid, $uscid));
   if (!empty($configuracioUSCInfo)){
-    //var_dump($configuracioUSCInfo);
   } else var_dump("NO m'arriba cap plantilla  per a Model:$mid Firmware:$fid USCid:$uscid !!!!");
   return $configuracioUSCInfo;
 }
@@ -379,7 +378,8 @@ function guifi_get_paramsMMF($devId) {
                         u.name usc_creator_nick,
                         m.model model_name,
                         mf.name as manufacturer_name,
-                        f.nom as firmware_name
+                        f.nom as firmware_name,
+                        f.descripcio as firmware_description
                     from
                         guifi_devices d
                         JOIN guifi_pfc_configuracioUnSolclic usc on usc.id = d.usc_id
