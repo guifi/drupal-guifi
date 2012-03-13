@@ -2253,6 +2253,12 @@ function guifi_update_devices_fromExtraInfo ( $verbose = FALSE) {
      _guifi_db_sql('guifi_devices',array('id' => $params['id']),$params,$log,$to_mail);
     }
   }
+  // actualitzar els camps usc_id dels devices als que els concordin fid i mid amb un usc.id 
+  db_query("update {guifi_devices} d 
+        inner join {guifi_pfc_configuracioUnSolclic} usc on usc.fid = d.fid and usc.mid = d.mid
+        set d.usc_id = usc.id  where d.mid <> 0 and d.fid <> 0 and d.usc_id = 0
+        and usc.enabled = 1");
+  
     return t('Update Devices from extra Info in %secs', array('%secs' =>
       number_format(microtime(TRUE)-$tstart, 4)));
 }
@@ -2284,59 +2290,81 @@ function guifi_check_unsolclics( $verbose = FALSE) {
   $tstart = microtime(TRUE);
   $array = array();
   
-  $trustedSite = 'http://guifi.net';
+  $trustedSite = 'http://guifimaster';
   $localSite = 'http://guifilocal';
   
   
 
   // buscar les configuracions unsolclic validades
-  $sql= db_query("select id, mid, fid, enabled from  guifi_pfc_configuracioUnSolclic where enabled = 1 order by id asc ");
+  $sql= db_query("select usc.id, usc.mid, usc.fid, usc.enabled , m.model,f.nom 
+                  from guifi_pfc_configuracioUnSolclic usc
+                      inner join guifi_model m  on m.mid = usc.mid
+                      inner join guifi_pfc_firmware f on f.id = usc.fid
+                  where usc.enabled = 1 
+                  order by usc.id asc ");
   while ($configuracio = db_fetch_object($sql)) {
     $unsolclics[$configuracio->id]['mid'] = $configuracio->mid;
     $unsolclics[$configuracio->id]['fid'] = $configuracio->fid;
+    $unsolclics[$configuracio->id]['model'] = $configuracio->model;
+    $unsolclics[$configuracio->id]['firmware'] = $configuracio->nom;
   }
   
   //var_dump($unsolclics);
   $totaldevices = 0;
   $devicesFail = 0;
   $devicesOK = 0;
+  
   foreach ($unsolclics as $confkey => $confValues) {
   
-    $output .= "<br>Configuració UnSolClic #". $confkey . "<br>";
+    $partialFail = 0;
+    $partialOK = 0;
+    $partialdevices = 0;
+  
+  
+    $output .= "<br>Configuració UnSolClic #". $confValues['model'] ."-". $confValues['firmware'] ."($confkey)";
     
     // buscar tots els devices que tenen un model i firmware cobert per les USC validades 
-    $sql= db_query("select d.id, d.nid, d.nick from guifi_pfc_configuracioUnSolclic  usc
-                    inner join guifi_devices d on d.mid = usc.mid and d.fid = usc.fid and d.flag = 'Working'
-                    where usc.id = %d", $confkey);
-    while ($configuracio = db_fetch_object($sql)) {
-      if ($totaldevices>15) break;
-      //var_dump($configuracio->id);
-      $trustedURL = $trustedSite . '/ca/guifi/device/'. $configuracio->nid .'/view/unsolclic';
-      $localURL = $localSite. '/ca/guifi/device/'. $configuracio->nid .'/view/unsolclic';
+    $sql= db_query("select d.id, d.nid, d.nick, mo.model, mo.fid, mf.name 
+                    from guifi_pfc_configuracioUnSolclic  usc
+                         inner join guifi_devices d on d.mid = usc.mid and d.fid = usc.fid and d.flag = 'Working'
+                         inner join guifi_model mo on mo.mid = usc.mid
+                         inner join guifi_manufacturer mf on mf.fid = mo.fid 
+                    where usc.id = %d ", $confkey); // and usc.id = 6
 
-      $resultat = check_unsolclicURL($configuracio->nid,$localURL,$trustedURL);
+    while ($configuracio = db_fetch_object($sql)) {
+      if ($partialdevices>5) break;
+      //var_dump($configuracio->id);
+      if ($configuracio->name=='Ubiquiti') $trustedURL = $trustedSite . '/files/nanostation/'. $configuracio->nick .'.cfg';
+      else $trustedURL = $trustedSite . '/ca/guifi/device/'. $configuracio->id .'/view/unsolclic';
+      $localURL = $localSite. '/ca/guifi/device/'. $configuracio->id .'/view/unsolclic';
+
+      $resultat = check_unsolclicURL($configuracio->id, $localURL,$trustedURL);
       
-      $output .= "<br>Checking device ". $configuracio->nid  . " ---  " ;
+      $output .= "<br>Checking device ". $configuracio->id  . " ---  " ;
       
       if ($resultat) {
         $output .=' [OK]';
-        $devicesOK++;
+        $partialOK++;
       } else {
-        $output .=' [FAIL]';
-        $devicesFail++;
+        $output .=' [FAIL] ('. $resultat.' diff lengths)';
+        $partialFail++;
       }
       $output .= " <a href=' $localURL'> $localURL</a>";      
       $output .= " | <a href='$trustedURL'>$trustedURL</a>";
-      $totaldevices++;
+      $partialdevices++;
     }
-    $output .= "<br>";
+    $devicesOK  = $devicesOK + $partialOK;
+    $devicesFail = $devicesFail + $partialFail;
+    $totaldevices = $totaldevices + $partialdevices;
+    $output .= "<br>Results for UnSolClic #". $confValues['model'] ."-". $confValues['firmware'] ."($confkey) -  [Total] : $partialdevices - [OK] : $partialOK - [FAIL] : $partialFail";
+    $output .= "<br><br>";
   }
   
   // per cadascun dels devices, comprovar la versio local del unsolclic contra la oficial
   
   // guardar els resultats dels correctes i dels incorrectes  
   
-    return $output ."<br>". t('Checked %unsolclics Unsolclics for %totaldevices devices([OK] %devicesOK - [FAIL] %devicesFAIL) in %secs ', 
+    return $output ."<br>". t('Checked Total %unsolclics Unsolclics for %totaldevices devices([OK] %devicesOK - [FAIL] %devicesFAIL) in %secs ', 
                               array('%unsolclics' => count($unsolclics),
                                     '%totaldevices' => $totaldevices,
                                     '%devicesOK' => $devicesOK,
@@ -2344,11 +2372,57 @@ function guifi_check_unsolclics( $verbose = FALSE) {
                                     '%secs' => number_format(microtime(TRUE)-$tstart, 4)));
 }
 
-function check_unsolclicURL($nid, ·$localUrl, $trustedUrl) {
+function check_unsolclicURL($device_id, $localUrl, $trustedUrl) {
 
-  //return true;
-  // si no tenen la mateixa longitud, cagada, sortim
-  if (strlen(getURLcontents($localUrl))<>strlen(getURLcontents($trustedUrl))){
+
+  $htmlLocal = trim(file_get_contents($localUrl));
+  $htmlTrusted = trim(file_get_contents($trustedUrl));
+  
+  if ($htmlLocal) {
+    $htmlLocal = str_replace(' ', '', $htmlLocal);
+//    $htmlLocal = preg_replace('/(?:(?:\r\n|\r|\n)\s*){2}/s', PHP_EOL, $htmlLocal);
+//    $htmlLocal = preg_replace('/[ ]+/', ' ', $htmlLocal);
+//    $htmlLocal = preg_replace('/>\n/', '>', $htmlLocal);
+//    $htmlLocal = preg_replace('/\n</', '<', $htmlLocal);
+/*
+    $htmlLocal = str_replace(' ', '', $htmlLocal);
+    $htmlLocal = str_replace('\n', '', $htmlLocal);
+    $htmlLocal = str_replace('\t', '', $htmlLocal);
+    $htmlLocal = str_replace('\r', '', $htmlLocal);
+    $htmlLocal = str_replace('\f', '', $htmlLocal);
+    $htmlLocal = str_replace('\v', '', $htmlLocal);
+*/    
+  }
+  if ($htmlTrusted) { 
+    $htmlTrusted = str_replace(' ', '', $htmlTrusted);
+//    $htmlTrusted = preg_replace('/(?:(?:\r\n|\r|\n)\s*){2}/s', PHP_EOL, $htmlTrusted);
+//    $htmlTrusted = preg_replace('/[ ]+/', ' ', $htmlTrusted);
+//    $htmlTrusted = preg_replace('/>\n/', '>', $htmlTrusted);
+//    $htmlTrusted = preg_replace('/\n</', '<', $htmlTrusted);
+  
+/*    $htmlTrusted = str_replace(' ', '', $htmlTrusted);
+    $htmlTrusted = str_replace('\n', '', $htmlTrusted);
+    $htmlTrusted = str_replace('\t', '', $htmlTrusted);
+    $htmlTrusted = str_replace('\r', '', $htmlTrusted);
+    $htmlTrusted = str_replace('\f', '', $htmlTrusted);
+    $htmlTrusted = str_replace('\v', '', $htmlTrusted);
+*/    
+  }  
+  
+  //echo "<br >local $lengthLocal - trusted $lengthTrusted ";
+  if (strcmp($lengthLocal, $lengthTrusted)){
+    $fp = fopen('/tmp/'.$device_id .'_localUrl.txt', 'w');
+    fwrite($fp, $htmlLocal);
+    fclose($fp);    
+
+
+    $fp = fopen('/tmp/'.$device_id .'_trustedUrl.txt', 'w');
+    fwrite($fp, $htmlTrusted);
+    fclose($fp);    
+    //echo "fet! $localUrl";  
+
+  
+  
     return false;
   } else {
     // si la longitud és igual cal comparar una mica més no fos per xiripa
