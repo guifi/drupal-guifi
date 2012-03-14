@@ -4,22 +4,33 @@
 include_once('contrib/twig_1.6/lib/Twig/Autoloader.php');
 
 
-function array_flatten(array $array, array $return = array(), $prefix=null, $nivell=0) {
+function array_flatten(array $array, array $return = array(), $prefix=null, $parentName=null, $nivell=0) {
 
+  $counter = 1;
   foreach ($array as $k => $item) {
+
     if (is_array($item)){
-      $name = $k;
-      if ($prefix) $name = $prefix.'_'.$k;
-      $return = array_flatten($item, $return, $name, $nivell++);
+
+      if ((strcmp($parentName, 'interfaces')==0)||(strcmp($parentName, 'links')==0)||(strcmp($parentName, 'radios')==0)) {
+
+        $name = $counter;
+      } else
+        $name = $k;
+      
+      if ($prefix) $name = $prefix.'_'.$name;
+      
+      $return = array_flatten($item, $return, $name, $k, $nivell++);
     }elseif ($item) {
-      $name = $k;
-      if ($nivell>0)$name = $k.'_'.$nivell;
-      if ($prefix)$name = $prefix.'_'.$k.'_'.$nivell;
+      if ((strcmp($parentName, 'interfaces')==0)||(strcmp($parentName, 'links')==0)||(strcmp($parentName, 'radios')==0)) {
+        $name = $counter;
+      } else
+        $name = $k;
+      
+      if ($prefix)$name = $prefix.'_'.$name;
       $return[$name] = $item;
     }
-    
+    $counter++;
   }
-
   return $return;
 }
 
@@ -34,13 +45,8 @@ function guifi_unsolclic($dev, $format = 'html') {
   $otype = $format;
 
   $dev = (object)$dev;
-  $dev = (array)$dev;
   
-  $res = array_flatten($dev ,array());
-  
-  var_dump($res);die;
-
-  die;
+  $flattenDev = array_flatten((array)$dev,array());
   
   if (isValidConfiguracioUSC($dev->usc_id)) {
 
@@ -93,7 +99,20 @@ function guifi_unsolclic($dev, $format = 'html') {
     // 6.B. recuperar els la informacio de la configuracio de fabricant-model-firmware
     $paramsMMF = guifi_get_paramsMMF($dev->id);
     
-    $totalParameters = array_merge($indexedParamsDevice, $paramsMMF);
+    $totalParameters = array_merge($indexedParamsDevice, $paramsMMF, $flattenDev);
+    
+    // altres parametres fixes; TODO posar-lo com a parametre fixe de la plantilla
+      $totalParameters['ospf_name'] ='backbone';
+      // proves de twig
+      $zone = guifi_zone_load($totalParameters['zone_id']);
+      list($primary_dns,$secondary_dns) = explode(' ',guifi_get_dns($zone,2));
+      $totalParameters['zone_primary_dns'] = $primary_dns;
+      $totalParameters['zone_secondary_dns'] = $secondary_dns;
+      
+      list($primary_ntp,$secondary_ntp) = explode(' ',guifi_get_ntp($zone));
+      $totalParameters['zone_primary_ntp'] = $primary_ntp;
+      $totalParameters['zone_secondary_ntp'] = $secondary_ntp;
+    
     if ($paramsconfiguracioUSC) {
 
       // 7. substituir els parametres a la plantilla
@@ -117,30 +136,17 @@ function guifi_unsolclic($dev, $format = 'html') {
       //$loader = new Twig_Loader_Filesystem('/home/albert/workspace/guifinet/drupal-6.22/sites/all/modules/guifi/firmware');
       $twig = new Twig_Environment($loader);
       
-      // proves de twig
-      $zone = guifi_zone_load($totalParameters['zone_id']);
-      list($primary_dns,$secondary_dns) = explode(' ',guifi_get_dns($zone,2));
-      $totalParameters['zone_primary_dns'] = $primary_dns;
-      $totalParameters['zone_secondary_dns'] = $secondary_dns;
-      
-      list($primary_ntp,$secondary_ntp) = explode(' ',guifi_get_ntp($zone));
-      $totalParameters['zone_primary_ntp'] = $primary_ntp;
-      $totalParameters['zone_secondary_ntp'] = $secondary_ntp;
-      
-//       var_dump( $primary_dns);
-//       var_dump($secondary_dns);
-//       var_dump($totalParameters);
-      
-      $twigVars['dev'] = $dev;
-      $twigVars['ospf_name'] = 'backbone';
-      $twigVars['all'] = $totalParameters;
+      $totalParameters['dev'] = $dev;
+//       var_dump($totalParameters);die;
+//       $twigVars['dev'] = $dev;
+//       $twigVars['all'] = $totalParameters;
 
       $twig->addFunction('ip2long', new Twig_Function_Function('ip2long'));
       $twig->addFunction('long2ip', new Twig_Function_Function('long2ip'));
       $twig->addFunction('t', new Twig_Function_Function('t'));
       
        //$plantilla  = $twig->render($configuracioUSC['template_file'], $twigVars);
-       $plantilla  = $twig->render($plantilla, $twigVars);
+       $plantilla  = $twig->render($plantilla, $totalParameters);
 //
     }
     $plantilla = str_replace("\n", "\n<br />", $plantilla);
