@@ -3,6 +3,26 @@
 // carreguem el Twig
 include_once('contrib/twig_1.6/lib/Twig/Autoloader.php');
 
+
+function array_flatten(array $array, array $return = array(), $prefix=null, $nivell=0) {
+
+  foreach ($array as $k => $item) {
+    if (is_array($item)){
+      $name = $k;
+      if ($prefix) $name = $prefix.'_'.$k;
+      $return = array_flatten($item, $return, $name, $nivell++);
+    }elseif ($item) {
+      $name = $k;
+      if ($nivell>0)$name = $k.'_'.$nivell;
+      if ($prefix)$name = $prefix.'_'.$k.'_'.$nivell;
+      $return[$name] = $item;
+    }
+    
+  }
+
+  return $return;
+}
+
 // Generador dels unsolclic
 function guifi_unsolclic($dev, $format = 'html') {
   global $rc_startup;
@@ -13,7 +33,14 @@ function guifi_unsolclic($dev, $format = 'html') {
 
   $otype = $format;
 
-  $dev = (object)$dev;//var_dump($dev);die;
+  $dev = (object)$dev;
+  $dev = (array)$dev;
+  
+  $res = array_flatten($dev ,array());
+  
+  var_dump($res);die;
+
+  die;
   
   if (isValidConfiguracioUSC($dev->usc_id)) {
 
