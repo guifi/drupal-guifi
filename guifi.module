@@ -2290,86 +2290,129 @@ function guifi_check_unsolclics( $verbose = FALSE) {
   $tstart = microtime(TRUE);
   $array = array();
   
+  $range = 0;
   $trustedSite = 'http://guifimaster';
   $localSite = 'http://guifilocal';
   
+  if ($_GET["action"])$action = $_GET["action"];
+  if ($_GET["trustedsite"]) $trustedSite = $_GET["trustedsite"];//'http://guifimaster';
+  if ($_GET["testingsite"]) $localSite = $_GET["testingsite"];'http://guifilocal';
+  if ($_GET["range"]) $range = $_GET["range"];
   
-
-  // buscar les configuracions unsolclic validades
-  $sql= db_query("select usc.id, usc.mid, usc.fid, usc.enabled , m.model,f.nom 
-                  from guifi_pfc_configuracioUnSolclic usc
-                      inner join guifi_model m  on m.mid = usc.mid
-                      inner join guifi_pfc_firmware f on f.id = usc.fid
-                  where usc.enabled = 1 
-                  order by usc.id asc ");
-  while ($configuracio = db_fetch_object($sql)) {
-    $unsolclics[$configuracio->id]['mid'] = $configuracio->mid;
-    $unsolclics[$configuracio->id]['fid'] = $configuracio->fid;
-    $unsolclics[$configuracio->id]['model'] = $configuracio->model;
-    $unsolclics[$configuracio->id]['firmware'] = $configuracio->nom;
-  }
+  if ($_GET["range"]) $range = $_GET["range"];
+  else $range = 2;
   
-  //var_dump($unsolclics);
-  $totaldevices = 0;
-  $devicesFail = 0;
-  $devicesOK = 0;
+  echo $range. "<br><br>";
   
-  foreach ($unsolclics as $confkey => $confValues) {
+  $avui = new DateTime;
+  $dateLimit = clone $avui;
+  $dateLimit->modify("-$range day");
   
-    $partialFail = 0;
-    $partialOK = 0;
-    $partialdevices = 0;
+  $output = "<form action='checkunsolclics' method='GET'>";
+  $output .= "<table>";
+  $output .= "<tr>";
+    $output .= "<td>Trusted Site</td>";
+    $output .= "<td><input type='text' name='trustedsite' value='$trustedSite'/></td>";
+    $output .= "<td>Testing Site</td>";
+    $output .= "<td><input type='text' name='testingsite' value='$localSite'/></td>";
+   /* $output .= "<td>Date Limit</td>";
+    $output .= "<td><select name='range'>
+                    <option value='1'>1 day</option>
+                    <option value='7'>1 week</option>
+                    <option value='30'>1 Month</option>
+                    <option value='365'>1 year</option>
+    </td>";*/
+    $output .= "<td><input type='submit' name='action' value='TEST!' /></td>";
+  $output .= "</tr>";
+  $output .= "</table>";
+  $output .= "</form>";
   
+  if ($action) {
   
-    $output .= "<br>Configuració UnSolClic #". $confValues['model'] ."-". $confValues['firmware'] ."($confkey)";
+    $trustedSite = $_GET["trustedsite"];//'http://guifimaster';
+    $localSite = $_GET["testingsite"];'http://guifilocal';
     
-    // buscar tots els devices que tenen un model i firmware cobert per les USC validades 
-    $sql= db_query("select d.id, d.nid, d.nick, mo.model, mo.fid, mf.name 
-                    from guifi_pfc_configuracioUnSolclic  usc
-                         inner join guifi_devices d on d.mid = usc.mid and d.fid = usc.fid and d.flag = 'Working'
-                         inner join guifi_model mo on mo.mid = usc.mid
-                         inner join guifi_manufacturer mf on mf.fid = mo.fid 
-                    where usc.id = %d ", $confkey); // and usc.id = 6
-
+    
+    // buscar les configuracions unsolclic validades
+    $sql= db_query("select usc.id, usc.mid, usc.fid, usc.enabled , m.model,f.nom 
+                    from guifi_pfc_configuracioUnSolclic usc
+                        inner join guifi_model m  on m.mid = usc.mid
+                        inner join guifi_pfc_firmware f on f.id = usc.fid
+                    where usc.enabled = 1 
+                    order by usc.id asc ");
     while ($configuracio = db_fetch_object($sql)) {
-      if ($partialdevices>5) break;
-      //var_dump($configuracio->id);
-      if ($configuracio->name=='Ubiquiti') $trustedURL = $trustedSite . '/files/nanostation/'. $configuracio->nick .'.cfg';
-      else $trustedURL = $trustedSite . '/ca/guifi/device/'. $configuracio->id .'/view/unsolclic';
-      $localURL = $localSite. '/ca/guifi/device/'. $configuracio->id .'/view/unsolclic';
-
-      $resultat = check_unsolclicURL($configuracio->id, $localURL,$trustedURL);
-      
-      $output .= "<br>Checking device ". $configuracio->id  . " ---  " ;
-      
-      if ($resultat) {
-        $output .=' [OK]';
-        $partialOK++;
-      } else {
-        $output .=' [FAIL] ('. $resultat.' diff lengths)';
-        $partialFail++;
-      }
-      $output .= " <a href=' $localURL'> $localURL</a>";      
-      $output .= " | <a href='$trustedURL'>$trustedURL</a>";
-      $partialdevices++;
+      $unsolclics[$configuracio->id]['mid'] = $configuracio->mid;
+      $unsolclics[$configuracio->id]['fid'] = $configuracio->fid;
+      $unsolclics[$configuracio->id]['model'] = $configuracio->model;
+      $unsolclics[$configuracio->id]['firmware'] = $configuracio->nom;
     }
-    $devicesOK  = $devicesOK + $partialOK;
-    $devicesFail = $devicesFail + $partialFail;
-    $totaldevices = $totaldevices + $partialdevices;
-    $output .= "<br>Results for UnSolClic #". $confValues['model'] ."-". $confValues['firmware'] ."($confkey) -  [Total] : $partialdevices - [OK] : $partialOK - [FAIL] : $partialFail";
-    $output .= "<br><br>";
-  }
+    
+
+    $totaldevices = 0;
+    $devicesFail = 0;
+    $devicesOK = 0;
+    
+    foreach ($unsolclics as $confkey => $confValues) {
+    
+      $partialFail = 0;
+      $partialOK = 0;
+      $partialdevices = 0;
+    
+    
+      $output .= "<br>Configuració UnSolClic #". $confValues['model'] ."-". $confValues['firmware'] ."(<a href='/ca/guifi/menu/devel/configuraciousc/$confkey/edit'>$confkey</a>)";
+      
+      // buscar tots els devices que tenen un model i firmware cobert per les USC validades 
+      $sql= db_query("select d.id, d.nid, d.nick, mo.model, mo.fid, mf.name 
+                      from guifi_pfc_configuracioUnSolclic  usc
+                           inner join guifi_devices d on d.mid = usc.mid and d.fid = usc.fid and d.flag = 'Working'
+                           inner join guifi_model mo on mo.mid = usc.mid
+                           inner join guifi_manufacturer mf on mf.fid = mo.fid 
+                      where usc.id = %d ", $confkey); // and usc.id = 6
   
-  // per cadascun dels devices, comprovar la versio local del unsolclic contra la oficial
+      while ($configuracio = db_fetch_object($sql)) {
+        if ($partialdevices>5) break;
+        //var_dump($configuracio->id);
+        if ($configuracio->name=='Ubiquiti') $trustedURL = $trustedSite . '/files/nanostation/'. $configuracio->nick .'.cfg';
+        else $trustedURL = $trustedSite . '/ca/guifi/device/'. $configuracio->id .'/view/unsolclic';
+        $localURL = $localSite. '/ca/guifi/device/'. $configuracio->id .'/view/unsolclic';
   
-  // guardar els resultats dels correctes i dels incorrectes  
-  
+        $resultat = check_unsolclicURL($configuracio->id, $localURL,$trustedURL);
+        
+        $output .= "<br>Checking device ". $configuracio->id  . " ---  " ;
+        
+        if ($resultat) {
+          $output .=' [OK]';
+          $partialOK++;
+        } else {
+          $output .=' [FAIL] ('. $resultat.' diff lengths)';
+          $partialFail++;
+        }
+        $output .= " <a href=' $localURL'> $localURL</a>";      
+        $output .= " | <a href='$trustedURL'>$trustedURL</a>";
+        $partialdevices++;
+      }
+      $devicesOK  = $devicesOK + $partialOK;
+      $devicesFail = $devicesFail + $partialFail;
+      $totaldevices = $totaldevices + $partialdevices;
+      $output .= "<br>Results for UnSolClic #". $confValues['model'] ."-". $confValues['firmware'] ."($confkey) -  [Total] : $partialdevices - [OK] : $partialOK - [FAIL] : $partialFail";
+      $output .= "<br><br>";
+    }
+    
     return $output ."<br>". t('Checked Total %unsolclics Unsolclics for %totaldevices devices([OK] %devicesOK - [FAIL] %devicesFAIL) in %secs ', 
                               array('%unsolclics' => count($unsolclics),
                                     '%totaldevices' => $totaldevices,
                                     '%devicesOK' => $devicesOK,
                                     '%devicesFAIL' => $devicesFail,
-                                    '%secs' => number_format(microtime(TRUE)-$tstart, 4)));
+                                    '%secs' => number_format(microtime(TRUE)-$tstart, 4)));    
+  } else {
+    //$output .= "No devices to test!<br><br>";
+    
+  }
+  // per cadascun dels devices, comprovar la versio local del unsolclic contra la oficial
+  
+  // guardar els resultats dels correctes i dels incorrectes  
+  
+
 }
 
 function check_unsolclicURL($device_id, $localUrl, $trustedUrl) {
