@@ -48,8 +48,8 @@ function guifi_radio_form($edit, $form_weight) {
   );
 
   $form['radio_settings']['variable']['firmware'] =
-    guifi_radio_firmware_field($edit['variable']['firmware'],
-        $edit['variable']['model_id']);
+    guifi_radio_firmware_field($edit['fid'],
+        $edit['mid']);
 
   $form['radio_settings']['mac'] = array(
     '#type' => 'textfield',
@@ -291,11 +291,25 @@ function guifi_radio_add_radio_form($edit) {
 }
 
 function guifi_radio_firmware_field($fid,$mid) {
-  $model=db_fetch_object(db_query(
+/* Consulta anterior al  PFC
+ * $model=db_fetch_object(db_query(
         "SELECT model name " .
         "FROM {guifi_model} " .
         "WHERE mid=%d}",
     $mid));
+*/
+  $queryfid = db_query("select
+      m.mid, mf.name, m.model, f.id, f.nom
+      from
+        {guifi_manufacturer} mf
+        inner join {guifi_model} m ON m.fid = mf.fid
+        inner join {guifi_pfc_configuracioUnSolclic} usc ON usc.mid = m.mid and usc.enabled = 1
+        inner join {guifi_pfc_firmware} f ON f.id = usc.fid and m.mid = %d
+        order by nom asc", $mid);
+  while ($firmware = db_fetch_array($queryfid)) {
+    $firmwares[$firmware["id"]] = $firmware["nom"] ;
+  }
+  
   return array(
     '#type' => 'select',
     '#title' => t("Firmware"),
@@ -304,7 +318,7 @@ function guifi_radio_firmware_field($fid,$mid) {
     '#default_value' => $fid,
     '#prefix' => '<td><div id="select-firmware">',
     '#suffix' => '</div></td>',
-    '#options' => guifi_types('firmware', NULL, NULL,$model->name),
+    '#options' => $firmwares,
     '#description' => t('Used for automatic configuration.'),
     '#weight' => 2,
 //    '#description' => $edit['variable']['model_id'],
