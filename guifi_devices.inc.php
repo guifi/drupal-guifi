@@ -663,6 +663,11 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
 
   // device
   $edit['extra'] = serialize($edit['variable']);
+  
+  // TODO : corretgir que agafi els midi fid de l'estructura qeu toca dins del edit
+  // amb lo de sota els repliquem per poder-hi accedir directament
+  $edit['mid'] = $edit['variable']['mid'];
+  $edit['fid'] = $edit['variable']['fid'];
   $ndevice = _guifi_db_sql('guifi_devices',array('id' => $edit['id']),$edit,$log,$to_mail);
 
   guifi_log(GUIFILOG_TRACE,

@@ -28,12 +28,13 @@ function guifi_radio_form($edit, $form_weight) {
     '#tree' => FALSE,
     '#collapsed' => !is_null($edit['id']),
   );
+  
   $form['radio_settings']['variable'] = array('#tree' => TRUE);
-  $form['radio_settings']['variable']['model_id'] = array(
+  $form['radio_settings']['variable']['mid'] = array(
     '#type' => 'select',
     '#title' => t("Radio Model"),
     '#required' => TRUE,
-    '#default_value' => $edit['variable']['model_id'],
+    '#default_value' => $edit['mid'],
     '#options' => $models_array,
     '#description' => t('Select the readio model that do you have.'),
     '#prefix' => '<table><tr><td>',
@@ -47,7 +48,7 @@ function guifi_radio_form($edit, $form_weight) {
     '#weight' => 0,
   );
 
-  $form['radio_settings']['variable']['firmware'] =
+  $form['radio_settings']['variable']['fid'] =
     guifi_radio_firmware_field($edit['fid'],
         $edit['mid']);
 
@@ -313,7 +314,7 @@ function guifi_radio_firmware_field($fid,$mid) {
   return array(
     '#type' => 'select',
     '#title' => t("Firmware"),
-    '#parents' => array('variable','firmware'),
+    '#parents' => array('variable','fid'),
     '#required' => TRUE,
     '#default_value' => $fid,
     '#prefix' => '<td><div id="select-firmware">',
