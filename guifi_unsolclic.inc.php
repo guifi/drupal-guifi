@@ -56,7 +56,7 @@ function guifi_unsolclic($dev, $format = 'html') {
     // PFC passos
     // 1. Recuperar informacio del trasto
     // 1.a Recuperar el id de model del trasto (del camp extra de device)
-    $modelId = $dev->variable['model_id'];
+    $modelId = $dev->mid;
     // recollir la configuracio unscolclic actual
     $uscId = $dev->usc_id;
 
@@ -105,9 +105,10 @@ function guifi_unsolclic($dev, $format = 'html') {
       $totalParameters['ospf_name'] ='backbone';
       // proves de twig
       $zone = guifi_zone_load($totalParameters['zone_id']);
-      list($primary_dns,$secondary_dns) = explode(' ',guifi_get_dns($zone,2));
+      list($primary_dns,$secondary_dns, $ternary_dns) = explode(' ',guifi_get_dns($zone,3));
       $totalParameters['zone_primary_dns'] = $primary_dns;
       $totalParameters['zone_secondary_dns'] = $secondary_dns;
+      $totalParameters['zone_ternary_dns'] = $ternary_dns;
       
       list($primary_ntp,$secondary_ntp) = explode(' ',guifi_get_ntp($zone));
       $totalParameters['zone_primary_ntp'] = $primary_ntp;
@@ -126,8 +127,8 @@ function guifi_unsolclic($dev, $format = 'html') {
             // DINAMIC s'ha de fer una segona passatda per buscar el origen de veritat
             $valor = $totalParameters[$origen];
           }
-          //echo "\nparam=$param = $valor $origen";
-          $twigVars[$param] = $valor;
+          $totalParameters[$param] = $valor;
+          //echo "\n<br>param '$param' $dinamic = '$valor $origen' ";
       }
 
       Twig_Autoloader::register();
@@ -149,7 +150,8 @@ function guifi_unsolclic($dev, $format = 'html') {
        $plantilla  = $twig->render($plantilla, $totalParameters);
 //
     }
-    $plantilla = str_replace("\n", "\n<br />", $plantilla);
+    if ($totalParameters['manufacturer_name']!='Ubiquiti')
+      $plantilla = str_replace("\n", "\n<br />", $plantilla);
     echo $plantilla;
     die;
   }
