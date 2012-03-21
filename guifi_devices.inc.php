@@ -668,6 +668,12 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
   // amb lo de sota els repliquem per poder-hi accedir directament
   $edit['mid'] = $edit['variable']['mid'];
   $edit['fid'] = $edit['variable']['fid'];
+  
+  // busquem el id de la configuracioUSC per aquests mid i fid
+  $sql = db_query('SELECT id as uscid, enabled  FROM {guifi_pfc_configuracioUnSolclic} WHERE mid=%d and fid=%d ', $edit['mid'], $edit['fid']);
+  $configuracio = db_fetch_object($sql);
+  
+  $edit['usc_id'] = $configuracio->uscid;
   $ndevice = _guifi_db_sql('guifi_devices',array('id' => $edit['id']),$edit,$log,$to_mail);
 
   guifi_log(GUIFILOG_TRACE,
