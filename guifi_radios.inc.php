@@ -22,7 +22,7 @@ function guifi_radio_form($edit, $form_weight) {
 
   $form['radio_settings'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Device model, firmware & MAC address').' ('.$edit['variable']['firmware'].')',
+    '#title' => t('Device model, firmware & MAC address').' ('.$models_array[$edit['mid']].')',
     '#weight' => $form_weight++,
     '#collapsible' => TRUE,
     '#tree' => FALSE,
