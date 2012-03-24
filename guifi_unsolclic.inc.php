@@ -34,6 +34,27 @@ function array_flatten(array $array, array $return = array(), $prefix=null, $par
   return $return;
 }
 
+function clientModeError($device){
+  $output = null;
+  if ($device->radios[0]['mode'] == 'client') {
+    $links = 0;
+    foreach ($device->radios[0]['interfaces'] as $interface_id => $interface)
+      foreach ($interface['ipv4'] as $ipv4_id => $ipv4)
+      if (isset($ipv4['links'])) foreach ($ipv4['links'] as $key => $link) {
+      if ($link['link_type'] == 'ap/client') {
+        $links++;
+        break;
+      }
+    }
+    if ($links == 0) {
+      $output .= t("# Generat per a:\n");
+      $output .= t("# {{ firmware_name }}\n");
+      $output .= t("# ERROR: Radio is in client mode but has no AP selected, please add a link to the AP at: ")."<a href=". base_path() ."guifi/device/$device->id/edit>http://guifi.net/guifi/device/$device->id/edit\n";
+    }
+  }
+  return $output;
+}
+
 // Generador dels unsolclic
 function guifi_unsolclic($dev, $format = 'html') {
   global $rc_startup;
@@ -98,6 +119,12 @@ function guifi_unsolclic($dev, $format = 'html') {
     
     // 6.B. recuperar els la informacio de la configuracio de fabricant-model-firmware
     $paramsMMF = guifi_get_paramsMMF($dev->id);
+    
+    // 4.b Comprovacions sobre el Device
+    $clientModeNoAPError = clientModeError($dev);
+    if ($clientModeNoAPError) {
+      $plantilla = $clientModeNoAPError;
+    }
     
     $totalParameters = array_merge($indexedParamsDevice, $paramsMMF, $flattenDev);
     
