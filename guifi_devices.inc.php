@@ -186,7 +186,12 @@ function guifi_device_load($id,$ret = 'array') {
 
     foreach($ipdec as $ka => $foo) {
       $a = $iparr[$ka];
+      $item = _ipcalc($a['ipv4'],$a['netmask']);
       $device['interfaces'][$i['id']]['ipv4'][$a['id']] = $a;
+      
+      // barrejem el qeu em ve de ipcalc aixi tinc totes les propietats de les ips definides a dins de (dev)
+      $device['interfaces'][$i['id']]['ipv4'][$a['id']] = array_merge($device['interfaces'][$i['id']]['ipv4'][$a['id']],$item);
+      
 
       // get linked devices
       $ql = db_query('
