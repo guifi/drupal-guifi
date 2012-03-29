@@ -3,6 +3,42 @@
 // carreguem el Twig
 include_once('contrib/twig_1.6/lib/Twig/Autoloader.php');
 
+function guifi_get_alchemy_ifs($dev) {
+  $ifs = array (
+      'wLan/Lan' => 'br0',
+      'wLan' => 'br0',
+      'vlan' => 'br0:1',
+      'vlwan' => 'br0',
+      'vlwan' => 'br0',
+      'wds/p2p' => 'wds0.',
+      'Wan' => 'vlan1',
+      'vlan2' => 'vlan2',
+      'vlan3' => 'vlan3',
+      'vlan4' => 'vlan4'
+  );
+  $ret = array();
+  if (!empty($dev->radios))       foreach ($dev->radios as $radio_id => $radio)
+    if (!empty($radio[interfaces])) foreach ($radio[interfaces] as $interface_id => $interface)
+    if (!empty($interface[ipv4]))   foreach ($interface[ipv4] as $ipv4_id => $ipv4)
+    if (!empty($ipv4[links]))       foreach ($ipv4[links] as $key => $link) {
+    if ($link['link_type'] == 'wds')
+      $wds_links[] = $link ;
+    else {
+      if (!isset($ret[$ifs[$interface['interface_type']]]))
+        $ret[$ifs[$interface['interface_type']]] = true;
+    }
+  }
+  if (count($wds_links))
+    foreach ($wds_links as $key => $wds)
+    $ret['wds0.'.($key+2)] = true;
+
+  if (!empty($dev->interfaces)) foreach ($dev->interfaces as $interface_id => $interface)
+    if (!isset($ret[$ifs[$interface['interface_type']]]))
+    $ret[$ifs[$interface['interface_type']]] = true;
+
+  return $ret;
+}
+
 
 function array_flatten(array $array, array $return = array(), $prefix=null, $parentName=null, $nivell=0) {
 
@@ -68,6 +104,7 @@ function guifi_unsolclic($dev, $format = 'html') {
   $dev = (object)$dev;
   
   $flattenDev = array_flatten((array)$dev,array());
+//  var_dump($flattenDev);
   
   if (isValidConfiguracioUSC($dev->usc_id)) {
 
@@ -110,12 +147,14 @@ function guifi_unsolclic($dev, $format = 'html') {
     // 4. recuperar TOTS els parametres variables associats al trasto
     //$paramsDevice = guifi_get_paramsDevice($dev->id);
     $paramsDevice = guifi_get_paramsClientDevice($dev->id);
+    //var_dump($dev->id);
 
     // 5. Indexar els els parametres variables associats al trasto
     $indexedParamsDevice = guifi_indexa_paramsDevice($paramsDevice, $paramPrefixes);
 
     // 6. recuperar els parametres de la plantilla
     $paramsconfiguracioUSC = guifi_get_paramsconfiguracioUSC($uscId);
+    //var_dump($paramsconfiguracioUSC);
     
     // 6.B. recuperar els la informacio de la configuracio de fabricant-model-firmware
     $paramsMMF = guifi_get_paramsMMF($dev->id);
@@ -127,6 +166,7 @@ function guifi_unsolclic($dev, $format = 'html') {
     }
     
     $totalParameters = array_merge($indexedParamsDevice, $paramsMMF, $flattenDev);
+    //var_dump($totalParameters);;
     
     // altres parametres fixes; TODO posar-lo com a parametre fixe de la plantilla
       $totalParameters['ospf_name'] ='backbone';
@@ -172,6 +212,9 @@ function guifi_unsolclic($dev, $format = 'html') {
       $twig->addFunction('ip2long', new Twig_Function_Function('ip2long'));
       $twig->addFunction('long2ip', new Twig_Function_Function('long2ip'));
       $twig->addFunction('t', new Twig_Function_Function('t'));
+      $twig->addFunction('guifi_to_7bits', new Twig_Function_Function('guifi_to_7bits'));
+      $twig->addFunction('guifi_get_alchemy_ifs', new Twig_Function_Function('guifi_get_alchemy_ifs'));
+      
       
        //$plantilla  = $twig->render($configuracioUSC['template_file'], $twigVars);
        $plantilla  = $twig->render($plantilla, $totalParameters);
@@ -418,7 +461,10 @@ function guifi_get_configuracioUSC($mid, $fid, $uscid) {
   //var_dump("Call guifi_get_configuracioUSC($mid, $fid, $uscid)");
   $configuracioUSCInfo = db_fetch_array(db_query("select id, mid, fid, enabled, tipologia, plantilla, template_file from {guifi_pfc_configuracioUnSolclic} where mid=%d and fid=%d and id = %d limit 1",$mid, $fid, $uscid));
   if (!empty($configuracioUSCInfo)){
-  } else var_dump("NO m'arriba cap plantilla  per a Model:$mid Firmware:$fid USCid:$uscid !!!!");
+  } else {
+    unsolclic_todo($dev);die;
+    var_dump("NO m'arriba cap plantilla  per a Model:$mid Firmware:$fid USCid:$uscid !!!!");
+  }
   return $configuracioUSCInfo;
 }
 function guifi_get_paramsconfiguracioUSC($uscid) {
