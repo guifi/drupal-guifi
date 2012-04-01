@@ -214,7 +214,8 @@ function guifi_unsolclic($dev, $format = 'html') {
       $twig->addFunction('t', new Twig_Function_Function('t'));
       $twig->addFunction('guifi_to_7bits', new Twig_Function_Function('guifi_to_7bits'));
       $twig->addFunction('guifi_get_alchemy_ifs', new Twig_Function_Function('guifi_get_alchemy_ifs'));
-      
+      $twig->addFunction('guifi_main_ip', new Twig_Function_Function('guifi_main_ip'));
+      $twig->addFunction('explode', new Twig_Function_Function('explode'));
       
        //$plantilla  = $twig->render($configuracioUSC['template_file'], $twigVars);
        $plantilla  = $twig->render($plantilla, $totalParameters);
