@@ -562,7 +562,7 @@ function guifi_get_paramsClientDevice($device_id) {
           JOIN guifi_links l ON l.interface_id = i.id
           JOIN guifi_links l2 ON l.id = l2.id and l2.device_id != d.id
           JOIN guifi_interfaces i2 on i2.id = l2.interface_id
-          JOIN guifi_radios r2 on r2.id = i2.device_id and r2.radiodev_counter = i2.radiodev_counter
+          LEFT JOIN guifi_radios r2 on r2.id = i2.device_id and r2.radiodev_counter = i2.radiodev_counter
           JOIN guifi_ipv4 ip2 ON ip2.interface_id = i2.id
           
           WHERE
