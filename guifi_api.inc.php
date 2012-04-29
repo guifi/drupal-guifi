@@ -24,7 +24,7 @@ function guifi_api() {
  * @param $parameters Parameters to login
  * @return boolean Whether the user authenticated or not
  */
-function guifi_api_auth_login(&$gapi, $parameters) {
+function guifi_api_auth_login($gapi, $parameters) {
   global $user;
   
 //  if (!guifi_api_check_fields($gapi, array('method' ), $parameters)) {
@@ -83,7 +83,7 @@ function _guifi_api_prepare_node($type, $title) {
   return $node;
 }
 
-function _guifi_api_zone_check_parameters(&$gapi, &$parameters) {
+function _guifi_api_zone_check_parameters($gapi, $parameters) {
   extract($parameters);
   
   if (isset($minx) || isset($maxx) || isset($miny) || isset($maxy)) {
@@ -178,7 +178,7 @@ function guifi_api_zone_add($gapi, $parameters) {
   $node->time_zone = '+01 2 2';
   $node->ospf_zone = '';
   
-  if (!_guifi_api_zone_check_parameters($gapi, &$parameters)) {
+  if (!_guifi_api_zone_check_parameters($gapi, $parameters)) {
     return FALSE;
   }
   
@@ -219,7 +219,7 @@ function guifi_api_zone_update($gapi, $parameters) {
   
   $node = node_load($zone_id);
   
-  if (!_guifi_api_zone_check_parameters($gapi, &$parameters)) {
+  if (!_guifi_api_zone_check_parameters($gapi, $parameters)) {
     return FALSE;
   }
   
@@ -293,7 +293,7 @@ function guifi_api_zone_nearest($gapi, $parameters) {
   return TRUE;
 }
 
-function _guifi_api_node_check_parameters(&$gapi, &$parameters) {
+function _guifi_api_node_check_parameters($gapi, $parameters) {
   extract($parameters);
   
   if (isset($status)) {
@@ -358,7 +358,7 @@ function guifi_api_node_add($gapi, $parameters) {
   $node->elevation = 0;
   $node->stable = 'Yes';
   
-  if (!_guifi_api_node_check_parameters($gapi, &$parameters)) {
+  if (!_guifi_api_node_check_parameters($gapi, $parameters)) {
     return FALSE;
   }
   
@@ -399,7 +399,7 @@ function guifi_api_node_update($gapi, $parameters) {
   
   $node = node_load($node_id);
   
-  if (!_guifi_api_node_check_parameters($gapi, &$parameters)) {
+  if (!_guifi_api_node_check_parameters($gapi, $parameters)) {
     return FALSE;
   }
   
@@ -461,7 +461,7 @@ function guifi_api_node_remove($gapi, $parameters) {
   return TRUE;
 }
 
-function _guifi_api_device_check_parameters(&$gapi, &$parameters) {
+function _guifi_api_device_check_parameters($gapi, $parameters) {
   extract($parameters);
   
   if (isset($status)) {
@@ -557,7 +557,7 @@ function guifi_api_device_add($gapi, $parameters) {
   
   $device['nick'] = guifi_device_get_default_nick((object)$node, $device['type'], $device['nid']);
   
-  if (!_guifi_api_device_check_parameters($gapi, &$parameters)) {
+  if (!_guifi_api_device_check_parameters($gapi, $parameters)) {
     return FALSE;
   }
   
@@ -598,7 +598,7 @@ function guifi_api_device_update($gapi, $parameters) {
     return FALSE;
   }
   
-  if (!_guifi_api_device_check_parameters($gapi, &$parameters)) {
+  if (!_guifi_api_device_check_parameters($gapi, $parameters)) {
     return FALSE;
   }
   
@@ -645,7 +645,7 @@ function guifi_api_device_remove($gapi, $parameters) {
   return TRUE;
 }
 
-function _guifi_api_radio_check_parameters(&$gapi, $parameters) {
+function _guifi_api_radio_check_parameters($gapi, $parameters) {
   extract($parameters);
   
   if (!empty($mac)) {
@@ -1071,7 +1071,7 @@ function guifi_api_interface_remove($gapi, $parameters) {
   return TRUE;
 }
 
-function _guifi_api_link_check_parameters(&$gapi, &$parameters) {
+function _guifi_api_link_check_parameters($gapi, $parameters) {
   extract($parameters);
   
   if (isset($status)) {
@@ -1349,7 +1349,7 @@ function guifi_api_link_remove($gapi, $parameters) {
   return TRUE;
 }
 
-function _guifi_api_misc_model_check_parameters(&$gapi, &$parameters) {
+function _guifi_api_misc_model_check_parameters($gapi, $parameters) {
   if (isset($parameters['type'])) {
     $types = array('Extern', 'PCMCIA', 'PCI' );
     if (!in_array($parameters['type'], $types)) {
@@ -1494,7 +1494,7 @@ function guifi_api_misc_channel($gapi, $parameters) {
  * @param string[] $required
  * @param mixed[] $parameters
  */
-function guifi_api_check_fields(&$gapi, $required, $parameters) {
+function guifi_api_check_fields($gapi, $required, $parameters) {
   $success = TRUE;
   foreach ($required as $req) {
     if (!isset($parameters[$req])) {
