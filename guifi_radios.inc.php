@@ -304,8 +304,8 @@ function guifi_radio_firmware_field($fid,$mid) {
       from
         {guifi_manufacturer} mf
         inner join {guifi_model} m ON m.fid = mf.fid
-        inner join {guifi_pfc_configuracioUnSolclic} usc ON usc.mid = m.mid and usc.enabled = 1
-        inner join {guifi_pfc_firmware} f ON f.id = usc.fid and m.mid = %d
+        inner join {guifi_configuracioUnSolclic} usc ON usc.mid = m.mid and usc.enabled = 1
+        inner join {guifi_firmware} f ON f.id = usc.fid and m.mid = %d
         order by nom asc", $mid);
   while ($firmware = db_fetch_array($queryfid)) {
     $firmwares[$firmware["id"]] = $firmware["nom"] ;

@@ -148,6 +148,8 @@ function guifi_devel_devices($devid , $op) {
   switch($devid) {
     case 'add':
      $devid = 'New';
+     $jquery1 = HelperMultipleSelect('guifi-devel-devices-form','firmwaresCompatibles', 'firmwaresTots');
+     drupal_add_js("if (Drupal.jsEnabled) { $jquery1 }", 'inline');
      return drupal_get_form('guifi_devel_devices_form',$devid);
   }
   switch($op) {
@@ -185,7 +187,7 @@ function guifi_devel_devices($devid , $op) {
                       FROM
                           {guifi_model} m
                           inner join {guifi_manufacturer} mf on mf.fid  = m.fid
-                          left join {guifi_pfc_configuracioUnSolclic} usc on usc.mid = m.mid and usc.enabled = 1
+                          left join {guifi_configuracioUnSolclic} usc on usc.mid = m.mid and usc.enabled = 1
                       GROUP BY  m.mid, model_url, m.model,manufacturer_name, manufacturer_url
                       ORDER BY enabledUSCs desc , mf.name asc , m.model ASC');
   
@@ -389,9 +391,9 @@ function guifi_devel_devices_form($form_state, $devid) {
   $query = db_query("select
                     usc.id, usc.mid, usc.fid, f.id as firmware_id, f.nom
                     from
-                    guifi_pfc_firmware f
+                    guifi_firmware f
                     left join
-                    guifi_pfc_configuracioUnSolclic usc ON usc.fid = f.id  and usc.mid = %d order by nom asc", $devid);
+                    guifi_configuracioUnSolclic usc ON usc.fid = f.id  and usc.mid = %d order by nom asc", $devid);
 
   
   while ($firmwares = db_fetch_array($query)) {
@@ -501,7 +503,7 @@ function guifi_devel_devices_duplicate_form_submit($form, &$form_state) {
   unset($form_state['values']['form_id']);
   
   // recuperar els firmwares suportats del model original
-  $sql= db_query("SELECT distinct(fid) FROM {guifi_pfc_configuracioUnSolclic} WHERE mid = %d order by fid asc", $originalmid);
+  $sql= db_query("SELECT distinct(fid) FROM {guifi_configuracioUnSolclic} WHERE mid = %d order by fid asc", $originalmid);
   while ($originalFirms = db_fetch_object($sql)) {
     $form_state['values']['firmwaresCompatibles'][$originalFirms->fid] = $originalFirms->fid;
   }
@@ -532,7 +534,7 @@ function guifi_devel_devices_save($edit, $originalmid=null) {
   }
   
   // recollida de parametresFirmware actuals
-  $sql= db_query("SELECT distinct(fid), plantilla FROM {guifi_pfc_configuracioUnSolclic} WHERE mid = %d order by fid asc", $midFirms);
+  $sql= db_query("SELECT distinct(fid), plantilla FROM {guifi_configuracioUnSolclic} WHERE mid = %d order by fid asc", $midFirms);
   while ($oldFirms = db_fetch_object($sql)) {
     $alreadyPresent[] = $oldFirms->fid;
     $plantilles[$oldFirms->fid] =  $oldFirms->plantilla;
@@ -557,13 +559,13 @@ function guifi_devel_devices_save($edit, $originalmid=null) {
         // per copiar el valor de la plantilla origen  'planitlla' => $plantilles[$firmware]
         
         // insertem una nova configuracio USC
-        $params = _guifi_db_sql('guifi_pfc_configuracioUnSolclic',array('mid' => $params['mid']),$params,$log,$to_mail);
+        $params = _guifi_db_sql('guifi_configuracioUnSolclic',array('mid' => $params['mid']),$params,$log,$to_mail);
          
          // TODO si fem el params = de sobre aleshores no cal tornar a el ultim mid, ja em ve del insert!
          // recuperem el id del uscid que acabem de crear
-         $uscid = db_fetch_array(db_query("SELECT max(id) mid FROM {guifi_pfc_configuracioUnSolclic} "));
+         $uscid = db_fetch_array(db_query("SELECT max(id) mid FROM {guifi_configuracioUnSolclic} "));
          
-         // aqui cal agafar tots els parametres del firmware i entrarlos a la taula guifi_pfc_parametresConfiguracioUnsolclic
+         // aqui cal agafar tots els parametres del firmware i entrarlos a la taula guifi_parametresConfiguracioUnsolclic
          crearParametresConfiguracioUSC($uscid['mid'], $firmware, $to_mail, $user->id);
          
       }
@@ -576,17 +578,17 @@ function guifi_devel_devices_save($edit, $originalmid=null) {
       if (!in_array($firmware, $edit['firmwaresCompatibles'])) {
         // IMPORTANT abans de esborrar comprovar que no tinguin configuracions USC validades
         
-        $sql = db_query('SELECT id as uscid, enabled  FROM {guifi_pfc_configuracioUnSolclic} WHERE mid=%d and fid=%d ', $edit['mid'], $firmware);
+        $sql = db_query('SELECT id as uscid, enabled  FROM {guifi_configuracioUnSolclic} WHERE mid=%d and fid=%d ', $edit['mid'], $firmware);
         $configuracions = db_fetch_object($sql);
         
         // si la configuracion USC no esta enabled la borrem
         if (!$configuracions->enabled) {
           
           // si esborrem la configuracio USC tambe hauriem d'esborrarli els parametres associats
-          db_query("DELETE FROM {guifi_pfc_configuracioUnSolclic} WHERE mid=%d and fid=%d ", $edit['mid'], $firmware);
+          db_query("DELETE FROM {guifi_configuracioUnSolclic} WHERE mid=%d and fid=%d ", $edit['mid'], $firmware);
           
           // si esborrem la configuracio USC tambe hauriem d'esborrarli els parametres associats
-          db_query("DELETE FROM {guifi_pfc_parametresConfiguracioUnsolclic} WHERE uscid=%d", $configuracions->uscid);
+          db_query("DELETE FROM {guifi_parametresConfiguracioUnsolclic} WHERE uscid=%d", $configuracions->uscid);
           
           $deleted[] = $firmware;
         } else {
@@ -654,6 +656,8 @@ function guifi_devel_firmware($firmid , $op) {
   switch($firmid) {
     case 'add':
      $firmid = 'New';
+     $jquery1 = HelperMultipleSelect('guifi-devel-firmware-form', 'parametres-associats', 'parametres-disponibles');
+     drupal_add_js("if (Drupal.jsEnabled) { $jquery1 }", 'inline');
      return drupal_get_form('guifi_devel_firmware_form',$firmid);
   }
   switch($op) {
@@ -681,8 +685,8 @@ function guifi_devel_firmware($firmid , $op) {
                       f.id, f.nom, f.descripcio, f.relations, f.enabled,
                       count(usc.fid) as enabledUSC
                   from
-                      {guifi_pfc_firmware{ f
-                      left join {guifi_pfc_configuracioUnSolclic} usc on usc.fid = f.id and usc.enabled = 1
+                      {guifi_firmware{ f
+                      left join {guifi_configuracioUnSolclic} usc on usc.fid = f.id and usc.enabled = 1
                   group by f.id, f.nom, f.descripcio, f.relations, f.enabled
                   order by enabled desc ,nom asc');
 
@@ -712,7 +716,7 @@ function guifi_devel_firmware($firmid , $op) {
 // Firmwares Form
 function guifi_devel_firmware_form($form_state, $firmid) {
 
-  $sql= db_query('SELECT id, nom, descripcio, relations, notification FROM {guifi_pfc_firmware} WHERE id = %d', $firmid);
+  $sql= db_query('SELECT id, nom, descripcio, relations, notification FROM {guifi_firmware} WHERE id = %d', $firmid);
   $firmware = db_fetch_object($sql);
 
   if ($firmid == 'New' ) {
@@ -730,7 +734,7 @@ function guifi_devel_firmware_form($form_state, $firmid) {
     '#maxlength' => 32,
     '#description' => t('The firmware name, please, use a clear and short name. ex: "FirmwarevXX" where XX = version'),
     '#prefix' => '<table><tr><td>',
-    '#suffix' => '',
+    '#suffix' => '</td>',
     '#weight' => $form_weight++,
   );
   
@@ -739,7 +743,7 @@ function guifi_devel_firmware_form($form_state, $firmid) {
       '#title' => t('Enabled'),
       '#default_value' => $firmware->enabled,
       '#description' => t('Check if firmware is avialable for use'),
-      '#prefix' => '',
+      '#prefix' => '<td>',
       '#suffix' => '</td></tr>',
       '#weight' => $form_weight++,
   );
@@ -752,7 +756,7 @@ function guifi_devel_firmware_form($form_state, $firmid) {
     '#size' => 64,
     '#maxlength' => 64,
     '#description' => t('The firmware description, please, use a clear and short description. ex: "FirmwarevXX from creator"'),
-    '#prefix' => '<tr><td>',
+    '#prefix' => '<tr><td colspan="2">',
     '#suffix' => '</td></tr>',
     '#weight' => $form_weight++,
   );
@@ -760,9 +764,9 @@ function guifi_devel_firmware_form($form_state, $firmid) {
   $query = db_query(" select
                           pf.fid, pf.pid, p.id, p.nom
                       from
-                          guifi_pfc_parametres p
+                          guifi_parametres p
                               left join
-                          guifi_pfc_parametresFirmware pf ON pf.pid = p.id and pf.fid = %d
+                          guifi_parametresFirmware pf ON pf.pid = p.id and pf.fid = %d
                       order by p.nom asc",$firmid);
   
   while ($parametres = db_fetch_array($query)) {
@@ -854,10 +858,10 @@ function guifi_devel_firmware_save($edit) {
 
   $to_mail = $user->mail;
   $log ='';
-  $query = db_query(" SELECT id, nom, descripcio, relations, enabled FROM {guifi_pfc_firmware} " );
+  $query = db_query(" SELECT id, nom, descripcio, relations, enabled FROM {guifi_firmware} " );
   
   // recollida de parametresFirmware actuals
-  $sql= db_query("SELECT distinct(pid) FROM {guifi_pfc_parametresFirmware} WHERE fid = %d order by pid asc", $edit['id']);
+  $sql= db_query("SELECT distinct(pid) FROM {guifi_parametresFirmware} WHERE fid = %d order by pid asc", $edit['id']);
   while ($oldParamsFirm = db_fetch_object($sql)) {
     $alreadyPresent[] = $oldParamsFirm->pid;
   }
@@ -874,10 +878,10 @@ function guifi_devel_firmware_save($edit) {
           'notification' => $to_mail,
           'new' => true
         );
-        _guifi_db_sql('guifi_pfc_parametresFirmware',array('mid' => $params['mid']),$params,$log,$to_mail);
+        _guifi_db_sql('guifi_parametresFirmware',array('mid' => $params['mid']),$params,$log,$to_mail);
         
         // busquem les propietats d'aquest nou parametre, dinamic i default_value
-        $sql = db_query('SELECT id, dinamic, default_value FROM {guifi_pfc_parametres} WHERE id = %d',$parametre);
+        $sql = db_query('SELECT id, dinamic, default_value FROM {guifi_parametres} WHERE id = %d',$parametre);
         $paramInfo = db_fetch_array($sql);
         
         // aqui cal agafar tots els unsolclic que funcionen amb aquest firmware i a cadascun afegir-li el parametre nou.
@@ -892,16 +896,16 @@ function guifi_devel_firmware_save($edit) {
         $sql = db_query('select
                                   pusc.pid, usc.enabled, usc.id uscid
                               from
-                                  {guifi_pfc_parametresConfiguracioUnsolclic} pusc
-                                  inner join {guifi_pfc_configuracioUnSolclic} usc on usc.id = pusc.uscid
+                                  {guifi_parametresConfiguracioUnsolclic} pusc
+                                  inner join {guifi_configuracioUnSolclic} usc on usc.id = pusc.uscid
                               where usc.fid = %d and pusc.pid = %d ', $edit['id'], $parametre);
         
         $configuracions = db_fetch_object($sql);
         
         if (!$configuracions->enabled) {
         
-          db_query("DELETE FROM {guifi_pfc_parametresFirmware} WHERE fid=%d and pid=%d ", $edit['id'], $parametre);
-          db_query("DELETE FROM {guifi_pfc_parametresConfiguracioUnsolclic} WHERE uscid=%d and pid=%d ", $configuracions->uscid, $parametre);
+          db_query("DELETE FROM {guifi_parametresFirmware} WHERE fid=%d and pid=%d ", $edit['id'], $parametre);
+          db_query("DELETE FROM {guifi_parametresConfiguracioUnsolclic} WHERE uscid=%d and pid=%d ", $configuracions->uscid, $parametre);
           
           $deleted[] = $parametre;
         } else {
@@ -924,7 +928,7 @@ function guifi_devel_firmware_save($edit) {
 
 
   //guifi_log(GUIFILOG_TRACE,'function guifi_devel_firmware_save()',$edit);
-  _guifi_db_sql('guifi_pfc_firmware',array('id' => $edit['id']),$edit,$log,$to_mail);
+  _guifi_db_sql('guifi_firmware',array('id' => $edit['id']),$edit,$log,$to_mail);
   
 drupal_set_message( $edit['nom'].' Actualitzat : '. $strGuardats . $strBorrats);
   guifi_notify(
@@ -1025,16 +1029,7 @@ function guifi_devel_manufacturer_form($form_state, $mid) {
   } else {
     $form['fid'] = array('#type' => 'hidden','#value' => $mid);
 }
-  $form['notification'] = array(
-    '#type' => 'textfield',
-    '#size' => 60,
-    '#maxlength' => 1024,
-    '#title' => t('contact'),
-    '#required' => TRUE,
-    '#element_validate' => array('guifi_emails_validate'),
-    '#default_value' => $mfr->notification,
-    '#description' =>  t('Mailid where changes on the device will be notified, if many, separated by \',\'<br />used for network administration.')
-  );
+
   $form['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Manufacturer Name'),
@@ -1043,7 +1038,7 @@ function guifi_devel_manufacturer_form($form_state, $mid) {
     '#size' => 32,
     '#maxlength' => 32,
     '#description' => t('Manufacturer name, please, use a clear and short description.'),
-    '#prefix' => '<table><tr><td>',
+    '#prefix' => '<table  style="width:700px"><tr><td valign="top" style="width:350px">',
     '#suffix' => '</td>',
     '#weight' => 1,
   );
@@ -1054,10 +1049,23 @@ function guifi_devel_manufacturer_form($form_state, $mid) {
     '#default_value' => $mfr->url,
     '#size' => 40,
     '#maxlength' => 40,
-    '#description' => t('TODO.'),
-    '#prefix' => '<td>',
-    '#suffix' => '</td></tr></table>',
+    '#description' => t('Manufacturer Url for more info.'),
+    '#prefix' => '<td valign="top"  style="width:350px">',
+    '#suffix' => '</td></tr>',
     '#weight' => 2,
+  );
+  $form['notification'] = array(
+      '#type' => 'textfield',
+      '#size' => 32,
+      '#maxlength' => 1024,
+      '#title' => t('contact'),
+      '#required' => TRUE,
+      '#element_validate' => array('guifi_emails_validate'),
+      '#default_value' => $mfr->notification,
+      '#description' =>  t('Mailid where changes on the device will be notified, if many, separated by \',\' used for network administration.'),
+      '#prefix' => '<tr><td>',
+      '#suffix' => '</td></tr></table>',
+      '#weight' => 3,
   );
 
   $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
@@ -1147,7 +1155,7 @@ function guifi_devel_parameter($id , $op) {
 
   $headers = array(t('ID'), t('Parameter'), t('Default Value'), t('Dynamic'), t('Origen'), t('Edit'), t('Delete'));
 
-  $sql = db_query('SELECT * FROM {guifi_pfc_parametres} order by nom ASC');
+  $sql = db_query('SELECT * FROM {guifi_parametres} order by nom ASC');
   while ($parameter = db_fetch_object($sql)) {
     $rows[] = array($parameter->id,
                     $parameter->nom,
@@ -1174,7 +1182,7 @@ function guifi_devel_parameter($id , $op) {
 // FirmWare Parameter Form
 function guifi_devel_parameter_form($form_state, $id) {
 
-  $sql = db_query('SELECT * FROM {guifi_pfc_parametres} WHERE id = %d', $id);
+  $sql = db_query('SELECT * FROM {guifi_parametres} WHERE id = %d', $id);
   $parameter = db_fetch_object($sql);
 
   if ($id == 'New' ) {
@@ -1254,7 +1262,7 @@ function guifi_devel_parameter_save($edit) {
 
   guifi_log(GUIFILOG_TRACE,'function guifi_devel_parameter_save()',$edit);
 
-  _guifi_db_sql('guifi_pfc_parametres',array('id' => $edit['id']),$edit,$log,$to_mail);
+  _guifi_db_sql('guifi_parametres',array('id' => $edit['id']),$edit,$log,$to_mail);
 
   guifi_notify(
   $to_mail,
@@ -1266,7 +1274,7 @@ function guifi_devel_parameter_delete_confirm($form_state,$id) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_parameter_delete_confirm()',$id);
 
   $form['id'] = array('#type' => 'hidden', '#value' => $id);
-  $qry= db_fetch_object(db_query("SELECT nom FROM {guifi_pfc_parametres} WHERE id = %d", $id));
+  $qry= db_fetch_object(db_query("SELECT nom FROM {guifi_parametres} WHERE id = %d", $id));
   return confirm_form(
   $form,
   t('Are you sure you want to delete the firmware parameter " %parameter "?',
@@ -1286,7 +1294,7 @@ function guifi_devel_parameter_delete_confirm_submit($form, &$form_state) {
   return;
 
   $to_mail = explode(',',$node->notification);
-  $log = _guifi_db_delete('guifi_pfc_parametres',array('id' => $form_state['values']['id']),$to_mail,$depth);
+  $log = _guifi_db_delete('guifi_parametres',array('id' => $form_state['values']['id']),$to_mail,$depth);
   drupal_set_message($log);
   guifi_notify(
   $to_mail,
@@ -1319,7 +1327,7 @@ function guifi_devel_modelfeature($id , $op) {
 
   $headers = array(t('ID'), t('name'), t('type'));
 
-  $sql = db_query('SELECT * FROM {guifi_pfc_caracteristica}');
+  $sql = db_query('SELECT * FROM {guifi_caracteristica}');
   while ($feature = db_fetch_object($sql)) {
     $rows[] = array($feature->id,
     $feature->nom,
@@ -1344,7 +1352,7 @@ function guifi_devel_modelfeature($id , $op) {
 // Model Feature Form
 function guifi_devel_modelfeature_form($form_state, $id) {
 
-  $sql = db_query('SELECT * FROM {guifi_pfc_caracteristica} WHERE id = %d', $id);
+  $sql = db_query('SELECT * FROM {guifi_caracteristica} WHERE id = %d', $id);
   $feature = db_fetch_object($sql);
 
   if ($id == 'New' ) {
@@ -1399,7 +1407,7 @@ function guifi_devel_modelfeature_save($edit) {
 
   guifi_log(GUIFILOG_TRACE,'function guifi_devel_modelfeature_save()',$edit);
 
-  _guifi_db_sql('guifi_pfc_caracteristica',array('id' => $edit['id']),$edit,$log,$to_mail);
+  _guifi_db_sql('guifi_caracteristica',array('id' => $edit['id']),$edit,$log,$to_mail);
 
   guifi_notify(
   $to_mail,
@@ -1411,7 +1419,7 @@ function guifi_devel_modelfeature_delete_confirm($form_state,$id) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_modelfeature_delete_confirm()',$id);
 
   $form['id'] = array('#type' => 'hidden', '#value' => $id);
-  $qry= db_fetch_object(db_query("SELECT nom FROM {guifi_pfc_caracteristica} WHERE id = %d", $id));
+  $qry= db_fetch_object(db_query("SELECT nom FROM {guifi_caracteristica} WHERE id = %d", $id));
   return confirm_form(
   $form,
   t('Are you sure you want to delete the Model Feature %modelfeature "?',
@@ -1431,7 +1439,7 @@ function guifi_devel_modelfeature_delete_confirm_submit($form, &$form_state) {
   return;
 
   $to_mail = explode(',',$node->notification);
-  $log = _guifi_db_delete('guifi_pfc_caracteristica',array('id' => $form_state['values']['id']),$to_mail,$depth);
+  $log = _guifi_db_delete('guifi_caracteristica',array('id' => $form_state['values']['id']),$to_mail,$depth);
   drupal_set_message($log);
   guifi_notify(
   $to_mail,
@@ -1466,11 +1474,11 @@ function guifi_devel_configuracio_usc($id , $op) {
         f.nom as nomfirmware,
         count(pusc.id) as numparameters
     FROM
-        {guifi_pfc_configuracioUnSolclic} usc
-        inner {join guifi_pfc_firmware} f on f.id = usc.fid
+        {guifi_configuracioUnSolclic} usc
+        inner {join guifi_firmware} f on f.id = usc.fid
         inner {join guifi_model} m on m.mid = usc.mid
         inner {join guifi_manufacturer} mf on mf.fid = m.fid
-        left {join guifi_pfc_parametresConfiguracioUnsolclic} pusc on pusc.uscid = usc.id
+        left {join guifi_parametresConfiguracioUnsolclic} pusc on pusc.uscid = usc.id
      group by usc.id, usc.mid, usc.fid, usc.enabled, usc.tipologia
      order by usc.enabled desc, fabricant asc, model asc, nomfirmware asc
   ');
@@ -1512,8 +1520,8 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
   $sql = db_query('SELECT
       usc.id, usc.mid, usc.fid, usc.enabled, usc.plantilla, mf.fid as mfid, mf.name as manufacturer, m.model, f.nom as nomfirmware
   FROM
-      guifi_pfc_configuracioUnSolclic usc
-      inner join guifi_pfc_firmware f on f.id = usc.fid
+      guifi_configuracioUnSolclic usc
+      inner join guifi_firmware f on f.id = usc.fid
       inner join guifi_model m on m.mid = usc.mid
       inner join guifi_manufacturer mf on mf.fid = m.fid
    where usc.id= %d', $id);
@@ -1565,8 +1573,8 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
   $sql = db_query('select
                         usc.id, usc.pid, usc.valor, p.dinamic, p.nom, p.origen
                     from
-                        guifi_pfc_parametresConfiguracioUnsolclic usc
-                        inner join guifi_pfc_parametres p on p.id = usc.pid
+                        guifi_parametresConfiguracioUnsolclic usc
+                        inner join guifi_parametres p on p.id = usc.pid
                     where
                         usc.uscid = %d
                     order by usc.dinamic asc, p.nom asc', $id);
@@ -1634,7 +1642,7 @@ function guifi_devel_configuracio_usc_save($edit) {
 
   guifi_log(GUIFILOG_TRACE,'function guifi_devel_configuracio_usc_save()',$edit);
 
-  _guifi_db_sql('guifi_pfc_configuracioUnSolclic',array('id' => $edit['id']),$edit,$log,$to_mail);
+  _guifi_db_sql('guifi_configuracioUnSolclic',array('id' => $edit['id']),$edit,$log,$to_mail);
 
   guifi_notify(
   $to_mail,
@@ -1646,7 +1654,7 @@ function guifi_devel_configuracio_usc_delete_confirm($form_state,$id) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_configuracio_usc_delete_confirm()',$id);
 
   $form['id'] = array('#type' => 'hidden', '#value' => $id);
-  $qry= db_fetch_object(db_query("SELECT plantilla FROM {guifi_pfc_configuracioUnSolclic} WHERE id = %d", $id));
+  $qry= db_fetch_object(db_query("SELECT plantilla FROM {guifi_configuracioUnSolclic} WHERE id = %d", $id));
   return confirm_form(
   $form,
   t('Are you sure you want to delete the Configuracio Unsolclic " %configuraciousc "?',
@@ -1666,7 +1674,7 @@ function guifi_devel_configuracio_usc_delete_confirm_submit($form, &$form_state)
   return;
 
   $to_mail = explode(',',$node->notification);
-  $log = _guifi_db_delete('guifi_pfc_configuracioUnSolclic',array('id' => $form_state['values']['id']),$to_mail,$depth);
+  $log = _guifi_db_delete('guifi_configuracioUnSolclic',array('id' => $form_state['values']['id']),$to_mail,$depth);
   drupal_set_message($log);
   guifi_notify(
   $to_mail,
@@ -1700,7 +1708,7 @@ function guifi_devel_paramusc($id , $op) {
 
   $headers = array(t('ID'), t('Parameter'), t('Origen'), t('Edit'), t('Delete'));
 
-  $sql = db_query('SELECT * FROM {guifi_pfc_parametres}');
+  $sql = db_query('SELECT * FROM {guifi_parametres}');
   while ($parameter = db_fetch_object($sql)) {
     $rows[] = array($parameter->id,
     $parameter->nom,
@@ -1728,10 +1736,10 @@ function guifi_devel_paramusc_form($form_state, $id) {
   $sql = db_query('select
                       pusc.id, pusc.uscid, pusc.valor, pusc.dinamic, p.id as pid, p.nom, f.id, f.nom as nomfirmware, d.mid, d.model,  mf.fid, mf.name as manufacturer
                   from
-                      guifi_pfc_parametresConfiguracioUnsolclic pusc
-                      inner join guifi_pfc_parametres p on p.id = pusc.pid
-                      inner join guifi_pfc_configuracioUnSolclic usc on usc.id = pusc.uscid
-                      inner join guifi_pfc_firmware f on f.id = usc.fid
+                      guifi_parametresConfiguracioUnsolclic pusc
+                      inner join guifi_parametres p on p.id = pusc.pid
+                      inner join guifi_configuracioUnSolclic usc on usc.id = pusc.uscid
+                      inner join guifi_firmware f on f.id = usc.fid
                       inner join guifi_model d on d.mid = usc.mid
                       inner join guifi_manufacturer mf on mf.fid = d.fid
                   where
@@ -1787,11 +1795,11 @@ function guifi_devel_paramusc_save($edit) {
 
   guifi_log(GUIFILOG_TRACE,'function guifi_devel_parameter_save()',$edit);
 
-  _guifi_db_sql('guifi_pfc_parametresConfiguracioUnsolclic',array('id' => $edit['id']),$edit,$log,$to_mail);
+  _guifi_db_sql('guifi_parametresConfiguracioUnsolclic',array('id' => $edit['id']),$edit,$log,$to_mail);
 
   guifi_notify(
   $to_mail,
-  t('The guifi_pfc_parametresConfiguracioUnsolclic !parameter has been created / updated by !user.',array('!manufacturer' => $edit['name'], '!user' => $user->name)),
+  t('The guifi_parametresConfiguracioUnsolclic !parameter has been created / updated by !user.',array('!manufacturer' => $edit['name'], '!user' => $user->name)),
   $log);
 }
 
@@ -1802,8 +1810,8 @@ function guifi_devel_paramusc_delete_confirm($form_state,$id) {
   $qry= db_fetch_object(db_query("SELECT
                                       p.nom, pusc.uscid as uscid
                                   FROM
-                                      guifi_pfc_parametresConfiguracioUnsolclic pusc
-                                      inner join guifi_pfc_parametres p on p.id = pusc.pid
+                                      guifi_parametresConfiguracioUnsolclic pusc
+                                      inner join guifi_parametres p on p.id = pusc.pid
                                   WHERE
                                       pusc.id = %d", $id));
   
@@ -1826,7 +1834,7 @@ function guifi_devel_paramusc_delete_confirm_submit($form, &$form_state) {
   return;
 
   $to_mail = explode(',',$node->notification);
-  $log = _guifi_db_delete('guifi_pfc_parametresConfiguracioUnsolclic',array('id' => $form_state['values']['id']),$to_mail,$depth);
+  $log = _guifi_db_delete('guifi_parametresConfiguracioUnsolclic',array('id' => $form_state['values']['id']),$to_mail,$depth);
   drupal_set_message($log);
   guifi_notify(
   $to_mail,
@@ -1866,8 +1874,8 @@ function crearParametresConfiguracioUSC($uscid, $fid, $notification, $userid) {
   $sql = db_query("SELECT
                         p.id, %d, p.nom, dinamic, default_value
                      FROM
-                      guifi_pfc_parametres p
-                     INNER JOIN guifi_pfc_parametresFirmware pf ON pf.pid = p.id  AND pf.fid = %d", $uscid,  $fid);
+                      guifi_parametres p
+                     INNER JOIN guifi_parametresFirmware pf ON pf.pid = p.id  AND pf.fid = %d", $uscid,  $fid);
   
   while ($paramsFirmware = db_fetch_object($sql)) {
     
@@ -1881,11 +1889,11 @@ function crearParametresConfiguracioUSC($uscid, $fid, $notification, $userid) {
               'user_created' => $userid,
               'new' => true
     );
-    _guifi_db_sql('guifi_pfc_parametresConfiguracioUnsolclic',array('id' => $params['id']),$params,$log,$notification);
+    _guifi_db_sql('guifi_parametresConfiguracioUnsolclic',array('id' => $params['id']),$params,$log,$notification);
     
     
     
-    //db_query("INSERT INTO  {guifi_pfc_parametresConfiguracioUnsolclic} (pid, uscid, dinamic, notification, user_created)
+    //db_query("INSERT INTO  {guifi_parametresConfiguracioUnsolclic} (pid, uscid, dinamic, notification, user_created)
     //VALUES (%d, %d, 0,'%s', %d)", $paramsFirmware->id, $uscid, $notification, $userid);
   }
   return true;
@@ -1899,7 +1907,7 @@ function crearParametresConfiguracioUSC($uscid, $fid, $notification, $userid) {
  * @param int $userid
  */
 function afegirParametreConfiguracionsUSC($fid, $parametre, $notification, $userid) {
-  $sql = db_query("select id , enabled from guifi_pfc_configuracioUnSolclic where fid = %d", $fid);
+  $sql = db_query("select id , enabled from guifi_configuracioUnSolclic where fid = %d", $fid);
   while ($configuracioUSC = db_fetch_object($sql)) {
     $params = array(
               'pid' => $parametre['id'],
@@ -1910,7 +1918,7 @@ function afegirParametreConfiguracionsUSC($fid, $parametre, $notification, $user
               'user_created' => $userid,
               'new' => true
     );
-    _guifi_db_sql('guifi_pfc_parametresConfiguracioUnsolclic',array('id' => $params['id']),$params,$log,$notification);
+    _guifi_db_sql('guifi_parametresConfiguracioUnsolclic',array('id' => $params['id']),$params,$log,$notification);
   }
   return true;
 }
@@ -1925,9 +1933,9 @@ function getUSCid($model, $firmware){
                       usc.mid,
                       usc.fid
                   FROM
-                      guifi_pfc_parametresConfiguracioUnsolclic pusc
+                      guifi_parametresConfiguracioUnsolclic pusc
                           inner join
-                      guifi_pfc_configuracioUnSolclic usc ON usc.id = pusc.uscid
+                      guifi_configuracioUnSolclic usc ON usc.id = pusc.uscid
                   where
                       pusc.pid = %d and usc.fid = %d', $model, $firmware);
   $usc = db_fetch_object($sql);

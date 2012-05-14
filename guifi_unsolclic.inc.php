@@ -104,7 +104,6 @@ function guifi_unsolclic($dev, $format = 'html') {
   $dev = (object)$dev;
   
   $flattenDev = array_flatten((array)$dev,array());
-//  var_dump($flattenDev);
   
   if (isValidConfiguracioUSC($dev->usc_id)) {
 
@@ -147,14 +146,12 @@ function guifi_unsolclic($dev, $format = 'html') {
     // 4. recuperar TOTS els parametres variables associats al trasto
     //$paramsDevice = guifi_get_paramsDevice($dev->id);
     $paramsDevice = guifi_get_paramsClientDevice($dev->id);
-    //var_dump($dev->id);
 
     // 5. Indexar els els parametres variables associats al trasto
     $indexedParamsDevice = guifi_indexa_paramsDevice($paramsDevice, $paramPrefixes);
 
     // 6. recuperar els parametres de la plantilla
     $paramsconfiguracioUSC = guifi_get_paramsconfiguracioUSC($uscId);
-    //var_dump($paramsconfiguracioUSC);
     
     // 6.B. recuperar els la informacio de la configuracio de fabricant-model-firmware
     $paramsMMF = guifi_get_paramsMMF($dev->id);
@@ -166,7 +163,6 @@ function guifi_unsolclic($dev, $format = 'html') {
     }
     
     $totalParameters = array_merge($indexedParamsDevice, $paramsMMF, $flattenDev);
-    //var_dump($totalParameters);;
     
     // altres parametres fixes; TODO posar-lo com a parametre fixe de la plantilla
       $totalParameters['ospf_name'] ='backbone';
@@ -205,9 +201,6 @@ function guifi_unsolclic($dev, $format = 'html') {
       $twig = new Twig_Environment($loader);
       
       $totalParameters['dev'] = $dev;
-//       var_dump($totalParameters);die;
-//       $twigVars['dev'] = $dev;
-//       $twigVars['all'] = $totalParameters;
 
       $twig->addFunction('ip2long', new Twig_Function_Function('ip2long'));
       $twig->addFunction('long2ip', new Twig_Function_Function('long2ip'));
@@ -216,6 +209,9 @@ function guifi_unsolclic($dev, $format = 'html') {
       $twig->addFunction('guifi_get_alchemy_ifs', new Twig_Function_Function('guifi_get_alchemy_ifs'));
       $twig->addFunction('guifi_main_ip', new Twig_Function_Function('guifi_main_ip'));
       $twig->addFunction('explode', new Twig_Function_Function('explode'));
+      
+      $escaper = new Twig_Extension_Escaper(true);
+      $twig->addExtension($escaper);
       
        //$plantilla  = $twig->render($configuracioUSC['template_file'], $twigVars);
        $plantilla  = $twig->render($plantilla, $totalParameters);
@@ -432,7 +428,7 @@ function guifi_get_model($mid) {
 
 function guifi_get_caractmodel($mid) {
 
-  $caractModelInfo = db_fetch_array(db_query("select * from {guifi_pfc_caracteristiquesModel} where mid=%d limit 1",$mid));
+  $caractModelInfo = db_fetch_array(db_query("select * from {guifi_caracteristiquesModel} where mid=%d limit 1",$mid));
   if (!empty($caractModelInfo)){
     //var_dump(caractModelInfo);
   }
@@ -441,7 +437,7 @@ function guifi_get_caractmodel($mid) {
 
 function guifi_get_firmware($nom) {
 
-  $firmwareInfo = db_fetch_array(db_query("select * from {guifi_pfc_firmware} where nom='%s'",$nom));
+  $firmwareInfo = db_fetch_array(db_query("select * from {guifi_firmware} where nom='%s'",$nom));
   if (!empty($firmwareInfo)){
     //var_dump($firmwareInfo);
   }
@@ -450,7 +446,7 @@ function guifi_get_firmware($nom) {
 
 function guifi_get_paramsFirmware($fid) {
 
-  $paramsFirmwareInfo = db_fetch_array(db_query("select * from {guifi_pfc_parametresFirmware} where fid='%d'",$fid));
+  $paramsFirmwareInfo = db_fetch_array(db_query("select * from {guifi_parametresFirmware} where fid='%d'",$fid));
   if (!empty($paramsFirmwareInfo)){
     //var_dump($paramsFirmwareInfo);
   }
@@ -460,7 +456,7 @@ function guifi_get_paramsFirmware($fid) {
 function guifi_get_configuracioUSC($mid, $fid, $uscid) {
 
   //var_dump("Call guifi_get_configuracioUSC($mid, $fid, $uscid)");
-  $configuracioUSCInfo = db_fetch_array(db_query("select id, mid, fid, enabled, tipologia, plantilla, template_file from {guifi_pfc_configuracioUnSolclic} where mid=%d and fid=%d and id = %d limit 1",$mid, $fid, $uscid));
+  $configuracioUSCInfo = db_fetch_array(db_query("select id, mid, fid, enabled, tipologia, plantilla, template_file from {guifi_configuracioUnSolclic} where mid=%d and fid=%d and id = %d limit 1",$mid, $fid, $uscid));
   if (!empty($configuracioUSCInfo)){
   } else {
     unsolclic_todo($dev);die;
@@ -470,8 +466,8 @@ function guifi_get_configuracioUSC($mid, $fid, $uscid) {
 }
 function guifi_get_paramsconfiguracioUSC($uscid) {
   $qry = db_query("select p.nom, c.valor, c.dinamic, p.origen
-                   from {guifi_pfc_parametresConfiguracioUnsolclic} c,
-                        {guifi_pfc_parametres} p
+                   from {guifi_parametresConfiguracioUnsolclic} c,
+                        {guifi_parametres} p
                    where c.pid = p.id and c.uscid= %d",$uscid);
   while ($param = db_fetch_array($qry)) {
     $params[] = $param;
@@ -491,11 +487,11 @@ function guifi_get_paramsMMF($devId) {
                         f.descripcio as firmware_description
                     from
                         guifi_devices d
-                        JOIN guifi_pfc_configuracioUnSolclic usc on usc.id = d.usc_id
+                        JOIN guifi_configuracioUnSolclic usc on usc.id = d.usc_id
                         JOIN users u ON u.uid = usc.user_created
                         JOIN guifi_model m on m.mid = usc.mid
                         JOIN guifi_manufacturer mf on mf.fid = m.fid
-                        JOIN guifi_pfc_firmware f on f.id = usc.fid
+                        JOIN guifi_firmware f on f.id = usc.fid
                     
                     where d.id = %d",$devId);
   $param = db_fetch_array($qry);
@@ -634,7 +630,7 @@ function guifi_usc_comprova_clau_prefix($clau, $paramPrefixes) {
 }
 
 function isValidConfiguracioUSC($uscid){
-  $result = db_fetch_object(db_query("SELECT id, enabled FROM {guifi_pfc_configuracioUnSolclic} WHERE  id = %d AND enabled = 1 LIMIT 1",$uscid));
+  $result = db_fetch_object(db_query("SELECT id, enabled FROM {guifi_configuracioUnSolclic} WHERE  id = %d AND enabled = 1 LIMIT 1",$uscid));
   if (!empty($result->enabled)) return true;
   
   return false;
