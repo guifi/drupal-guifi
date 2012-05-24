@@ -266,6 +266,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
                  case 'antenna_angle': $radioXML->addAttribute('antenna_angle',$value); break;
                  case 'antenna_gain': $radioXML->addAttribute('antenna_gain',$value); break;
                  case 'antenna_azimuth': $radioXML->addAttribute('antenna_azimuth',$value); break;
+                 case 'clients_accepted': $radioXML->addAttribute('clients_accepted',$value); break;
                }
               }
               if (isset($device->variable['model_id']))
