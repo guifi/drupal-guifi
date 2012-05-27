@@ -27,8 +27,9 @@ function guifi_api() {
 
 /**
  * Try to authenticate the user using any method
+ * At the moment there is only one method available: 'password'
  * 
- * @param GuifiAPI $gapi Guifi API
+ * @param GuifiAPI $gapi GuifiAPI object
  * @param $parameters Parameters to login
  * @return boolean Whether the user authenticated or not
  */
@@ -73,12 +74,13 @@ function guifi_api_auth_login(&$gapi, $parameters) {
 }
 
 /**
- *
+ * Builds an array with the user information and submits it
  * @param $type
  *
  * @param $title
  *
- * @return
+ * @return submitted node
+ * @todo node_submit() doesn't exist?
  */
 function _guifi_api_prepare_node($type, $title) {
   global $user;
@@ -100,12 +102,12 @@ function _guifi_api_prepare_node($type, $title) {
 }
 
 /**
+ * Checks zone parameters data types (coherency)
+ * 
+ * @param GuifiAPI $gapi GuifiAPI object
+ * @param mixed[] $parameters
  *
- * @param $gapi
- *
- * @param $parameters
- *
- * @return
+ * @return TRUE if the parameters values passed all checks, FALSE otherwise
  */
 function _guifi_api_zone_check_parameters(&$gapi, &$parameters) {
   extract($parameters);
@@ -146,6 +148,7 @@ function _guifi_api_zone_check_parameters(&$gapi, &$parameters) {
     }
   }
   
+  //Checks the service id exists and its type is 'SNPgraphs'
   if (!empty($graph_server)) {
     $server = db_fetch_object(db_query("SELECT id FROM {guifi_services} WHERE id = '%d' AND service_type = 'SNPgraphs'", $graph_server));
     if (!$server->id) {
@@ -154,6 +157,7 @@ function _guifi_api_zone_check_parameters(&$gapi, &$parameters) {
     }
   }
   
+  //Checks the service id exists and its type is 'Proxy'
   if (isset($proxy_server)) {
     $server = db_fetch_object(db_query("SELECT id FROM {guifi_services} WHERE id = '%d' AND service_type = 'Proxy'", $proxy_server));
     if (!empty($proxy_server) && !$server->id) {
@@ -164,6 +168,7 @@ function _guifi_api_zone_check_parameters(&$gapi, &$parameters) {
     }
   }
   
+  //Checks the zone_mode is a valid type ('infrastructure' or 'ad-hoc')
   if (isset($zone_mode)) {
     $zone_modes = array('infrastructure', 'ad-hoc' );
     if (!in_array($zone_mode, $zone_modes)) {
@@ -280,9 +285,9 @@ function guifi_api_zone_update(&$gapi, $parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -316,9 +321,9 @@ function guifi_api_zone_remove(&$gapi, $parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -386,9 +391,9 @@ function _guifi_api_node_check_parameters(&$gapi, &$parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -442,7 +447,7 @@ function guifi_api_node_add(&$gapi, $parameters) {
 /**
  * Updates a guifi.net node
  * @param GuifiAPI $gapi
- * @param $parameters
+ * @param mixed[] $parameters
  * @return unknown_type
  */
 function guifi_api_node_update(&$gapi, $parameters) {
@@ -486,7 +491,7 @@ function guifi_api_node_update(&$gapi, $parameters) {
 /**
  * Removes a node from guifi.net
  * @param GuifiAPI $gapi
- * @param $parameters
+ * @param mixed[] $parameters
  * @return unknown_type
  */
 function guifi_api_node_remove(&$gapi, $parameters) {
@@ -519,9 +524,9 @@ function guifi_api_node_remove(&$gapi, $parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -650,9 +655,9 @@ function guifi_api_device_add(&$gapi, $parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -690,7 +695,7 @@ function guifi_api_device_update(&$gapi, $parameters) {
  * Remove a device from guifi.net
  * 
  * @param GuifiAPI $gapi
- * @param $parameters Parameters to remove the device (device_id, basically)
+ * @param mixed[] $parameters Parameters to remove the device (device_id, basically)
  * @return boolean Whether the device was removed or not
  */
 function guifi_api_device_remove(&$gapi, $parameters) {
@@ -723,9 +728,9 @@ function guifi_api_device_remove(&$gapi, $parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -903,9 +908,9 @@ function guifi_api_radio_add(&$gapi, $parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -962,9 +967,9 @@ function guifi_api_radio_update(&$gapi, $parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -1001,9 +1006,9 @@ function guifi_api_radio_remove(&$gapi, $parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -1087,9 +1092,9 @@ function guifi_api_radio_nearest(&$gapi, $parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -1153,9 +1158,9 @@ function guifi_api_interface_add(&$gapi, $parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -1203,9 +1208,9 @@ function guifi_api_interface_remove(&$gapi, $parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -1255,9 +1260,9 @@ function _guifi_api_link_validate_local_ipv4($l_ipv4, $r_ipv4) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -1400,9 +1405,9 @@ function guifi_api_link_add(&$gapi, $parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -1477,9 +1482,9 @@ function guifi_api_link_update(&$gapi, $parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -1526,9 +1531,9 @@ function guifi_api_link_remove(&$gapi, $parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -1564,9 +1569,9 @@ function _guifi_api_misc_model_check_parameters(&$gapi, &$parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -1609,9 +1614,9 @@ function guifi_api_misc_model(&$gapi, $parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -1630,9 +1635,9 @@ function guifi_api_misc_manufacturer(&$gapi, $parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -1664,9 +1669,9 @@ function guifi_api_misc_firmware(&$gapi, $parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -1686,9 +1691,9 @@ function guifi_api_misc_protocol(&$gapi, $parameters) {
 
 /**
  *
- * @param $gapi
+ * @param GuifiAPI $gapi GuifiAPI object
  *
- * @param $parameters
+ * @param mixed[] $parameters
  *
  * @return
  */
@@ -1714,11 +1719,11 @@ function guifi_api_misc_channel(&$gapi, $parameters) {
 }
 
 /**
- * Check if any fields are present in the parameters passed to the API or not
+ * Check if a set of fields are present in the parameters array passed to the API
  *
- * @param GuifiAPI $gapi
- * @param string[] $required
- * @param mixed[] $parameters
+ * @param GuifiAPI $gapi GuifiAPI object
+ * @param string[] $required Array with required fieldnames
+ * @param mixed[] $parameters Array of parameters to be checked
  *
  * @return
  */
