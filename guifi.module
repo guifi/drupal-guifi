@@ -723,6 +723,14 @@ function guifi_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK
   );
+   $items['guifi/export/%guifi_service/federation'] = array(
+    'title' => 'federation',
+    'page callback' => 'dump_guifi_proxy_federation',
+    'page arguments' => array(2),
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK
+  );
   $items['guifi/export/%guifi_service/federated'] = array(
     'title' => 'federated',
     'page callback' => 'guifi_users_dump_federated',
@@ -1033,6 +1041,15 @@ function guifi_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK
   );
+  $items['guifi/csvproxy/%'] = array(
+    'title' => 'export zone proxy services in csv format',
+    'page callback' => 'guifi_csvproxy',
+    'page arguments' => array(2),
+    'access arguments' => array('access content'),
+    'file' => 'guifi_csvproxy.inc.php',
+    'type' => MENU_CALLBACK
+  );
+  
 //  $items['guifi/nodexchange/%'] = array(
 //    'title' => 'export zone in nodeXchange format',
 //    'page callback' => 'guifi_nodexchange',
@@ -1504,7 +1521,7 @@ function guifi_block($op = "list", $delta = 0, $edit = array()) {
       switch ($delta) {
         case 0:
           $block['subject'] = t(variable_get("guifi_title", "<a href=\"guifi\">". t("List of guifi nodes") ."</a>"));
-          $block['content'] = guifi_display_block_1($content);
+          $block['content'] = guifi_display_block_1();
           break;
       }
       return $block;
@@ -1520,7 +1537,7 @@ function guifi_counters_block() {
     SELECT
     status_flag, count(*) c
     FROM {guifi_location}
-    GROUP BY status_flag');
+    GROUP BY status_flag ORDER BY C DESC');
   $str = '';
   $rows = array();
   $totals = 0;
@@ -1660,7 +1677,7 @@ function guifi_display_block_1() {
       SELECT
         status_flag, count(*) c
       FROM {guifi_location}
-      GROUP BY status_flag');
+      GROUP BY status_flag ORDER BY C DESC');
     $str = '';
     $rows = array();
     $totals = 0;
@@ -1800,6 +1817,10 @@ function guifi_link($type, $node = 0) {
 //      'title'=> t('nodeXchange'),
 //      'href' => "guifi/nodexchange/$node->nid",
 //      'attributes' => array('title' => t('export zone in nodeXchange format')));
+    $links['guifiproxy'] = array(
+      'title' => t('guifiproxy'),
+      'href' => "guifi/csvproxy/$node->nid",
+      'attributes' => array('title' => t('export zone proxy services in csv format')));
     $links['cnml'] = array(
       'title' => t('CNML'),
       'href' => "guifi/cnml/$node->nid",

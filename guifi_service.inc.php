@@ -771,7 +771,7 @@ function guifi_service_view($node, $teaser = FALSE, $page = FALSE, $block = FALS
     $node->content['body']['#value'] =
       theme('box',t('Description'),$node->content['body']['#value']);
     $node->content['body']['#weight'] = 1;
-    $service_data = 
+    $service_data =
         array(
           '#value' => theme('box', t('service information'),
              theme_guifi_service_data($node, FALSE)),
@@ -804,7 +804,7 @@ function guifi_service_view($node, $teaser = FALSE, $page = FALSE, $block = FALS
             array('data' => $domain['type'],'style' => 'text-align: left;'),
             array('data' => $domain['scope']),
             $edit_domain,
-          ); 
+          );
         }
         if (count($rows)) {
           $node->content['data'] = array(
@@ -824,7 +824,7 @@ function guifi_service_view($node, $teaser = FALSE, $page = FALSE, $block = FALS
              )
           );
         }
-    } 
+    }
     else {
       $node->content['data'] = array(
         array(
@@ -838,5 +838,33 @@ function guifi_service_view($node, $teaser = FALSE, $page = FALSE, $block = FALS
   return $node;
 }
 
+function dump_guifi_proxy_federation($node) {
+
+  $qryself=db_query("SELECT id,extra FROM {guifi_services} WHERE service_type = 'Proxy' AND id = '%s' AND (status_flag = 'Working' OR status_flag = 'Testing') ORDER BY id",$node->id);
+  $qryothers = db_query("SELECT id,extra FROM {guifi_services} WHERE service_type = 'Proxy' AND id != '%s' AND (status_flag = 'Working' OR status_flag = 'Testing') ORDER BY id",$node->id);
+
+  $ownproxy = db_fetch_array( $qryself );
+  $extra=unserialize($ownproxy['extra']);
+  $in = $extra['fed']['IN'];
+  $out = $extra['fed']['OUT'];
+  $in = strtolower(($in == '0')?'':$in);
+  $out = strtolower(($out == '0')?'':$out);
+  $inout = ($in.$out == '')?'private':$in.$out;
+  if (!empty($ownproxy['id']))
+    $head = $ownproxy['id']."-".$inout."\n";
+  else
+   $head = "0000-private\n";
+  while ( ($row = db_fetch_array( $qryothers )) != null) {
+    unset($extra);
+    $extra=unserialize($row['extra']);
+    $in = $extra['fed']['IN'];
+    $out = $extra['fed']['OUT'];
+    $in = strtolower(($in == '0')?'':$in);
+    $out = strtolower(($out == '0')?'':$out);
+    $inout = ($in.$out == '')?'private':$in.$out;
+    $head .= $row['id']."-".$inout."\n";
+      }
+  echo $head;
+}
 
 ?>

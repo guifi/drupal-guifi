@@ -240,10 +240,14 @@ function guifi_node_form(&$node, $form_state) {
       '#description' => t('You must accept this agreement to be authorized to create new nodes.'),
       '#weight' => 1,
     );
+    if (empty($node->agreement))
+      $agreement = 'No';
+    else
+      $agreement = $node->agreement;
+
     $form['agreement']= array(
       '#type' => 'radios',
-//      '#title' => t('Yes, I have read this and accepted'),
-      '#default_value' => 'No',
+      '#default_value' =>$agreement,
       '#options' => array('Yes' => t('Yes, I have read this and accepted')),
       '#element_validate' => array('guifi_node_agreement_validate'),
       '#weight' => 2,
@@ -253,17 +257,20 @@ function guifi_node_form(&$node, $form_state) {
       '#type' => 'hidden',
       '#default_value' => 'Yes',
     );
-  };
+  }
 
   if (empty($node->nid)) {
-    if(empty($user->guifi_default_zone)){
-      $zone_id=$node->zone_id;
-    }else{
-      $zone_id = $user->guifi_default_zone;
+    if (empty($node->zone_id)) {
+      if(!empty($user->guifi_default_zone)) {
+        $zone_id = $user->guifi_default_zone;
+      }
+    } else {
+      $zone_id = $node->zone_id;
     }
-  }else {
+  } else {
     $zone_id = $node->zone_id;
   }
+
   $form['zone_id'] = guifi_zone_select_field($zone_id,'zone_id');
   $form['zone_id']['#weight'] = 3;
 

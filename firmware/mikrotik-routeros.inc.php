@@ -546,22 +546,28 @@ function unsolclic_routeros($dev) {
   case 'RouterOSv4.0+' :
   case 'RouterOSv4.7+':
   case 'RouterOSv5.x':
-      _outln(sprintf('add chain=srcnat src-address="192.168.0.0/16" dst-address=!192.168.0.0/16 action=src-nat to-addresses=%s comment="" disabled=no',$ospf_routerid));
-      _outln(sprintf('add chain=srcnat src-address="172.16.0.0/12" dst-address=!172.16.0.0/12 protocol=!ospf action=src-nat to-addresses=%s comment="" disabled=no',$ospf_routerid));
-    break;
+    _outln(sprintf('add chain=srcnat src-address="192.168.0.0/16" dst-address=!192.168.0.0/16 action=src-nat to-addresses=%s comment="" disabled=no',$ospf_routerid));
+    _outln(sprintf('add chain=srcnat src-address="172.16.0.0/12" dst-address=!172.16.0.0/12 protocol=!ospf action=src-nat to-addresses=%s comment="" disabled=no',$ospf_routerid));
+  break;
 }
 
   // BGP
   _outln_comment();
   _outln_comment(t('BGP Routing'));
-  _outln_comment(t('BGP &#038; OSPF Filters'));
+  _outln_comment(t('BGP & OSPF Filters'));
   _outln(':foreach i in [/routing filter find chain=ospf-in] do={/routing filter remove $i;}');
   _outln(':foreach i in [/routing filter find chain=ospf-out] do={/routing filter remove $i;}');
   _outln(':foreach i in [/routing filter find chain=ebgp-in] do={/routing filter remove $i;}');
   _outln(':foreach i in [/routing filter find chain=ebgp-out] do={/routing filter remove $i;}');
   _outln("/ routing filter");
-  _outln('add action=discard chain=ebgp-in comment="1. Discard insert non 10.x routes" disabled=no invert-match=no prefix=!10.0.0.0/8 prefix-length=!8-32');
-  _outln('add action=discard chain=ebgp-out comment="2. Discard send non 10.x routes" disabled=no invert-match=no prefix=!10.0.0.0/8 prefix-length=!8-32');
+  _outln('add action=discard chain=ebgp-in comment="1. Discard insert non 10.x routes from BGP peer" disabled=no invert-match=no prefix=!10.0.0.0/8 prefix-length=8-32');
+  _outln('add action=discard chain=ebgp-out comment="2. Discard send non 10.x routes to BGP peer" disabled=no invert-match=no prefix=!10.0.0.0/8 prefix-length=8-32');
+  _outln('add action=accept chain=ospf-in comment="3. Accept insert 10.x routes from OSPF neighbor" disabled=no invert-match=no prefix=10.0.0.0/8 prefix-length=8-32');
+  _outln('add action=accept chain=ospf-in comment="4. Accept insert 172.x routes from OSPF neighbor" disabled=no invert-match=no prefix=172.16.0.0/12 prefix-length=8-32');
+  _outln('add action=discard chain=ospf-in comment="5. Discard insert non 10.x and 172.x from OSPF neighbor" disabled=no invert-match=no');
+  _outln('add action=accept chain=ospf-out comment="6. Allow send 10.x routes to OSPF neighbor" disabled=no invert-match=no prefix=10.0.0.0/8 prefix-length=8-32');
+  _outln('add action=accept chain=ospf-out comment="7. Allow send 172.x routes to OSPF neighbor" disabled=no invert-match=no prefix=172.16.0.0/12 prefix-length=8-32');
+  _outln('add action=discard chain=ospf-out comment="8. Discard send non 10.x and 172.x to OSPF neighbor" disabled=no invert-match=no');
   _outln_comment();
   _outln_comment(t('BGP instance'));
   _outln("/ routing bgp instance");
@@ -593,7 +599,7 @@ function unsolclic_routeros($dev) {
   case 'RouterOSv4.7+':
   case 'RouterOSv5.x':
    _outln(sprintf('/routing ospf instance set default name=default router-id=%s comment="" disabled=no distribute-default=never \ ',$ospf_routerid));
-   _outln(sprintf('redistribute-bgp=as-type-1 redistribute-connected=no redistribute-other-ospf=no redistribute-rip=no redistribute-static=no in-filter=ebgp-in out-filter=ebgp-out'));
+   _outln(sprintf('redistribute-bgp=as-type-1 redistribute-connected=no redistribute-other-ospf=no redistribute-rip=no redistribute-static=no in-filter=ospf-in out-filter=ospf-out'));
   break;
   }
 
