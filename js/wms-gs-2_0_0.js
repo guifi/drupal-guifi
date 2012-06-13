@@ -85,13 +85,13 @@ var GuifiLayer = function(map, url) {
 var openStreet = new google.maps.ImageMapType({
       getTileUrl: function(ll, z) {
               var X = ll.x % (1 << z);  // wrap
-              return "http://tile.openstreetmap.org/" + z + "/" + X + "/" + ll.y + ".png";
+              return "http://alzina.act.uji.es/tiles/" + z + "/" + X + "/" + ll.y + ".png";
       },
       tileSize: new google.maps.Size(256, 256),
       isPng: true,
       maxZoom: 18,
-      name: "Mapa",
-      alt: "Open Streetmap"
+      name: "OSM",
+      alt: "OpenStreetMap"
 });
 
 var copyrightNode;
