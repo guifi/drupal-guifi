@@ -1491,7 +1491,7 @@ function theme_guifi_zone_stats($zone,$links = TRUE) {
 **/
 function guifi_zone_stats_data($zone) {
 
-  $rows[] = array('<a "href=/guifi/menu/stats/nodes?zone='.$zone.'"><img src="/guifi/stats/chart?id=1&zone='.$zone.'&width=400&height=300&title=void"></a>','&nbsp;');
+  $rows[] = array('<a href="'.base_path().'/guifi/menu/stats/nodes?zone='.$zone.'"><img src="/guifi/stats/chart?id=1&amp;zone='.$zone.'&amp;width=400&amp;height=300&amp;title=void"></a>','&nbsp;');
   return array_merge($rows);
 }
 ?>
