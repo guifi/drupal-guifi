@@ -94,8 +94,8 @@ function draw_map() {
             var basePath = Drupal.settings.basePath;
 
             infoWindow.setContent(
-                    'Lat : ' + point.lat() + '<br>Lon: ' + point.lng() +
-                    '<br><a href="' + basePath + 'node/add/guifi-node?lon='
+                    'Lat : ' + point.lat() + '<br />Lon: ' + point.lng() +
+                    '<br /><a href="' + basePath + 'node/add/guifi-node?lon='
                     + point.lng() + '&lat=' + point.lat() +
                     '&zone='+document.getElementById("zone_id").value+
                     '" TARGET=fijo APPEND=blank>Add a new node here</a>');

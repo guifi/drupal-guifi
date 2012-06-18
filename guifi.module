@@ -1790,7 +1790,7 @@ function guifi_display_block_1() {
       '<p align="right">#</p>', t('kms.')), $rows);
     
     //history chart
-    $content .= '<br><a href="'. base_path() .'guifi/menu/stats/nodes"><img src="'. base_path() .'guifi/cnml/1/plot"></a>';
+    $content .= '<br /><a href="'. base_path() .'guifi/menu/stats/nodes"><img src="'. base_path() .'guifi/cnml/1/plot"></a>';
     return $content;
 }
 

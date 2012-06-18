@@ -57,7 +57,7 @@ function guifi_host_form($edit,$form_weight) {
             $alias = $host['aliases'];
           }
        }
-      $cname_description = t('Enter the host alias. ex: www<br> Must put a DOT "<strong>.</strong>" at the end of the domain name if the alias points to an external domain. ex: "externalhost.dyndns.org<strong>.</strong>". <strong>ONLY ONE</strong> external domain alias allowed');
+      $cname_description = t('Enter the host alias. ex: www<br /> Must put a DOT "<strong>.</strong>" at the end of the domain name if the alias points to an external domain. ex: "externalhost.dyndns.org<strong>.</strong>". <strong>ONLY ONE</strong> external domain alias allowed');
 
       if (count($alias)) {
         foreach ($alias as $delta => $value)
@@ -83,14 +83,14 @@ function guifi_host_form($edit,$form_weight) {
         $access = FALSE;
         $options = array('MX' => 'MX');
         $optionsdesc = t('Select these options only if this feature has made by this host.
-                                   <br><b>NS</b>: Selected as default on host \'ns1\'. This is your primary NameServer forced, cannot uncheck it.
-                                   <br><b>MX</b>: Choose this option if this host has to perform tasks of <b>MailHost</b> server. Select, then Save and edit again to set priority on a new field.');
+                                   <br /><b>NS</b>: Selected as default on host \'ns1\'. This is your primary NameServer forced, cannot uncheck it.
+                                   <br /><b>MX</b>: Choose this option if this host has to perform tasks of <b>MailHost</b> server. Select, then Save and edit again to set priority on a new field.');
       } else {
         $access = TRUE;
         $options = array('NS' => 'NS','MX' => 'MX');
         $optionsdesc = t('Select these options only if this feature has made by this host.
-                                   <br><b>NS</b>: Choose this option if this host has to perform tasks of <b>NameServer</b>.
-                                   <br><b>MX</b>: Choose this option if this host has to perform tasks of <b>MailHost</b> server. Select, then Save and edit again to set priority on a new field.');
+                                   <br /><b>NS</b>: Choose this option if this host has to perform tasks of <b>NameServer</b>.
+                                   <br /><b>MX</b>: Choose this option if this host has to perform tasks of <b>MailHost</b> server. Select, then Save and edit again to set priority on a new field.');
       }
 
       unset ($nsoptions);
@@ -226,7 +226,7 @@ function guifi_host_host_form($host, $key, &$form_weight = -200) {
       '#parents' => array('hosts',$key,'ipv4'),
       '#default_value' => $host['ipv4'],
       '#element_validate' => array('guifi_ipv4_validate'),
-      '#description' => t('Leave it blank if you want to use an alias to an external domain.<br> ex: hostname is an alias of hostname.dyndns.org.'),
+      '#description' => t('Leave it blank if you want to use an alias to an external domain.<br /> ex: hostname is an alias of hostname.dyndns.org.'),
       '#weight' => $form_weight++,
     );
     $f[] = array(
@@ -235,7 +235,7 @@ function guifi_host_host_form($host, $key, &$form_weight = -200) {
       '#parents' => array('hosts',$key,'ipv6'),
       '#default_value' => $host['ipv6'],
       '#element_validate' => array('guifi_ipv6_validate'),
-      '#description' => t('Leave it blank if you want to use an alias to an external domain.<br> ex: hostname is an alias of hostname.dyndns.org.'),
+      '#description' => t('Leave it blank if you want to use an alias to an external domain.<br /> ex: hostname is an alias of hostname.dyndns.org.'),
       '#weight' => $form_weight++,
     );
       
