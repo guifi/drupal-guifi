@@ -20,7 +20,7 @@ function draw_map() {
         zoom: 2,
         mapTypeControl: true,
         mapTypeControlOptions: {
-            mapTypeIds: [ "osm",
+            mapTypeIds: [ /*"osm",*/
                           google.maps.MapTypeId.ROADMAP,
                           google.maps.MapTypeId.TERRAIN,
                           google.maps.MapTypeId.SATELLITE,
@@ -40,19 +40,65 @@ function draw_map() {
     // Add the map to the div
     map = new google.maps.Map(divmap, opts);
 
+
+
+
+    
     // Add the OSM map type
-    map.mapTypes.set('osm', openStreet);
-    initCopyrights();
+    //map.mapTypes.set('osm', openStreet);
+    //initCopyrights();
+    
+    // Add the right panel
+    var panelcontrol = new PanelControl({
+        forms:{
+        fuente: {name: 'Mapas', tooltip: 'Proveedor de los mapas de la capa inferior (terreno, etc)',
+                type: 'radio', list: {
+                    google: { name: 'Google', tooltip: 'Google Maps', default: true },
+                    osm: { name: 'OSM', tooltip: 'OpenStreetMap' },
+                    mapquest: { name: 'MapQuest', tooltip: 'Map Quest' }}},
+        capas: {name: 'Capas', tooltip: 'Capas de datos extra',
+                type: 'checkbox', list: {
+                    //supernodos: { name: 'Supernodos', tooltip: 'Nodos con más de 1 enlace inalámbrico', default: true},
+                    nodos: { name: 'Nodos', tooltip: /*'Nodos clientes (1 enlace inalámbrico)'*/'Nodos y supernodos', default: true },
+                    //superenlaces: { name: 'Superenlaces', tooltip: 'Enlaces entre supernodos (troncales)', default: true},
+                    enlaces: { name: 'Enlaces', tooltip: /*'Enlaces cliente (de nodo a supernodo)'*/'Enlaces cliente y enlaces troncales', default: true}}}
+        },
+        extrahtml:'<p style="font-size: 10px;text-align:center;color:#888;">(en construcción)</p>'
+    });
+    map.controls[google.maps.ControlPosition.RIGHT_TOP].push(panelcontrol.div);
 
-    // Guifi control
-    var guifi = new GuifiLayer(map, baseURL);
-    map.overlayMapTypes.insertAt(0, guifi.overlay);
+    // Guifi layers
+    var guifinodes = new GuifiLayer(map, baseURL,"Nodes");
+    var guifilinks = new GuifiLayer(map, baseURL,"Links");
+    var guifinodeslinks = new GuifiLayer(map, baseURL,"Nodes,Links");
+    //map.overlayMapTypes.insertAt(0, guifinodes.overlay);
+    //map.overlayMapTypes.insertAt(0, guifilinks.overlay);
+    map.overlayMapTypes.insertAt(0, guifinodeslinks.overlay);
+    
+    var toggleOverlays = function () {
+        if (this.panel.capas.nodos && this.panel.capas.enlaces) {
+            map.overlayMapTypes.setAt(0, guifinodeslinks.overlay);
+        } else {
+            if (this.panel.capas.nodos) {
+                map.overlayMapTypes.setAt(0, guifinodes.overlay);
+            } else if (this.panel.capas.enlaces) {
+                map.overlayMapTypes.setAt(0, guifilinks.overlay);
+            } else {
+                map.overlayMapTypes.pop();
+            }
+        }
+        if (map.overlayMapTypes.getLength()>1) {
+            alert('debug: capas>1\n(esto no debería pasar)');
+        }
+    }
+    google.maps.event.addDomListener(panelcontrol.inputs.nodos, 'click', toggleOverlays);
+    google.maps.event.addDomListener(panelcontrol.inputs.enlaces, 'click', toggleOverlays);
 
-    var guifiControl = new Control("guifi");
+    /*var guifiControl = new Control("guifi");
     guifiControl.div.index = 1;
     map.controls[google.maps.ControlPosition.TOP_RIGHT].push(guifiControl.div);
 
-    // Setup the click event listeners: simply set the map to Chicago
+    // Setup the click event listeners
     google.maps.event.addDomListener(guifiControl.ui, 'click', function() {
         if (guifiControl.enabled) {
             map.overlayMapTypes.removeAt(0);
@@ -62,7 +108,7 @@ function draw_map() {
             map.overlayMapTypes.insertAt(0, guifi.overlay);
             guifiControl.enable();
         }
-    });
+    });*/
 
     var marcador = new google.maps.Marker();
 

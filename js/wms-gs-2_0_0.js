@@ -17,15 +17,20 @@ GWMSTileLayer.prototype = {
     },
 }
 
-var GuifiLayer = function(map, url) {
+var GuifiLayer = function(map, url, layers) {
 
     this.map = map;
     this.tileSize = new google.maps.Size(256, 256);
 
-    if (url) {
+    if (typeof url === "undefined") {
         this.baseURL = url;
     } else {
         this.baseURL = "http://guifi.net/cgi-bin/mapserv?map=/home/guifi/maps.guifi.net/guifimaps/GMap.map";
+    }
+    if (typeof layers === "undefined") {
+        this.layers="Nodes,Links";
+    } else {
+        this.layers=layers;
     }
      
     this.overlay = new google.maps.ImageMapType( {
@@ -37,7 +42,7 @@ var GuifiLayer = function(map, url) {
         tileSize: this.tileSize,
         baseURL: this.baseURL,
         map: this.map,
-        layers: "Nodes,Links",
+        layers: this.layers,
         format: "image/png",
         mercZoomLevel: 0,
 
@@ -235,4 +240,196 @@ Control.prototype = {
             this.ui.style.borderColor= '#a9bbdf';
             this.text.style.color = 'black';
     },
+}
+
+
+function PanelControl(opts) {
+    var self = this;
+    var defaultopts = { startminimized : true, extrahtml : '' };
+    function MergeRecursive(obj1, obj2) {
+        "use strict";
+        var p;
+        for (p in obj2) {
+            if (obj2.hasOwnProperty(p)) {
+                try {
+                    if (obj2[p].constructor === Object) {
+                        obj1[p] = new MergeRecursive(obj1[p], obj2[p]);
+                    } else {
+                        obj1[p] = obj2[p];
+                    }
+                } catch (e) {
+                    obj1[p] = obj2[p];
+                }
+            }
+        }
+        return obj1;
+    }
+    this.opts = new MergeRecursive(defaultopts, opts);
+    this.minimized = this.opts.startminimized;
+    this.div = document.createElement('div');
+    this.div.style.padding = '5px';
+    this.div.style.paddingRight = '0px';
+
+    // general panel styling
+    this.panel = document.createElement('div');
+    this.panel.style.padding = '10px';
+    this.panel.style.paddingRight = '15px';
+    this.panel.style.backgroundColor = 'white';
+    this.panel.style.opacity = 0.95;
+    this.panel.style.filter = 'alpha(opacity = ' + 95 + ')';
+    this.panel.style.borderStyle = 'solid';
+    this.panel.style.borderWidth = '1px';
+    this.panel.style.borderColor = '#ddd';
+    this.panel.style.borderTopLeftRadius = '10px';
+    this.panel.style.borderBottomLeftRadius = '10px';
+    this.panel.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.4)';
+
+    // maximize/minimize button
+    this.mbutton = document.createElement('div');
+    this.mbutton.style.zIndex = '1';
+    this.mbutton.style.cursor = 'pointer';
+    this.mbutton.style.backgroundColor = 'white';
+    this.mbutton.style.borderStyle = 'solid';
+    this.mbutton.style.borderRadius = '3px';
+    this.mbutton.style.borderColor = '#888';
+    this.mbutton.style.borderWidth = '1px';
+    this.mbutton.style.boxShadow = '0px 2px 4px rgba(0,0,0,0.4)';
+    this.mbutton.style.position = 'absolute';
+    this.mbutton.style.right = '0px';
+    this.mbutton.style.top = '10px';
+    this.mbutton.style.textAlign = 'center';
+    this.mbutton.style.width = '15px';
+    this.mbutton.style.height = '15px';
+    this.mbutton.mbuttontext = document.createElement('span'); //TODO: replace with image
+    this.mbutton.mbuttontext.style.lineHeight = '15px';
+    this.mbutton.mbuttontext.style.fontSize = '15px';
+    this.mbutton.mbuttontext.style.fontWeight = 'bold';
+    this.mbutton.mbuttontext.style.color = '#888';
+    this.mbutton.mbuttontext.style.display = 'block';
+    this.mbutton.mbuttontext.style.verticalAlign = 'middle';
+    this.mbutton.mbuttontext.style.position = 'relative';
+    this.mbutton.appendChild(this.mbutton.mbuttontext);    
+    var minstatechanged = function () {
+        self.panel.style.display = self.minimized ? 'none' : 'block';
+        self.mbutton.mbuttontext.innerHTML = self.minimized ? '+' : '-';
+        self.mbutton.title = self.minimized ? 'Maximiza el panel' : 'Minimiza el panel';
+        self.mbutton.style.borderBottomLeftRadius = self.minimized ? '7px' : '3px';
+        self.mbutton.style.borderTopLeftRadius = self.minimized ? '7px' : '3px';
+        self.mbutton.style.borderBottomRightRadius = self.minimized ? '0px' : '3px';
+        self.mbutton.style.borderTopRightRadius = self.minimized ? '0px' : '3px';
+        self.mbutton.style.borderRightWidth = self.minimized ? '0px' : '1px';
+    }
+    this.toggleminimized = function () {
+        self.minimized = !self.minimized;
+        minstatechanged();
+    };
+    this.mbutton.onclick = this.toggleminimized;
+    this.mbutton.onkeydown = this.toggleminimized; // for touch devices
+    minstatechanged();
+    this.div.appendChild(this.mbutton);
+
+    this.inputs = [];
+
+    // parse opts
+    var forms = this.opts.forms;
+    for (var form in forms) {
+        if (forms.hasOwnProperty(form)) {
+            var f = forms[form];
+            if (f.hasOwnProperty('name')) {
+                var h = document.createElement('h1');
+                h.style.fontSize = '120%';
+                h.style.fontWeight = 'bold';
+                h.innerHTML = f.name;
+                if (f.hasOwnProperty('tooltip')) h.title = f.tooltip;
+                this.panel.appendChild(h);
+            }
+            if (f.hasOwnProperty('list')) {
+                var formul = document.createElement('form');
+                formul.method = 'get';
+                formul.action = '#';
+                formul.id = form;
+                formul.style.padding = '0px';
+                formul.style.margin = '0px';
+                var p = document.createElement('p');
+                var l = f.list;
+                for (var elem in l) {
+                    if (l.hasOwnProperty(elem)) {
+                        var i = document.createElement('input');
+                        var input = l[elem];
+                        if (input.hasOwnProperty('default') && input['default']) {
+                            i.checked = 'checked';
+                        }
+                        if (input.hasOwnProperty('disabled') && input['disabled']) {
+                            i.disabled = 'disabled';
+                        }
+                        i.style.verticalAlign = 'bottom';
+                        i.style.margin = '1px 1px 1px 5px';
+                        i.value = elem;
+                        i.id = 'guifimap_' + elem;
+                        if (f.hasOwnProperty('type')) {
+                            i.type = f.type;
+                            if (f.type == 'radio') {
+                                i.name = form;
+                                if (i.checked) {
+                                    this.panel[form] = elem;
+                                }
+                            } else {
+                                i.name = elem;
+                                if (typeof this.panel[form] === "undefined") { this.panel[form] = []; }
+                                if (f.type == 'checkbox') {
+                                    this.panel[form][elem] = (i.checked) ? true : false;
+                                } else {
+                                    i.value = input.hasOwnProperty('defaultvalue') ? input['defaultvalue'] : '';
+                                    this.panel[form][elem] = i.value;
+                                }
+                            }
+                            // the first action is to store the value somewhere
+                            google.maps.event.addDomListener(i, 'click', function () {
+                                switch(this.type) {
+                                    case 'checkbox':
+                                        self.panel[this.form.id][this.name] = this.checked ? true : false;
+                                        break;
+                                    case 'radio':
+                                        self.panel[this.name] = this.value;
+                                        break;
+                                    default:
+                                        self.panel[this.form.id][this.name] = this.value;
+                                } 
+                            });
+                            // add extra event handlers
+                            if (input.hasOwnProperty('events')) {
+                                for (var e in input.events) {
+                                    if (input.events.hasOwnProperty(e)) {
+                                        google.maps.event.addDomListener(i, e, input.events[e]);
+                                    }
+                                }
+                            }
+                            i.panel = this.panel;
+                            this.inputs[elem] = i;
+                            p.appendChild(i);
+                        }
+                        var la = document.createElement('label');
+                        la.htmlFor = i.id;
+                        la.style.verticalAlign = 'bottom';
+                        la.style.marginLeft = '5px';
+                        if (input.hasOwnProperty('tooltip')) {
+                            la.title = input.tooltip;
+                        }
+                        if (input.hasOwnProperty('name')) {
+                            la.innerHTML = input.name;
+                        }
+                        p.appendChild(la);
+                        p.appendChild(document.createElement('br'));
+                    }
+                }
+                formul.appendChild(p);
+                this.panel.appendChild(formul);
+            }
+        }
+    }
+    var extrahtml = document.createElement('div');
+    extrahtml.innerHTML = this.opts.extrahtml;
+    this.panel.appendChild(extrahtml);
+    
+    this.div.appendChild(this.panel);
 }
