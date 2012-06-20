@@ -59,9 +59,11 @@ function draw_map() {
         capas: {name: 'Capas', tooltip: 'Capas de datos extra',
                 type: 'checkbox', list: {
                     //supernodos: { name: 'Supernodos', tooltip: 'Nodos con más de 1 enlace inalámbrico', default: true},
-                    nodos: { name: 'Nodos', tooltip: /*'Nodos clientes (1 enlace inalámbrico)'*/'Nodos y supernodos', default: true },
+                    nodos: { name: 'Nodos', tooltip: /*'Nodos clientes (1 enlace inalámbrico)'*/'Nodos y supernodos', default: true,
+                                        extrahtml: '<img id="img_overlay_nodos" alt="(loading)" title="cargando" src="sites/all/modules/guifi/js/loading.gif" style="vertical-align: middle; margin-left: 10px;" />' },
                     //superenlaces: { name: 'Superenlaces', tooltip: 'Enlaces entre supernodos (troncales)', default: true},
-                    enlaces: { name: 'Enlaces', tooltip: /*'Enlaces cliente (de nodo a supernodo)'*/'Enlaces cliente y enlaces troncales', default: true}}}
+                    enlaces: { name: 'Enlaces', tooltip: /*'Enlaces cliente (de nodo a supernodo)'*/'Enlaces cliente y enlaces troncales', default: true,
+                                        extrahtml: '<img id="img_overlay_enlaces" alt="(loading)" title="cargando" src="sites/all/modules/guifi/js/loading.gif" style="vertical-align: middle; margin-left: 10px;" />'}}}
         },
         extrahtml:'<p style="font-size: 10px;text-align:center;color:#888;">(en construcción)</p>'
     });
@@ -74,26 +76,71 @@ function draw_map() {
     //map.overlayMapTypes.insertAt(0, guifinodes.overlay);
     //map.overlayMapTypes.insertAt(0, guifilinks.overlay);
     map.overlayMapTypes.insertAt(0, guifinodeslinks.overlay);
-    
+
+    // sets the 'loading' icon visible for the layer
+    var loadingTiles = function (p) {
+        var n = document.getElementById('img_overlay_nodos');
+        var e = document.getElementById('img_overlay_enlaces');
+        if (p.panel.capas.nodos && p.panel.capas.enlaces) {
+            if (n) { n.style.display='inline'; }
+            if (e) { e.style.display='inline'; }
+        } else {
+            if (p.panel.capas.nodos) {
+                if (n) { n.style.display='inline'; }
+            } else if (p.panel.capas.enlaces) {
+                if (e) { e.style.display='inline'; }
+            }
+        }   
+    }
+    // loads the selected layers
     var toggleOverlays = function () {
+        var n = document.getElementById('img_overlay_nodos');
+        var e = document.getElementById('img_overlay_enlaces');
         if (this.panel.capas.nodos && this.panel.capas.enlaces) {
             map.overlayMapTypes.setAt(0, guifinodeslinks.overlay);
+            n.style.display='inline';
+            e.style.display='inline';
         } else {
             if (this.panel.capas.nodos) {
                 map.overlayMapTypes.setAt(0, guifinodes.overlay);
+                n.style.display='inline';
             } else if (this.panel.capas.enlaces) {
                 map.overlayMapTypes.setAt(0, guifilinks.overlay);
+                e.style.display='inline';
             } else {
                 map.overlayMapTypes.pop();
             }
         }
-        if (map.overlayMapTypes.getLength()>1) {
-            alert('debug: capas>1\n(esto no debería pasar)');
-        }
     }
     google.maps.event.addDomListener(panelcontrol.inputs.nodos, 'click', toggleOverlays);
     google.maps.event.addDomListener(panelcontrol.inputs.enlaces, 'click', toggleOverlays);
+    // every time the zoom changes, new tiles have to be loaded
+    google.maps.event.addListener(map, 'zoom_changed', function () {
+        new loadingTiles(panelcontrol);
+    });
+    // There's no way to know for sure if new tiles have to be loaded.
+    // We could add an event hook for 'bounds_changed', but that won't work
+    // if we just move the map a little, but not enough to go outside the tile.
+    // 'bounds_changed' would probably work for base layers, but not for overlays.
+    // We really need to migrate to OpenLayers...
 
+    // hide the 'loading' icon when the tiles finish loading
+    google.maps.event.addListener(guifinodes.overlay, 'tilesloaded', function () {
+        var n = document.getElementById('img_overlay_nodos');
+        n.style.display='none';
+    });
+    google.maps.event.addListener(guifilinks.overlay, 'tilesloaded', function () {
+        var n = document.getElementById('img_overlay_enlaces');
+        n.style.display='none';
+    });
+    google.maps.event.addListener(guifinodeslinks.overlay, 'tilesloaded', function () {
+        var n = document.getElementById('img_overlay_nodos');
+        var e = document.getElementById('img_overlay_enlaces');
+        n.style.display='none';
+        e.style.display='none';
+    });
+
+    
     /*var guifiControl = new Control("guifi");
     guifiControl.div.index = 1;
     map.controls[google.maps.ControlPosition.TOP_RIGHT].push(guifiControl.div);
