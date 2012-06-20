@@ -4,59 +4,7 @@
  * Install, update and uninstall functions for the guifi module.
  */
 
-/**
-* Perform an SQL query and return success or failure.
-*
-* @see http://api.drupal.org/api/function/update_sql/6
-*
-* @param $sql
-*   A string containing a complete SQL query.
-* @return
-*   An array containing the keys:
-*      success: a boolean indicating whether the query succeeded
-*      query: the SQL query executed, passed through check_plain()
-*      rows: number of rows effected
-*/
-function my_update_sql($sql) {
-  $args = func_get_args();
-  array_shift($args);
-  $result = db_query($sql, $args);
-  $sql = my_return_query_string($sql, $args);
-  return array('success' => $result !== FALSE, 'query' => check_plain($sql), 'rows' => db_affected_rows());
-}
 
-/**
-* Builds a basic query, returns string.
-*
-* @see http://api.drupal.org/api/function/db_query/6
-*
-* @param $query
-*   A string containing an SQL query.
-* @param ...
-*   A variable number of arguments which are substituted into the query
-*   using printf() syntax. Instead of a variable number of query arguments,
-*   you may also pass a single array containing the query arguments.
-*
-*   Valid %-modifiers are: %s, %d, %f, %b (binary data, do not enclose
-*   in '') and %%.
-*
-*   NOTE: using this syntax will cast NULL and FALSE values to decimal 0,
-*   and TRUE values to decimal 1.
-*
-* @return
-*   String of query that would have been run
-*/
-function my_return_query_string($query) {
-  $args = func_get_args();
-  array_shift($args);
-  //$query = db_prefix_tables($query);
-  if (isset($args[0]) and is_array($args[0])) { // 'All arguments in one array' syntax
-    $args = $args[0];
-  }
-  _db_query_callback($args, TRUE);
-  $query = preg_replace_callback(DB_QUERY_REGEXP, '_db_query_callback', $query);
-  return $query;
-}
 
 
 function guifi_uninstall() {
@@ -1404,6 +1352,61 @@ function guifi_update_902() {
 }
 
 function guifi_update_903() {
+
+  /**
+  * Perform an SQL query and return success or failure.
+  *
+  * @see http://api.drupal.org/api/function/update_sql/6
+  *
+  * @param $sql
+  *   A string containing a complete SQL query.
+  * @return
+  *   An array containing the keys:
+  *      success: a boolean indicating whether the query succeeded
+  *      query: the SQL query executed, passed through check_plain()
+  *      rows: number of rows effected
+  */
+  function my_update_sql($sql) {
+    $args = func_get_args();
+    array_shift($args);
+    $result = db_query($sql, $args);
+    $sql = my_return_query_string($sql, $args);
+    return array('success' => $result !== FALSE, 'query' => check_plain($sql), 'rows' => db_affected_rows());
+  }
+  
+  /**
+  * Builds a basic query, returns string.
+  *
+  * @see http://api.drupal.org/api/function/db_query/6
+  *
+  * @param $query
+  *   A string containing an SQL query.
+  * @param ...
+  *   A variable number of arguments which are substituted into the query
+  *   using printf() syntax. Instead of a variable number of query arguments,
+  *   you may also pass a single array containing the query arguments.
+  *
+  *   Valid %-modifiers are: %s, %d, %f, %b (binary data, do not enclose
+  *   in '') and %%.
+  *
+  *   NOTE: using this syntax will cast NULL and FALSE values to decimal 0,
+  *   and TRUE values to decimal 1.
+  *
+  * @return
+  *   String of query that would have been run
+  */
+  function my_return_query_string($query) {
+    $args = func_get_args();
+    array_shift($args);
+    //$query = db_prefix_tables($query);
+    if (isset($args[0]) and is_array($args[0])) { // 'All arguments in one array' syntax
+      $args = $args[0];
+    }
+    _db_query_callback($args, TRUE);
+    $query = preg_replace_callback(DB_QUERY_REGEXP, '_db_query_callback', $query);
+    return $query;
+  }
+
   $items = array();
   
   // creació de la taula de firmwares
@@ -1692,7 +1695,7 @@ function guifi_update_903() {
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='UnSolclic Configurations'
   ");
   
-$items[] = my_update_sql("INSERT INTO guifi_configuracioUnSolclic (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (19,25,13,1,%s,0,'albertsarle@gmailcom',541,541,0,1336846001,NULL);", 'aaa.1.status=disabled
+$items[] = my_update_sql("INSERT INTO guifi_configuracioUnSolclic (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (19,25,13,1,'%s',0,'albertsarle@gmailcom',541,541,0,1336846001,NULL);", 'aaa.1.status=disabled
 aaa.status=disabled
 bridge.1.devname=br0
 bridge.1.fd=1
@@ -1820,7 +1823,7 @@ radio.1.tx_antenna=2
 radio.1.ext_antenna=disabled
 radio.1.mcastrate=11');
 
-$items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (6,31,16,1,'# Generat per a:
+$items[] = my_update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (6,31,16,1,'%s',0,'albertsarle@gmailcom',541,541,0,1333305965,'mikrotik.tpl');",'# Generat per a:
 # {{ firmware_name }}
 :log info \"Unsolclic for {{ dev.id }}-{{ dev.nick }} going to be executed.\"
 #
@@ -1834,9 +1837,9 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
 # &nbsp;&nbsp;&nbsp;Then execute the script with:
 # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;>&nbsp;/system script run script_name
 # 2.-Fitxer importat:
-# &nbsp;&nbsp;&nbsp;&nbsp;Desa aquesta \"sortida\" a un fitxer, després puja''l al router
-# &nbsp;&nbsp;&nbsp;&nbsp;fent servir FTP amb un nom de l''estil \"script_name.rsc\".
-# &nbsp;&nbsp;&nbsp;&nbsp;(note, l''extensió \".rsc\" es un requisit)
+# &nbsp;&nbsp;&nbsp;&nbsp;Desa aquesta \"sortida\" a un fitxer, després puja\'l al router
+# &nbsp;&nbsp;&nbsp;&nbsp;fent servir FTP amb un nom de l\'estil \"script_name.rsc\".
+# &nbsp;&nbsp;&nbsp;&nbsp;(note, l\'extensió \".rsc\" es un requisit)
 # &nbsp;&nbsp;&nbsp;&nbsp;Executa el fitxer importat amb la comanda:
 # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;>&nbsp;/import script_name
 # 3.-Telnet copia i enganxar:
@@ -1848,7 +1851,7 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
 # -wlans should be enabled manually, be sure to set the correct antenna (a or b)
 # &nbsp;&nbsp;according in how did you connect the cable to the miniPCI. Keep the
 # &nbsp;&nbsp;power at the minimum possible and check the channel.
-# -The script doesn''t reset the router, you might have to do it manually
+# -The script doesn\'t reset the router, you might have to do it manually
 # -You must have write access to the router
 # -MAC access (winbox, MAC telnet...) method is recommended
 # &nbsp;&nbsp;(the script reconfigures some IP addresses, so communication can be lost)
@@ -1856,7 +1859,7 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
 # -A Read Only guest account with no password will be created to allow guest access
 # &nbsp;&nbsp;to the router with no danger of damage but able to see the config.
 # -Be sure that all packages are activated.
-# -Don''t run the script from telnet and being connected through an IP connection at
+# -Don\'t run the script from telnet and being connected through an IP connection at
 # &nbsp;&nbsp;the wLan/Lan interface: This interface will be destroyed during the script.
 #
 / system identity set name={{ dev.nick }}
@@ -1905,7 +1908,7 @@ do=[/system logging action remove $i]
 /system logging add action=guifi_remot topics=critical
 /system logging add action=guifi_remot topics=account
 {% endif %}
-{% if dev.mode != ''client'' %}
+{% if dev.mode != \'client\' %}
 # Remove current wLan/Lan bridge if exists
 :foreach i in [/interface bridge find name=wLan/Lan] \
 do={:foreach i in [/interface bridge port find bridge=wLan/Lan] \
@@ -1924,29 +1927,29 @@ add interface=wlan1 bridge=wLan/Lan
 :delay 1
 #
 {# la declarem aqui perque sino no hi puc accedir fora del foreach radio #}
-{% set ospf_routerid = ''ospf_routerid'' %}
+{% set ospf_routerid = \'ospf_routerid\' %}
 {% for radio_id, radio in dev.radios %}
 # Radio#: {{ radio.radiodev_counter }} {{ radio.ssid }}
 {% spaceless %}
 /interface wireless set wlan{{ radio.radiodev_counter+1 }} name=\"wlan{{ radio.radiodev_counter+1 }}\" \
 radio-name=\"{{ radio.ssid }}\" mode={{ radio.mode }}-bridge ssid=\"guifi.net-{{ radio.ssid }}\" \
-{% if radio.mode == ''ap'' %}
-   {% set mode = ''ap-bridge'' %}
+{% if radio.mode == \'ap\' %}
+   {% set mode = \'ap-bridge\' %}
     {% if radio.channel < 5000 %}
-      {% set band = ''2.4ghz-b'' %}
+      {% set band = \'2.4ghz-b\' %}
     {% else %}
-      {% set band = ''5ghz'' %}
+      {% set band = \'5ghz\' %}
     {% endif %}
-{% elseif (radio.mode == ''client'' or radio.mode == ''clientrouted'') %}
-   {% set mode = ''station'' %}
+{% elseif (radio.mode == \'client\' or radio.mode == \'clientrouted\') %}
+   {% set mode = \'station\' %}
     {% if radio.channel != 5000 %}
-      {% set band = ''2.4ghz-b'' %}
+      {% set band = \'2.4ghz-b\' %}
     {% else %}
-      {% set band = ''5ghz'' %}
+      {% set band = \'5ghz\' %}
     {% endif %}
 {% endif %}
-{% if radio.protocol == ''802.11n'' and radio.channel > 5000 and mai == true %}
-  {% set band = ''5ghz-a/n'' %}
+{% if radio.protocol == \'802.11n\' and radio.channel > 5000 and mai == true %}
+  {% set band = \'5ghz-a/n\' %}
 {% endif %}
 band=\"{{ band }}\" \
 frequency-mode=regulatory-domain country=spain antenna-gain={{ radio.antenna_gain }} \
@@ -1957,19 +1960,19 @@ frequency-mode=regulatory-domain country=spain antenna-gain={{ radio.antenna_gai
       {% endif %}
 frequency={{ channel }} \
     {% endif %}
-    {% if ((radio.1.band == ''5ghz'' or ''5ghz-a'') and (channel == 5000 )) or
-         ((radio.1.band == ''2.4ghz-b'' or ''2ghz-b'') and (channel == 0 )) %}
+    {% if ((radio.1.band == \'5ghz\' or \'5ghz-a\') and (channel == 5000 )) or
+         ((radio.1.band == \'2.4ghz-b\' or \'2ghz-b\') and (channel == 0 )) %}
  dfs-mode=radar-detect \
     {% else %}
  dfs-mode=none \
     {% endif %}
-    {% if radio.antenna_mode =='''' %}
+    {% if radio.antenna_mode ==\'\' %}
  wds-mode=static wds-default-bridge=none wds-default-cost=100 \
     {% else %}
-      {% if radio.antenna_mode != ''Main''%}
-         {% set antenna_mode = ''ant-b'' %}
+      {% if radio.antenna_mode != \'Main\'%}
+         {% set antenna_mode = \'ant-b\' %}
       {% else %}
-         {% set antenna_mode = ''ant-a'' %}
+         {% set antenna_mode = \'ant-a\' %}
       {% endif %}
  antenna-mode={{ antenna_mode }} wds-mode=static wds-default-bridge=none wds-default-cost=100 \
     {% endif %}
@@ -1977,7 +1980,7 @@ frequency={{ channel }} \
     {% for interface_id, interface in radio.interfaces %}
 :delay 1
 # Type: {{ interface.interface_type }}
-      {% if interface.interface_type == ''wds/p2p'' %}
+      {% if interface.interface_type == \'wds/p2p\' %}
 # Remove all existing wds interfaces
 :foreach i in [/interface wireless wds find master-interface=wlan{{ radio.radiodev_counter+1 }}] \
 do={:foreach n in [/interface wireless wds get $i name] \
@@ -1988,26 +1991,26 @@ do={/ip address remove $inum;};}; \
           {% for ipv4_id,ipv4 in interface.ipv4 %}
                     {% if ipv4.links %}
                       {% for link_id, link in ipv4.links %}
-                        {% if link.flag == ''Working'' or link.flag == ''Testing'' or link.flag == ''Building'' %}
-                           {% set disabled = ''no'' %}
+                        {% if link.flag == \'Working\' or link.flag == \'Testing\' or link.flag == \'Building\' %}
+                           {% set disabled = \'no\' %}
                         {% else %}
-                           {% set disabled = ''yes'' %}
+                           {% set disabled = \'yes\' %}
                         {% endif %}
-                        {% set wds_name = ''wds_''. link.interface.ipv4.host_name %}
+                        {% set wds_name = \'wds_\'. link.interface.ipv4.host_name %}
                         {% if not link.interface.mac %}
-                          {% set link_mac = ''FF:FF:FF:FF:FF:FF'' %}
+                          {% set link_mac = \'FF:FF:FF:FF:FF:FF\' %}
                         {% else %}
                           {% set link_mac = link.interface.mac %}
                         {% endif %}
 / interface wireless wds
 add name=\"wds_{{ link.interface.ipv4.host_name }}\" master-interface=wlan{{ radio_id+1 }} wds-address={{ link_mac }} disabled={{ disabled }}
 / ip address add address={{ ipv4.ipv4 }}/{{ ipv4.maskbits }} network={{ ipv4.netid }} broadcast={{ ipv4.broadcast }} interface=wds_{{ link.interface.ipv4.host_name }} disabled={{ disabled }} comment=\"wds_{{ link.interface.ipv4.host_name }}\"
-                        {% if link.routing == ''OSPF'' %}
-                          {{ _self.ospf_interface(''wds_'' ~ link.interface.ipv4.host_name , ipv4.netid , ipv4.maskbits , ospf_name , ospf_zone, ospf_id, ''no'') }}
-                          {{ _self.bgp_peer(link.device_id, link.interface.ipv4.host_name, link.interface.ipv4.ipv4, ''yes'') }}
+                        {% if link.routing == \'OSPF\' %}
+                          {{ _self.ospf_interface(\'wds_\' ~ link.interface.ipv4.host_name , ipv4.netid , ipv4.maskbits , ospf_name , ospf_zone, ospf_id, \'no\') }}
+                          {{ _self.bgp_peer(link.device_id, link.interface.ipv4.host_name, link.interface.ipv4.ipv4, \'yes\') }}
                         {% else %}
-                          {{ _self.ospf_interface(''wds_'' ~ link.interface.ipv4.host_name , ipv4.netid , ipv4.maskbits , ospf_name , ospf_zone, ospf_id, ''yes'') }}
-                          {{ _self.bgp_peer(link.device_id, link.interface.ipv4.host_name, link.interface.ipv4.ipv4, ''no'') }}
+                          {{ _self.ospf_interface(\'wds_\' ~ link.interface.ipv4.host_name , ipv4.netid , ipv4.maskbits , ospf_name , ospf_zone, ospf_id, \'yes\') }}
+                          {{ _self.bgp_peer(link.device_id, link.interface.ipv4.host_name, link.interface.ipv4.ipv4, \'no\') }}
                         {% endif %}
                       {% endfor %}
                     {% endif %}
@@ -2017,16 +2020,16 @@ add name=\"wds_{{ link.interface.ipv4.host_name }}\" master-interface=wlan{{ rad
           {# // wLan, wLan/Lan, Hotspot or client #}
           {% if interface.ipv4 %}
              {% for ipv4_id,ipv4 in interface.ipv4 %}
-                {# aixo a l''original no es ben be aixi #}
-                {% if interface.interface_type == ''wLan/Lan'' %}
+                {# aixo a l\'original no es ben be aixi #}
+                {% if interface.interface_type == \'wLan/Lan\' %}
                   {% set iname = interface.interface_type %}
                   {% set ospf_routerid = ipv4.ipv4 %}
                 {% else  %}
                   {% set radioindex = radio_id+1 %}
-                  {% set iname = ''wlan'' ~ radioindex %}
+                  {% set iname = \'wlan\' ~ radioindex %}
                 {% endif %}
 /ip address
-                {% if interface.interface_type == ''Wan''%}
+                {% if interface.interface_type == \'Wan\'%}
 :foreach i in [find interface={{ iname }}] do={remove $i}
                 {% endif  %}
 :foreach i in [find address=\"{{ ipv4.ipv4 }}/{{ ipv4.maskbits }}\"] do={remove $i}
@@ -2034,13 +2037,13 @@ add name=\"wds_{{ link.interface.ipv4.host_name }}\" master-interface=wlan{{ rad
 / routing bgp network
 :foreach i in [/routing bgp network find network={{ ipv4.netid }}/{{ ipv4.maskbits }}] do={/routing bgp network remove $i;}
 add network={{ ipv4.netid }}/{{ ipv4.maskbits }} disabled=no
-                {% if dev.mode != ''client'' %}
+                {% if dev.mode != \'client\' %}
 / routing ospf interface
 :foreach i in [/routing ospf interface find interface={{ iname }}] do={/routing ospf interface remove $i;}
 add interface={{ iname }}
 / routing ospf network
 :foreach i in [/routing ospf network find network={{ ipv4.netid }}/{{ ipv4.maskbits }}] do={/routing ospf network remove $i;}
-add network={{ ipv4.netid }}/{{ ipv4.maskbits }} area={%if ipv4.ospf_name=='''' %} backbone{% else %}{{ ipv4.ospf_name }}{% endif %} disabled=no
+add network={{ ipv4.netid }}/{{ ipv4.maskbits }} area={%if ipv4.ospf_name==\'\' %} backbone{% else %}{{ ipv4.ospf_name }}{% endif %} disabled=no
                 {% else %}
 / routing ospf interface
 :foreach i in [/routing ospf interface find interface={{ iname }}] do={/routing ospf interface remove $i;}
@@ -2049,13 +2052,13 @@ add interface={{ iname }}
 :foreach i in [/routing ospf network find network={{ ipv4.netid }}/{{ ipv4.maskbits }}] do={/routing ospf network remove $i;}
 add network={{ ipv4.netid }}/{{ ipv4.maskbits }} area={{ ipv4.ospf_name }} disabled=yes
                 {% endif %}
-                {% if interface.interface_type == ''HotSpot'' %}
+                {% if interface.interface_type == \'HotSpot\' %}
 #
 # HotSpot
 /interface wireless
 :foreach i in [find name=hotspot{{ radio.id+1 }}] do={remove $i}
 add name=\"hotspot{{ radio.id+1 }}\" arp=enabled master-interface=wlan{{ radio.id+1 }} ssid=\"guifi.net-{{ hotspot_ssid}}\" disabled=\"no\"
-/ip address'');
+/ip address\');
 :foreach i in [find address=\"192.168.{{ radio.id+100 }}.1/24\"] do={remove $i}
 /ip address add address=192.168.{{ radio.id+100 }}.1/24 interface=hotspot{{ radio.id+1 }} disabled=no
 /ip pool
@@ -2078,15 +2081,15 @@ add name=\"hotspot{{ radio.id+1 }}\" interface=hotspot{{ radio.id+1 }} address-p
 end of HotSpot
                 {% endif %} {# end hotspot #}
 :delay 1
-                {% if interface.interface_type != ''HotSpot'' and interface.interface_type != ''Wan'' %}
-                  {% if mode == ''ap-bridge'' %}
+                {% if interface.interface_type != \'HotSpot\' and interface.interface_type != \'Wan\' %}
+                  {% if mode == \'ap-bridge\' %}
                     {% set maxip = ip2long(ipv4.netstart) +1  %}
                     {% if maxip +5 >  ip2long(ipv4.netend) -5 %}
                       {% set maxip = ip2long(ipv4.netend) %}
-                      {% set dhcpDisabled = ''yes'' %}
+                      {% set dhcpDisabled = \'yes\' %}
                     {% else %}
                       {% set maxip = maxip +5 %}
-                      {% set dhcpDisabled = ''no'' %}
+                      {% set dhcpDisabled = \'no\' %}
                     {% endif %}
 #
 # DHCP
@@ -2105,7 +2108,7 @@ end of HotSpot
                           {% set maxip = link.interface.ipv4.ipv4 +1  %}
                         {% endif %}
                         {% if not link.interface.mac %}
-                          {% set rmac = ''ff:ff:ff:ff:ff:ff''  %}
+                          {% set rmac = \'ff:ff:ff:ff:ff:ff\'  %}
                         {% else %}
                           {% set rmac = link.interface.mac  %}
                         {% endif %}
@@ -2130,33 +2133,33 @@ add address={{ link.interface.ipv4.ipv4 }} mac-address={{ rmac }} client-id={{ l
 {% endif %}
 # Routed device
 #
-# {{ t(''Other cable connections'') }}
+# {{ t(\'Other cable connections\') }}
 {% if dev.interfaces %}
   {% for interface_i, interface in dev.interfaces %}
-    {% if interface.interface_type == ''vlan'' %}
-        {% set iname = ''wLan/Lan'' %}
-    {% elseif interface.interface_type == ''vlan2'' %}
-        {% set iname = ''ether2'' %}
-    {% elseif interface.interface_type == ''vlan3'' %}
-        {% set iname = ''ether3'' %}
-    {% elseif interface.interface_type == ''vlan4'' %}
-        {% set iname = ''wLan/Lan'' %}
-    {% elseif interface.interface_type == ''Wan'' %}
-        {% set iname = ''wLan/Lan'' %}
+    {% if interface.interface_type == \'vlan\' %}
+        {% set iname = \'wLan/Lan\' %}
+    {% elseif interface.interface_type == \'vlan2\' %}
+        {% set iname = \'ether2\' %}
+    {% elseif interface.interface_type == \'vlan3\' %}
+        {% set iname = \'ether3\' %}
+    {% elseif interface.interface_type == \'vlan4\' %}
+        {% set iname = \'wLan/Lan\' %}
+    {% elseif interface.interface_type == \'Wan\' %}
+        {% set iname = \'wLan/Lan\' %}
     {% else %}
         {% set iname = interface.interface_type  %}
     {% endif %}
   {% endfor %}
 {% endif  %}
 #
-# {{ t(''Internal addresses NAT'') }}
+# {{ t(\'Internal addresses NAT\') }}
 :foreach i in [/ip firewall nat find src-address=\"172.16.0.0/12\"] do={/ip firewall nat remove $i;}
 :foreach i in [/ip firewall nat find src-address=\"192.168.0.0/16\"] do={/ip firewall nat remove $i;}
 /ip firewall nat
 add chain=srcnat src-address=\"192.168.0.0/16\" dst-address=!192.168.0.0/16 action=src-nat to-addresses={{ ospf_routerid }} comment=\"\" disabled=no
 add chain=srcnat src-address=\"172.16.0.0/12\" dst-address=!172.16.0.0/12 protocol=!ospf action=src-nat to-addresses={{ ospf_routerid }} comment=\"\" disabled=no
 #
-# {{ t(''BGP Routing'') }}
+# {{ t(\'BGP Routing\') }}
 # BGP & OSPF Filters
 :foreach i in [/routing filter find chain=ospf-in] do={/routing filter remove $i;}
 :foreach i in [/routing filter find chain=ospf-out] do={/routing filter remove $i;}
@@ -2172,14 +2175,14 @@ add action=accept chain=ospf-out comment=\"6. Allow send 10.x routes to OSPF nei
 add action=accept chain=ospf-out comment=\"7. Allow send 172.x routes to OSPF neighbor\" disabled=no invert-match=no prefix=172.16.0.0/12 prefix-length=8-32
 add action=discard chain=ospf-out comment=\"8. Discard send non 10.x and 172.x to OSPF neighbor\" disabled=no invert-match=no
 #
-# {{ t(''BGP instance'') }}
+# {{ t(\'BGP instance\') }}
 / routing bgp instance
 set default name=\"default\" as={{ dev.id }} router-id={{ ospf_routerid }} \
 redistribute-connected=no redistribute-static=no redistribute-rip=no \
 redistribute-ospf=yes redistribute-other-bgp=yes out-filter=ebgp-out \
 client-to-client-reflection=yes comment=\"\" disabled=no
 #
-# {{ t(''OSPF Routing'') }}
+# {{ t(\'OSPF Routing\') }}
 /routing ospf instance set default name=default router-id={{ ospf_routerid }} comment=\"\" disabled=no distribute-default=never \
 redistribute-bgp=as-type-1 redistribute-connected=no redistribute-other-ospf=no redistribute-rip=no redistribute-static=no in-filter=ospf-in out-filter=ospf-out
 #
@@ -2196,15 +2199,15 @@ multihop=no route-reflect=no ttl=default in-filter=ebgp-in out-filter=ebgp-out d
 add interface={{ iname }}
 / routing ospf network
 :foreach i in [/routing ospf network find network={{ netid }}/{{ maskbits }}] do={/routing ospf network remove $i;}
-add network={{ netid }}/{{ maskbits }} area={{ ospf_name }} disabled={{ disabled }}{% endmacro %}',0,'albertsarle@gmailcom',541,541,0,1333305965,'mikrotik.tpl');");
+add network={{ netid }}/{{ maskbits }} area={{ ospf_name }} disabled={{ disabled }}{% endmacro %}');
 
-$items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (22,18,4,1,'# Generat per a:
+$items[] = my_update_sql("INSERT INTO guifi_configuracioUnSolclic (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (22,18,4,1,'%s',0,'albertsarle@gmailcom',541,541,1329864340,1332286333,NULL);",'# Generat per a:
 # {{ firmware_name }}
 #
 # unsolclic version: v3.7
 #
 #######################################################
-#WARNING!thisunsolclicisforuseonlyonDD-WRTv23beta2firmware''s.
+#WARNING!thisunsolclicisforuseonlyonDD-WRTv23beta2firmware\'s.
 #DD-WRTV23sp2orV24containssomechangesintheuserauthentificationmethod
 #V23beta2usesplain-textpasswordandV23sp2andv24needthepasswordtobecrypted!!
 #Youmayloseaccesstoyourdevice,youwillbewarned.
@@ -2213,8 +2216,8 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
 #######################################################
 #
 # obre una sessió telnet/ssh en el teu trasto i executa aquest script.
-# Nota: Fes servir l''Status/Wireless survey per verificar que
-# tens l''antena ben endollada i configurada. La dreta es probablement
+# Nota: Fes servir l\'Status/Wireless survey per verificar que
+# tens l\'antena ben endollada i configurada. La dreta es probablement
 # la que tens a la dreta si el mires des del davant (on hi han els
 # leds). Si et cal, canvia el connector des de la configuració via
 # anant a Wireless->Advanced Settings.
@@ -2319,9 +2322,9 @@ ifconfig eth0 promisc\"
 # Fi del script i re-iniciar
 nvram commit
 reboot
-',0,'albertsarle@gmail.com',541,541,1329864340,1332286333,NULL);");
+',0,'albertsarle@gmail.com');
 
-$items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (20,18,5,1,'    {% spaceless %}# Generat per a:
+$items[] = my_update_sql("INSERT INTO guifi_configuracioUnSolclic (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (20,18,5,1,'%s',0,'albertsarle@gmail.com',541,541,1329862310,1336817612,NULL);",'    {% spaceless %}# Generat per a:
     # {{ firmware_name }}
     #
     # unsolclic version: v3.7
@@ -2333,7 +2336,7 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
     # {{ t(\"(where it have the leds). If needed, change the antenna connector\") }}
     # {{ t(\"at Wireless->Advanced Settings.\") }}
     # {{ t(\"Security notes:\") }}
-    # {{ t(''Once this script is executes, the router password for root/admin users is \"guifi\"'') }}
+    # {{ t(\'Once this script is executes, the router password for root/admin users is \"guifi\"\') }}
     # {{ t(\"You must change this password if you want to keep it secret. If you like to still\") }}
     # {{ t(\"be managed externally, you must install a trusted ssh key. Upon request, your setup\") }}
     # {{ t(\"might be asked for being inspected to check the Wireless Commons compliance.\") }}
@@ -2345,7 +2348,7 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
 {% endautoescape %}
     #
     # {{ dev.nick }}
-    # {{ t(''Global network parameters'') }}
+    # {{ t(\'Global network parameters\') }}
     nvram set router_name=\"{{ dev.nick }}\"
     nvram set wan_hostname=\"{{ dev.nick }}\"
     {# busquem interficie WLan/Lan #}
@@ -2353,7 +2356,7 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
     {#% for radio_id, radio in dev.radios %#}
         {% for interface_id, interface in dev.interfaces %}
             {% for ipv4_id,ipv4 in interface.ipv4 %}
-                {% if interface.interface_type == ''wLan/Lan'' %}
+                {% if interface.interface_type == \'wLan/Lan\' %}
                     {% set interfaceWlanLan = interface %}
                     nvram set lan_ipaddr=\"{{ ipv4.ipv4 }}\"
                     nvram set lan_gateway=\"0.0.0.0\"
@@ -2367,7 +2370,7 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
     {#% for radio_id, radio in dev.radios %#}
         {% for interface_id, interface in dev.interfaces %}
             {% for ipv4_id,ipv4 in interface.ipv4 %}
-                {% if interface.interface_type == ''Lan'' %}
+                {% if interface.interface_type == \'Lan\' %}
                     {% set interfaceLan = interface %}
                     nvram set lan_ipaddr=\"{{ ipv4.ipv4 }}\"
                     nvram set lan_gateway=\"{{ ipv4.netstart }}\"
@@ -2380,7 +2383,7 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
     {% set interfaceWan = null %}
     {% for interface_id, interface in dev.interfaces %}
         {% for ipv4_id,ipv4 in interface.ipv4 %}
-                {% if link.interface.interface_type == ''Wan'' %}
+                {% if link.interface.interface_type == \'Wan\' %}
                     {% set interfaceWan = interface %}
                     {% if ipv4.ipv4 %}
                         nvram set lan_ipaddr=\"{{ ipv4.ipv4 }}\"
@@ -2407,26 +2410,26 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
     nvram set wl_afterburner=\"on\"
     nvram set wl_frameburst=\"on\"
     nvram set txpwr=\"{{ txpwr }}\"
-    {% if dev.radios[0][''antenna_mode''] == '''' %}
-        {% set antena_mode = ''Main'' %}
+    {% if dev.radios[0][\'antenna_mode\'] == \'\' %}
+        {% set antena_mode = \'Main\' %}
     {% endif %}
-    {% if antena_mode !=''Main'' %}
-        {% set antena_mode = ''1'' %}
+    {% if antena_mode !=\'Main\' %}
+        {% set antena_mode = \'1\' %}
     {% else %}
-        {% set antena_mode = ''0'' %}
+        {% set antena_mode = \'0\' %}
     {% endif %}
     nvram set txant=\"{{ antena_mode }}\"
     nvram set wl0_antdiv=\"0\"
     nvram set wl_antdiv=\"0\"
     nvram set block_wan=\"0\"
-    {% if dev.variable.firmware == ''Talisman'' %}
+    {% if dev.variable.firmware == \'Talisman\' %}
         nvram set ident_pass=\"0\"
         nvram set multicast_pass=\"0\"
         nvram set wl_closed=\"0\"
         nvram set block_loopback=\"0\"
     {% endif %}
     #
-    # {{ t(''Management'') }}
+    # {{ t(\'Management\') }}
     nvram set telnetd_enable=\"1\"
     nvram set sshd_enable=\"1\"
     nvram set sshd_passwd_auth=\"1\"
@@ -2436,7 +2439,7 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
     nvram set snmpd_sysname=\"guifi.net\"
     nvram set snmpd_syscontact=\"guifi_at_guifi.net\"
     nvram set boot_wait=\"on\"
-    # {{ t(''This is just a fake key. You must install a trusted key if you like to have you router managed externally'') }}
+    # {{ t(\'This is just a fake key. You must install a trusted key if you like to have you router managed externally\') }}
     nvram set sshd_authorized_keys=\"
     ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAIEAwWNX4942fQExw4Hph2M/sxOAWVE9PB1I4JnNyhoWuF9v\
     id0XcU34kwWqBBlI+LjDErCQyaR4ysFgDX61V4kUuCKwBOMp+UGxhL648VTv5Qji/YwvIzt7nguUOZ5A\
@@ -2446,19 +2449,19 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
     nvram set https_enable=\"1\"
     #
     # NTP Network time protocol
-    {% if zone_primary_ntp == '''' %}
+    {% if zone_primary_ntp == \'\' %}
     nvram set ntp_enable=\"0\"
     {% else  %}
     nvram set ntp_enable=\"1\"
     nvram set ntp_server=\"{{ zone_primary_ntp }}\"
     {% endif %}
     #
-    {% if dev.radios[0].mode ==''ap'' or dev.radios[0].mode ==''AP''  %}
-        # {{ t(''AP mode'') }}
+    {% if dev.radios[0].mode ==\'ap\' or dev.radios[0].mode ==\'AP\'  %}
+        # {{ t(\'AP mode\') }}
         nvram set wl_mode=\"ap\"
         nvram set wl0_mode=\"ap\"
-        nvram set wl_channel=\"{{ dev.radios[0][''channel''] }}\"
-        nvram set wl_ssid=\"guifi.net-{{ guifi_to_7bits(dev.radios[0][''ssid'']) }}\"
+        nvram set wl_channel=\"{{ dev.radios[0][\'channel\'] }}\"
+        nvram set wl_ssid=\"guifi.net-{{ guifi_to_7bits(dev.radios[0][\'ssid\']) }}\"
         nvram set wl_macmode=\"disable\"
         nvram set wl0_macmode=\"disable\"
         nvram set wl_macmode1=\"disable\"
@@ -2466,28 +2469,28 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
         {{ _self.guifi_unsolclic_ospf(dev, zone, ospfzone,interfaceWlanLan) }}
         {{ _self.guifi_unsolclic_dhcp(dev, interfaceWlanLan) }}
         {{ _self.guifi_unsolclic_wds_vars(dev) }}
-    {% elseif dev.radios[0].mode ==''client'' %}
+    {% elseif dev.radios[0].mode ==\'client\' %}
         # Mode Client
         {% for interface_id, interface in dev.radios[0].interfaces %}
             {% for ipv4_id,ipv4 in interface.ipv4 %}
                 {% if ipv4.links %}
                     {% for link_id, link in ipv4.links %}
-                        {% if link.link_type == ''ap/client'' %}
-                            {% set ap_macs = ap_macs ~'' ''~ link.interface.mac %}
+                        {% if link.link_type == \'ap/client\' %}
+                            {% set ap_macs = ap_macs ~\' \'~ link.interface.mac %}
                             {% set gateway = link.interface.ipv4.ipv4 %}
-                            {# if (($dev->variable[''firmware''] == ''DD-WRTv23'') or ($dev->variable[''firmware''] == ''DD-guifi'')) #}
+                            {# if (($dev->variable[\'firmware\'] == \'DD-WRTv23\') or ($dev->variable[\'firmware\'] == \'DD-guifi\')) #}
                             nvram set wl_mode=\"sta\"
-                            nvram set ''wl0_mode=\"sta\"
+                            nvram set \'wl0_mode=\"sta\"
                             nvram set wl_ssid=\"guifi.net-\"{{ dev.radios[0].ssid }})\"
                             {# end if de comrpovacio de firmware dd-wrtv23 #}
                             nvram set wan_gateway=\"{{ gateway }}\"
                         {% endif %}
                     {% endfor %}
                 {% endif %}
-                {% if dev[''variable''][''firmware''] == ''Alchemy'' %}
-                    {% if ap_macs == '''' %}
-                        # {{ t(''WARNING: AP MAC not set'') }}
-                        {% set filter = ''FF:FF:FF:FF:FF:FF'' %}
+                {% if dev[\'variable\'][\'firmware\'] == \'Alchemy\' %}
+                    {% if ap_macs == \'\' %}
+                        # {{ t(\'WARNING: AP MAC not set\') }}
+                        {% set filter = \'FF:FF:FF:FF:FF:FF\' %}
                     {% endif %}
                     nvram set wl_macmode=\"allow\"
                     nvram set wl0_macmode=\"allow\"
@@ -2505,13 +2508,13 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
                 {% endif %}
                 {# busquem interficie Lan #}
                 {% for interface in dev.radios.interfaces %}
-                    {% if interface.interface_type ==''Lan'' %}
+                    {% if interface.interface_type ==\'Lan\' %}
                         {# _self.guifi_unsolclic_ospf(dev,zone, ospfzone,interfaceWlanLan) #}
                         {# aqui estem en el pas de php a twig de dd-wrt. #}
                     {% else %}
                         {# guifi_unsolclic_gateway($dev); #}
                         #
-                        # {{ t(''Gateway routing'') }}
+                        # {{ t(\'Gateway routing\') }}
                         nvram set wk_mode=\"gateway\"
                         nvram set dr_setting=\"0\"
                         nvram set route_default=\"1\"
@@ -2520,7 +2523,7 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
                         nvram set dr_wan_rx=\"0\"
                         nvram set dr_wan_tx=\"0\"
                         nvram set dr_wan_tx=\"0\"
-                        # {{ t(''Firewall enabled'') }}
+                        # {{ t(\'Firewall enabled\') }}
                         nvram set filter=\"on\"
                         nvram set rc_firewall=\"
                         /usr/sbin/iptables -I INPUT -p udp --dport 161 -j ACCEPT; /usr/sbin/iptables -I \
@@ -2535,26 +2538,26 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
     {{ _self.guifi_unsolclic_vlan_vars(dev, rc_startup) }}
     {{ _self.guifi_unsolclic_startup(dev, version, rc_startup) }}
     #
-    # {{ t(''end of script and reboot'') }}
+    # {{ t(\'end of script and reboot\') }}
     nvram commit
     reboot
     {% macro guifi_unsolclic_ospf(dev,zone, ospfzone,interfaceWlanLan) %}
                         # {{ ipv4Addr  }}
-                        # {{ t(''Firewall disabled'') }}
+                        # {{ t(\'Firewall disabled\') }}
                         nvram set filter=\"off\"
-                        # {{ dev.variable.firmware ~ t('' OSPF routing'') }}
+                        # {{ dev.variable.firmware ~ t(\' OSPF routing\') }}
                         nvram set dr_setting=\"3\"
                         nvram set dr_lan_rx=\"1 2\"
                         nvram set dr_lan_tx=\"1 2\"
                         nvram set dr_wan_rx=\"1 2\"
                         nvram set dr_wan_tx=\"1 2\"
                         nvram set wk_mode=\"ospf\"
-                        {% if dev.variable.firmware == ''DD-WRTv23'' or dev.variable.firmware == ''DD-guifi''  %}
+                        {% if dev.variable.firmware == \'DD-WRTv23\' or dev.variable.firmware == \'DD-guifi\'  %}
                             nvram set routing_lan=\"on\"
                             nvram set routing_wan=\"on\"
                             nvram set routing_ospf=\"on\"
                         {% endif %}
-                        {% if dev.variable.firmware == ''Alchemy'' %}
+                        {% if dev.variable.firmware == \'Alchemy\' %}
                             nvram set route_default=\"1\"
                             nvram set expert_mode=\"1\"
                         {% endif %}
@@ -2572,7 +2575,7 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
                         ospf router-id {{ interfaceWlanLan.ipv4[0].ipv4 }}
                         {% for radio_id, radio in dev.radios %}
                           {% for interface_id, interface in radio.interfaces %}
-                                {% if interface.interface_type == ''wLan'' or  interface.interface_type == ''wLan/Lan'' %}
+                                {% if interface.interface_type == \'wLan\' or  interface.interface_type == \'wLan/Lan\' %}
                                     {% for ipv4_id,ipv4 in interface.ipv4 %}
                                       network {{ ipv4.netid }}/{{ ipv4.maskbits  }} area 0
                                     {% endfor %}
@@ -2581,12 +2584,12 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
                         {% endfor %}
                         {% for radio_id, radio in dev.radios %}
                           {% for interface_id, interface in radio.interfaces %}
-                                {% if interface.interface_type == ''wds/p2p'' %}
+                                {% if interface.interface_type == \'wds/p2p\' %}
                                     {% if interface.ipv4[0] %}
                                         {% for ipv4_id,ipv4 in interface.ipv4 %}
                                             {% for link_id, link in ipv4.links %}
-                                                {% if link.link_type == ''wds'' and link.routing ==''OSPF''  %}
-                                                    {% if link.flag in '' Working Testing Building ''  %}
+                                                {% if link.link_type == \'wds\' and link.routing ==\'OSPF\'  %}
+                                                    {% if link.flag in \' Working Testing Building \'  %}
                                                       network {{ ipv4.netid }}/{{ ipv4.maskbits }} area 0
                                                     {% endif %}
                                                 {% endif %}
@@ -2598,13 +2601,13 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
                         {% endfor %}
                         {% for interface_id, interface in dev.interfaces %}
                             {% for ipv4_id,ipv4 in interface.ipv4 %}
-                                {% if ipv4.ipv4_type ==''1'' and interface.interface_type != ''wLan/Lan'' %}
-                                    network {{ ipv4.netid }}/{{ ipv4.maskbits }} area 0''
+                                {% if ipv4.ipv4_type ==\'1\' and interface.interface_type != \'wLan/Lan\' %}
+                                    network {{ ipv4.netid }}/{{ ipv4.maskbits }} area 0\'
                                 {% endif %}
                                 {% if ipv4.links %}
                                     {% for link_id, link in ipv4.links %}
-                                        {% if ipv4.ipv4_type == ''2'' and link.routing ==''OSPF''  %}
-                                            {% if link.flag in '' Working Testing Building ''  %}
+                                        {% if ipv4.ipv4_type == \'2\' and link.routing ==\'OSPF\'  %}
+                                            {% if link.flag in \' Working Testing Building \'  %}
                                               network {{ ipv4.netid }}/{{ ipv4.maskbits }} area 0
                                             {% endif %}
                                         {% endif %}
@@ -2623,7 +2626,7 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
         {% set DHCP_statics = null %}
         {% set max = null %}
         {% set main_ip = guifi_main_ip(dev.id) %}
-        {% set max = explode(''.'', main_ip[''ipv4'']) %}
+        {% set max = explode(\'.\', main_ip[\'ipv4\']) %}
         {% set max = max[3] %}
         {# BEGIN Cable Links #}
         {% if dev.interfaces %}
@@ -2632,10 +2635,10 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
                     {% for ipv4_id,ipv4 in interface.ipv4 %}
                         {% if ipv4.links %}
                             {% for link_id, link in ipv4.links %}
-                                {% if link.interface.ipv4.ipv4 != ''''  %}
+                                {% if link.interface.ipv4.ipv4 != \'\'  %}
                                     {% if link.interface.ipv4.netid %}
-                                        {# if link.interface.mac == '''' #}
-                                            {# set link.interface.mac = ''FF:FF:FF:FF:FF:FF'' #}
+                                        {# if link.interface.mac == \'\' #}
+                                            {# set link.interface.mac = \'FF:FF:FF:FF:FF:FF\' #}
                                         {# endif #}
                                         {% set curr = explode(\".\", link.interface.ipv4.ipv4) %}
                                         {% if curr[3] > max %}
@@ -2657,7 +2660,7 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
                             {% for ipv4_id,ipv4 in interface.ipv4 %}
                                 {% if ipv4.links %}
                                     {% for link_id, link in ipv4.links %}
-                                        {% if link.link_type == ''ap/client'' and link.interface.ipv4.ipv4 != ''''  %}
+                                        {% if link.link_type == \'ap/client\' and link.interface.ipv4.ipv4 != \'\'  %}
                                             {% set count = count +1  %}
                                             {% set curr = explode(\".\", link.interface.ipv4.ipv4) %}
                                         {% if curr[3] > max %}
@@ -2679,39 +2682,39 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
         nvram set dhcp_start=\"{{ dhcp_start }}\"{% endmacro %}
     {% macro guifi_unsolclic_wds_vars(dev) %}
       #
-      # {{ t(''WDS Links for'') }} {{ dev.nick }}
-        {% if dev.variable.firmware == ''DD-guifi'' or dev.variable.firmware == ''DD-WRTv23'' %}
+      # {{ t(\'WDS Links for\') }} {{ dev.nick }}
+        {% if dev.variable.firmware == \'DD-guifi\' or dev.variable.firmware == \'DD-WRTv23\' %}
             {% set ifcount = 2  %}
         {% else %}
             {% set ifcount = 1  %}
         {% endif %}
         {% if dev.radios %}
             {% set count = 1 %}
-            {% set wds_str = '''' %}
-            {% set rc_startup = '''' %}
+            {% set wds_str = \'\' %}
+            {% set rc_startup = \'\' %}
             {% for radio_id, radio in dev.radios %}
                 {% if dev.interfaces %}
                     {% for interface_id, interface in radio.interfaces %}
-                        {% if interface.interface_type == ''wds/p2p'' %}
+                        {% if interface.interface_type == \'wds/p2p\' %}
                             {% if interface.ipv4 %}
                                 {% for ipv4_id,ipv4 in interface.ipv4 %}
                                     {% if ipv4.links %}
                                         {% for link_id, link in ipv4.links %}
-                                            {% if link.link_type == ''wds''%}
+                                            {% if link.link_type == \'wds\'%}
                                                 {% set hostname = link.interface.ipv4.host_name  %}
                                                 # {{  link.interface.device_id }}-{{ hostname }}
                                                 nvram set wl_wds{{ count }}_desc=\"{{ hostname }}\"
-                                                {% if link.flag in '' Working Testing Building ''  %}
+                                                {% if link.flag in \' Working Testing Building \'  %}
                                                     {% set ifcount = ifcount + 1  %}
                                                     nvram set wl_wds{{ count }}_enable=\"1\"
-                                                    {% if dev.variable.firmware == ''DD-guifi'' or dev.variable.firmware == ''DD-WRTv23'' %}
+                                                    {% if dev.variable.firmware == \'DD-guifi\' or dev.variable.firmware == \'DD-WRTv23\' %}
                                                         nvram set wl_wds{{ count }}_if=\"wds0.4915{{ ifcount }}\"
                                                     {% else %}
                                                         nvram set wl_wds{{ count }}_if=\"wds0.{{ ifcount }}\"
                                                     {% endif %}
-                                                    {% set wds_str = wds_str ~'' ''~ link.interface.mac %}
-                                                    {% if dev.variable.firmware == ''Talisman'' %}
-                                                         {% set rc_startup = rc_startup ~''ifconfig wds0.''~ ifcount ~'' up\n<br />'' %}
+                                                    {% set wds_str = wds_str ~\' \'~ link.interface.mac %}
+                                                    {% if dev.variable.firmware == \'Talisman\' %}
+                                                         {% set rc_startup = rc_startup ~\'ifconfig wds0.\'~ ifcount ~\' up\n<br />\' %}
                                                     {% endif %}
                                                 {% else %}
                                                     nvram wl_wds{{ count }}_enable=\"0\"
@@ -2731,9 +2734,9 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
             {% endfor %}
         {% endif %}
         #
-        # {{ t(''Free WDS slots'') }}
+        # {{ t(\'Free WDS slots\') }}
         {% for key in count..10 %}
-            nvram set wl_wds{{ key }}_desc=\"{{ t(''free'') }}\"
+            nvram set wl_wds{{ key }}_desc=\"{{ t(\'free\') }}\"
             nvram set wl_wds{{ key }}_enable=\"0\"
             nvram set wl_wds{{ key }}_ipaddr=\"172.0.0.0\"
             nvram set wl_wds{{ key }}_hwaddr=\"00:13:00:00:00:00\"
@@ -2756,8 +2759,8 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
                                 {% if ipv4.links %}
                                     {% for link_id, link in ipv4.links %}
 
-                                        {% if link.type == ''wds'' %}
-                                           {% set wds_links = wds_links ~''|''~ link %}
+                                        {% if link.type == \'wds\' %}
+                                           {% set wds_links = wds_links ~\'|\'~ link %}
                                         {% else %}
                                             {# friki, molt friki REVISAR!!! ret[alchemyIfs[interface.interface_type]] = true #}
                                             {% set ret = true %}
@@ -2785,8 +2788,8 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
         {% set vlans = false %}
         {% set br0 = 0 %}
         {% set eth1 = 0 %}
-        {% set rc = '''' %}
-        {% set bips = '''' %}
+        {% set rc = \'\' %}
+        {% set bips = \'\' %}
         {% if dev.interfaces %}
             {% for interface_id, interface in dev.interfaces %}
                 {% if interface.ipv4 %}
@@ -2794,28 +2797,28 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
                         {% if ipv4.links %}
                             {% for link_id, link in ipv4.links %}
                                 {% if not interface.ipv4 in bips  %}
-                                    {% set bips = bips ~'' ''~ interface.ipv4 %}
-                                    {% if interface.interface_type ==''vlan'' or interface.interface_type ==''vwlan''  %}
+                                    {% set bips = bips ~\' \'~ interface.ipv4 %}
+                                    {% if interface.interface_type ==\'vlan\' or interface.interface_type ==\'vwlan\'  %}
                                         {% set br0 = br0 +1 %}
-                                        {% set rc = ''# br0:''~ br0  ~'': ''~  ipv4.link.interface.ipv4.host_name ~''\n''%}
-                                        {% if link.flag not in '' Working Testing Building '' %}
-                                            {% set rc = rc ~''# '' %}
+                                        {% set rc = \'# br0:\'~ br0  ~\': \'~  ipv4.link.interface.ipv4.host_name ~\'\n\'%}
+                                        {% if link.flag not in \' Working Testing Building \' %}
+                                            {% set rc = rc ~\'# \' %}
                                         {% endif %}
-                                        {% set rc = ''ifconfig br0:''~ br0  ~'' ''~ ipv4.ipv4 ~'' netmask ''~ ipv4.netmask ~'' broadcast ''~ ipv4.broadcast %}
-                                    {% elseif interface.interface_type ==''vwan'' %}
+                                        {% set rc = \'ifconfig br0:\'~ br0  ~\' \'~ ipv4.ipv4 ~\' netmask \'~ ipv4.netmask ~\' broadcast \'~ ipv4.broadcast %}
+                                    {% elseif interface.interface_type ==\'vwan\' %}
                                         {% set eth1 = eth1 +1 %}
-                                        {% set rc = ''# eth1:''~ eth1 ~'': ''~  ipv4.link.interface.ipv4.host_name ~''\n''%}
-                                        {% if link.flag not in '' Working Testing Building '' %}
-                                            {% set rc = rc ~''# '' %}
+                                        {% set rc = \'# eth1:\'~ eth1 ~\': \'~  ipv4.link.interface.ipv4.host_name ~\'\n\'%}
+                                        {% if link.flag not in \' Working Testing Building \' %}
+                                            {% set rc = rc ~\'# \' %}
                                         {% endif %}
-                                        {% set rc = ''ifconfig eth1:''~ eth1 ~'' ''~ ipv4.ipv4 ~'' netmask ''~ ipv4.netmask ~'' broadcast ''~ ipv4.broadcast %}
+                                        {% set rc = \'ifconfig eth1:\'~ eth1 ~\' \'~ ipv4.ipv4 ~\' netmask \'~ ipv4.netmask ~\' broadcast \'~ ipv4.broadcast %}
 
-                                    {% elseif interface.interface_type ==''vlan2'' or interface.interface_type ==''vlan3'' or interface.interface_type ==''vlan4''%}
-                                        {% set rc = ''# ''~ interface.interface_type ~'': ''~  ipv4.link.interface.ipv4.host_name ~''<br/>'' %}
-                                        {% if link.flag not in '' Working Testing Building '' %}
-                                            {% set rc = rc ~''# '' %}
+                                    {% elseif interface.interface_type ==\'vlan2\' or interface.interface_type ==\'vlan3\' or interface.interface_type ==\'vlan4\'%}
+                                        {% set rc = \'# \'~ interface.interface_type ~\': \'~  ipv4.link.interface.ipv4.host_name ~\'<br/>\' %}
+                                        {% if link.flag not in \' Working Testing Building \' %}
+                                            {% set rc = rc ~\'# \' %}
                                         {% endif %}
-                                        {% set rc = ''ifconfig ''~ interface.interface_type ~'' ''~ ipv4.ipv4 ~'' netmask ''~ ipv4.netmask ~'' broadcast ''~ ipv4.broadcast %}
+                                        {% set rc = \'ifconfig \'~ interface.interface_type ~\' \'~ ipv4.ipv4 ~\' netmask \'~ ipv4.netmask ~\' broadcast \'~ ipv4.broadcast %}
                                         {% set vlans = true %}
                                     {% endif %}
                                 {% endif %}
@@ -2825,15 +2828,15 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
                 {% endif %}
             {% endfor %}
         {% endif %}
-        {% if rc != '''' %}
-            {% set rc_startup = ''# VLANs -- radio: '' ~ dev.id ~''-''~ dev.nick %}
+        {% if rc != \'\' %}
+            {% set rc_startup = \'# VLANs -- radio: \' ~ dev.id ~\'-\'~ dev.nick %}
             {% set rc_startup = rc_startup ~ rc %}
         {% endif %}
         {% if vlans  %}
             #
             # VLANs -- radio: {{ dev.id}}-{{ dev.nick}}
-            {% if dev.variable.model_id == ''1'' or dev.variable.model_id == ''15'' or dev.variable.model_id == ''17'' %}
-                {% if dev.variable.firmware == ''DD-guifi'' or dev.variable.firmware == ''DD-WRTv23'' %}
+            {% if dev.variable.model_id == \'1\' or dev.variable.model_id == \'15\' or dev.variable.model_id == \'17\' %}
+                {% if dev.variable.firmware == \'DD-guifi\' or dev.variable.firmware == \'DD-WRTv23\' %}
                     nvram set vlan2hwname=\"et0\"
                     nvram set vlan3hwname=\"et0\"
                     nvram set vlan4hwname=\"et0\"
@@ -2848,7 +2851,7 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
                     nvram set port4vlans=\"4\"
                     nvram set port5vlans=\"0 1 2 3 4 16\"
                 {% endif %}
-            {% elseif  dev.variable.model_id == ''16'' or dev.variable.model_id == ''18'' %}
+            {% elseif  dev.variable.model_id == \'16\' or dev.variable.model_id == \'18\' %}
                 nvram set vlan2hwname=\"et0\"
                 nvram set vlan3hwname=\"et0\"
                 nvram set vlan4hwname=\"et0\"
@@ -2865,25 +2868,25 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
         # unsolclic: v3.7
         # radio: {{ dev.id }}-{{ dev.nick }}
         #
-        {% if dev.variable.firmware == ''DD-WRTv23'' and dev.radios[0].mode ==''ap'' %}
+        {% if dev.variable.firmware == \'DD-WRTv23\' and dev.radios[0].mode ==\'ap\' %}
             /bin/sleep 5
             {# Write the config for bird, for compatibility with Alchemy and area support #}
             /bin/kill -9 \/bin/ps |/bin/grep bird|/usr/bin/cut -c1-5|/usr/bin/head -n 1\;
             /bin/rm /tmp/bird/bird.conf
-            /bin/echo -e ''router id {{ dev.ipv4 }}
+            /bin/echo -e \'router id {{ dev.ipv4 }}
             protocol kernel { learn; persist; scan time 10; import all; export all; }
             protocol device { scan time 10; }
             protocol direct { interface \\\"*\\\";} 
             protocol ospf WRT54G_ospf {
-            area ''.$ospf_zone.'' { tick 8;
+            area \'.$ospf_zone.\' { tick 8;
             interface \"*\" { cost 1; hello 10; priority 1; retransmit 7; authentication none; };
             };
             }
-            '' >/tmp/bird/bird.conf
+            \' >/tmp/bird/bird.conf
         {% endif %}
         #
         {{ rc_startup }}
-        {% if dev.variable.firmware == ''DD-WRTv23'' %}
+        {% if dev.variable.firmware == \'DD-WRTv23\' %}
             /bin/sleep 3
             bird -c /tmp/bird/bird.conf
             /usr/sbin/wl shortslot_override 0
@@ -2891,7 +2894,7 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
             ifconfig br0 -promisc -allmulti
             ifconfig eth0 promisc \"
         {% else %}
-            {% if dev.variable.firmware == ''DD-guifi'' %}
+            {% if dev.variable.firmware == \'DD-guifi\' %}
               /bin/sleep 10
               /usr/sbin/wl shortslot_override 0
               ifconfig eth1 -promisc -allmulti
@@ -2903,16 +2906,16 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
             {% endif %}
         {% endif %}
     {% endmacro %}
-    {% endspaceless %}',0,'albertsarle@gmail.com',541,541,1329862310,1336817612,NULL);");
+    {% endspaceless %}');
     
     
-$items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (21,18,21,1,'# Generat per a:
+$items[] = my_update_sql("INSERT INTO guifi_configuracioUnSolclic (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (21,18,21,1,'%s',0,'albertsarle@gmail.com',541,541,1329863091,1332286445,NULL);",'# Generat per a:
 # {{ firmware_name }}
 #
 # unsolclic version: v3.7
 # obre una sessió telnet/ssh en el teu trasto i executa aquest script.
-# Nota: Fes servir l''Status/Wireless survey per verificar que
-# tens l''antena ben endollada i configurada. La dreta es probablement
+# Nota: Fes servir l\'Status/Wireless survey per verificar que
+# tens l\'antena ben endollada i configurada. La dreta es probablement
 # la que tens a la dreta si el mires des del davant (on hi han els
 # leds). Si et cal, canvia el connector des de la configuració via
 # anant a Wireless->Advanced Settings.
@@ -3017,9 +3020,9 @@ ifconfig eth0 promisc\"
 # Fi del script i re-iniciar
 nvram commit
 reboot
-',0,'albertsarle@gmail.com',541,541,1329863091,1332286445,NULL);");
+');
 
-$items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (24,31,14,1,'{% macro bgp_peer(id, host_name, ipv4, disabled) %}
+$items[] = my_update_sql("INSERT INTO guifi_configuracioUnSolclic (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (24,31,14,1,'%s',0,'miquelmartos@guifi.net',541,541,1330459031,1333305903,'routerOS4.0.twig');",'{% macro bgp_peer(id, host_name, ipv4, disabled) %}
 / routing bgp peer
 :foreach i in [find name={{ host_name }}] do={/routing bgp peer remove $i;}
 add name=\"{{ host_name }}\" instance=default remote-address={{ ipv4 }} remote-as={{ id }} \
@@ -3045,9 +3048,9 @@ add network={{ netid }}/{{ maskbits }} area={{ ospf_name }} disabled={{ disabled
 # &nbsp;&nbsp;&nbsp;Then execute the script with:
 # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;>&nbsp;/system script run script_name
 # 2.-Fitxer importat:
-# &nbsp;&nbsp;&nbsp;&nbsp;Desa aquesta \"sortida\" a un fitxer, després puja''l al router
-# &nbsp;&nbsp;&nbsp;&nbsp;fent servir FTP amb un nom de l''estil \"script_name.rsc\".
-# &nbsp;&nbsp;&nbsp;&nbsp;(note, l''extensió \".rsc\" es un requisit)
+# &nbsp;&nbsp;&nbsp;&nbsp;Desa aquesta \"sortida\" a un fitxer, després puja\'l al router
+# &nbsp;&nbsp;&nbsp;&nbsp;fent servir FTP amb un nom de l\'estil \"script_name.rsc\".
+# &nbsp;&nbsp;&nbsp;&nbsp;(note, l\'extensió \".rsc\" es un requisit)
 # &nbsp;&nbsp;&nbsp;&nbsp;Executa el fitxer importat amb la comanda:
 # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;>&nbsp;/import script_name
 # 3.-Telnet copia i enganxar:
@@ -3059,7 +3062,7 @@ add network={{ netid }}/{{ maskbits }} area={{ ospf_name }} disabled={{ disabled
 # -wlans should be enabled manually, be sure to set the correct antenna (a or b)
 # &nbsp;&nbsp;according in how did you connect the cable to the miniPCI. Keep the
 # &nbsp;&nbsp;power at the minimum possible and check the channel.
-# -The script doesn''t reset the router, you might have to do it manually
+# -The script doesn\'t reset the router, you might have to do it manually
 # -You must have write access to the router
 # -MAC access (winbox, MAC telnet...) method is recommended
 # &nbsp;&nbsp;(the script reconfigures some IP addresses, so communication can be lost)
@@ -3067,7 +3070,7 @@ add network={{ netid }}/{{ maskbits }} area={{ ospf_name }} disabled={{ disabled
 # -A Read Only guest account with no password will be created to allow guest access
 # &nbsp;&nbsp;to the router with no danger of damage but able to see the config.
 # -Be sure that all packages are activated.
-# -Don''t run the script from telnet and being connected through an IP connection at
+# -Don\'t run the script from telnet and being connected through an IP connection at
 # &nbsp;&nbsp;the wLan/Lan interface: This interface will be destroyed during the script.
 #
 / system identity set name={{ dev.nick }}
@@ -3092,7 +3095,7 @@ add network={{ netid }}/{{ maskbits }} area={{ ospf_name }} disabled={{ disabled
 / tool bandwidth-server set enabled=yes authenticate=no allocate-udp-ports-from=2000
 #
 # SNMP
-/snmp set contact=\"{{ snmp_contact }}\" enabled=yes location=\"{{ node_name|replace({'' '': ''''})  }}\"
+/snmp set contact=\"{{ snmp_contact }}\" enabled=yes location=\"{{ node_name|replace({\' \': \'\'})  }}\"
 #
 # Guest user
 /user
@@ -3112,7 +3115,7 @@ do=[/system logging action remove $i]
 /system logging add action=guifi_remot topics=critical
 /system logging add action=guifi_remot topics=account
 {% endif %}
-{% if dev.mode != ''client'' %}
+{% if dev.mode != \'client\' %}
 # Remove current wLan/Lan bridge if exists
 :foreach i in [/interface bridge find name=wLan/Lan] \
 do={:foreach i in [/interface bridge port find bridge=wLan/Lan] \
@@ -3131,29 +3134,29 @@ add interface=wlan1 bridge=wLan/Lan
 :delay 1
 #
 {# la declarem aqui perque sino no hi puc accedir fora del foreach radio #}
-{% set ospf_routerid = ''ospf_routerid'' %}
+{% set ospf_routerid = \'ospf_routerid\' %}
 {% for radio_id, radio in dev.radios %}
 # Radio#: {{ radio.radiodev_counter }} {{ radio.ssid }}
 {% spaceless %}
 /interface wireless set wlan{{ radio.radiodev_counter+1 }} name=\"wlan{{ radio.radiodev_counter+1 }}\" \
 radio-name=\"{{ radio.ssid }}\" mode={{ radio.mode }}-bridge ssid=\"guifi.net-{{ radio.ssid }}\" \
-{% if radio.mode == ''ap'' %}
-   {% set mode = ''ap-bridge'' %}
+{% if radio.mode == \'ap\' %}
+   {% set mode = \'ap-bridge\' %}
     {% if radio.channel < 5000 %}
-      {% set band = ''2.4ghz-b'' %}
+      {% set band = \'2.4ghz-b\' %}
     {% else %}
-      {% set band = ''5ghz'' %}
+      {% set band = \'5ghz\' %}
     {% endif %}
-{% elseif (radio.mode == ''client'' or radio.mode == ''clientrouted'') %}
-   {% set mode = ''station'' %}
+{% elseif (radio.mode == \'client\' or radio.mode == \'clientrouted\') %}
+   {% set mode = \'station\' %}
     {% if radio.channel != 5000 %}
-      {% set band = ''2.4ghz-b'' %}
+      {% set band = \'2.4ghz-b\' %}
     {% else %}
-      {% set band = ''5ghz'' %}
+      {% set band = \'5ghz\' %}
     {% endif %}
 {% endif %}
-{% if radio.protocol == ''802.11n'' and radio.channel > 5000 %}
-  {% set band = ''5ghz'' %}
+{% if radio.protocol == \'802.11n\' and radio.channel > 5000 %}
+  {% set band = \'5ghz\' %}
 {% endif %}
 band=\"{{ band }}\" \
 frequency-mode=regulatory-domain country=spain antenna-gain={{ radio.antenna_gain }} \
@@ -3164,19 +3167,19 @@ frequency-mode=regulatory-domain country=spain antenna-gain={{ radio.antenna_gai
       {% endif %}
 frequency={{ channel }} \
     {% endif %}
-    {% if ((radio.1.band == ''5ghz'' or ''5ghz-a'') and (channel == 5000 )) or
-         ((radio.1.band == ''2.4ghz-b'' or ''2ghz-b'') and (channel == 0 )) %}
+    {% if ((radio.1.band == \'5ghz\' or \'5ghz-a\') and (channel == 5000 )) or
+         ((radio.1.band == \'2.4ghz-b\' or \'2ghz-b\') and (channel == 0 )) %}
  dfs-mode=radar-detect \
     {% else %}
  dfs-mode=none \
     {% endif %}
-    {% if radio.antenna_mode =='''' %}
+    {% if radio.antenna_mode ==\'\' %}
  wds-mode=static wds-default-bridge=none wds-default-cost=100 \
     {% else %}
-      {% if radio.antenna_mode != ''Main''%}
-         {% set antenna_mode = ''ant-b'' %}
+      {% if radio.antenna_mode != \'Main\'%}
+         {% set antenna_mode = \'ant-b\' %}
       {% else %}
-         {% set antenna_mode = ''ant-a'' %}
+         {% set antenna_mode = \'ant-a\' %}
       {% endif %}
  antenna-mode={{ antenna_mode }} wds-mode=static wds-default-bridge=none wds-default-cost=100 \
     {% endif %}
@@ -3184,7 +3187,7 @@ frequency={{ channel }} \
     {% for interface_id, interface in radio.interfaces %}
 :delay 1
 # Type: {{ interface.interface_type }}
-      {% if interface.interface_type == ''wds/p2p'' %}
+      {% if interface.interface_type == \'wds/p2p\' %}
 # Remove all existing wds interfaces
 :foreach i in [/interface wireless wds find master-interface=wlan{{ radio.radiodev_counter+1 }}] \
 do={:foreach n in [/interface wireless wds get $i name] \
@@ -3195,26 +3198,26 @@ do={/ip address remove $inum;};}; \
           {% for ipv4_id,ipv4 in interface.ipv4 %}
                     {% if ipv4.links %}
                       {% for link_id, link in ipv4.links %}
-                        {% if link.flag == ''Working'' or link.flag == ''Testing'' or link.flag == ''Building'' %}
-                           {% set disabled = ''no'' %}
+                        {% if link.flag == \'Working\' or link.flag == \'Testing\' or link.flag == \'Building\' %}
+                           {% set disabled = \'no\' %}
                         {% else %}
-                           {% set disabled = ''yes'' %}
+                           {% set disabled = \'yes\' %}
                         {% endif %}
-                        {% set wds_name = ''wds_''. link.interface.ipv4.host_name %}
+                        {% set wds_name = \'wds_\'. link.interface.ipv4.host_name %}
                         {% if not link.interface.mac %}
-                          {% set link_mac = ''FF:FF:FF:FF:FF:FF'' %}
+                          {% set link_mac = \'FF:FF:FF:FF:FF:FF\' %}
                         {% else %}
                           {% set link_mac = link.interface.mac %}
                         {% endif %}
 / interface wireless wds
 add name=\"wds_{{ link.interface.ipv4.host_name }}\" master-interface=wlan{{ radio_id+1 }} wds-address={{ link_mac }} disabled={{ disabled }}
 / ip address add address={{ ipv4.ipv4 }}/{{ ipv4.maskbits }} network={{ ipv4.netid }} broadcast={{ ipv4.broadcast }} interface=wds_{{ link.interface.ipv4.host_name }} disabled={{ disabled }} comment=\"wds_{{ link.interface.ipv4.host_name }}\"
-                        {% if link.routing == ''OSPF'' %}
-                          {{ _self.ospf_interface(''wds_'' ~ link.interface.ipv4.host_name , ipv4.netid , ipv4.maskbits , ospf_name , ospf_zone, ospf_id, ''no'') }}
-                          {{ _self.bgp_peer(link.device_id, link.interface.ipv4.host_name, link.interface.ipv4.ipv4, ''yes'') }}
+                        {% if link.routing == \'OSPF\' %}
+                          {{ _self.ospf_interface(\'wds_\' ~ link.interface.ipv4.host_name , ipv4.netid , ipv4.maskbits , ospf_name , ospf_zone, ospf_id, \'no\') }}
+                          {{ _self.bgp_peer(link.device_id, link.interface.ipv4.host_name, link.interface.ipv4.ipv4, \'yes\') }}
                         {% else %}
-                          {{ _self.ospf_interface(''wds_'' ~ link.interface.ipv4.host_name , ipv4.netid , ipv4.maskbits , ospf_name , ospf_zone, ospf_id, ''yes'') }}
-                          {{ _self.bgp_peer(link.device_id, link.interface.ipv4.host_name, link.interface.ipv4.ipv4, ''no'') }}
+                          {{ _self.ospf_interface(\'wds_\' ~ link.interface.ipv4.host_name , ipv4.netid , ipv4.maskbits , ospf_name , ospf_zone, ospf_id, \'yes\') }}
+                          {{ _self.bgp_peer(link.device_id, link.interface.ipv4.host_name, link.interface.ipv4.ipv4, \'no\') }}
                         {% endif %}
                       {% endfor %}
                     {% endif %}
@@ -3225,17 +3228,17 @@ add name=\"wds_{{ link.interface.ipv4.host_name }}\" master-interface=wlan{{ rad
           {# // wLan, wLan/Lan, Hotspot or client #}
           {% if interface.ipv4 %}
              {% for ipv4_id,ipv4 in interface.ipv4 %}
-                {# aixo a l''original no es ben be aixi #}
+                {# aixo a l\'original no es ben be aixi #}
                 {% set ospf_routerid = ipv4.ipv4 %}
-                {% if interface.interface_type == ''wLan/Lan'' %}
+                {% if interface.interface_type == \'wLan/Lan\' %}
                   {% set iname = interface.interface_type %}
                   {% set ospf_routerid = ipv4.ipv4 %}
                 {% else  %}
                   {% set radioindex = radio_id+1 %}
-                  {% set iname = ''wlan'' ~ radioindex %}
+                  {% set iname = \'wlan\' ~ radioindex %}
                 {% endif %}
 /ip address
-                {% if interface.interface_type == ''Wan''%}
+                {% if interface.interface_type == \'Wan\'%}
 :foreach i in [find interface={{ iname }}] do={remove $i}
                 {% endif  %}
 :foreach i in [find address=\"{{ ipv4.ipv4 }}/{{ ipv4.maskbits }}\"] do={remove $i}
@@ -3243,13 +3246,13 @@ add name=\"wds_{{ link.interface.ipv4.host_name }}\" master-interface=wlan{{ rad
 / routing bgp network
 :foreach i in [/routing bgp network find network={{ ipv4.netid }}/{{ ipv4.maskbits }}] do={/routing bgp network remove $i;}
 add network={{ ipv4.netid }}/{{ ipv4.maskbits }} disabled=no
-                {% if dev.mode != ''client'' %}
+                {% if dev.mode != \'client\' %}
 / routing ospf interface
 :foreach i in [/routing ospf interface find interface={{ iname }}] do={/routing ospf interface remove $i;}
 add interface={{ iname }}
 / routing ospf network
 :foreach i in [/routing ospf network find network={{ ipv4.netid }}/{{ ipv4.maskbits }}] do={/routing ospf network remove $i;}
-add network={{ ipv4.netid }}/{{ ipv4.maskbits }} area={%if ipv4.ospf_name== '''' %} backbone{% else %}{{ ipv4.ospf_name }}{% endif %} disabled=no
+add network={{ ipv4.netid }}/{{ ipv4.maskbits }} area={%if ipv4.ospf_name== \'\' %} backbone{% else %}{{ ipv4.ospf_name }}{% endif %} disabled=no
                 {% else %}
 / routing ospf interface
 :foreach i in [/routing ospf interface find interface={{ iname }}] do={/routing ospf interface remove $i;}
@@ -3258,13 +3261,13 @@ add interface={{ iname }}
 :foreach i in [/routing ospf network find network={{ ipv4.netid }}/{{ ipv4.maskbits }}] do={/routing ospf network remove $i;}
 add network={{ ipv4.netid }}/{{ ipv4.maskbits }} area={{ ipv4.ospf_name }} disabled=yes
                 {% endif %}
-                {% if interface.interface_type == ''HotSpot'' %}
+                {% if interface.interface_type == \'HotSpot\' %}
 #
 # HotSpot
 /interface wireless
 :foreach i in [find name=hotspot{{ radio.id+1 }}] do={remove $i}
 add name=\"hotspot{{ radio.id+1 }}\" arp=enabled master-interface=wlan{{ radio.id+1 }} ssid=\"guifi.net-{{ hotspot_ssid}}\" disabled=\"no\"
-/ip address'');
+/ip address\');
 :foreach i in [find address=\"192.168.{{ radio.id+100 }}.1/24\"] do={remove $i}
 /ip address add address=192.168.{{ radio.id+100 }}.1/24 interface=hotspot{{ radio.id+1 }} disabled=no
 /ip pool
@@ -3287,15 +3290,15 @@ add name=\"hotspot{{ radio.id+1 }}\" interface=hotspot{{ radio.id+1 }} address-p
 end of HotSpot
                 {% endif %} {# end hotspot #}
 :delay 1
-                {% if interface.interface_type != ''HotSpot'' and interface.interface_type != ''Wan'' %}
-                  {% if mode == ''ap-bridge'' %}
+                {% if interface.interface_type != \'HotSpot\' and interface.interface_type != \'Wan\' %}
+                  {% if mode == \'ap-bridge\' %}
                     {% set maxip = ip2long(ipv4.netstart) +1  %}
                     {% if maxip +5 >  ip2long(ipv4.netend) -5 %}
                       {% set maxip = ip2long(ipv4.netend) %}
-                      {% set dhcpDisabled = ''yes'' %}
+                      {% set dhcpDisabled = \'yes\' %}
                     {% else %}
                       {% set maxip = maxip +5 %}
-                      {% set dhcpDisabled = ''no'' %}
+                      {% set dhcpDisabled = \'no\' %}
                     {% endif %}
 #
 # DHCP
@@ -3314,7 +3317,7 @@ end of HotSpot
                           {% set maxip = link.interface.ipv4.ipv4 +1  %}
                         {% endif %}
                         {% if not link.interface.mac %}
-                          {% set rmac = ''ff:ff:ff:ff:ff:ff''  %}
+                          {% set rmac = \'ff:ff:ff:ff:ff:ff\'  %}
                         {% else %}
                           {% set rmac = link.interface.mac  %}
                         {% endif %}
@@ -3338,19 +3341,19 @@ add address={{ link.interface.ipv4.ipv4 }} mac-address={{ rmac }} client-id={{ l
 {% endif %}
 # Routed device
 #
-# {{ t(''Other cable connections'') }}
+# {{ t(\'Other cable connections\') }}
 {% if dev.interfaces %}
   {% for interface_i, interface in dev.interfaces %}
-    {% if interface.interface_type == ''vlan'' %}
-        {% set iname = ''wLan/Lan'' %}
-    {% elseif interface.interface_type == ''vlan2'' %}
-        {% set iname = ''ether2'' %}
-    {% elseif interface.interface_type == ''vlan3'' %}
-        {% set iname = ''ether3'' %}
-    {% elseif interface.interface_type == ''vlan4'' %}
-        {% set iname = ''wLan/Lan'' %}
-    {% elseif interface.interface_type == ''Wan'' %}
-        {% set iname = ''wLan/Lan'' %}
+    {% if interface.interface_type == \'vlan\' %}
+        {% set iname = \'wLan/Lan\' %}
+    {% elseif interface.interface_type == \'vlan2\' %}
+        {% set iname = \'ether2\' %}
+    {% elseif interface.interface_type == \'vlan3\' %}
+        {% set iname = \'ether3\' %}
+    {% elseif interface.interface_type == \'vlan4\' %}
+        {% set iname = \'wLan/Lan\' %}
+    {% elseif interface.interface_type == \'Wan\' %}
+        {% set iname = \'wLan/Lan\' %}
     {% else %}
         {% set iname = interface.interface_type  %}
     {% endif %}
@@ -3380,23 +3383,23 @@ add action=accept chain=ospf-out comment=\"6. Allow send 10.x routes to OSPF nei
 add action=accept chain=ospf-out comment=\"7. Allow send 172.x routes to OSPF neighbor\" disabled=no invert-match=no prefix=172.16.0.0/12 prefix-length=8-32
 add action=discard chain=ospf-out comment=\"8. Discard send non 10.x and 172.x to OSPF neighbor\" disabled=no invert-match=no
 #
-# {{ t(''BGP instance'') }}
+# {{ t(\'BGP instance\') }}
 / routing bgp instance
 set default name=\"default\" as={{ dev.id }} router-id={{ ospf_routerid }} \
 redistribute-connected=no redistribute-static=no redistribute-rip=no \
 redistribute-ospf=yes redistribute-other-bgp=yes out-filter=ebgp-out \
 client-to-client-reflection=yes comment=\"\" disabled=no
 #
-# {{ t(''OSPF Routing'') }}
+# {{ t(\'OSPF Routing\') }}
 /routing ospf instance set default name=default router-id={{ ospf_routerid }} comment=\"\" disabled=no distribute-default=never \
 redistribute-bgp=as-type-1 redistribute-connected=no redistribute-other-ospf=no redistribute-rip=no redistribute-static=no in-filter=ospf-in out-filter=ospf-out
 #
 :log info \"Unsolclic for {{ dev.id}}-{{ dev.nick }} executed.\"
 /
-',0,'miquelmartos@guifi.net',541,541,1330459031,1333305903,'routerOS4.0.twig');");
+');
 
 
-$items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (25,31,19,1,'# Generat per a:
+$items[] = my_update_sql("INSERT INTO guifi_configuracioUnSolclic (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (25,31,19,1,'%s',0,'miquelmartos@guifi.net',541,541,1331072361,1336814926,NULL);",'# Generat per a:
 # {{ firmware_name }}
 :log info \"Unsolclic for {{ dev.id }}-{{ dev.nick }} going to be executed.\"
 #
@@ -3410,9 +3413,9 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
 # &nbsp;&nbsp;&nbsp;Then execute the script with:
 # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;>&nbsp;/system script run script_name
 # 2.-Fitxer importat:
-# &nbsp;&nbsp;&nbsp;&nbsp;Desa aquesta \"sortida\" a un fitxer, després puja''l al router
-# &nbsp;&nbsp;&nbsp;&nbsp;fent servir FTP amb un nom de l''estil \"script_name.rsc\".
-# &nbsp;&nbsp;&nbsp;&nbsp;(note, l''extensió \".rsc\" es un requisit)
+# &nbsp;&nbsp;&nbsp;&nbsp;Desa aquesta \"sortida\" a un fitxer, després puja\'l al router
+# &nbsp;&nbsp;&nbsp;&nbsp;fent servir FTP amb un nom de l\'estil \"script_name.rsc\".
+# &nbsp;&nbsp;&nbsp;&nbsp;(note, l\'extensió \".rsc\" es un requisit)
 # &nbsp;&nbsp;&nbsp;&nbsp;Executa el fitxer importat amb la comanda:
 # &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;>&nbsp;/import script_name
 # 3.-Telnet copia i enganxar:
@@ -3424,7 +3427,7 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
 # -wlans should be enabled manually, be sure to set the correct antenna (a or b)
 # &nbsp;&nbsp;according in how did you connect the cable to the miniPCI. Keep the
 # &nbsp;&nbsp;power at the minimum possible and check the channel.
-# -The script doesn''t reset the router, you might have to do it manually
+# -The script doesn\'t reset the router, you might have to do it manually
 # -You must have write access to the router
 # -MAC access (winbox, MAC telnet...) method is recommended
 # &nbsp;&nbsp;(the script reconfigures some IP addresses, so communication can be lost)
@@ -3432,7 +3435,7 @@ $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,ena
 # -A Read Only guest account with no password will be created to allow guest access
 # &nbsp;&nbsp;to the router with no danger of damage but able to see the config.
 # -Be sure that all packages are activated.
-# -Don''t run the script from telnet and being connected through an IP connection at
+# -Don\'t run the script from telnet and being connected through an IP connection at
 # &nbsp;&nbsp;the wLan/Lan interface: This interface will be destroyed during the script.
 #
 / system identity set name={{ dev.nick }}
@@ -3481,7 +3484,7 @@ do=[/system logging action remove $i]
 /system logging add action=guifi_remot topics=critical
 /system logging add action=guifi_remot topics=account
 {% endif %}
-{% if dev.mode != ''client'' %}
+{% if dev.mode != \'client\' %}
 # Remove current wLan/Lan bridge if exists
 :foreach i in [/interface bridge find name=wLan/Lan] \
 do={:foreach i in [/interface bridge port find bridge=wLan/Lan] \
@@ -3499,27 +3502,27 @@ add interface=wlan1 bridge=wLan/Lan
 {% if dev.radios %}
 :delay 1
 {# la declarem aqui perque sino no hi puc accedir fora del foreach radio #}
-{% set ospf_routerid = ''ospf_routerid'' %}
+{% set ospf_routerid = \'ospf_routerid\' %}
 {% for radio_id, radio in dev.radios %}
-    {% if radio.mode == ''ap'' %}
-       {% set mode = ''ap-bridge'' %}
+    {% if radio.mode == \'ap\' %}
+       {% set mode = \'ap-bridge\' %}
         {% if radio.channel < 5000 %}
-          {% set band = ''2ghz-b'' %}
+          {% set band = \'2ghz-b\' %}
         {% else %}
-          {% set band = ''5ghz-a'' %}
+          {% set band = \'5ghz-a\' %}
         {% endif %}
-        {% set channel_width = '' channel-width=20mhz'' %}
-    {% elseif (radio.mode == ''client'' or radio.mode == ''clientrouted'') %}
-       {% set mode = ''station'' %}
+        {% set channel_width = \' channel-width=20mhz\' %}
+    {% elseif (radio.mode == \'client\' or radio.mode == \'clientrouted\') %}
+       {% set mode = \'station\' %}
         {% if radio.channel != 5000 %}
-          {% set band = ''2ghz-b'' %}
+          {% set band = \'2ghz-b\' %}
         {% else %}
-          {% set band = ''5ghz-a'' %}
+          {% set band = \'5ghz-a\' %}
           {# aqui falten coses del mirotik-routerOS.inc.php linia 219 #}
           {% set firewall = true %}
         {% endif %}
-        {% if radio.protocol == ''802.11n'' and radio.channel > 5000 %}
-          {% set band = ''5ghz-a'' %}
+        {% if radio.protocol == \'802.11n\' and radio.channel > 5000 %}
+          {% set band = \'5ghz-a\' %}
         {% endif %}
     {% endif %}
 #
@@ -3535,19 +3538,19 @@ frequency-mode=regulatory-domain country=spain antenna-gain={{ radio.antenna_gai
       {% endif %}
 frequency={{ channel }} \
     {% endif %}
-    {% if ((radio.1.band == ''5ghz'' or ''5ghz-a'') and (channel == 5000 )) or
-         ((radio.1.band == ''2ghz-b'' or ''2ghz-b'') and (channel == 0 )) %}
+    {% if ((radio.1.band == \'5ghz\' or \'5ghz-a\') and (channel == 5000 )) or
+         ((radio.1.band == \'2ghz-b\' or \'2ghz-b\') and (channel == 0 )) %}
 dfs-mode=radar-detect \
     {% else %}
 dfs-mode=none \
     {% endif %}
-    {% if radio.antenna_mode =='''' %}
+    {% if radio.antenna_mode ==\'\' %}
 wds-mode=static wds-default-bridge=none wds-default-cost=100 \
     {% else %}
-      {% if radio.antenna_mode != ''Main''%}
-         {% set antenna_mode = ''ant-b'' %}
+      {% if radio.antenna_mode != \'Main\'%}
+         {% set antenna_mode = \'ant-b\' %}
       {% else %}
-         {% set antenna_mode = ''ant-a'' %}
+         {% set antenna_mode = \'ant-a\' %}
       {% endif %}
 antenna-mode={{ antenna_mode }} wds-mode=static wds-default-bridge=none wds-default-cost=100 \
     {% endif %}
@@ -3556,7 +3559,7 @@ wds-cost-range=50-150 wds-ignore-ssid=yes hide-ssid=no
         {% for interface_id, interface in radio.interfaces %}
         :delay 1
         # Type: {{ interface.interface_type }}
-            {% if interface.interface_type == ''wds/p2p'' %}
+            {% if interface.interface_type == \'wds/p2p\' %}
             # Remove all existing wds interfaces
             :foreach i in [/interface wireless wds find master-interface=wlan{{ radio.radiodev_counter+1 }}] \
             do={:foreach n in [/interface wireless wds get $i name] \
@@ -3567,45 +3570,45 @@ wds-cost-range=50-150 wds-ignore-ssid=yes hide-ssid=no
                       {% for ipv4_id,ipv4 in interface.ipv4 %}
                                 {% if ipv4.links %}
                                   {% for link_id, link in ipv4.links %}
-                                    {% if link.flag == ''Working'' or link.flag == ''Testing'' or link.flag == ''Building'' %}
-                                       {% set disabled = ''no'' %}
+                                    {% if link.flag == \'Working\' or link.flag == \'Testing\' or link.flag == \'Building\' %}
+                                       {% set disabled = \'no\' %}
                                     {% else %}
-                                       {% set disabled = ''yes'' %}
+                                       {% set disabled = \'yes\' %}
                                     {% endif %}
-                                    {% set wds_name = ''wds_''. link.interface.ipv4.host_name %}
+                                    {% set wds_name = \'wds_\'. link.interface.ipv4.host_name %}
                                     {% if not link.interface.mac %}
-                                      {% set link_mac = ''FF:FF:FF:FF:FF:FF'' %}
+                                      {% set link_mac = \'FF:FF:FF:FF:FF:FF\' %}
                                     {% else %}
                                       {% set link_mac = link.interface.mac %}
                                     {% endif %}
                                     / interface wireless wds
                                     add name=\"wds_{{ link.interface.ipv4.host_name }}\" master-interface=wlan{{ radio_id+1 }} wds-address={{ link_mac }} disabled={{ disabled }}
                                     / ip address add address={{ ipv4.ipv4 }}/{{ ipv4.maskbits }} network={{ ipv4.netid }} broadcast={{ ipv4.broadcast }} interface=wds_{{ link.interface.ipv4.host_name }} disabled={{ disabled }} comment=\"wds_{{ link.interface.ipv4.host_name }}\"
-                                    {% if link.routing == ''OSPF'' %}
-                                      {{ _self.ospf_interface(''wds_'' ~ link.interface.ipv4.host_name , ipv4.netid , ipv4.maskbits , ospf_name , ospf_zone, ospf_id, ''no'') }}
-                                      {{ _self.bgp_peer(link.device_id, link.interface.ipv4.host_name, link.interface.ipv4.ipv4, ''yes'') }}
+                                    {% if link.routing == \'OSPF\' %}
+                                      {{ _self.ospf_interface(\'wds_\' ~ link.interface.ipv4.host_name , ipv4.netid , ipv4.maskbits , ospf_name , ospf_zone, ospf_id, \'no\') }}
+                                      {{ _self.bgp_peer(link.device_id, link.interface.ipv4.host_name, link.interface.ipv4.ipv4, \'yes\') }}
                                     {% else %}
-                                      {{ _self.ospf_interface(''wds_'' ~ link.interface.ipv4.host_name , ipv4.netid , ipv4.maskbits , ospf_name , ospf_zone, ospf_id, ''yes'') }}
-                                      {{ _self.bgp_peer(link.device_id, link.interface.ipv4.host_name, link.interface.ipv4.ipv4, ''no'') }}
+                                      {{ _self.ospf_interface(\'wds_\' ~ link.interface.ipv4.host_name , ipv4.netid , ipv4.maskbits , ospf_name , ospf_zone, ospf_id, \'yes\') }}
+                                      {{ _self.bgp_peer(link.device_id, link.interface.ipv4.host_name, link.interface.ipv4.ipv4, \'no\') }}
                                     {% endif %}
                                   {% endfor %}
                                 {% endif %}
-                      {% endfor %}{# aqui anava el 3b d''abans #}
+                      {% endfor %}{# aqui anava el 3b d\'abans #}
                     {% endif %}
                 {% else %}
                       {# // wLan, wLan/Lan, Hotspot or client #}
                       {% if interface.ipv4 %}
                          {% for ipv4_id,ipv4 in interface.ipv4 %}
-                            {# aixo a l''original no es ben be aixi #}
-                            {% if interface.interface_type == ''wLan/Lan'' %}
+                            {# aixo a l\'original no es ben be aixi #}
+                            {% if interface.interface_type == \'wLan/Lan\' %}
                               {% set iname = interface.interface_type %}
                               {% set ospf_routerid = ipv4.ipv4 %}
                             {% else  %}
                               {% set radioindex = radio_id+1 %}
-                              {% set iname = ''wlan'' ~ radioindex %}
+                              {% set iname = \'wlan\' ~ radioindex %}
                             {% endif %}
                             /ip address
-                            {% if interface.interface_type == ''Wan''%}
+                            {% if interface.interface_type == \'Wan\'%}
                                 :foreach i in [find interface={{ iname }}] do={remove $i}
                             {% endif  %}
                             :foreach i in [find address=\"{{ ipv4.ipv4 }}/{{ ipv4.maskbits }}\"] do={remove $i}
@@ -3613,13 +3616,13 @@ wds-cost-range=50-150 wds-ignore-ssid=yes hide-ssid=no
                             / routing bgp network
                             :foreach i in [/routing bgp network find network={{ ipv4.netid }}/{{ ipv4.maskbits }}] do={/routing bgp network remove $i;}
                             add network={{ ipv4.netid }}/{{ ipv4.maskbits }} disabled=no
-                            {% if dev.mode != ''client'' %}
+                            {% if dev.mode != \'client\' %}
                                 / routing ospf interface
                                 :foreach i in [/routing ospf interface find interface={{ iname }}] do={/routing ospf interface remove $i;}
                                 add interface={{ iname }}
                                 / routing ospf network
                                 :foreach i in [/routing ospf network find network={{ ipv4.netid }}/{{ ipv4.maskbits }}] do={/routing ospf network remove $i;}
-                                add network={{ ipv4.netid }}/{{ ipv4.maskbits }} area={%if ipv4.ospf_name=='''' %} backbone{% else %}{{ ipv4.ospf_name }}{% endif %} disabled=no
+                                add network={{ ipv4.netid }}/{{ ipv4.maskbits }} area={%if ipv4.ospf_name==\'\' %} backbone{% else %}{{ ipv4.ospf_name }}{% endif %} disabled=no
                             {% else %}
                                 / routing ospf interface
                                 :foreach i in [/routing ospf interface find interface={{ iname }}] do={/routing ospf interface remove $i;}
@@ -3628,19 +3631,19 @@ wds-cost-range=50-150 wds-ignore-ssid=yes hide-ssid=no
                                 :foreach i in [/routing ospf network find network={{ ipv4.netid }}/{{ ipv4.maskbits }}] do={/routing ospf network remove $i;}
                                 add network={{ ipv4.netid }}/{{ ipv4.maskbits }} area={{ ipv4.ospf_name }} disabled=yes
                             {% endif %}
-                            {% if interface.interface_type == ''HotSpot'' %}
+                            {% if interface.interface_type == \'HotSpot\' %}
                                 {{ _self.hotspot_code(radio, hotspot_ssid) }}
                             {% endif %}
                             :delay 1
-                            {% if interface.interface_type != ''HotSpot'' and interface.interface_type != ''Wan'' %}
-                              {% if mode == ''ap-bridge'' %}
+                            {% if interface.interface_type != \'HotSpot\' and interface.interface_type != \'Wan\' %}
+                              {% if mode == \'ap-bridge\' %}
                                 {% set maxip = ip2long(ipv4.netstart) +1  %}
                                 {% if maxip +5 >  ip2long(ipv4.netend) -5 %}
                                   {% set maxip = ip2long(ipv4.netend) %}
-                                  {% set dhcpDisabled = ''yes'' %}
+                                  {% set dhcpDisabled = \'yes\' %}
                                 {% else %}
                                   {% set maxip = maxip +5 %}
-                                  {% set dhcpDisabled = ''no'' %}
+                                  {% set dhcpDisabled = \'no\' %}
                                 {% endif %}
                                 #
                                 # DHCP
@@ -3659,7 +3662,7 @@ wds-cost-range=50-150 wds-ignore-ssid=yes hide-ssid=no
                                       {% set maxip = link.interface.ipv4.ipv4 +1  %}
                                     {% endif %}
                                     {% if not link.interface.mac %}
-                                      {% set rmac = ''ff:ff:ff:ff:ff:ff''  %}
+                                      {% set rmac = \'ff:ff:ff:ff:ff:ff\'  %}
                                     {% else %}
                                       {% set rmac = link.interface.mac  %}
                                     {% endif %}
@@ -3670,7 +3673,7 @@ wds-cost-range=50-150 wds-ignore-ssid=yes hide-ssid=no
                             {% endif %}{# es aqui on poso un # i arreglo un i em carrego un altre!!! #}
                          {% endfor %}
                       {% endif  %}
-            {% endif  %}{# FINAL IF ''wds/p2p#}
+            {% endif  %}{# FINAL IF \'wds/p2p#}
 #
         {% endfor %}
     {% endif  %}
@@ -3678,38 +3681,38 @@ wds-cost-range=50-150 wds-ignore-ssid=yes hide-ssid=no
   {% endfor %} {# end for radio #}
 {% endif %}
 {% if firewall %}
-{{ _self.firewall(link.interface.ipv4.ipv4, ''192.168.1.1'',''/24'', ''192.168.1.0'',''192.168.1.100'',''192.168.1.200'',zone_primary_dns,zone_secondary_dns,''wlan1'') }}
+{{ _self.firewall(link.interface.ipv4.ipv4, \'192.168.1.1\',\'/24\', \'192.168.1.0\',\'192.168.1.100\',\'192.168.1.200\',zone_primary_dns,zone_secondary_dns,\'wlan1\') }}
 {% endif %}
 #
 # Routed device
 #
-# {{ t(''Other cable connections'') }}
+# {{ t(\'Other cable connections\') }}
 {% if dev.interfaces %}
   {% for interface_i, interface in dev.interfaces %}
-    {% if interface.interface_type == ''vlan'' %}
-        {% set iname = ''wLan/Lan'' %}
-    {% elseif interface.interface_type == ''vlan2'' %}
-        {% set iname = ''ether2'' %}
-    {% elseif interface.interface_type == ''vlan3'' %}
-        {% set iname = ''ether3'' %}
-    {% elseif interface.interface_type == ''vlan4'' %}
-        {% set iname = ''wLan/Lan'' %}
-    {% elseif interface.interface_type == ''Wan'' %}
-        {% set iname = ''wLan/Lan'' %}
+    {% if interface.interface_type == \'vlan\' %}
+        {% set iname = \'wLan/Lan\' %}
+    {% elseif interface.interface_type == \'vlan2\' %}
+        {% set iname = \'ether2\' %}
+    {% elseif interface.interface_type == \'vlan3\' %}
+        {% set iname = \'ether3\' %}
+    {% elseif interface.interface_type == \'vlan4\' %}
+        {% set iname = \'wLan/Lan\' %}
+    {% elseif interface.interface_type == \'Wan\' %}
+        {% set iname = \'wLan/Lan\' %}
     {% else %}
         {% set iname = interface.interface_type  %}
     {% endif %}
   {% endfor %}
 {% endif  %}
 #
-# {{ t(''Internal addresses NAT'') }}
+# {{ t(\'Internal addresses NAT\') }}
 :foreach i in [/ip firewall nat find src-address=\"172.16.0.0/12\"] do={/ip firewall nat remove $i;}
 :foreach i in [/ip firewall nat find src-address=\"192.168.0.0/16\"] do={/ip firewall nat remove $i;}
 /ip firewall nat
 add chain=srcnat src-address=\"192.168.0.0/16\" dst-address=!192.168.0.0/16 action=src-nat to-addresses={{ ospf_routerid }} comment=\"\" disabled=no
 add chain=srcnat src-address=\"172.16.0.0/12\" dst-address=!172.16.0.0/12 protocol=!ospf action=src-nat to-addresses={{ ospf_routerid }} comment=\"\" disabled=no
 #
-# {{ t(''BGP Routing'') }}
+# {{ t(\'BGP Routing\') }}
 # BGP & OSPF Filters
 :foreach i in [/routing filter find chain=ospf-in] do={/routing filter remove $i;}
 :foreach i in [/routing filter find chain=ospf-out] do={/routing filter remove $i;}
@@ -3725,14 +3728,14 @@ add action=accept chain=ospf-out comment=\"6. Allow send 10.x routes to OSPF nei
 add action=accept chain=ospf-out comment=\"7. Allow send 172.x routes to OSPF neighbor\" disabled=no invert-match=no prefix=172.16.0.0/12 prefix-length=8-32
 add action=discard chain=ospf-out comment=\"8. Discard send non 10.x and 172.x to OSPF neighbor\" disabled=no invert-match=no
 #
-# {{ t(''BGP instance'') }}
+# {{ t(\'BGP instance\') }}
 / routing bgp instance
 set default name=\"default\" as={{ dev.id }} router-id={{ ospf_routerid }} \
 redistribute-connected=no redistribute-static=no redistribute-rip=no \
 redistribute-ospf=yes redistribute-other-bgp=yes out-filter=ebgp-out \
 client-to-client-reflection=yes comment=\"\" disabled=no
 #
-# {{ t(''OSPF Routing'') }}
+# {{ t(\'OSPF Routing\') }}
 /routing ospf instance set default name=default router-id={{ ospf_routerid }} comment=\"\" disabled=no distribute-default=never \ 
 redistribute-bgp=as-type-1 redistribute-connected=no redistribute-other-ospf=no redistribute-rip=no redistribute-static=no in-filter=ospf-in out-filter=ospf-out
 #
@@ -3817,7 +3820,7 @@ add chain=input action=drop comment=\"Drop anything else\" disabled=no
 /interface wireless
 :foreach i in [find name=hotspot{{ radio.id+1 }}] do={remove $i}
 add name=\"hotspot{{ radio.id+1 }}\" arp=enabled master-interface=wlan{{ radio.id+1 }} ssid=\"guifi.net-{{ hotspot_ssid}}\" disabled=\"no\"
-/ip address'');
+/ip address\');
 :foreach i in [find address=\"192.168.{{ radio.id+100 }}.1/24\"] do={remove $i}
 /ip address add address=192.168.{{ radio.id+100 }}.1/24 interface=hotspot{{ radio.id+1 }} disabled=no
 /ip pool
@@ -3838,7 +3841,7 @@ set default name=\"default\" advertise-url=http://guifi.net/trespassos/
 :foreach i in [find name=hotspot{{ radio.id+1 }}] do={remove $i}
 add name=\"hotspot{{ radio.id+1 }}\" interface=hotspot{{ radio.id+1 }} address-pool=hs-pool-{{ radio.id+100 }} profile=hsprof{{ radio.id+1 }} idle-timeout=5m keepalive-timeout=none addresses-per-mac=2 disabled=no
 # end of HotSpot
-{% endmacro %}',0,'miquelmartos@guifi.net',541,541,1331072361,1336814926,NULL);");
+{% endmacro %}');
   
   
   // creació de la taula de Parametres dels UnSolclics
@@ -4107,33 +4110,4 @@ add name=\"hotspot{{ radio.id+1 }}\" interface=hotspot{{ radio.id+1 }} address-p
   
   return $items;
 }
-
-function guifi_update_904() {
-   $items = array();
-  $items[] = update_sql("CREATE TABLE IF NOT EXISTS `guifi_configuracioUnSolclic` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `mid` int(11) NOT NULL,
-  `fid` int(11) NOT NULL,
-  `enabled` tinyint(1) unsigned zerofill DEFAULT '0',
-  `plantilla` text,
-  `tipologia` tinyint(1) unsigned zerofill NOT NULL DEFAULT '0',
-  `notification` varchar(1024) NOT NULL,
-  `user_created` mediumint(9) NOT NULL,
-  `user_changed` mediumint(9) NOT NULL,
-  `timestamp_created` int(11) NOT NULL,
-  `timestamp_changed` int(11) NOT NULL,
-  `template_file` varchar(45) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='UnSolclic Configurations'
-  ");
-
-
- $items[] = my_update_sql("INSERT INTO guifi_configuracioUnSolclic (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (19,25,13,1,'%s',0,'albertsarle@gmailcom',541,541,0,1336846001,NULL);",'wpasupplicant.status=disabled
-wireless.1.ssid=guifi.net-{{ wireless1ssid }}
-');
- 
-  return $items;
-}
-
-
 ?>
