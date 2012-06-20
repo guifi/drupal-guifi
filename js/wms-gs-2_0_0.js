@@ -99,6 +99,36 @@ var openStreet = new google.maps.ImageMapType({
       alt: "OpenStreetMap"
 });
 
+var mapquestosm = new google.maps.ImageMapType({
+      getTileUrl: function(ll, z) {
+              if (typeof this.counter === "undefined") { this.counter = 0; }
+              var X = ll.x % (1 << z);  // wrap
+              this.counter++;
+              if (this.counter > 4) { this.counter = 1; }
+              return "http://otile" + this.counter + ".mqcdn.com/tiles/1.0.0/osm/" + z + "/" + X + "/" + ll.y + ".jpg";
+      },
+      tileSize: new google.maps.Size(256, 256),
+      isPng: false,
+      maxZoom: 18,
+      name: "MapQuest",
+      alt: "MapQuest-OSM"
+});
+
+var mapquestopenaerial = new google.maps.ImageMapType({
+      getTileUrl: function(ll, z) {
+              if (typeof this.counter === "undefined") { this.counter = 0; }
+              var X = ll.x % (1 << z);  // wrap
+              this.counter++;
+              if (this.counter > 4) { this.counter = 1; }
+              return "http://oatile" + this.counter + ".mqcdn.com/tiles/1.0.0/sat/" + z + "/" + X + "/" + ll.y + ".jpg";
+      },
+      tileSize: new google.maps.Size(256, 256),
+      isPng: false,
+      maxZoom: 11,
+      name: "MQ Open Aerial",
+      alt: "MapQuest Open Aerial"
+});
+
 var copyrightNode;
 
 function initCopyrights() {
@@ -110,6 +140,10 @@ function initCopyrights() {
     copyrightNode.style.fontFamily = 'Arial, sans-serif';
     copyrightNode.style.margin = '0 2px 2px 0';
     copyrightNode.style.whiteSpace = 'nowrap';
+    copyrightNode.style.opacity = 0.50;
+    copyrightNode.style.filter = 'alpha(opacity = ' + 50 + ')';
+    copyrightNode.style.backgroundColor = 'white';
+    copyrightNode.style.padding = '2px 10px';
     copyrightNode.index = 0;
     map.controls[google.maps.ControlPosition.BOTTOM_RIGHT].push(copyrightNode);
     
@@ -118,11 +152,21 @@ function initCopyrights() {
 }
 
 function updateCopyrights() {
-    var notice = '&copy; OpenStreetMap contributors, CC-BY-SA';
-    if (map.getMapTypeId() == "osm") {
-    	copyrightNode.innerHTML = notice;
-    } else {
-    	copyrightNode.innerHTML = "";
+    var mq = 'Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">';
+    var osm = '&copy; OpenStreetMap contributors, CC-BY-SA';
+    switch (map.getMapTypeId()) {
+        case "osm":
+            copyrightNode.innerHTML = osm;
+            break;
+        case "mapquestosm":
+            copyrightNode.innerHTML = mq + '<br />' + osm;
+            break;
+        case "mapquestopenaerial":
+            copyrightNode.innerHTML = mq + '<br />' +
+            'Portions Courtesy NASA/JPL-Caltech and U.S. Depart. of Agriculture, Farm Service Agency';
+            break;
+        default:
+            copyrightNode.innerHTML = '';
     }
 }
 
@@ -360,7 +404,7 @@ function PanelControl(opts) {
                             i.checked = 'checked';
                         }
                         if (input.hasOwnProperty('disabled') && input['disabled']) {
-                            i.disabled = 'disabled';
+                            i.disabled = true;
                         }
                         i.style.verticalAlign = 'bottom';
                         i.style.margin = '1px 1px 1px 5px';
@@ -412,6 +456,7 @@ function PanelControl(opts) {
                         la.htmlFor = i.id;
                         la.style.verticalAlign = 'bottom';
                         la.style.marginLeft = '5px';
+                        if (i.disabled) { la.style.color = '#aaa'; }
                         if (input.hasOwnProperty('tooltip')) {
                             la.title = input.tooltip;
                         }
