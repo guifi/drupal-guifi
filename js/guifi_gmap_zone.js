@@ -20,7 +20,7 @@ function draw_map() {
         zoom: 2,
         mapTypeControl: true,
         mapTypeControlOptions: {
-            mapTypeIds: [ /*"osm",*/
+            mapTypeIds: [ "osm", "mapquestosm", "mapquestopenaerial",
                           google.maps.MapTypeId.ROADMAP,
                           google.maps.MapTypeId.TERRAIN,
                           google.maps.MapTypeId.SATELLITE,
@@ -45,8 +45,11 @@ function draw_map() {
 
     
     // Add the OSM map type
+    map.mapTypes.set('osm', openStreet);
+    map.mapTypes.set('mapquestosm', mapquestosm);
+    map.mapTypes.set('mapquestopenaerial', mapquestopenaerial);
+    initCopyrights();
     //map.mapTypes.set('osm', openStreet);
-    //initCopyrights();
     
     // Add the right panel
     var panelcontrol = new PanelControl({
@@ -54,8 +57,9 @@ function draw_map() {
         fuente: {name: 'Mapas', tooltip: 'Proveedor de los mapas de la capa inferior (terreno, etc)',
                 type: 'radio', list: {
                     google: { name: 'Google', tooltip: 'Google Maps', default: true },
-                    osm: { name: 'OSM', tooltip: 'OpenStreetMap' },
-                    mapquest: { name: 'MapQuest', tooltip: 'Map Quest' }}},
+                    bing: { name: 'Bing', tooltip: 'Bing Maps', disabled: true },
+                    osm: { name: 'OSM', tooltip: 'OpenStreetMap', disabled: true },
+                    mapquest: { name: 'MapQuest', tooltip: 'Map Quest', disabled: true }}},
         capas: {name: 'Capas', tooltip: 'Capas de datos extra',
                 type: 'checkbox', list: {
                     //supernodos: { name: 'Supernodos', tooltip: 'Nodos con más de 1 enlace inalámbrico', default: true},
