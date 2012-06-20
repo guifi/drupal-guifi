@@ -4,6 +4,61 @@
  * Install, update and uninstall functions for the guifi module.
  */
 
+/**
+* Perform an SQL query and return success or failure.
+*
+* @see http://api.drupal.org/api/function/update_sql/6
+*
+* @param $sql
+*   A string containing a complete SQL query.
+* @return
+*   An array containing the keys:
+*      success: a boolean indicating whether the query succeeded
+*      query: the SQL query executed, passed through check_plain()
+*      rows: number of rows effected
+*/
+function my_update_sql($sql) {
+  $args = func_get_args();
+  array_shift($args);
+  $result = db_query($sql, $args);
+  $sql = my_return_query_string($sql, $args);
+  return array('success' => $result !== FALSE, 'query' => check_plain($sql), 'rows' => db_affected_rows());
+}
+
+/**
+* Builds a basic query, returns string.
+*
+* @see http://api.drupal.org/api/function/db_query/6
+*
+* @param $query
+*   A string containing an SQL query.
+* @param ...
+*   A variable number of arguments which are substituted into the query
+*   using printf() syntax. Instead of a variable number of query arguments,
+*   you may also pass a single array containing the query arguments.
+*
+*   Valid %-modifiers are: %s, %d, %f, %b (binary data, do not enclose
+*   in '') and %%.
+*
+*   NOTE: using this syntax will cast NULL and FALSE values to decimal 0,
+*   and TRUE values to decimal 1.
+*
+* @return
+*   String of query that would have been run
+*/
+function my_return_query_string($query) {
+  $args = func_get_args();
+  array_shift($args);
+  //$query = db_prefix_tables($query);
+  if (isset($args[0]) and is_array($args[0])) { // 'All arguments in one array' syntax
+    $args = $args[0];
+  }
+  _db_query_callback($args, TRUE);
+  $query = preg_replace_callback(DB_QUERY_REGEXP, '_db_query_callback', $query);
+  return $query;
+}
+
+
 function guifi_uninstall() {
 
   drupal_uninstall_schema('guifi');
@@ -1637,7 +1692,7 @@ function guifi_update_903() {
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='UnSolclic Configurations'
   ");
   
-$items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (19,25,13,1,'aaa.1.status=disabled
+$items[] = my_update_sql("INSERT INTO guifi_configuracioUnSolclic (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (19,25,13,1,%s,0,'albertsarle@gmailcom',541,541,0,1336846001,NULL);", 'aaa.1.status=disabled
 aaa.status=disabled
 bridge.1.devname=br0
 bridge.1.fd=1
@@ -1763,7 +1818,7 @@ radio.1.acktimeout=45
 radio.1.rx_antenna=2
 radio.1.tx_antenna=2
 radio.1.ext_antenna=disabled
-radio.1.mcastrate=11',0,'albertsarle@gmailcom',541,541,0,1336846001,NULL);");
+radio.1.mcastrate=11');
 
 $items[] = update_sql("INSERT INTO {guifi_configuracioUnSolclic} (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (6,31,16,1,'# Generat per a:
 # {{ firmware_name }}
@@ -4052,4 +4107,33 @@ add name=\"hotspot{{ radio.id+1 }}\" interface=hotspot{{ radio.id+1 }} address-p
   
   return $items;
 }
+
+function guifi_update_904() {
+   $items = array();
+  $items[] = update_sql("CREATE TABLE IF NOT EXISTS `guifi_configuracioUnSolclic` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `mid` int(11) NOT NULL,
+  `fid` int(11) NOT NULL,
+  `enabled` tinyint(1) unsigned zerofill DEFAULT '0',
+  `plantilla` text,
+  `tipologia` tinyint(1) unsigned zerofill NOT NULL DEFAULT '0',
+  `notification` varchar(1024) NOT NULL,
+  `user_created` mediumint(9) NOT NULL,
+  `user_changed` mediumint(9) NOT NULL,
+  `timestamp_created` int(11) NOT NULL,
+  `timestamp_changed` int(11) NOT NULL,
+  `template_file` varchar(45) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='UnSolclic Configurations'
+  ");
+
+
+ $items[] = my_update_sql("INSERT INTO guifi_configuracioUnSolclic (id,mid,fid,enabled,plantilla,tipologia,notification,user_created,user_changed,timestamp_created,timestamp_changed,template_file) VALUES (19,25,13,1,'%s',0,'albertsarle@gmailcom',541,541,0,1336846001,NULL);",'wpasupplicant.status=disabled
+wireless.1.ssid=guifi.net-{{ wireless1ssid }}
+');
+ 
+  return $items;
+}
+
+
 ?>
