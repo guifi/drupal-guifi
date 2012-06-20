@@ -419,6 +419,11 @@ function PanelControl(opts) {
                             la.innerHTML = input.name;
                         }
                         p.appendChild(la);
+                        if (input.hasOwnProperty('extrahtml')) {
+                            var extra = document.createElement('span');
+                            extra.innerHTML = input.extrahtml;
+                            p.appendChild(extra);
+                        }
                         p.appendChild(document.createElement('br'));
                     }
                 }
