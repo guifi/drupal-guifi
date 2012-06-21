@@ -96,7 +96,7 @@ var openStreet = new google.maps.ImageMapType({
       isPng: true,
       maxZoom: 18,
       name: "OSM",
-      alt: "OpenStreetMap"
+      alt: "OpenStreetMap (servidor propio)"
 });
 
 var mapquestosm = new google.maps.ImageMapType({

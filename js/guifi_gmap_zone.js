@@ -50,6 +50,9 @@ function draw_map() {
     map.mapTypes.set('mapquestopenaerial', mapquestopenaerial);
     initCopyrights();
     //map.mapTypes.set('osm', openStreet);
+
+    // directory of Drupal installation
+    var basepath = (typeof Drupal.settings.basePath === "undefined") ? '' : Drupal.settings.basePath;
     
     // Add the right panel
     var panelcontrol = new PanelControl({
@@ -64,10 +67,12 @@ function draw_map() {
                 type: 'checkbox', list: {
                     //supernodos: { name: 'Supernodos', tooltip: 'Nodos con más de 1 enlace inalámbrico', default: true},
                     nodos: { name: 'Nodos', tooltip: /*'Nodos clientes (1 enlace inalámbrico)'*/'Nodos y supernodos', default: true,
-                                        extrahtml: '<img id="img_overlay_nodos" alt="(loading)" title="cargando" src="sites/all/modules/guifi/js/loading.gif" style="vertical-align: middle; margin-left: 10px;" />' },
+                                        extrahtml: '<img id="img_overlay_nodos" alt="(loading)" title="cargando" src="'
+                                        + basepath + 'sites/all/modules/guifi/js/loading.gif" style="vertical-align: middle; margin-left: 10px;" />' },
                     //superenlaces: { name: 'Superenlaces', tooltip: 'Enlaces entre supernodos (troncales)', default: true},
                     enlaces: { name: 'Enlaces', tooltip: /*'Enlaces cliente (de nodo a supernodo)'*/'Enlaces cliente y enlaces troncales', default: true,
-                                        extrahtml: '<img id="img_overlay_enlaces" alt="(loading)" title="cargando" src="sites/all/modules/guifi/js/loading.gif" style="vertical-align: middle; margin-left: 10px;" />'}}}
+                                        extrahtml: '<img id="img_overlay_enlaces" alt="(loading)" title="cargando" src="'
+                                        + basepath + 'sites/all/modules/guifi/js/loading.gif" style="vertical-align: middle; margin-left: 10px;" />'}}}
         },
         extrahtml:'<p style="font-size: 10px;text-align:center;color:#888;">(en construcción)</p>'
     });
