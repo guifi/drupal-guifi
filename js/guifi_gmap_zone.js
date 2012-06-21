@@ -4,134 +4,139 @@ var marker_NE;
 var marker_SW;
 var marker_move ;
 
-var border;
-
 if(Drupal.jsEnabled) {
-	  $(document).ready(function(){
-		xz();
-	    }); 
-	}
+    $(document).ready(function(){
+        draw_map();
+    }); 
+}
 
-function xz() 
-{
-  if (GBrowserIsCompatible()) {
-    map=new GMap2(document.getElementById("map"));
-    if (map.getSize().height >= 300)
-      map.addControl(new GLargeMapControl());
-    else
-      map.addControl(new GSmallMapControl());
-    if (map.getSize().width >= 500) {
-      map.addControl(new GScaleControl()) ;
-      map.addControl(new GOverviewMapControl());
-  	  map.addControl(new GMapTypeControl());
+function draw_map() {
+
+    var divmap = document.getElementById("map");
+    var baseURL = document.getElementById("guifi-wms").value
+
+    opts = {
+        center: new google.maps.LatLng(41.974175, 2.238118),
+        zoom: 2,
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+            mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
+                          google.maps.MapTypeId.TERRAIN,
+                          google.maps.MapTypeId.SATELLITE,
+                          google.maps.MapTypeId.HYBRID ]
+        },
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+        scaleControl: false,
+        streetViewControl: false,
+        zoomControl: true,
+        panControl: true,
+        zoomControlOptions: {
+            style: google.maps.ZoomControlStyle.LARGE
+        },
+
+        mapTypeId: google.maps.MapTypeId.HYBRID
     }
-    map.enableScrollWheelZoom();
+
+    // Add the map to the div
+    map = new google.maps.Map(divmap, opts);
+
+    // Add the OSM map type
+    //map.mapTypes.set('osm', openStreet);
+    //initCopyrights();
+
+    // Guifi control
+    var guifi = new GuifiLayer(map, baseURL);
+    map.overlayMapTypes.insertAt(0, guifi.overlay);
+
+    var guifiControl = new Control("guifi");
+    guifiControl.div.index = 1;
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(guifiControl.div);
+
+    // Setup the click event listeners: simply set the map to Chicago
+    google.maps.event.addDomListener(guifiControl.ui, 'click', function() {
+        if (guifiControl.enabled) {
+            map.overlayMapTypes.removeAt(0);
+            guifiControl.disable();
+        } else {
+            // Add the guifi layer
+            map.overlayMapTypes.insertAt(0, guifi.overlay);
+            guifiControl.enable();
+        }
+    });
+
+    var marcador = new google.maps.Marker();
+
+    var newNE = new google.maps.LatLng(document.getElementById("maxy").value, 
+			                           document.getElementById("maxx").value);
+    var newSW = new google.maps.LatLng(document.getElementById("miny").value, 
+			                           document.getElementById("minx").value); 
+
+    var newBounds = new google.maps.LatLngBounds(newSW, newNE) ;
+
+    marker_NE = new google.maps.Marker({ position: newBounds.getNorthEast() }) ;
+    marker_SW = new google.maps.Marker({ position: newBounds.getSouthWest() }) ;
+    marker_move = new google.maps.Marker( 
+                      new google.maps.LatLng(((marker_SW.getPosition().lat() + marker_NE.getPosition().lat()) / 2),
+		                                      (marker_NE.getPosition().lng() + marker_SW.getPosition().lng()) / 2)) ;
+    marker_move.savePoint = marker_move.getPosition() ;			// Save for later
+
+    var infoWindow = new google.maps.InfoWindow({});
+
+    google.maps.event.addListener(map, "click", function(event) {
+
+        var point = event.latLng;
+
+        if (map.getZoom() <= 15 ) {
+            map.setZoom(map.getZoom()+3);
+        } else {
+
+            marcador.setPosition(point);
+            var basePath = Drupal.settings.basePath;
+
+            infoWindow.setContent(
+                    'Lat : ' + point.lat() + '<br>Lon: ' + point.lng() +
+                    '<br><a href="' + basePath + 'node/add/guifi-node?lon='
+                    + point.lng() + '&lat=' + point.lat() +
+                    '&zone='+document.getElementById("zone_id").value+
+                    '" TARGET=fijo APPEND=blank>Add a new node here</a>');
+            infoWindow.open(map, marcador);    
+        }
+    });
     
-	var layer1 = new GWMSTileLayer(map, new GCopyrightCollection("guifi.net"),1,17);
-    layer1.baseURL=document.getElementById("guifi-wms").value;
-    layer1.layers="Nodes,Links";
-    layer1.mercZoomLevel = 0;
-    layer1.opacity = 1.0;
+    var bounds = new google.maps.LatLngBounds();
 
-    var myMapTypeLayers=[G_SATELLITE_MAP.getTileLayers()[0],layer1];
-    var myCustomMapType = new GMapType(myMapTypeLayers, 
-    		G_NORMAL_MAP.getProjection(), "guifi.net", G_SATELLITE_MAP);
+    // Check for moved center...
+    if ( marker_move.getPosition() != marker_move.savePoint ) {
 
-    map.addMapType(myCustomMapType);	
-	
-    map.setCenter(new GLatLng(20.0, -10.0), 2);
-    map.setMapType(myCustomMapType);
-    
-    initialPosition();
-  }
-}
+        var x = marker_move.getPosition().lat() - marker_move.savePoint.lat() ;
+        var y = marker_move.getPosition().lng() - marker_move.savePoint.lng() ;
+        marker_SW.setPosition( new google.maps.LatLng( marker_SW.getPosition().lat() + x, marker_SW.getPosition().lng() + y) ) ;
+        marker_NE.setPosition( new google.maps.LatLng( marker_NE.getPosition().lat() + x, marker_NE.getPosition().lng() + y) ) ;
+
+    } else	{
+        // Center not moved so move center
+        var x = (marker_SW.getPosition().lat() + marker_NE.getPosition().lat()) / 2 ;
+        var y = (marker_NE.getPosition().lng() + marker_SW.getPosition().lng()) / 2 ;
+        marker_move.setPosition( new google.maps.LatLng(x,y) ) ;
+        map.setCenter(new google.maps.LatLng(x,y));
+    }
+
+    marker_move.savePoint = marker_move.getPosition() ;			// Save for later
+
+    var points = [
+        marker_NE.getPosition(),
+        new google.maps.LatLng(marker_SW.getPosition().lat(), marker_NE.getPosition().lng()),
+        marker_SW.getPosition(),
+        new google.maps.LatLng(marker_NE.getPosition().lat(), marker_SW.getPosition().lng()),
+        marker_NE.getPosition()
+    ];
+
+    var border = new google.maps.Polyline( { path: points, strokeColor: "#66000", strokeOpacity: .4, strokeWeight: 5, map: map });
  
-function initialPosition()
-{
- map.clearOverlays();
-
- var newNE = new GLatLng(document.getElementById("maxy").value, 
-			 document.getElementById("maxx").value);
- var newSW = new GLatLng(document.getElementById("miny").value, 
-			 document.getElementById("minx").value); 
-
- var newBounds = new GLatLngBounds(newSW, newNE) ;
-
- marker_NE = new GMarker(newBounds.getNorthEast()) ;
- marker_SW = new GMarker(newBounds.getSouthWest()) ;
- marker_move = new GMarker( new GLatLng(((marker_SW.getPoint().lat() + marker_NE.getPoint().lat()) / 2),
-		 (marker_NE.getPoint().lng() + marker_SW.getPoint().lng()) / 2)) ;
- marker_move.savePoint = marker_move.getPoint() ;			// Save for later
+    bounds.extend(marker_SW.getPosition());
+    bounds.extend(marker_NE.getPosition());
+    map.fitBounds(bounds);
  
- GEvent.addListener(map, "click", function(marker, point) {
-   if (marker) {
-     null;
-   } else {  
-     map.clearOverlays();    
-     var marcador = new GMarker(point);
-     var basePath = Drupal.settings.basePath;
-
-     if (map.getZoom() > 15) {
-       map.addOverlay(marcador);
-       marcador.openInfoWindowHtml(
-         'Lat : '+point.y+'<br>Lon: '+point.x+
-         '<br><a href="'+basePath+'node/add/guifi-node?lon='
-           +point.x+'&lat='+point.y+
-           '&zone='+document.getElementById("zone_id").value+
-         '" TARGET=fijo APPEND=blank>Add a new node here</a>');
-     } else {
-       map.setCenter(point,map.getZoom()+3);	
-     }
-   }
- }	);
- updatePolyline();
-}
-
-function updatePolyline()
-{
- var bounds = new GLatLngBounds();
-	
- if (border)
- {
-  map.removeOverlay(border);
- }
-
- // Check for moved center...
-
- if ( marker_move.getPoint() != marker_move.savePoint )
- {
-  var x = marker_move.getPoint().lat() - marker_move.savePoint.lat() ;
-  var y = marker_move.getPoint().lng() - marker_move.savePoint.lng() ;
-  marker_SW.setPoint( new GLatLng( marker_SW.getPoint().lat() + x, marker_SW.getPoint().lng() + y) ) ;
-  marker_NE.setPoint( new GLatLng( marker_NE.getPoint().lat() + x, marker_NE.getPoint().lng() + y) ) ;
-
- } else						// Center not moved so move center
- {
-  var x = (marker_SW.getPoint().lat() + marker_NE.getPoint().lat()) / 2 ;
-  var y = (marker_NE.getPoint().lng() + marker_SW.getPoint().lng()) / 2 ;
-  marker_move.setPoint( new GLatLng(x,y) ) ;
- // map.setCenter(new GLatLng(x,y),Math.abs(90/x));
-  
-  map.setCenter(new GLatLng(x,y));
- }
-
- marker_move.savePoint = marker_move.getPoint() ;			// Save for later
-
- var points = [
-      marker_NE.getPoint(),
-      new GLatLng(marker_SW.getPoint().lat(), marker_NE.getPoint().lng()),
-      marker_SW.getPoint(),
-      new GLatLng(marker_NE.getPoint().lat(), marker_SW.getPoint().lng()),
-      marker_NE.getPoint()];
- border = new GPolyline(points, "#66000");
- 
- map.addOverlay(border);
- bounds.extend(marker_SW.getPoint());
- bounds.extend(marker_NE.getPoint());
- map.setZoom(map.getBoundsZoomLevel(bounds)); 
- 
-// map.setCenter(new GLatLng(20.0, -10.0), 2)
-
 }
 
 

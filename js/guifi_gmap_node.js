@@ -1,69 +1,149 @@
 var map = null;
-
-var marker_Node;
+var marcador = null;
 
 if(Drupal.jsEnabled) {
-	  $(document).ready(function(){
-		xz();
-	    }); 
-	}
+    $(document).ready(function(){
+        draw_map();
+    }); 
+}
 
-function xz() 
+function draw_map() 
 {
-  if (GBrowserIsCompatible()) {
-    map=new GMap2(document.getElementById("map"));
-    if (map.getSize().height >= 300)
-      map.addControl(new GLargeMapControl());
-    else
-      map.addControl(new GSmallMapControl());
-    if (map.getSize().width >= 500) {
-      map.addControl(new GScaleControl()) ;
-      map.addControl(new GOverviewMapControl());
-  	  map.addControl(new GMapTypeControl());
+
+    var divmap = document.getElementById("map");
+    var lat = document.getElementById("edit-lat").value;
+    var lon = document.getElementById("edit-lon").value;
+    var baseURL=document.getElementById("edit-guifi-wms").value;
+
+    var node  = new google.maps.LatLng(lat, lon);
+
+    opts = {
+        center: node,
+        zoom: 16,
+        mapTypeControl: true,
+        mapTypeControlOptions: {
+            mapTypeIds: [ google.maps.MapTypeId.ROADMAP,
+                          google.maps.MapTypeId.TERRAIN,
+                          google.maps.MapTypeId.SATELLITE, 
+                          google.maps.MapTypeId.HYBRID ]
+        },
+        mapTypeId: google.maps.MapTypeId.HYBRID,
+        scaleControl: false,
+        streetViewControl: false,
+        zoomControl: true,
+        panControl: true,
+        zoomControlOptions: {
+            style: google.maps.ZoomControlStyle.LARGE
+        },
+
     }
-    map.enableScrollWheelZoom();
-    
-	var layer1 = new GWMSTileLayer(map, new GCopyrightCollection("guifi.net"),1,17);
-    layer1.baseURL=document.getElementById("edit-guifi-wms").value;
-    layer1.layers="Nodes,Links";
-    layer1.mercZoomLevel = 0;
-    layer1.opacity = 1.0;
 
-    var myMapTypeLayers=[G_SATELLITE_MAP.getTileLayers()[0],layer1];
-    var myCustomMapType = new GMapType(myMapTypeLayers, 
-    		G_NORMAL_MAP.getProjection(), "guifi.net", G_SATELLITE_MAP);
+    // Add the map to the div
+    map = new google.maps.Map(divmap, opts);
 
-    map.addMapType(myCustomMapType);	
-	
-    var newNode = new GLatLng(document.getElementById("edit-lat").value, 
-			 document.getElementById("edit-lon").value);
+    // Add the marker
+    marcador = new google.maps.Marker( { position: node, draggable: true, map: map } );
 
-    if (newNode != '(0, 0)') {
-      map.setCenter(newNode, 16);
-    } else {
-    map.setCenter(new GLatLng(41.974175, 2.238118), 2);
+    // Add the autocomplete
+    var search = document.getElementById("mapSearch");
+    var bounds = new google.maps.LatLngBounds(
+                        new google.maps.LatLng(-10.76171875, 34.91003829791827),
+                        new google.maps.LatLng(4.2578125, 43.91632552738952));
+    var autocomplete = new google.maps.places.Autocomplete(search);
+    autocomplete.bindTo('bounds', map);
+
+    google.maps.event.addListener(autocomplete, 'place_changed', function() {
+        var place = autocomplete.getPlace();
+        map.setOptions({ center: place.geometry.location, zoom: 12 });
+        marcador.setPosition(place.geometry.location);
+    });
+
+    $("input#mapSearch").bind("keypress", function(e) {
+        if ( e.keyCode == 13 ) {
+            e.preventDefault();
+            var addr = $(this).val();
+            var geo = new google.maps.Geocoder();
+            geo.geocode( { address: addr }, function(results, status) {
+                if (status == google.maps.GeocoderStatus.OK) {
+                    var result = results[0].geometry.location;
+                    map.setOptions({ center: result, zoom: 12 });
+                    marcador.setPosition(result);
+                }
+            });
+        }
+        return true;
+    });
+
+    //Detect the actual position, if possible
+    if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(function(position) {
+            var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            map.setOptions({ center: latlng, zoom: 10 });
+            marcador.setPosition(latlng);
+          });
     }
-    GEvent.addListener(map, "click", function(marker, point) {
-	     map.clearOverlays();    
-   	     var marcador = new GMarker(point);
 
-   	     if (map.getZoom() > 15) {
-   	       map.addOverlay(marcador);
-   	       document.getElementById("edit-latdeg").value = point.lat();
-   	       document.getElementById("edit-londeg").value = point.lng();
-   	       document.getElementById("edit-latmin").value = "";
-   	       document.getElementById("edit-lonmin").value = "";
-   	       document.getElementById("edit-latseg").value = "";
-   	       document.getElementById("edit-lonseg").value = "";
-   	       
-   	       map.setCenter(point);
-   	     } else {
-   	       map.setCenter(point,map.getZoom()+3);	
-   	     }
+    // Add the OSM map type
+    //map.mapTypes.set('osm', openStreet);
+    //initCopyrights();
+
+    // Guifi control
+    var guifi = new GuifiLayer(map, baseURL);
+    map.overlayMapTypes.insertAt(0, guifi.overlay);
+
+    var guifiControl = new Control("guifi");
+    guifiControl.div.index = 1;
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(guifiControl.div);
+
+    // Setup the click event listeners: simply set the map to Chicago
+    google.maps.event.addDomListener(guifiControl.ui, 'click', function() {
+        if (guifiControl.enabled) {
+            map.overlayMapTypes.removeAt(0);
+            guifiControl.disable();
+        } else {
+            // Add the guifi layer
+            map.overlayMapTypes.insertAt(0, guifi.overlay);
+            guifiControl.enable();
+        }
+    });
+
+    //map.mapTypes.set(guifiMapType.MAPTYPE_ID, guifiMapType.overlay);
+    //map.setMapTypeId(guifiMapType.MAPTYPE_ID);
+
+    if (node.toString() == '(0, 0)') {
+        map.setCenter(new google.maps.LatLng(41.974175, 2.238118));
+        map.setZoom(2);
+    }
+
+    google.maps.event.addListener(map, "click", function(event) {
+        
+   	    marcador.setPosition(event.latLng);
+   	    document.getElementById("edit-latdeg").value = event.latLng.lat();
+   	    document.getElementById("edit-londeg").value = event.latLng.lng();
+   	    document.getElementById("edit-latmin").value = "";
+   	    document.getElementById("edit-lonmin").value = "";
+   	    document.getElementById("edit-latseg").value = "";
+   	    document.getElementById("edit-lonseg").value = "";
+   	    map.setCenter(event.latLng);
+
+   	    if (map.getZoom() <= 15 ) {
+            map.setZoom(map.getZoom()+3);	
+   	    }
+
 	});
 
-    var marcador = new GMarker(newNode);
-    map.addOverlay(marcador);
-    map.setMapType(myCustomMapType);
-  }
+    google.maps.event.addListener(marcador, 'dragend', function(event) {
+   	    document.getElementById("edit-latdeg").value = event.latLng.lat();
+   	    document.getElementById("edit-londeg").value = event.latLng.lng();
+   	    document.getElementById("edit-latmin").value = "";
+   	    document.getElementById("edit-lonmin").value = "";
+   	    document.getElementById("edit-latseg").value = "";
+   	    document.getElementById("edit-lonseg").value = "";
+
+   	    if (map.getZoom() <= 15 ) {
+   	        map.setCenter(event.latLng);
+            map.setZoom(map.getZoom()+3);	
+   	    }
+
+    });
 }

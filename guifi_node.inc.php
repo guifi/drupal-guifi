@@ -292,7 +292,7 @@ function guifi_node_form(&$node, $form_state) {
       '#type' => 'item',
       '#title' => t('Map'),
       '#description' => t('Select the point where the node has to be placed.'),
-      '#suffix' => '<div id="map" style="width: 100%; height: 437px; margin:5px;"></div>',
+      '#suffix' => '<input style="width: 240px;" id="mapSearch" type="text" /><div id="map" style="width: 100%; height: 437px; margin:5px;"></div>',
       '#weight' => 0,
     );
     $form['guifi_wms'] = array(
