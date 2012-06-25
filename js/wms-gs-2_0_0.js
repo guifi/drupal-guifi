@@ -346,7 +346,6 @@ function PanelControl(opts) {
     this.mbutton.style.height = '15px';
     this.mbutton.mbuttontext = document.createElement('span'); //TODO: replace with image
     this.mbutton.mbuttontext.style.lineHeight = '15px';
-    this.mbutton.mbuttontext.style.fontSize = '15px';
     this.mbutton.mbuttontext.style.fontWeight = 'bold';
     this.mbutton.mbuttontext.style.color = '#888';
     this.mbutton.mbuttontext.style.display = 'block';
@@ -356,6 +355,7 @@ function PanelControl(opts) {
     var minstatechanged = function () {
         self.panel.style.display = self.minimized ? 'none' : 'block';
         self.mbutton.mbuttontext.innerHTML = self.minimized ? '+' : '-';
+        self.mbutton.mbuttontext.style.fontSize = self.minimized ? '14px' : '15px';
         self.mbutton.title = self.minimized ? 'Maximiza el panel' : 'Minimiza el panel';
         self.mbutton.style.borderBottomLeftRadius = self.minimized ? '7px' : '3px';
         self.mbutton.style.borderTopLeftRadius = self.minimized ? '7px' : '3px';
