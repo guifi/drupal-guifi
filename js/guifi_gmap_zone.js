@@ -20,7 +20,7 @@ function draw_map() {
         zoom: 2,
         mapTypeControl: true,
         mapTypeControlOptions: {
-            mapTypeIds: [ "osm", "mapquestosm", "mapquestopenaerial",
+            mapTypeIds: [ 
                           google.maps.MapTypeId.ROADMAP,
                           google.maps.MapTypeId.TERRAIN,
                           google.maps.MapTypeId.SATELLITE,
@@ -46,10 +46,12 @@ function draw_map() {
     
     // Add the OSM map type
     map.mapTypes.set('osm', openStreet);
+    map.mapTypes.set('opencyclemap', opencyclemap);
+    map.mapTypes.set('opencyclemaptransport', opencyclemaptransport);
     map.mapTypes.set('mapquestosm', mapquestosm);
     map.mapTypes.set('mapquestopenaerial', mapquestopenaerial);
     initCopyrights();
-    //map.mapTypes.set('osm', openStreet);
+    
 
     // directory of Drupal installation
     var basepath = (typeof Drupal.settings.basePath === "undefined") ? '' : Drupal.settings.basePath;
@@ -57,12 +59,13 @@ function draw_map() {
     // Add the right panel
     var panelcontrol = new PanelControl({
         forms:{
-        fuente: {name: 'Mapas', tooltip: 'Proveedor de los mapas de la capa inferior (terreno, etc)',
+        fuente: {name: 'Proveedores', tooltip: 'Proveedor de los mapas de la capa inferior (terreno, etc)',
                 type: 'radio', list: {
                     google: { name: 'Google', tooltip: 'Google Maps', default: true },
-                    bing: { name: 'Bing', tooltip: 'Bing Maps', disabled: true },
-                    osm: { name: 'OSM', tooltip: 'OpenStreetMap', disabled: true },
-                    mapquest: { name: 'MapQuest', tooltip: 'Map Quest', disabled: true }}},
+                    osm: { name: 'OSM', tooltip: 'OpenStreetMap' },
+                    mapquest: { name: 'MapQuest', tooltip: 'Map Quest' },
+                    demo: { name: 'Demo de menús', tooltip: 'Demostración de menús' }
+                }},
         capas: {name: 'Capas', tooltip: 'Capas de datos extra',
                 type: 'checkbox', list: {
                     //supernodos: { name: 'Supernodos', tooltip: 'Nodos con más de 1 enlace inalámbrico', default: true},
@@ -149,6 +152,221 @@ function draw_map() {
         e.style.display='none';
     });
 
+    /* ---------------------------------------------------------------  */
+    //
+    // Build our custom menus for each provider
+    //
+
+    // demo menu
+    var layerswitcher_demo = new LayerSwitcher({
+        "menu": {
+            "name": "Mapas",
+            "title": "Pulse aquí para seleccionar mapas alternativos",
+            "type": "menulist",
+            "list": [
+                { "name": "Mapa", "title": "Muestra el callejero", "type": "menu",
+                "list": [
+                    { "name": "Ejemplo1", "title": "Texto explicativo (opcional)", "type": "radiolist", "list": [
+                        { "name": "opción 1", "title": "o1", "type": "radio", "selected": "true" },
+                        { "name": "opción 2", "title": "o2", "type": "radio" },
+                        { "type": "extrahtml", "extrahtml": "<span style='font-size: 10px;'>(demostración)</span>" }
+                    ] },
+                    { "name": "Ejemplo2", "type": "radiolist", "list": [
+                        { "name": "opción 1", "title": "o1", "type": "radio", "selected": "true" },
+                        { "name": "opción 2", "title": "o2", "type": "radio" }
+                    ] },
+                    { "name": "Ejemplo3", "title": "Texto explicativo (opcional)", "type": "checklist", "list": [
+                        { "name": "check1", "type": "check", "selected": "true" },
+                        { "name": "check2", "type": "check", "selected": "false", "list": [
+                            { "name": "sub1", "type": "check", "selected": "true" },
+                            { "name": "sub2", "type": "check", "selected": "true" }
+                        ] },
+                        { "name": "check3", "type": "check", "selected": "false" },
+                        { "name": "check4", "type": "check" }
+                    ] },
+                    { "name": "Ejemplo4", "type": "checklist", "list": [
+                        { "name": "check1", "type": "check", "selected": "true" },
+                        { "name": "check2", "type": "check", "selected": "true" }                        
+                    ] }
+                ]},
+                { "name": "Satélite", "title": "Muestra las imágenes de satélite", "type": "menu", "selected": "true",
+                "list": [
+                    { "name": "Ejemplo1", "title": "Texto explicativo (opcional)", "type": "radiolist", "list": [
+                        { "name": "opción 1", "title": "o1", "type": "radio", "selected": "true" },
+                        { "name": "opción 2", "title": "o2", "type": "radio" },
+                        { "type": "extrahtml", "extrahtml": "<span style='font-size: 10px;'>(demostración)</span>" }
+                    ] },
+                    { "name": "Ejemplo2", "type": "radiolist", "list": [
+                        { "name": "opción 1", "title": "o1", "type": "radio", "selected": "true" },
+                        { "name": "opción 2", "title": "o2", "type": "radio" }
+                    ] },
+                    { "name": "Ejemplo3", "title": "Texto explicativo (opcional)", "type": "checklist", "list": [
+                        { "name": "check1", "type": "check", "selected": "true" },
+                        { "name": "check2", "type": "check", "selected": "false", "list": [
+                            { "name": "sub1", "type": "check", "selected": "true" },
+                            { "name": "sub2", "type": "check", "selected": "true" }
+                        ] },
+                        { "name": "check3", "type": "check", "selected": "false" },
+                        { "name": "check4", "type": "check" }
+                    ] },
+                    { "name": "Ejemplo4", "type": "checklist", "list": [
+                        { "name": "check1", "type": "check", "selected": "true" },
+                        { "name": "check2", "type": "check", "selected": "true" }
+                    ] }
+                ]},
+                { "name": "Ejemplo (púlsame)", "title": "Muestra de un posible menú", "type": "menu", "list": [
+                    { "name": "Mapas base", "title": "Mapas que salen al fondo del todo", "type": "radiolist", "list" : [
+                        { "name": "Fotografía aérea", "title": "Fotos desde el aire (avión, satélite)", "type": "radio", "selected": "true" },
+                        { "name": "Mapa básico", "title": "Mapa dibujado", "type": "radio" }
+                    ]},
+                    { "name": "Capas superpuestas", "title": "Capas con datos geográficas superpuestas a la capa base", "type": "checklist", "list" : [
+                        { "name": "Etiquetas", "title": "Nombres de pueblos, etc", "type": "check", "selected": "true" },
+                        { "name": "Puntos de interés", "title": "Elementos puntuales (antenas de móviles, postes de alta tensión, etc)", "type": "check", "list": [
+                            { "name": "Antenas de telefonía", "title": "Antenas de móviles", "type": "check", "selected": "true" },
+                            { "name": "Postes eléctricos", "title": "Postes de tendido eléctrico", "type": "check", "selected": "true", "list": [
+                                { "name": "alta tensión", "title": "Postes de alta tensión", "type": "check", "selected": "true" },
+                                { "name": "baja tensión", "title": "Postes de baja tensión", "type": "check" }
+                            ] },
+                            { "name": "Torres", "title": "Torres o edificios especialmente altos", "type": "check", "selected": "true" }
+                        ] }
+                    ]},
+                    { "name": "Otros", "title": "Otras capas", "type": "checklist", "list": [
+                        { "name": "varios", "title": "La mayoría de elementos son opcionales y configurables", "type": "check", "selected": "true" },
+                        { "type": "extrahtml", "extrahtml": "<span style='font-size: 10px;'>(se puede añadir HTML extra como un elemento más)</span>" }
+                    ]}
+                ]},
+                { "name": "Etc", "title": "Se pueden tener tantos menús como se quieran", "type": "menu", "list": [
+                    { "name": "etc", "title": "Opción de ejemplo", "type": "check" }
+                ]}
+            ]}
+    });
+    layerswitcher_demo.view.toggle(false);
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(layerswitcher_demo.div);
+
+
+    // OSM menu
+    layerswitcher_osm = new LayerSwitcher({
+        "menu": {
+            "name": "Mapas",
+            "title": "Pulse aquí para seleccionar mapas alternativos",
+            "type": "menulist",
+            "list": [
+                { "name": "Mapa", "title": "Muestra el callejero", "type": "menu", "selected": "true", 
+                "list": [
+                    { "name": "Capa base", "title": "Mapa que se verá al fondo del todo", "type": "radiolist", "list": [
+                        { "name": "OpenStreetMap", "title": "Mapa casero elaborado con datos de OpenStreetMap", "type": "radio", "selected": "true" },
+                        { "name": "OpenCycleMap", "title": "Mapa ciclista (incluye curvas de nivel)", "type": "radio" },
+                        { "name": "OCM transport", "title": "OpenCycleMap con líneas de transporte destacadas", "type": "radio" }
+                    ] }
+                ]},
+                { "name": "Satélite", "title": "Muestra las imágenes de satélite", "type": "menu",
+                "list": [
+                    { "name": "Capa base", "title": "Imagen que se verá al fondo del todo", "type": "radiolist", "list": [
+                        { "name": "OpenAerialMap", "title": "Open Aerial Map (fotos sacadas de la NASA, de licencia libre, pero poca resolución)", "type": "radio", "selected": "true" },
+                        { "name": "PNOA (máx.res.)", "title": "Fotografías libres de la superficie española, máxima resolución", "type": "radio", "enabled": "false" },
+                        { "name": "PNOA (más recientes)", "title": "Fotografías libres de la superficie española, las más recientes disponibles", "type": "radio", "enabled": "false" }
+                    ] },
+                    { "name": "Etiquetas", "title": "Nombres de pueblos, etc", "type": "checklist", "list": [
+                        { "name": "Nombres de ciudades", "title": "Etiquetas con los nombres de las ciudades principales", "type": "check", "selected": "true", "enabled": "false" },
+                        { "name": "Carreteras", "title": "Principales carreteras", "type": "check", "selected": "true", "enabled": "false" }
+                    ] }                    
+                ]}
+            ]}
+    });
+    layerswitcher_osm.view.toggle(false);
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(layerswitcher_osm.div);
+
+    // MapQuest menu
+    layerswitcher_mapquest = new LayerSwitcher({
+        "menu": {
+            "name": "Mapas",
+            "title": "Pulse aquí para seleccionar mapas alternativos",
+            "type": "menulist",
+            "list": [
+                { "name": "Mapa", "title": "Muestra el callejero", "type": "menu" },
+                { "name": "Satélite", "title": "Muestra las imágenes de satélite", "type": "menu", "selected": "true" }
+            ]}
+    });
+    layerswitcher_mapquest.view.toggle(false);
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(layerswitcher_mapquest.div);
+
+    // Tie the events on the right panel to actions on the layerswitcher control
+    google.maps.event.addDomListener(panelcontrol.inputs.google, 'click', function () {
+        layerswitcher_demo.view.toggle(false);    // disable the controls that are not google
+        layerswitcher_osm.view.toggle(false);
+        layerswitcher_mapquest.view.toggle(false);
+        map.setOptions({mapTypeControl: true});   // enable google layer control
+        map.setMapTypeId(opts.mapTypeId);         // switch to the default layer
+        google.maps.event.trigger(map, 'resize'); // trigger redraw/reflow
+    });
+    google.maps.event.addDomListener(panelcontrol.inputs.demo, 'click', function () {
+        map.setOptions({mapTypeControl: false});
+        layerswitcher_osm.view.toggle(false);
+        layerswitcher_mapquest.view.toggle(false);
+        layerswitcher_demo.view.toggle(true);
+        layerswitcher_demo.model.notifySelections(true);
+        google.maps.event.trigger(map, 'resize');
+    });
+    google.maps.event.addDomListener(panelcontrol.inputs.osm, 'click', function () {
+        map.setOptions({mapTypeControl: false});
+        layerswitcher_demo.view.toggle(false);
+        layerswitcher_mapquest.view.toggle(false);
+        layerswitcher_osm.view.toggle(true);
+        layerswitcher_osm.model.notifySelections(true);
+        google.maps.event.trigger(map, 'resize');
+    });
+    google.maps.event.addDomListener(panelcontrol.inputs.mapquest, 'click', function () {
+        map.setOptions({mapTypeControl: false});
+        layerswitcher_demo.view.toggle(false);
+        layerswitcher_osm.view.toggle(false);
+        layerswitcher_mapquest.view.toggle(true);
+        layerswitcher_mapquest.model.notifySelections(true);
+        google.maps.event.trigger(map, 'resize');
+    });
+
+    // OSM layer switcher: if a subelement of "Mapa" is selected, switch to that layer
+    layerswitcher_osm.model.list[0].list[0].onChildSelected.attach( function (sender, args) {
+        if (args.state) {
+            switch (args.who.name) {
+            case "OpenStreetMap":
+                map.setMapTypeId("osm");
+                break;
+            case "OpenCycleMap":
+                map.setMapTypeId("opencyclemap");
+                break;
+            case "OCM transport":
+                map.setMapTypeId("opencyclemaptransport");
+                break;
+            }
+        }
+    });
+    // OSM layer switcher: if a subelement of "Satélite" is selected, switch to that layer
+    layerswitcher_osm.model.list[1].list[0].onChildSelected.attach( function (sender, args) {
+        if (args.state) {
+            switch (args.who.name) {
+            case "OpenAerialMap":
+                map.setMapTypeId("mapquestopenaerial");
+                break;
+            }
+        }
+    });
+    layerswitcher_osm.model.list[0].onSelected.attach( function (sender, args) {
+        sender.notifyChildrenSelections(true);
+    });
+    layerswitcher_osm.model.list[1].onSelected.attach( function (sender, args) {
+        sender.notifyChildrenSelections(true);
+    });
+    
+    layerswitcher_mapquest.model.list[0].onSelected.attach( function (sender, args) {
+        if (args.state) {
+            map.setMapTypeId("mapquestosm");
+        }
+    });
+    layerswitcher_mapquest.model.list[1].onSelected.attach( function (sender, args) {
+        if (args.state) {
+            map.setMapTypeId("mapquestopenaerial");
+        }
+    });
     
     /*var guifiControl = new Control("guifi");
     guifiControl.div.index = 1;
