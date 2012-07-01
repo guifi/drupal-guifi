@@ -695,8 +695,8 @@ function guifi_node_distances_map($node) {
   if (guifi_gmap_key()) {
     drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_dist.js','module');
 
-    $rows[] = array(array('data' => t('Click on the map to get a new path profile to check the Line Of Sight<br />Click on the path profile to see the point on the map'),'align' => 'center'));
-    $rows[] = array(array('data' => '<a href="javascript:;" onclick="profileclick(event)"><img id="profile" src="'.drupal_get_path('module', 'guifi').'/js/marker_start.png" /></a>','align' => "center"));
+    $rows[] = array(array('data' => t('Click on the map to get a new path profile ( Thanks to <a href="http://www.heywhatsthat.com">HeyWhatsThat</a> ) to check the Line Of Sight<br />Click on the path profile to see the point on the map'),'align' => 'center'));
+    $rows[] = array(array('data' => 'Profile graph and Countour Layer provided by: <a href="http://www.heywhatsthat.com">HeyWhatsThat</a> Copyright 2012 Michael Kosowsky. <b>All rights reserved</b><br>Visit <a href="http://wisp.heywhatsthat.com">HeyWhatsThat WISP</a> for tools for planning wireless networks.<br><a href="javascript:;" onclick="profileclick(event)"><img id="profile" src="'.drupal_get_path('module', 'guifi').'/js/marker_start.png" /></a>','align' => "center"));
     $rows[] = array('<div id="map" style="width: 100%; height: 600px; margin:5px;"></div>');
     $rows[] = array(array('data' => '<div style="float:left;">'.t('Distance:').'&nbsp;</div>'.'<div id="tdistance" style="float:left;">0</div>'.'<div style="float:left;">&nbsp;Km.&nbsp;&nbsp;&nbsp;&nbsp;'.t('Azimuth:').'&nbsp;</div>'.'<div id="tazimut" style="float:left;">0</div>&nbsp;'.t('degrees')));
     $output = theme('table', NULL,$rows);
@@ -889,7 +889,9 @@ function guifi_node_distances_list($filters,$node) {
   $form['z'][-1]['h_heights'] = array(
     '#type'=> 'item',
     '#title'=> t('Heights image'),
-    '#description'=> t('Click over the image to view in large format'),
+    '#description'=> t('Click over the image to view in large format<br>
+      Visit <a href="http://wisp.heywhatsthat.com">HeyWhatsThat WISP</a> for tools
+      for planning wireless networks.<br><a href="http://www.heywhatsthat.com">HeyWhatsThat</a>. Copyright 2012 Michael Kosowsky. <b>All rights reserved</b>'),
     '#prefix' => '<th>',
     '#suffix' => '</th></tr>',
     '#weight' => $fw++,
@@ -1402,16 +1404,6 @@ function theme_guifi_node_links_by_type($id = 0, $ltype = '%') {
 //        '</p>';
   return theme('box',$titlebox,$output);
 
-}
-
-function guifi_hwt_query($lat,$lon,$elev) {
-  $url = 'http://www.heywhatsthat.com/bin/query.cgi?lat='.$lat.'&lon='.$lon.'&elev='.$elev.
-  '&elev_is_absolute=0&name=tmp&public=0&return_data=1';
-  $fd = fopen($url, "r");
-  echo fread($fd, 8);
-  fclose($fd);
-
-  return;
 }
 
 function guifi_hwt_list($id) {
