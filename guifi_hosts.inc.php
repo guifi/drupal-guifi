@@ -8,7 +8,7 @@ function guifi_host_form($edit,$form_weight) {
   guifi_log(GUIFILOG_TRACE,'function guifi_host_form()',$edit);
 
   $collapse = FALSE;
-  
+
   $msg = (count($edit['hosts'])) ?
     format_plural(count($edit['hosts']),'1 host','@count hosts') :
     t('No hosts');
@@ -34,13 +34,13 @@ function guifi_host_form($edit,$form_weight) {
   $form['r']['hosts'] = array('#tree' => TRUE);
 
   $rc = 0;
-  
+
   if (!empty($edit['hosts']))
     foreach ($edit['hosts'] as $key => $host) {
       $form['r']['hosts'][$key] = guifi_host_host_form($host,$key,$form_weight);
       $form['r']['hosts'][$key]['aliases'] = array(
         '#type' => 'fieldset',
-        '#title' => t('Aliases'),
+        '#title' => t('Aliases (CNAME)'),
         '#collapsible' => TRUE,
         '#collapsed' => TRUE,
         '#description' => t('Host aliases. Save or press "Preview" to get more entries'),
@@ -173,7 +173,7 @@ function guifi_host_form($edit,$form_weight) {
     '#submit' => array(guifi_host_add_host_submit),
     '#weight' => $form_weight++,
   );
-  
+
   return $form;
 }
 
@@ -208,7 +208,7 @@ function guifi_host_host_form($host, $key, &$form_weight = -200) {
      if (($host['host'] == 'ns1' ) AND ($host['counter'] == '0')) {
         $access = FALSE;
      } else {
-         $access = TRUE;
+        $access = TRUE;
      }
 
     $f[] = array(
@@ -219,14 +219,14 @@ function guifi_host_host_form($host, $key, &$form_weight = -200) {
       '#default_value' => $host['host'],
       '#weight' => $form_weight++,
     );
-              
     $f[] = array(
       '#type' => 'textfield',
       '#title' => t("IPv4 Address"),
       '#parents' => array('hosts',$key,'ipv4'),
       '#default_value' => $host['ipv4'],
       '#element_validate' => array('guifi_ipv4_validate'),
-      '#description' => t('Leave it blank if you want to use an alias to an external domain.<br /> ex: hostname is an alias of hostname.dyndns.org.'),
+      '#description' => t('Leave it blank if you want to use an alias (CNAME ) to an external domain.<br /> ex: hostname is an alias of hostname.dyndns.org.').
+                        t('<br>This address is usually the same IP as the domain NameServer.'),
       '#weight' => $form_weight++,
     );
     $f[] = array(
@@ -235,10 +235,11 @@ function guifi_host_host_form($host, $key, &$form_weight = -200) {
       '#parents' => array('hosts',$key,'ipv6'),
       '#default_value' => $host['ipv6'],
       '#element_validate' => array('guifi_ipv6_validate'),
-      '#description' => t('Leave it blank if you want to use an alias to an external domain.<br /> ex: hostname is an alias of hostname.dyndns.org.'),
+      '#description' => t('Leave it blank if you want to use an alias (CNAME ) to an external domain.<br /> ex: hostname is an alias of hostname.dyndns.org.').
+                        t('<br>This address is usually the same IP as the domain NameServer.'),
       '#weight' => $form_weight++,
     );
-      
+
     if ($host['deleted']) {
       $f['deletedMsg'] = array(
         '#type' => 'item',
@@ -267,14 +268,14 @@ function guifi_ipv4_validate($element,&$form_state) {
 
     if ($form_state['clicked_button']['#value'] == t('Reset'))
     return;
-    
+
     if ($element['#value']) {
-    $value = $element['#value'];
+      $value = $element['#value'];
       if(filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
         return $element;
-        } else {
-            form_error($element, t('Invalid %ipv4 address',array('%ipv4' => $value)));
-        }
+      } else {
+        form_error($element, t('Invalid %ipv4 address',array('%ipv4' => $value)));
+      }
     }
 }
 
@@ -283,7 +284,7 @@ function guifi_ipv6_validate($element,&$form_state) {
 
     if ($form_state['clicked_button']['#value'] == t('Reset'))
     return;
-    
+
     if ($element['#value']) {
     $value = $element['#value'];
       if(filter_var($value, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
@@ -344,14 +345,14 @@ function guifi_hosts_print_data($id) {
   $querydom = db_query("
     SELECT *
     FROM {guifi_dns_domains}
-    WHERE id = %d", 
+    WHERE id = %d",
     $id
   );
   $domain = db_fetch_object($querydom);
   $queryhosts = db_query("
      SELECT *
      FROM {guifi_dns_hosts}
-     WHERE id = '%d'", 
+     WHERE id = '%d'",
      $domain->id
    );
 
@@ -389,7 +390,7 @@ function guifi_hosts_print_data($id) {
         $priority
         );
       }
-    if ($rows) 
+    if ($rows)
       return array_merge($rows);
 }
 

@@ -52,6 +52,13 @@ function guifi_schema() {
          'timestamp_created' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
          'timestamp_changed' => array('type' => 'int', 'not null' => FALSE)),
     'primary key' => array('id'),
+    'indexes' => array(
+        'lat_index' => array('lat'),
+        'lon_index' => array('lon'),
+        'zcs_index' => array('zone_id', 'timestamp_created', 'status_flag'),
+        'year_index' => array('timestamp_created'),
+        'status_index' => array('status_flag'),
+    ),
   );
 
   $schema['guifi_networks'] = array(
@@ -107,7 +114,9 @@ function guifi_schema() {
          'timestamp_changed' => array('type' => 'int', 'not null' => TRUE, 'default' => 0)),
     'primary key' => array('id'),
     'indexes' => array(
-         'name' => array(array('title', 10))),
+         'name' => array(array('title', 10)),
+         'master_index' => array('master'),
+    ),
   );
 
   $schema['guifi_devices'] = array(
@@ -136,6 +145,9 @@ function guifi_schema() {
     'primary key' => array('id'),
     'unique keys' => array(
          'nick' => array('nick')),
+    'indexes' => array(
+        'nid_index' => array('nid'),
+    ),
   );
 
   $schema['guifi_links'] = array(
@@ -151,7 +163,9 @@ function guifi_schema() {
          'flag' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => 'Planned')),
     'primary key' => array('device_id', 'id'),
     'indexes' => array(
-         'id' => array('id')),
+         'id' => array('id'),
+         'device_index' => array('device_id'),
+    ),
   );
 
   $schema['guifi_interfaces'] = array(
@@ -221,6 +235,9 @@ function guifi_schema() {
          'timestamp_created' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
          'timestamp_changed' => array('type' => 'int', 'not null' => FALSE)),
     'primary key' => array('id'),
+    'indexes' => array(
+        'zone_index' => array('zone_id'),
+    ),
   );
 
   $schema['guifi_users'] = array(
@@ -1343,6 +1360,20 @@ function guifi_update_902() {
    $items[] = update_sql("UPDATE {guifi_devices} SET extra = REPLACE( extra,'8:\"model_id\";s:2:\"14\"', '8:\"model_id\";s:1:\"3\"')");
    $items[] = update_sql("UPDATE {guifi_devices} SET extra = REPLACE( extra,'8:\"model_id\";s:2:\"99\"', '8:\"model_id\";s:1:\"3\"')");
   return $items;
+}
+
+function guifi_update_910() {
+   $items = array();
+   $items[] = update_sql("ALTER TABLE guifi_location ADD INDEX lat_index    USING BTREE (lat);");
+   $items[] = update_sql("ALTER TABLE guifi_location ADD INDEX lon_index    USING BTREE (lon);");
+   $items[] = update_sql("ALTER TABLE guifi_location ADD INDEX zcs_index    USING BTREE (zone_id, timestamp_created, status_flag);");
+   $items[] = update_sql("ALTER TABLE guifi_location ADD INDEX year_index   USING BTREE (timestamp_created);");
+   $items[] = update_sql("ALTER TABLE guifi_location ADD INDEX status_index USING BTREE (status_flag);");
+   $items[] = update_sql("ALTER TABLE guifi_devices  ADD INDEX nid_index    USING BTREE (nid);");
+   $items[] = update_sql("ALTER TABLE guifi_links    ADD INDEX device_index USING BTREE (device_id);");
+   $items[] = update_sql("ALTER TABLE guifi_services ADD INDEX zone_index   USING BTREE (zone_id);");
+   $items[] = update_sql("ALTER TABLE guifi_zone     ADD INDEX master_index USING BTREE (master);");
+   return $items;
 }
 
 ?>
