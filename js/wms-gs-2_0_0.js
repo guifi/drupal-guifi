@@ -167,6 +167,25 @@ var opencyclemaptransport = new google.maps.ImageMapType({
       alt: "Open Cycle Map Transport (experimental)"
 });
 
+var opencyclemaplandscape = new google.maps.ImageMapType({
+      getTileUrl: function(ll, z) {
+              var X, chars;
+
+              chars = "abcdefghijklmnopqrstuvwxyz"; // only abc needed in this case
+              if (typeof this.counter === "undefined") { this.counter = 0; }
+              X = ll.x % (1 << z);  // wrap
+              this.counter++;
+              if (this.counter > 3) { this.counter = 1; }
+
+              return "http://" + chars.charAt(this.counter - 1) + ".tile3.opencyclemap.org/landscape/" + z + "/" + X + "/" + ll.y + ".png";
+      },
+      tileSize: new google.maps.Size(256, 256),
+      isPng: true,
+      maxZoom: 18,
+      name: "OpenCycleMap Landscape",
+      alt: "Open Cycle Map Landscape (experimental)"
+});
+
 var copyrightNode;
 
 function initCopyrights() {
@@ -192,6 +211,7 @@ function initCopyrights() {
 function updateCopyrights() {
     var mq = 'Tiles Courtesy of <a href="http://www.mapquest.com/" target="_blank">MapQuest</a> <img src="http://developer.mapquest.com/content/osm/mq_logo.png">';
     var osm = '&copy; OpenStreetMap contributors, CC-BY-SA';
+    var ocm = 'Tiles Courtesy of <a href="http://www.opencyclemap.org" target="_blank">OpenCycleMap</a>';
     switch (map.getMapTypeId()) {
         case "osm":
             copyrightNode.innerHTML = osm;
@@ -202,6 +222,15 @@ function updateCopyrights() {
         case "mapquestopenaerial":
             copyrightNode.innerHTML = mq + '<br />' +
             'Portions Courtesy NASA/JPL-Caltech and U.S. Depart. of Agriculture, Farm Service Agency';
+            break;
+        case "opencyclemap":
+            copyrightNode.innerHTML = ocm + '<br />' + osm;
+            break;
+        case "opencyclemaptransport":
+            copyrightNode.innerHTML = ocm + '<br />' + osm;
+            break;
+        case "opencyclemaplandscape":
+            copyrightNode.innerHTML = ocm + '<br />' + osm;
             break;
         default:
             copyrightNode.innerHTML = '';

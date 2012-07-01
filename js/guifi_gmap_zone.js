@@ -48,6 +48,7 @@ function draw_map() {
     map.mapTypes.set('osm', openStreet);
     map.mapTypes.set('opencyclemap', opencyclemap);
     map.mapTypes.set('opencyclemaptransport', opencyclemaptransport);
+    map.mapTypes.set('opencyclemaplandscape', opencyclemaplandscape);
     map.mapTypes.set('mapquestosm', mapquestosm);
     map.mapTypes.set('mapquestopenaerial', mapquestopenaerial);
     initCopyrights();
@@ -256,7 +257,8 @@ function draw_map() {
                     { "name": "Capa base", "title": "Mapa que se verá al fondo del todo", "type": "radiolist", "list": [
                         { "name": "OpenStreetMap", "title": "Mapa casero elaborado con datos de OpenStreetMap", "type": "radio", "selected": "true" },
                         { "name": "OpenCycleMap", "title": "Mapa ciclista (incluye curvas de nivel)", "type": "radio" },
-                        { "name": "OCM transport", "title": "OpenCycleMap con líneas de transporte destacadas", "type": "radio" }
+                        { "name": "OCM Transport", "title": "OpenCycleMap con líneas de transporte destacadas", "type": "radio" },
+                        { "name": "OCM Landscape", "title": "OpenCycleMap optimizado para naturaleza (relieve, curvas de nivel, etc)", "type": "radio" }
                     ] }
                 ]},
                 { "name": "Satélite", "title": "Muestra las imágenes de satélite", "type": "menu",
@@ -334,8 +336,11 @@ function draw_map() {
             case "OpenCycleMap":
                 map.setMapTypeId("opencyclemap");
                 break;
-            case "OCM transport":
+            case "OCM Transport":
                 map.setMapTypeId("opencyclemaptransport");
+                break;
+            case "OCM Landscape":
+                map.setMapTypeId("opencyclemaplandscape");
                 break;
             }
         }
