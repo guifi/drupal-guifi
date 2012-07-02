@@ -165,6 +165,7 @@ function guifi_schema() {
     'indexes' => array(
          'id' => array('id'),
          'device_index' => array('device_id'),
+         'nid_index' => array('nid'),
     ),
   );
 
@@ -1374,6 +1375,11 @@ function guifi_update_910() {
    $items[] = update_sql("ALTER TABLE guifi_services ADD INDEX zone_index   USING BTREE (zone_id);");
    $items[] = update_sql("ALTER TABLE guifi_zone     ADD INDEX master_index USING BTREE (master);");
    return $items;
+}
+
+function guifi_update_911() {
+   $items = array();
+   $items[] = update_sql("ALTER TABLE guifi_links ADD INDEX nid_index USING BTREE (nid);"); return $items;
 }
 
 ?>
