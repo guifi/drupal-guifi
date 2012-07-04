@@ -447,7 +447,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
                           case 'id': $linkXML->addAttribute('id',$link->id); break;
                           case 'linked_node_id': $linkXML->addAttribute('linked_node_id',$link->linked_node_id); break;
                           case 'linked_device_id': $linkXML->addAttribute('linked_device_id',$link->linked_device_id); break;
-                          case 'linked_interface_id': $linkXML->addAttribute('linked_interface_id',$link->linked_device_id); break;
+                          case 'linked_interface_id': $linkXML->addAttribute('linked_interface_id',$link->linked_interface_id); break;
                           case 'link_type': $linkXML->addAttribute('link_type',$link->link_type); break;
                           case 'status': $linkXML->addAttribute('link_status',$link->status); break;
                         }
@@ -496,7 +496,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
                       case 'id': $linkXML->addAttribute('id',$link->id); break;
                       case 'linked_node_id': $linkXML->addAttribute('linked_node_id',$link->linked_node_id); break;
                       case 'linked_device_id': $linkXML->addAttribute('linked_device_id',$link->linked_device_id); break;
-                      case 'linked_interface_id': $linkXML->addAttribute('linked_interface_id',$link->linked_device_id); break;
+                      case 'linked_interface_id': $linkXML->addAttribute('linked_interface_id',$link->linked_interface_id); break;
                       case 'link_type': $linkXML->addAttribute('link_type',$link->link_type); break;
                       case 'status': $linkXML->addAttribute('link_status',$link->status); break;
                     }
