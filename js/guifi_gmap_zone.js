@@ -76,7 +76,10 @@ function draw_map() {
                     //superenlaces: { name: 'Superenlaces', tooltip: 'Enlaces entre supernodos (troncales)', default: true},
                     enlaces: { name: 'Enlaces', tooltip: /*'Enlaces cliente (de nodo a supernodo)'*/'Enlaces cliente y enlaces troncales', default: true,
                                         extrahtml: '<img id="img_overlay_enlaces" alt="(loading)" title="cargando" src="'
-                                        + basepath + 'sites/all/modules/guifi/js/loading.gif" style="vertical-align: middle; margin-left: 10px;" />'}}}
+                                        + basepath + 'sites/all/modules/guifi/js/loading.gif" style="vertical-align: middle; margin-left: 10px;" />'},
+                    nodosd: { name: 'Nodos dinámicos', tooltip: 'Nodos interactivos (con información al hacer click)', default: false, extrahtml: '<img id="img_nodos_dinamicos" alt="(loading)" title="cargando" src="'
+                                        + basepath + 'sites/all/modules/guifi/js/loading.gif" style="vertical-align: middle; margin-left: 10px; display: none;" />' }
+                }}
         },
         extrahtml:'<p style="font-size: 10px;text-align:center;color:#888;">(en construcción)</p>'
     });
@@ -372,6 +375,204 @@ function draw_map() {
             map.setMapTypeId("mapquestopenaerial");
         }
     });
+
+    /****************************************************************************/
+    // Clickable nodes
+    var clickablenodes = false;
+    var nodes = new Object(); // associative array
+    nodes.length = 0;
+    var toggleClickableNodes = function () {
+        var i, n;
+        n = nodes;
+        if (clickablenodes) {
+            for (i in n) {
+                if (n.hasOwnProperty(i) && (i !== "length")) {
+                    n[i].setMap(null);
+                    delete n[i];
+                    n.length -= 1;
+                }
+            }
+        }
+        clickablenodes = !clickablenodes;
+        google.maps.event.trigger(map, 'bounds_changed');
+    }
+    google.maps.event.addDomListener(panelcontrol.inputs.nodosd, 'click', toggleClickableNodes);
+    var createXmlHttp = function () {
+        var xmlHttp;
+        if (typeof XMLHttpRequest == "undefined") {
+            try { xmlHttp = new ActiveXObject("Msxml2.XMLHTTP.6.0"); }
+            catch (a) {
+                try { xmlHttp = new ActiveXObject("Msxml2.XMLHTTP.3.0"); }
+                catch (b) {
+                    try { xmlHttp = new ActiveXObject("Microsoft.XMLHTTP"); }
+                    catch (c) { xmlHttp = null; }
+                }
+            }
+        } else {
+            xmlHttp = new XMLHttpRequest();
+        }
+        return xmlHttp;
+    };
+    var request = createXmlHttp();
+    var draw_nodes = function () {
+        if (!clickablenodes) { return; }
+        var result, i, len, n, maxnodes, links, infowindow, desaturate,
+        f, b, borderSize, size,
+        star, nimg;
+        desaturate = function (red, green, blue, alpha) {
+            var gray;
+            // different grayscale methods
+            //gray = (red + green + blue) / 3;
+            //gray = red * 0.3 + green * 0.59 + blue * 0.11;
+            gray = (Math.max(red, green, blue) + Math.min(red, green, blue)) / 2;
+            
+            gray = Math.floor(gray); // must be an integer
+            return { red: gray, green: gray, blue: gray, alpha: alpha };
+        };
+         // five point star in SVG path notation
+        star = 'M 1.25992,1.9741 0.01732,1.306 -1.21224,2 -0.99024,0.555 -2,-0.4561 -0.62004,-0.6809 -0.01452,-1.9998 0.61604,-0.6938 2,-0.4982 1.00972,0.5339 z';
+        n = nodes;
+        maxnodes = 300;
+        // remove nodes not in viewable area
+        for (i in n) {
+            if (n.hasOwnProperty(i) && (i !== "length")) {
+                if (!map.getBounds().contains(n[i].getPosition())) {
+                    n[i].setMap(null);
+                    delete n[i];
+                    n.length -= 1;
+                }
+            }
+        }
+        if ((request.readyState == 4) && (request.status == 200)) {
+            result = eval("(" + request.responseText + ")");
+            if (!result.hasOwnProperty('message')) {
+                infowindow = new google.maps.InfoWindow();
+                len = result.length;
+                len = (len > maxnodes) ? maxnodes : len;
+                if (n.length > maxnodes) { len = 0; }
+                for (i = 0; i < len; i += 1) {
+                    if (!n.hasOwnProperty(result[i].id)) {
+                        n.length += 1;
+                        f = { red: 0, green: 0, blue: 0, alpha: 1 };
+                        b = { red: 0, green: 0, blue: 0, alpha: 1 };
+                        links = parseInt(result[i].links, 10); // number of air links
+                        size = 2 + (Math.pow(links,0.4) / 2);  // size of the marker
+                        if (links < 2) { size = 1; }
+                        borderSize = 0;
+                        if (links > 1) { borderSize = 1; }      // supernodes have border
+                        if (links > 20) { borderSize = 2; }     // big supernodes
+                        if (links > 100) { borderSize = 3; }    // huge supernodes
+                        switch (result[i].status) {
+                        case 'W':
+                            f.red = 51; f.green = 255; f.blue = 0;
+                            break;
+                        case 'T':
+                            f.red = 255; f.green = 153; f.blue = 0;
+                            break;
+                        case 'B':
+                            f.red = 255; f.green = 255; f.blue = 153;
+                            break;
+                        case 'P':
+                            f.red = 102; f.green = 255; f.blue = 255;
+                            break;
+                        case 'R':
+                            f.red = 255; f.green = 168; f.blue = 243;
+                            break;
+                        case 'D':
+                            f.red = 10; f.green = 10; f.blue = 10;
+                            break;
+                        default:
+                            f.red = 255; f.green = 255; f.blue = 255;
+                        }
+                        if (result[i].stable === "N") { f = desaturate(f.red, f.green, f.blue, 0.5); b.alpha = 0.5; }
+                        nodes[result[i].id] = new google.maps.Marker({
+                            position: new google.maps.LatLng(result[i].lat, result[i].lon),
+                            map: map,
+                            clickable: true,
+                            flat: true,
+                            visible: true,
+                            optimized: true,
+                            icon: {
+                                path:(links > 1) ? star : google.maps.SymbolPath.CIRCLE,
+                                fillColor: "rgb(" + f.red + "," + f.green + "," + f.blue + ")",
+                                fillOpacity: f.alpha,
+                                strokeColor: "rgb(" + b.red + "," + b.green + "," + b.blue + ")",
+                                strokeOpacity: b.alpha,
+                                strokeWeight: borderSize,
+                                scale: size
+                            },
+                            zIndex: parseInt(result[i].links, 10),
+                            title: result[i].nick
+                        });
+                        // Info Window when the user clicks on the node
+                        google.maps.event.addListener(nodes[result[i].id], 'click', (function(nodes,i) {
+                            return function() {
+                                var status, stable, supernode, links;
+                                links = parseInt(result[i].links,10);
+                                supernode = '<strong>Supernode</strong>: ';
+                                status = '<strong>Status</strong>: ';
+                                stable = '<strong>Stable</strong>: ';
+                                if (links > 1) { supernode += 'yes'; } else { supernode += 'no'; }
+                                supernode += ' (' + links + ' airlinks)';
+                                switch (result[i].status) {
+                                    case 'W':
+                                        status += '<span style="color: #080;">Working</span>';
+                                        break;
+                                    case 'T':
+                                        status += '<span style="color: #f80;">Testing</span>';
+                                        break;
+                                    case 'B':
+                                        status += '<span style="color: #880;">Building</span>';
+                                        break;
+                                    case 'P':
+                                        status += '<span style="color: #33f;">Planned</span>';
+                                        break;
+                                    case 'R':
+                                        status += '<span style="color: #080;">Reserved</span>';
+                                        break;
+                                    case 'D':
+                                        status += '<span style="color: #666;">Dropped</span>';
+                                        break;
+                                    default:
+                                        status += '?';
+                                }
+                                switch (result[i].stable) {
+                                    case 'Y':
+                                        stable += 'yes';
+                                        break;
+                                    case 'N':
+                                        stable += '<span style="color: #f00;">no</span>';
+                                        break;
+                                    default:
+                                        stable += '?';
+                                }
+                                infowindow.setContent('<div><h3><a target="_blank" href="' + basepath + 'node/' + result[i].id + '">' + result[i].nick + '</a></h3><hr /><p>' + supernode + '<br />' + status + '<br />' + stable + '</p></div>');
+                                infowindow.open(map, nodes[result[i].id]);
+                            }
+                        })(nodes, i));
+                    }
+                }
+            } else {
+                alert(result.message);
+            }
+        nimg = document.getElementById('img_nodos_dinamicos');
+        nimg.style.display = 'none';
+        }
+    };
+    
+    google.maps.event.addListener(map, 'bounds_changed', function () {
+        var coord, n;
+        if (clickablenodes) {
+            n = document.getElementById('img_nodos_dinamicos');
+            n.style.display = 'inline';
+            coord = map.getBounds().toUrlValue().replace(/,/g,'/');
+            request.onreadystatechange = draw_nodes;
+            request.open("GET", basepath + "guifi/spatialsearch/nodes/air/all/" + coord, true);
+            //39.9469/-0.1015/40.0227/-0.003
+            request.send(null);
+        }
+    });
+    /****************************************************************************/
     
     /*var guifiControl = new Control("guifi");
     guifiControl.div.index = 1;
@@ -412,7 +613,7 @@ function draw_map() {
         var point = event.latLng;
 
         if (map.getZoom() <= 15 ) {
-            map.setZoom(map.getZoom()+3);
+            //map.setZoom(map.getZoom()+3);
         } else {
 
             marcador.setPosition(point);

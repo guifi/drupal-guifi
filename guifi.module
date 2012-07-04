@@ -23,6 +23,7 @@ include_once("guifi_networkutils.inc.php");  // network calc routines
 include_once("guifi_sql.inc.php");       // database changes
 include_once("guifi_ahah.inc.php");      // AHAH functions
 include_once("GeoCalc.class.php");       // geographic routines
+include_once("guifi_spatial.inc.php");   // spatial searches
 
 include_once("guifi_api.inc.php");       // Guifi public API includes
 include_once("libs/GuifiAPI.php");       // Guifi API
@@ -1110,6 +1111,15 @@ function guifi_menu() {
      'access callback' => 'user_access',
      'access arguments' => array('access content'),
      'type' => CALLBACK
+  );
+
+  // Spatial searches
+  $items['guifi/spatialsearch'] = array(
+     'title' => 'spatial search',
+     'description' => 'Callback function for quick GIS searches (output in JSON format)',
+     'page callback' => 'guifi_spatialsearch',
+     'access arguments' => array('access content'),
+     'type' => MENU_CALLBACK
   );
 
   return $items;
