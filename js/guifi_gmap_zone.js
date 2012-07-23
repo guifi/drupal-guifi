@@ -526,7 +526,6 @@ function draw_map() {
         if ((request.readyState == 4) && (request.status == 200)) {
             result = eval("(" + request.responseText + ")");
             if (!result.hasOwnProperty('message')) {
-                infowindow = new google.maps.InfoWindow();
                 len = result.length;
                 len = (len > maxnodes) ? maxnodes : len;
                 if (n.length > maxnodes) { len = 0; }
@@ -609,7 +608,7 @@ function draw_map() {
                                         status += '<span style="color: #33f;">Planned</span>';
                                         break;
                                     case 'R':
-                                        status += '<span style="color: #080;">Reserved</span>';
+                                        status += '<span style="color: #B374AA;">Reserved</span>';
                                         break;
                                     case 'D':
                                         status += '<span style="color: #666;">Dropped</span>';
@@ -626,6 +625,9 @@ function draw_map() {
                                         break;
                                     default:
                                         stable += '?';
+                                }
+                                if (typeof infowindow === "undefined") {
+                                    infowindow = new google.maps.InfoWindow();
                                 }
                                 infowindow.setContent('<div><h3><a target="_blank" href="' + basepath + 'node/' + result[i].id + '">' + result[i].nick + '</a></h3><hr /><p>' + supernode + '<br />' + status + '<br />' + stable + '</p></div>');
                                 infowindow.open(map, nodes[result[i].id]);
