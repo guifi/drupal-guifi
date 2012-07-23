@@ -377,10 +377,13 @@ function draw_map() {
     });
 
     /****************************************************************************/
-    // Clickable nodes
-    var clickablenodes = false;
-    var nodes = new Object(); // associative array
+    // "Clickable nodes" feature
+
+    var clickablenodes = false;  // feature enabled by default?
+    var nodes = new Object();    // associative array
     nodes.length = 0;
+
+    // enables/disables "clickable nodes" feature
     var toggleClickableNodes = function () {
         var i, n;
         n = nodes;
@@ -397,6 +400,8 @@ function draw_map() {
         google.maps.event.trigger(map, 'bounds_changed');
     }
     google.maps.event.addDomListener(panelcontrol.inputs.nodosd, 'click', toggleClickableNodes);
+
+    // creates the object for AJAX calls
     var createXmlHttp = function () {
         var xmlHttp;
         if (typeof XMLHttpRequest == "undefined") {
@@ -414,6 +419,81 @@ function draw_map() {
         return xmlHttp;
     };
     var request = createXmlHttp();
+
+    // store all the ImageMarkers here for later usage (improves performance)
+    var iconset = function () {
+        var self, size, x, y, i, j, step, url, imagesize, codes, code;
+        self = this;
+
+        this.geticon = function (links, status, stable) {
+            var size, i;
+            if (links > 1) {
+                size = Math.floor((2 + (Math.pow(links, 0.4) / 2)) * 4);
+                if (size > 32) { size = 32; }
+                if (size < 10) { size = 10; }
+                i = Math.floor((size - 10) / 2);
+                return self.supernodes[i][status];
+            } else {
+                if (stable == "Y") {
+                    return self.clients[0][status];
+                } else {
+                    return self.clients[1][status];
+                }
+            }
+        };
+
+        size = 10;
+        step = 2;
+        url = basepath + 'sites/all/modules/guifi/js/markers.png';
+        imagesize = 256;
+        codes = ["W", "T", "B", "P", "R", "D", "U", "I"];// ..., Unknown, Invisible
+
+        this.supernodes = new Array();
+        this.clients = new Array();
+
+        y = 0;
+        for (j = 0; j < 12; j += 1) {
+            this.supernodes[j] = new Object();
+            for (i = 0; i < 8; i += 1) {
+                x = i * size;
+                code = codes[i];
+                this.supernodes[j][code] = new google.maps.MarkerImage(url,
+                                                   new google.maps.Size(size,size),
+                                                   new google.maps.Point(x,y),
+                                                   new google.maps.Point(size/2,size/2),
+                                                   new google.maps.Size(256,256)
+                );
+            }
+            y += size;
+            size += step;
+        }
+
+        // icons for the clients (various styles)
+        // mini:   size = 1, y = 0
+        // small:  size = 2, y = 2
+        // normal: size = 5, y = 6
+        // big:    size = 5, y = 16
+        y = 16;
+        size = 5;
+        for (j = 0; j < 2; j += 1) {
+            x = 216;
+            this.clients[j] = new Object();
+            for (i = 0; i < 8; i += 1) {
+                code = codes[i];
+                this.clients[j][code] = new google.maps.MarkerImage(url,
+                                                   new google.maps.Size(size,size),
+                                                   new google.maps.Point(x,y),
+                                                   new google.maps.Point(size/2,size/2),
+                                                   new google.maps.Size(256,256)
+                );
+                x += size;
+            }
+            y += size;
+        }
+    };
+    var icons = new iconset();
+
+    // draws the markers (nodes) on the map
     var draw_nodes = function () {
         if (!clickablenodes) { return; }
         var result, i, len, n, maxnodes, links, infowindow, desaturate,
@@ -453,10 +533,10 @@ function draw_map() {
                 for (i = 0; i < len; i += 1) {
                     if (!n.hasOwnProperty(result[i].id)) {
                         n.length += 1;
-                        f = { red: 0, green: 0, blue: 0, alpha: 1 };
-                        b = { red: 0, green: 0, blue: 0, alpha: 1 };
+                        /*f = { red: 0, green: 0, blue: 0, alpha: 1 };
+                        b = { red: 0, green: 0, blue: 0, alpha: 1 };*/
                         links = parseInt(result[i].links, 10); // number of air links
-                        size = 2 + (Math.pow(links,0.4) / 2);  // size of the marker
+                        /*size = 2 + (Math.pow(links,0.4) / 2);  // size of the marker
                         if (links < 2) { size = 1; }
                         borderSize = 0;
                         if (links > 1) { borderSize = 1; }      // supernodes have border
@@ -484,7 +564,7 @@ function draw_map() {
                         default:
                             f.red = 255; f.green = 255; f.blue = 255;
                         }
-                        if (result[i].stable === "N") { f = desaturate(f.red, f.green, f.blue, 0.5); b.alpha = 0.5; }
+                        if (result[i].stable === "N") { f = desaturate(f.red, f.green, f.blue, 0.5); b.alpha = 0.5; }*/
                         nodes[result[i].id] = new google.maps.Marker({
                             position: new google.maps.LatLng(result[i].lat, result[i].lon),
                             map: map,
@@ -492,7 +572,8 @@ function draw_map() {
                             flat: true,
                             visible: true,
                             optimized: true,
-                            icon: {
+                            icon: icons.geticon(links, result[i].status, result[i].stable),
+                            /*icon: {
                                 path:(links > 1) ? star : google.maps.SymbolPath.CIRCLE,
                                 fillColor: "rgb(" + f.red + "," + f.green + "," + f.blue + ")",
                                 fillOpacity: f.alpha,
@@ -500,7 +581,7 @@ function draw_map() {
                                 strokeOpacity: b.alpha,
                                 strokeWeight: borderSize,
                                 scale: size
-                            },
+                            },*/
                             zIndex: parseInt(result[i].links, 10),
                             title: result[i].nick
                         });
@@ -559,6 +640,7 @@ function draw_map() {
         nimg.style.display = 'none';
         }
     };
+    
     var dragging;
     dragging = false;
 
