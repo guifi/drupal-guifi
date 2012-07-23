@@ -502,10 +502,16 @@ function draw_map() {
         desaturate = function (red, green, blue, alpha) {
             var gray;
             // different grayscale methods
+
+            // gimp desaturate: lightness (claridad)
+            //gray = (Math.max(red, green, blue) + Math.min(red, green, blue)) / 2;
+
+            // gimp desaturate: luminosity (luminosidad)
+            gray = red * 0.21 + green * 0.72 + blue * 0.07;
+
+            // gimp desaturate: average (media)
             //gray = (red + green + blue) / 3;
-            //gray = red * 0.3 + green * 0.59 + blue * 0.11;
-            gray = (Math.max(red, green, blue) + Math.min(red, green, blue)) / 2;
-            
+
             gray = Math.floor(gray); // must be an integer
             return { red: gray, green: gray, blue: gray, alpha: alpha };
         };
