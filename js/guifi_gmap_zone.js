@@ -822,8 +822,9 @@ function draw_map() {
         }
     };
     
-    var dragging;
+    var dragging, pendingupdate;
     dragging = false;
+    pendingupdate = false;
 
     google.maps.event.addListener(map, 'dragstart', function () {
         dragging = true;
@@ -831,11 +832,17 @@ function draw_map() {
 
     google.maps.event.addListener(map, 'dragend', function () {
         dragging = false;
+        if (pendingupdate) {
+            google.maps.event.trigger(map, 'bounds_changed');
+        }
     });
     
     google.maps.event.addListener(map, 'bounds_changed', function () {
         var coord, n;
+        if (dragging) { pendingupdate = true; }
+        
         if (clickablenodes && !dragging) {
+            pendingupdate = false;
             n = document.getElementById('img_nodos_dinamicos');
             n.style.display = 'inline';
             coord = map.getBounds().toUrlValue().replace(/,/g,'/');
