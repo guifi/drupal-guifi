@@ -133,6 +133,8 @@ function draw_map() {
                 e.style.display='inline';
             } else {
                 map.overlayMapTypes.pop();
+                n.style.display='none';
+                e.style.display='none';
             }
         }
     }
