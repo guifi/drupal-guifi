@@ -559,10 +559,20 @@ function draw_map() {
         nimg.style.display = 'none';
         }
     };
+    var dragging;
+    dragging = false;
+
+    google.maps.event.addListener(map, 'dragstart', function () {
+        dragging = true;
+    });
+
+    google.maps.event.addListener(map, 'dragend', function () {
+        dragging = false;
+    });
     
     google.maps.event.addListener(map, 'bounds_changed', function () {
         var coord, n;
-        if (clickablenodes) {
+        if (clickablenodes && !dragging) {
             n = document.getElementById('img_nodos_dinamicos');
             n.style.display = 'inline';
             coord = map.getBounds().toUrlValue().replace(/,/g,'/');
