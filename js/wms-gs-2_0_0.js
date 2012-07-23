@@ -877,12 +877,16 @@ var LayerSwitcher = function (opts) {
                                                   "bold");
 
 
+                    // little wrapper for the dropdown menulist
+                    e4 = document.createElement('div');
+                    e4.style.position = "relative";
+                    
                     // dropdown menu
                     e = document.createElement('div');
                     e.style.border = "1px solid #000";
                     e.style.backgroundColor = "#fff";
                     e.style.position = "absolute";
-                    e.style.top = "18px";
+                    //e.style.top = "18px";
                     e.style.zIndex = "10";
                     e.style.padding = "5px 10px";
                     e.style.boxShadow = "0px 2px 4px rgba(0, 0, 0, 0.4)";
@@ -901,6 +905,9 @@ var LayerSwitcher = function (opts) {
                         if (this.style.fontWeight === "bold") {
                             if (elem.list.length > 0) {
                                 e.style.display = "block";
+                                if ((e.offsetParent.offsetParent.offsetParent.offsetWidth - (e.offsetParent.offsetParent.offsetLeft + e.offsetWidth + e.offsetParent.offsetLeft)) < 0) {
+                                    e.style.left = (e.offsetParent.offsetParent.offsetParent.offsetWidth - (e.offsetParent.offsetParent.offsetLeft + e.offsetWidth + e.offsetParent.offsetLeft)) + "px";
+                                }
                             }
                         }
                     };
@@ -935,6 +942,9 @@ var LayerSwitcher = function (opts) {
                         elem.select(true);         // select the button we're clicking
                         if (elem.list.length > 0) {
                             e.style.display = "block"; // display the dropdown menu
+                            if ((e.offsetParent.offsetParent.offsetParent.offsetWidth - (e.offsetParent.offsetParent.offsetLeft + e.offsetWidth + e.offsetParent.offsetLeft)) < 0) {
+                                e.style.left = (e.offsetParent.offsetParent.offsetParent.offsetWidth - (e.offsetParent.offsetParent.offsetLeft + e.offsetWidth + e.offsetParent.offsetLeft)) + "px";
+                            }
                         }
 
                         // hide the other dropdown menus immediately
@@ -942,7 +952,7 @@ var LayerSwitcher = function (opts) {
                             len = this.parentNode.parentNode.childNodes.length;
                             for (i = 0; i < len; i += 1) {
                                 if (this.parentNode.parentNode.childNodes[i] !== this.parentNode) {
-                                    this.parentNode.parentNode.childNodes[i].lastChild.style.display = "none";
+                                    this.parentNode.parentNode.childNodes[i].lastChild.lastChild.style.display = "none";
                                 }
                             }
                         }
@@ -981,8 +991,9 @@ var LayerSwitcher = function (opts) {
                     };
 
                     // tieing all together
+                    e4.appendChild(e);
                     e3.appendChild(e2);
-                    e3.appendChild(e);
+                    e3.appendChild(e4);
                     parent.appendChild(e3);
 
                     // the last dropdown menu goes from right to left
