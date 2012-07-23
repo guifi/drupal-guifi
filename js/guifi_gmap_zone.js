@@ -81,7 +81,15 @@ function draw_map() {
                                         + basepath + 'sites/all/modules/guifi/js/loading.gif" style="vertical-align: middle; margin-left: 10px; display: none;" />' }
                 }}
         },
-        extrahtml:'<p style="font-size: 10px;text-align:center;color:#888;">(en construcción)</p>'
+        extrahtml:'<div id="filtros" style="margin-top:-15px; margin-left: 10px; font-size: 10px; display:none;"><table style="border:0;border-collapse:collapse"><tbody style="border:0">\
+        <tr><td style="padding:0"><input id="fil_w" type="checkbox" checked="checked" style="margin-top:0;margin-bottom:0;vertical-align:bottom;padding:0;"/><label for="fil_w">Operativos</label>\
+        </td><td style="padding:0"><input id="fil_t" type="checkbox" checked="checked" style="margin-top:0;margin-bottom:0;vertical-align:bottom;padding:0;"/><label for="fil_t">En pruebas</label></tr>\
+        <tr><td style="padding:0"><input id="fil_b" type="checkbox" checked="checked" style="margin-top:0;margin-bottom:0;vertical-align:bottom;padding:0;"/><label for="fil_b">En construcción</label>\
+        </td><td style="padding:0"><input id="fil_r" type="checkbox" checked="checked" style="margin-top:0;margin-bottom:0;vertical-align:bottom;padding:0;"/><label for="fil_r">Reservados</label></tr>\
+        <tr><td style="padding:0"><input id="fil_p" type="checkbox" checked="checked" style="margin-top:0;margin-bottom:0;vertical-align:bottom;padding:0;"/><label for="fil_p">Proyectados</label>\
+        </td><td style="padding:0"><input id="fil_d" type="checkbox" checked="checked" style="margin-top:0;margin-bottom:0;vertical-align:bottom;padding:0;"/><label for="fil_d">Borrados</label></tr>\
+        <tr><td style="padding:0"><input id="fil_c" type="checkbox" checked="checked" style="margin-top:0;margin-bottom:0;vertical-align:bottom;padding:0;"/><label for="fil_c">Clientes</label>\
+        </td><td style="padding:0"><input id="fil_s" type="checkbox" checked="checked" style="margin-top:0;margin-bottom:0;vertical-align:bottom;padding:0;"/><label for="fil_s">SuperNodos</label></td></tr></tbody></table></div>'
     });
     map.controls[google.maps.ControlPosition.RIGHT_TOP].push(panelcontrol.div);
 
@@ -379,27 +387,175 @@ function draw_map() {
     /****************************************************************************/
     // "Clickable nodes" feature
 
-    var clickablenodes = false;  // feature enabled by default?
-    var nodes = new Object();    // associative array
-    nodes.length = 0;
+    var clickablenodes = false; // feature initially enabled?
+    markers = new Object(); // associative array with all the markers, visible or not
+    nodes   = new Array();  // current requested nodes, ordered by importance
+    markers.length = 0;         // number of current visible markers
+    var maxnodes = 1000;            // maximum visiable nodes at the same time
 
-    // enables/disables "clickable nodes" feature
-    var toggleClickableNodes = function () {
-        var i, n;
-        n = nodes;
-        if (clickablenodes) {
-            for (i in n) {
-                if (n.hasOwnProperty(i) && (i !== "length")) {
-                    n[i].setMap(null);
-                    delete n[i];
-                    n.length -= 1;
+    // holds the data about what needs to be shown/hidden
+    var filters = function () {
+        var self;
+        self = this;
+        this.lastshown = -1;
+        
+        // reads the checkboxes
+        this.update = function () {
+            var e;
+            // Planned, Reserved, Testing, Building, Working, Dropped, Clients, Supernodes
+            e = document.getElementById("fil_p");
+            self.p = e ? e.checked : true;
+            e = document.getElementById("fil_r");
+            self.r = e ? e.checked : true;
+            e = document.getElementById("fil_t");
+            self.t = e ? e.checked : true;
+            e = document.getElementById("fil_b");
+            self.b = e ? e.checked : true;
+            e = document.getElementById("fil_w");
+            self.w = e ? e.checked : true;
+            e = document.getElementById("fil_d");
+            self.d = e ? e.checked : true;
+            e = document.getElementById("fil_c");
+            self.c = e ? e.checked : true;
+            e = document.getElementById("fil_s");
+            self.s = e ? e.checked : true;
+        };
+        this.apply = function (node) {
+            var show;
+            show = true;
+
+            if (node.hasOwnProperty("id") && node.hasOwnProperty("status") && node.hasOwnProperty("links") && markers.hasOwnProperty(node["id"])) {
+                switch (node.status) {
+                    case "W":
+                        if (!filter.w) { show = false; }
+                        break;
+                    case "P":
+                        if (!filter.p) { show = false; }
+                        break;
+                    case "T":
+                        if (!filter.t) { show = false; }
+                        break;
+                    case "R":
+                        if (!filter.r) { show = false; }
+                        break;
+                    case "B":
+                        if (!filter.b) { show = false; }
+                        break;
+                    case "D":
+                        if (!filter.d) { show = false; }
+                        break;
+                }
+                if (node.links > 1) {
+                    if (!filter.s) { show = false; }
+                } else {
+                    if (!filter.c) { show = false; }
+                }
+                if (markers[node.id].getMap() === map) {
+                    if (!show) {
+                        markers[node.id].setMap(null);
+                        markers.length -= 1;
+                    }
+                } else {
+                    if (show) {
+                        markers[node.id].setMap(map);
+                        markers.length += 1;
+                    }
+                }
+                return show;
+            }
+            return null;
+        };
+        this.applyAll = function () {
+            var i, len, shown, n;
+
+            n = document.getElementById('img_nodos_dinamicos');
+            n.style.display = 'inline';
+
+            self.update();
+            len = nodes.length;
+            for (i = 0; i < len; i += 1) {
+                shown = self.apply(nodes[i]);
+                if (markers.length < maxnodes) {
+                    if (shown && self.lastshown < i) {
+                        self.lastshown = i;
+                    }
+                } else if (shown) {
+                    if (i < self.lastshown) {
+                        markers[nodes[self.lastshown].id].setMap(null);
+                        markers.length -= 1;
+                        self.searchLastShown(self.lastshown);
+                    } else {
+                        markers[nodes[i].id].setMap(null);
+                        markers.length -= 1;
+                    }
                 }
             }
+            n.style.display = 'none';
+        };
+        this.searchLastShown = function (from) {
+            var i, len, lastpos;
+            
+            len = nodes.length;
+            if (typeof from === "undefined") {
+                lastpos = len - 1;
+            } else {
+                lastpos = from;
+            }
+            for (i = lastpos; i >= 0; i -= 1) {
+                if (nodes[i].hasOwnProperty("id") && markers.hasOwnProperty(nodes[i].id) && markers[nodes[i].id].getMap() === map) {
+                    self.lastshown = i;
+                    return;
+                }
+            }
+            self.lastshown = -1;
+        };
+    };
+    filter = new filters();
+
+    // enables/disables the entire "clickable nodes" feature
+    var toggleClickableNodes = function () {
+        var id, filters;
+        filters = document.getElementById('filtros');
+        if (clickablenodes) {
+            for (id in markers) {
+                if (markers.hasOwnProperty(id) && (id !== "length")) {
+                    if (markers[id].getMap() === map) {
+                        markers.length -= 1;
+                        markers[id].setMap(null);
+                    }
+                    delete markers[id];
+                    totalmarkercount -= 1;
+                }
+            }
+            filters.style.display = "none";
+        } else {
+            filters.style.display = "block";
         }
         clickablenodes = !clickablenodes;
         google.maps.event.trigger(map, 'bounds_changed');
-    }
+    };
     google.maps.event.addDomListener(panelcontrol.inputs.nodosd, 'click', toggleClickableNodes);
+
+    // we've added checkboxes to panelcontrol through extrahtml, so
+    // we have to wait for them to become available
+    var waitforfilterinputs;
+    waitforfilterinputs = setInterval(function () {
+        var e, i, j, tbody, tr, td, input;
+        e = document.getElementById("filtros");
+        if (e) {
+            tbody = e.children[0].children[0];
+            for (i = 0; i < tbody.children.length; i += 1) {
+                tr = tbody.children[i];
+                for (j = 0; j < tr.children.length; j += 1) {
+                    td = tr.children[j];
+                    input = td.children[0];
+                    google.maps.event.addDomListener(input, 'click', filter.applyAll);
+                }
+            }
+            filter.update();
+            clearInterval(waitforfilterinputs);
+        }
+    },1000);
 
     // creates the object for AJAX calls
     var createXmlHttp = function () {
@@ -493,13 +649,17 @@ function draw_map() {
     };
     var icons = new iconset();
 
+    totalmarkercount = 0;
+
     // draws the markers (nodes) on the map
     var draw_nodes = function () {
-        if (!clickablenodes) { return; }
-        var result, i, len, n, maxnodes, links, infowindow, desaturate,
+        var result, i, id, len, links, infowindow, /*desaturate,
         f, b, borderSize, size,
-        star, nimg;
-        desaturate = function (red, green, blue, alpha) {
+        star,*/ nimg, shown;
+
+        if (!clickablenodes) { return; }
+        
+        /*desaturate = function (red, green, blue, alpha) {
             var gray;
             // different grayscale methods
 
@@ -516,28 +676,32 @@ function draw_map() {
             return { red: gray, green: gray, blue: gray, alpha: alpha };
         };
          // five point star in SVG path notation
-        star = 'M 1.25992,1.9741 0.01732,1.306 -1.21224,2 -0.99024,0.555 -2,-0.4561 -0.62004,-0.6809 -0.01452,-1.9998 0.61604,-0.6938 2,-0.4982 1.00972,0.5339 z';
-        n = nodes;
-        maxnodes = 300;
-        // remove nodes not in viewable area
-        for (i in n) {
-            if (n.hasOwnProperty(i) && (i !== "length")) {
-                if (!map.getBounds().contains(n[i].getPosition())) {
-                    n[i].setMap(null);
-                    delete n[i];
-                    n.length -= 1;
+        star = 'M 1.25992,1.9741 0.01732,1.306 -1.21224,2 -0.99024,0.555 -2,-0.4561 -0.62004,-0.6809 -0.01452,-1.9998 0.61604,-0.6938 2,-0.4982 1.00972,0.5339 z';*/
+
+        // remove markers not in viewable area
+        for (id in markers) {
+            if (markers.hasOwnProperty(id) && (id !== "length")) {
+                if (!map.getBounds().contains(markers[id].getPosition())) {
+                    if (markers[id].getMap() === map) {
+                        markers.length -= 1;
+                        markers[id].setMap(null);
+                    }
+                    delete markers[id];
+                    totalmarkercount -= 1;
                 }
             }
         }
         if ((request.readyState == 4) && (request.status == 200)) {
-            result = eval("(" + request.responseText + ")");
+            result = eval("(" + request.responseText + ")"); // parse JSON
             if (!result.hasOwnProperty('message')) {
+                nodes = result;
+                filter.update();
+                filter.lastshown = -1;
                 len = result.length;
-                len = (len > maxnodes) ? maxnodes : len;
-                if (n.length > maxnodes) { len = 0; }
                 for (i = 0; i < len; i += 1) {
-                    if (!n.hasOwnProperty(result[i].id)) {
-                        n.length += 1;
+                    if (!markers.hasOwnProperty(result[i].id)) {
+                        //markers.length += 1;
+                        totalmarkercount += 1;
                         /*f = { red: 0, green: 0, blue: 0, alpha: 1 };
                         b = { red: 0, green: 0, blue: 0, alpha: 1 };*/
                         links = parseInt(result[i].links, 10); // number of air links
@@ -570,9 +734,9 @@ function draw_map() {
                             f.red = 255; f.green = 255; f.blue = 255;
                         }
                         if (result[i].stable === "N") { f = desaturate(f.red, f.green, f.blue, 0.5); b.alpha = 0.5; }*/
-                        nodes[result[i].id] = new google.maps.Marker({
+                        markers[result[i].id] = new google.maps.Marker({
                             position: new google.maps.LatLng(result[i].lat, result[i].lon),
-                            map: map,
+                            map: null,
                             clickable: true,
                             flat: true,
                             visible: true,
@@ -591,7 +755,7 @@ function draw_map() {
                             title: result[i].nick
                         });
                         // Info Window when the user clicks on the node
-                        google.maps.event.addListener(nodes[result[i].id], 'click', (function(nodes,i) {
+                        google.maps.event.addListener(markers[result[i].id], 'click', (function(nodes,i) {
                             return function() {
                                 var status, stable, supernode, links;
                                 links = parseInt(result[i].links,10);
@@ -636,9 +800,18 @@ function draw_map() {
                                     infowindow = new google.maps.InfoWindow();
                                 }
                                 infowindow.setContent('<div><h3><a target="_blank" href="' + basepath + 'node/' + result[i].id + '">' + result[i].nick + '</a></h3><hr /><p>' + supernode + '<br />' + status + '<br />' + stable + '</p></div>');
-                                infowindow.open(map, nodes[result[i].id]);
+                                infowindow.open(map, markers[result[i].id]);
                             }
                         })(nodes, i));
+                        shown = filter.apply(result[i]);
+                        if (shown) {
+                            if (markers.length <= maxnodes) {
+                                filter.lastshown = i;
+                            } else {
+                                markers[result[i].id].setMap(null);
+                                markers.length -= 1;
+                            }
+                        }
                     }
                 }
             } else {
@@ -713,7 +886,7 @@ function draw_map() {
         var point = event.latLng;
 
         if (map.getZoom() <= 15 ) {
-            //map.setZoom(map.getZoom()+3);
+            map.setZoom(map.getZoom()+3);
         } else {
 
             marcador.setPosition(point);
