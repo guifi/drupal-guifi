@@ -1,7 +1,7 @@
 <?php
 
-// carreguem el Twig
-include_once('contrib/twig_1.6/lib/Twig/Autoloader.php');
+// carreguem el Twig , actualitzat a la 1.91
+include_once('contrib/Twig/Autoloader.php');
 
 function guifi_get_alchemy_ifs($dev) {
   $ifs = array (
