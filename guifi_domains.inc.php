@@ -141,10 +141,15 @@ function guifi_domain_form($form_state, $params = array()) {
       $form_state['values']['name'] = $params['dname'];
     }
     $form_state['values']['type'] = $params['type'];
-    $form_state['values']['ipv4'] = $params['ipv4'];
+
+     if ($params['scope'] == 'external') {
+       $form_state['values']['ipv4'] = '';
+     } else {
+      $form_state['values']['ipv4'] = $params['ipv4'];
+    }
     $form_state['values']['scope'] = $params['scope'];
     $form_state['values']['management'] = $params['management'];
-    $form_state['values']['allow'] = 'disabled'; 
+    $form_state['values']['allow'] = 'disabled';
     $form_state['values']['hosts']['0']['new'] = TRUE;
     $form_state['values']['hosts']['0']['counter'] = '0';
     $form_state['values']['hosts']['0']['host'] = 'ns1';
@@ -266,6 +271,25 @@ function guifi_domain_form($form_state, $params = array()) {
     '#weight' => $form_weight++,
   );
 
+  if ($form_state['values']['scope'] == 'external') {
+    $form['main']['ipv4'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Set the Nameserver IP Address'),
+    '#size' => 16,
+    '#maxlength' => 16,
+    '#required' => TRUE,
+    '#default_value'=> $form_state['values']['ipv4'],
+    '#element_validate' => array('guifi_ipv4_validate'),
+    '#description' =>  t('External scope: Put the Internet IP Address of NameServer.'),
+    '#weight' => $form_weight++,
+  );
+  } else {
+    $form['main']['ipv4'] = array(
+      '#type' => 'hidden',
+      '#default_value'=> $form_state['values']['ipv4'],
+    );
+  }
+
   $form['main']['settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Advanced domain name settings'),
@@ -304,24 +328,6 @@ function guifi_domain_form($form_state, $params = array()) {
                                    .'<br \>'
                                    .t('<strong>Disabled</strong>, If you select this option, the management of your domain may not be transferred in any way, your domain will not be visible to other network servers.'),
   );
-
-  if ($form_state['values']['settings']['scope'] == 'external') {
-    $form['main']['ipv4'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Nameserver IP Address'),
-    '#size' => 16,
-    '#maxlength' => 16,
-    '#required' => TRUE,
-    '#default_value'=> $form_state['values']['ipv4'],
-    '#element_validate' => array('guifi_ipv4_validate'),
-  );
-  } else {
-    $form['main']['settings']['ipv4'] = array(
-      '#type' => 'hidden',
-      '#title' => t('Nameserver IP Address'),
-      '#default_value'=> $form_state['values']['ipv4'],
-    );
-  }
 
   $form['main']['settings']['defipv4'] = array(
     '#type' => 'textfield',
@@ -419,15 +425,15 @@ function guifi_domain_form_validate($form,&$form_state) {
         FROM {guifi_dns_domains}
         WHERE id = '%d'", $form_state['values']['id']);
   $domainname = array();
-  $domainname = db_fetch_array($qrydomainname); 
+  $domainname = db_fetch_array($qrydomainname);
   $qrydomaindlg = db_query("
         SELECT *
         FROM {guifi_dns_domains}
         WHERE mname = '%s'", $domainname['name']);
   $dlgdomainname = array();
-  $dlgdomainname = db_fetch_array($qrydomaindlg); 
+  $dlgdomainname = db_fetch_array($qrydomaindlg);
 
-if (!empty($domainname['name'])) 
+if (!empty($domainname['name']))
   if (($form_state['values']['name'] != $domainname['name']) AND ($domainname['name'] == $dlgdomainname['mname'])) {
      form_set_error('name', t('Error!  you renamed the domain / subdomain: <strong>%name</strong> This domain contains delegations, such <strong>%dlgdomain</strong>.', array('%name' => $domainname['name'], '%dlgdomain' => $dlgdomainname['name'])));
   }
@@ -475,7 +481,7 @@ if (!empty($domainname['name']))
     $devqry = db_query("
       SELECT *
       FROM {guifi_devices}
-      WHERE id = '%d'", $dev->device_id);  
+      WHERE id = '%d'", $dev->device_id);
     $device = db_fetch_object($devqry);
       form_set_error('ipv4', t('Server <strong>%nick</strong> does not have an IPv4 address. Please, check it.', array('%nick' => $device->nick)));
   }
@@ -533,7 +539,7 @@ if (!empty($domainname['name']))
           $dot = '.';
           if ( strcmp($checkdot,$dot) == 0 ) {
             $count = count(explode(".", $aliasa));
-            if ( $count <= 3) 
+            if ( $count <= 3)
               form_set_error('hosts]['.$host_id.'][aliases]['.$aliasa_id, t('Error! Alias: <strong>%alias</strong> This is no a valid host name, You should write something like this: <strong>%aliasdomain.xx.</strong> for an external aliases', array('%alias' => $aliasa)));
           }
           if (( strcmp($checkdot,$dot) != 0 ) && (empty($hosts['ipv4']) && empty($hosts['ipv6']))) {
@@ -634,7 +640,7 @@ function guifi_domain_save($edit, $verbose = TRUE, $notify = TRUE) {
         }
         $host['aliases'] =  serialize($host['aliases']);
       } else {
-        unset($host['aliases']); 
+        unset($host['aliases']);
       }
      if (($host['host'] == 'ns1' ) AND ($host['counter'] == '0')) {
       $host['opt']['options']['NS'] = 'NS';
@@ -779,16 +785,20 @@ function guifi_domain_delete($domain, $notify = TRUE, $verbose = TRUE) {
 /* guifi_domain_add(): Provides a form to create a new domain */
 function guifi_domain_add() {
   guifi_log(GUIFILOG_TRACE,'function guifi_domain_add()');
+  if (arg(8) == 'external')
+    $ipv4 = '';
+  else
+    $ipv4 = arg(6);
 
   $output = drupal_get_form('guifi_domain_form',array(
     'add' => arg(3),
     'dname' => arg(4),
     'type' => arg(5),
-    'ipv4' => arg(6),
+    'ipv4' => $ipv4,
     'mname' => arg(7),
     'scope' => arg(8),
     'management' => arg(9)));
-    
+
   // To gain space, save bandwith and CPU, omit blocks
   print theme('page', $output, FALSE);
 }
@@ -833,7 +843,7 @@ function guifi_domain_create_form($form_state, $node) {
     '#type' => 'fieldset',
   );
 
-  if ($form_state['values']['domain_type'] === 'master') {
+  if ($form_state['values']['domain_type'] == 'master') {
     $form['domain_type_form']['sid'] = array(
       '#type' => 'hidden',
       '#value' => $node->id
@@ -884,7 +894,7 @@ function guifi_domain_create_form($form_state, $node) {
     );
   }
 
-  if ($form_state['values']['domain_type'] === 'delegation') {
+  if ($form_state['values']['domain_type'] == 'delegation') {
     $ip = guifi_main_ip($node->device_id);
     $form['domain_type_form']['sid'] = array(
       '#type' => 'hidden',

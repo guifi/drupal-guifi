@@ -450,34 +450,49 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
           $link['ipv4_id'],$link['interface_id']);
       while ($ripv4 = db_fetch_array($qar)) {
         $aitem = _ipcalc($ripv4['ipv4'],$ripv4['netmask']);
-        // if the addres is a /30 (single p2p link)
-        // or the remote ip is not the router address
-        if ( ($ripv4['netmask'] == '255.255.255.252') or
-             ($ripv4['ipv4'] != $aitem['netstart'])
-           ) {
-          $log .= '<br />'._guifi_db_delete(
-            'guifi_ipv4',
-            array('id' => $link['ipv4_id'],
-              'interface_id' => $link['interface_id']),
-            $to_mail,
-            $depth,
-            FALSE);
 
-          if ($ripv4['netmask'] == '255.255.255.252')
-           // cascade to local ipv4
+        if ($ripv4['ipv4_type'] == '2') {
+          // type 2: link is backbone
+          // if the addres is a:
+          // /30 (single p2p link)
+          // or /29 and /28 ( Multilink )
+          if (($ripv4['netmask'] == '255.255.255.252') or  ($ripv4['netmask'] == '255.255.255.248') or  ($ripv4['netmask'] == '255.255.255.240')) {
             $log .= '<br />'._guifi_db_delete(
               'guifi_ipv4',
-              array('id' => $item->ipv4_id,
-                'interface_id' => $item->interface_id),
+              array('id' => $link['ipv4_id'],
+              'interface_id' => $link['interface_id']),
               $to_mail,
               $depth,
               FALSE);
 
-        }
-//        guifi_log(GUIFILOG_BASIC,'function delete cascade remote address()',$link);
+           // cascade to local ipv4
+            $log .= '<br />'._guifi_db_delete(
+              'guifi_ipv4',
+              array('id' => $item->ipv4_id,
+              'interface_id' => $item->interface_id),
+              $to_mail,
+              $depth,
+              FALSE);
+          }
+       } else {
 
+      $mlinks = db_fetch_array(db_query('SELECT count(id) AS links ' .
+          'FROM {guifi_links} '.
+          'WHERE ipv4_id=%d AND interface_id=%d',
+          $link['ipv4_id'],$link['interface_id']));
 
-        // cleanup remote interface when appropriate
+       if  (($ripv4['ipv4'] != $aitem['netstart']) and ( $mlinks['links'] < 1)) {
+              $log .= '<br />'._guifi_db_delete(
+              'guifi_ipv4',
+              array('id' => $link['ipv4_id'],
+              'interface_id' => $link['interface_id']),
+              $to_mail,
+              $depth,
+              FALSE);
+       }
+     }
+     // guifi_log(GUIFILOG_BASIC,'function delete cascade remote address()',$link);
+     // cleanup remote interface when appropriate
         $qir = db_query('SELECT i.id id, i.interface_type, count(a.id) na ' .
            'FROM {guifi_interfaces} i ' .
            '  LEFT OUTER JOIN {guifi_ipv4} a ' .
@@ -491,8 +506,8 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
 //          guifi_log(GUIFILOG_BASIC,'function delete cascade remote interface()',$na);
 
           // delete the interface, if has no other ipv4 address and is not
-          // in the list Wan, wLan/Lan, Lan or wds/p2p
-          if ((in_array($na['interface_type'],array('Wan','wLan/Lan','Lan','wds/p2p')))
+          // in the list Wan, wLan/Lan, Lan/Lan, Lan or wds/p2p
+          if ((in_array($na['interface_type'],array('Wan','wLan/Lan','Lan/Lan','Lan','wds/p2p')))
               or ($na['na'] != 0)
           )
             continue;
