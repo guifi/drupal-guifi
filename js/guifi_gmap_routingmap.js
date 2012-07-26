@@ -182,19 +182,19 @@ function build_routing(pdata){
     vlink.setMap(map);
   }
 
-  var output = "ultimate aggregation<br>";
+  var output = "ultimate aggregation<br />";
   for(gnet in agnets){
-    output += agnets[gnet]["netid"] + "/" + agnets[gnet]["maskbits"]+"&nbsp;&nbsp;" + agnets[gnet]["zone"]+"<br>";
+    output += agnets[gnet]["netid"] + "/" + agnets[gnet]["maskbits"]+"&nbsp;&nbsp;" + agnets[gnet]["zone"]+"<br />";
   }
 
-  output += "<br>aggregate subnets<br>";
+  output += "<br />aggregate subnets<br />";
   for(net in anets){
-    output += anets[net]["netid"] + "/" + anets[net]["maskbits"]+"<br>";
+    output += anets[net]["netid"] + "/" + anets[net]["maskbits"]+"<br />";
   }
 
-  output += "<br>zone networks<br>";
+  output += "<br />zone networks<br />";
   for(znet in aznets){
-    output += aznets[znet]["netid"] + "/" + aznets[znet]["maskbits"]+"&nbsp;&nbsp;broadcast:"+aznets[znet]["broadcast"]+"&nbsp;&nbsp;zone:"+aznets[znet]["zid"]+"&nbsp;"+aznets[znet]["znick"]+"<br>";
+    output += aznets[znet]["netid"] + "/" + aznets[znet]["maskbits"]+"&nbsp;&nbsp;broadcast:"+aznets[znet]["broadcast"]+"&nbsp;&nbsp;zone:"+aznets[znet]["zid"]+"&nbsp;"+aznets[znet]["znick"]+"<br />";
   }
 
   $("#topmap").text("Completed");

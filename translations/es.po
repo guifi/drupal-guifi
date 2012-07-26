@@ -666,7 +666,7 @@ msgid "Default Domain IP Address"
 msgstr ""
 
 #: guifi_domains.inc.php:284
-msgid "Ex: domain.net without hostname resolve this IP Address, tends to be the same address as hostname: www.<br> leave it blank if not needed, additionally yo can create an host name ' * ' to resolve all undefined hostnames for this domain"
+msgid "Ex: domain.net without hostname resolve this IP Address, tends to be the same address as hostname: www.<br /> leave it blank if not needed, additionally yo can create an host name ' * ' to resolve all undefined hostnames for this domain"
 msgstr ""
 
 #: guifi_domains.inc.php:296
@@ -889,7 +889,7 @@ msgid "Host aliases. Save or press \"Preview\" to get more entries"
 msgstr ""
 
 #: guifi_hosts.inc.php:56
-msgid "Enter the host alias. ex: www<br> Must put a DOT \"<strong>.</strong>\" at the end of the domain name if the alias points to an external domain. ex: \"outsidehost.dyndns.org<strong>.</strong>\""
+msgid "Enter the host alias. ex: www<br /> Must put a DOT \"<strong>.</strong>\" at the end of the domain name if the alias points to an external domain. ex: \"outsidehost.dyndns.org<strong>.</strong>\""
 msgstr ""
 
 #: guifi_hosts.inc.php:63
@@ -929,7 +929,7 @@ msgid "IP Address"
 msgstr "Dirección IP"
 
 #: guifi_hosts.inc.php:174
-msgid "Leave it blank if you want to use an alias to an external domain.<br> ex: hostname is an alias of hostname.dyndns.org."
+msgid "Leave it blank if you want to use an alias to an external domain.<br /> ex: hostname is an alias of hostname.dyndns.org."
 msgstr ""
 
 #: guifi_hosts.inc.php:214

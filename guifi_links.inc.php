@@ -333,7 +333,7 @@ function guifi_links_check_overlap($overlap,&$form_state) {
   $new_broadcast = $net['broadcast'];
   $old_broadcast = $net_overlap['broadcast'];
 
-  //guifi_log(GUIFILOG_BASIC,'<br>Old Netid: '.$old_netid.'<br>New Netid: '.$new_netid.'<br>Old Netmask: '.$old_netmask.'<br>New NetMask: '.$new_netmask.'<br>Old broadcast: '.$old_broadcast.'<br>New Broadcast: '.$new_broadcast.'<br><br> ');
+  //guifi_log(GUIFILOG_BASIC,'<br />Old Netid: '.$old_netid.'<br />New Netid: '.$new_netid.'<br />Old Netmask: '.$old_netmask.'<br />New NetMask: '.$new_netmask.'<br />Old broadcast: '.$old_broadcast.'<br />New Broadcast: '.$new_broadcast.'<br /><br /> ');
   $sql = db_query("SELECT INET_ATON(ipv4) as ip FROM guifi_ipv4 WHERE ipv4 BETWEEN '%s' AND '%s' ", $old_broadcast, $new_broadcast);
 
   while ($item = db_fetch_array($sql)) {
@@ -345,7 +345,7 @@ function guifi_links_check_overlap($overlap,&$form_state) {
       if ($ip == $ipnow) {
         drupal_set_message(t('Ip address: %ip is already taken on another device!!', array('%ip' => $ip)),'error');
         $error = TRUE;
-        //guifi_log(GUIFILOG_BASIC,'Tipus de check: Broadcast<br>');
+        //guifi_log(GUIFILOG_BASIC,'Tipus de check: Broadcast<br />');
       }
     }
     $count = $e-$s+1;
@@ -369,7 +369,7 @@ function guifi_links_check_overlap($overlap,&$form_state) {
   }
 
   if ($error == TRUE) {
-    form_error($overlap, t('Error! Your new netmask: /%bit ( %mask ) is overlapping another existing subnet, you can\'t expand it!<br>'
+    form_error($overlap, t('Error! Your new netmask: /%bit ( %mask ) is overlapping another existing subnet, you can\'t expand it!<br />'
                                        .'Then, We will find a range of network in your area with the size needed, just for information. You can use it if it thinks fit.',
           array('%mask' => $new_netmask, '%bit' => $net['maskbits'])));
 

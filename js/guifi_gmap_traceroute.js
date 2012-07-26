@@ -188,7 +188,7 @@ function createEventNode(pNode, pNumber) {
   google.maps.event.addListener(pNode, "mouseover", function() {
       var point = new google.maps.LatLng(oNodes[pNumber].lat,oNodes[pNumber].lon);
       var v="Node: "+oNodes[pNumber]["nodelink"]+"-"+oNodes[pNumber]["nodename"];
-      v += "<br>level: "+oSubRouteLevel[oNodes[pNumber].subroute];
+      v += "<br />level: "+oSubRouteLevel[oNodes[pNumber].subroute];
       infowindow.setContent(v);
       infowindow.setPosition(point);
       infowindow.open(map);
@@ -202,9 +202,9 @@ function createEventLink(pLink, pNumber) {
   pLink.value = pNumber;
   google.maps.event.addListener(pLink, "click", function(point) {
       var v="from device: "+oLinks[pNumber]["fromdevicename"]+"-"+oLinks[pNumber]["fromipv4"];
-      v+="<br>to device: "+oLinks[pNumber]["todevicename"]+"-"+oLinks[pNumber]["toipv4"];
-      v+="<br>distance: "+oLinks[pNumber]["distance"]+" Km."+"&nbsp;&nbsp;&nbsp;&nbsp;level: "+oSubRouteLevel[oLinks[pNumber]["subroute"]];
-      v+="<br>routes: "+oLinksId[oLinks[pNumber]["idlink"]]["routes"];
+      v+="<br />to device: "+oLinks[pNumber]["todevicename"]+"-"+oLinks[pNumber]["toipv4"];
+      v+="<br />distance: "+oLinks[pNumber]["distance"]+" Km."+"&nbsp;&nbsp;&nbsp;&nbsp;level: "+oSubRouteLevel[oLinks[pNumber]["subroute"]];
+      v+="<br />routes: "+oLinksId[oLinks[pNumber]["idlink"]]["routes"];
       infowindow.setContent(v);
       infowindow.setPosition(point.latLng);
       infowindow.open(map);
