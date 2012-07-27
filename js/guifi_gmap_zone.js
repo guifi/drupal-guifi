@@ -85,9 +85,9 @@ function draw_map() {
         <tr><td style="padding:0"><input id="fil_w" type="checkbox" checked="checked" style="margin-top:0;margin-bottom:0;vertical-align:bottom;padding:0;"/><label for="fil_w">Operativos</label>\
         </td><td style="padding:0"><input id="fil_t" type="checkbox" checked="checked" style="margin-top:0;margin-bottom:0;vertical-align:bottom;padding:0;"/><label for="fil_t">En pruebas</label></tr>\
         <tr><td style="padding:0"><input id="fil_b" type="checkbox" checked="checked" style="margin-top:0;margin-bottom:0;vertical-align:bottom;padding:0;"/><label for="fil_b">En construcción</label>\
-        </td><td style="padding:0"><input id="fil_r" type="checkbox" checked="checked" style="margin-top:0;margin-bottom:0;vertical-align:bottom;padding:0;"/><label for="fil_r">Reservados</label></tr>\
+        </td><td style="padding:0"><input id="fil_r" type="checkbox" style="margin-top:0;margin-bottom:0;vertical-align:bottom;padding:0;"/><label for="fil_r">Reservados</label></tr>\
         <tr><td style="padding:0"><input id="fil_p" type="checkbox" checked="checked" style="margin-top:0;margin-bottom:0;vertical-align:bottom;padding:0;"/><label for="fil_p">Proyectados</label>\
-        </td><td style="padding:0"><input id="fil_d" type="checkbox" checked="checked" style="margin-top:0;margin-bottom:0;vertical-align:bottom;padding:0;"/><label for="fil_d">Borrados</label></tr>\
+        </td><td style="padding:0"><input id="fil_d" type="checkbox" style="margin-top:0;margin-bottom:0;vertical-align:bottom;padding:0;"/><label for="fil_d">Borrados</label></tr>\
         <tr><td style="padding:0"><input id="fil_c" type="checkbox" checked="checked" style="margin-top:0;margin-bottom:0;vertical-align:bottom;padding:0;"/><label for="fil_c">Clientes</label>\
         </td><td style="padding:0"><input id="fil_s" type="checkbox" checked="checked" style="margin-top:0;margin-bottom:0;vertical-align:bottom;padding:0;"/><label for="fil_s">SuperNodos</label></td></tr></tbody></table></div>'
     });
