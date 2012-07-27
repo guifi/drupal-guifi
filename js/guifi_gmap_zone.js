@@ -64,8 +64,7 @@ function draw_map() {
                 type: 'radio', list: {
                     google: { name: 'Google', tooltip: 'Google Maps', default: true },
                     osm: { name: 'OSM', tooltip: 'OpenStreetMap' },
-                    mapquest: { name: 'MapQuest', tooltip: 'Map Quest' },
-                    demo: { name: 'Demo de menús', tooltip: 'Demostración de menús' }
+                    mapquest: { name: 'MapQuest', tooltip: 'Map Quest' }
                 }},
         capas: {name: 'Capas', tooltip: 'Capas de datos extra',
                 type: 'checkbox', list: {
@@ -171,93 +170,6 @@ function draw_map() {
     // Build our custom menus for each provider
     //
 
-    // demo menu
-    var layerswitcher_demo = new LayerSwitcher({
-        "menu": {
-            "name": "Mapas",
-            "title": "Pulse aquí para seleccionar mapas alternativos",
-            "type": "menulist",
-            "list": [
-                { "name": "Mapa", "title": "Muestra el callejero", "type": "menu",
-                "list": [
-                    { "name": "Ejemplo1", "title": "Texto explicativo (opcional)", "type": "radiolist", "list": [
-                        { "name": "opción 1", "title": "o1", "type": "radio", "selected": "true" },
-                        { "name": "opción 2", "title": "o2", "type": "radio" },
-                        { "type": "extrahtml", "extrahtml": "<span style='font-size: 10px;'>(demostración)</span>" }
-                    ] },
-                    { "name": "Ejemplo2", "type": "radiolist", "list": [
-                        { "name": "opción 1", "title": "o1", "type": "radio", "selected": "true" },
-                        { "name": "opción 2", "title": "o2", "type": "radio" }
-                    ] },
-                    { "name": "Ejemplo3", "title": "Texto explicativo (opcional)", "type": "checklist", "list": [
-                        { "name": "check1", "type": "check", "selected": "true" },
-                        { "name": "check2", "type": "check", "selected": "false", "list": [
-                            { "name": "sub1", "type": "check", "selected": "true" },
-                            { "name": "sub2", "type": "check", "selected": "true" }
-                        ] },
-                        { "name": "check3", "type": "check", "selected": "false" },
-                        { "name": "check4", "type": "check" }
-                    ] },
-                    { "name": "Ejemplo4", "type": "checklist", "list": [
-                        { "name": "check1", "type": "check", "selected": "true" },
-                        { "name": "check2", "type": "check", "selected": "true" }                        
-                    ] }
-                ]},
-                { "name": "Satélite", "title": "Muestra las imágenes de satélite", "type": "menu", "selected": "true",
-                "list": [
-                    { "name": "Ejemplo1", "title": "Texto explicativo (opcional)", "type": "radiolist", "list": [
-                        { "name": "opción 1", "title": "o1", "type": "radio", "selected": "true" },
-                        { "name": "opción 2", "title": "o2", "type": "radio" },
-                        { "type": "extrahtml", "extrahtml": "<span style='font-size: 10px;'>(demostración)</span>" }
-                    ] },
-                    { "name": "Ejemplo2", "type": "radiolist", "list": [
-                        { "name": "opción 1", "title": "o1", "type": "radio", "selected": "true" },
-                        { "name": "opción 2", "title": "o2", "type": "radio" }
-                    ] },
-                    { "name": "Ejemplo3", "title": "Texto explicativo (opcional)", "type": "checklist", "list": [
-                        { "name": "check1", "type": "check", "selected": "true" },
-                        { "name": "check2", "type": "check", "selected": "false", "list": [
-                            { "name": "sub1", "type": "check", "selected": "true" },
-                            { "name": "sub2", "type": "check", "selected": "true" }
-                        ] },
-                        { "name": "check3", "type": "check", "selected": "false" },
-                        { "name": "check4", "type": "check" }
-                    ] },
-                    { "name": "Ejemplo4", "type": "checklist", "list": [
-                        { "name": "check1", "type": "check", "selected": "true" },
-                        { "name": "check2", "type": "check", "selected": "true" }
-                    ] }
-                ]},
-                { "name": "Ejemplo (púlsame)", "title": "Muestra de un posible menú", "type": "menu", "list": [
-                    { "name": "Mapas base", "title": "Mapas que salen al fondo del todo", "type": "radiolist", "list" : [
-                        { "name": "Fotografía aérea", "title": "Fotos desde el aire (avión, satélite)", "type": "radio", "selected": "true" },
-                        { "name": "Mapa básico", "title": "Mapa dibujado", "type": "radio" }
-                    ]},
-                    { "name": "Capas superpuestas", "title": "Capas con datos geográficas superpuestas a la capa base", "type": "checklist", "list" : [
-                        { "name": "Etiquetas", "title": "Nombres de pueblos, etc", "type": "check", "selected": "true" },
-                        { "name": "Puntos de interés", "title": "Elementos puntuales (antenas de móviles, postes de alta tensión, etc)", "type": "check", "list": [
-                            { "name": "Antenas de telefonía", "title": "Antenas de móviles", "type": "check", "selected": "true" },
-                            { "name": "Postes eléctricos", "title": "Postes de tendido eléctrico", "type": "check", "selected": "true", "list": [
-                                { "name": "alta tensión", "title": "Postes de alta tensión", "type": "check", "selected": "true" },
-                                { "name": "baja tensión", "title": "Postes de baja tensión", "type": "check" }
-                            ] },
-                            { "name": "Torres", "title": "Torres o edificios especialmente altos", "type": "check", "selected": "true" }
-                        ] }
-                    ]},
-                    { "name": "Otros", "title": "Otras capas", "type": "checklist", "list": [
-                        { "name": "varios", "title": "La mayoría de elementos son opcionales y configurables", "type": "check", "selected": "true" },
-                        { "type": "extrahtml", "extrahtml": "<span style='font-size: 10px;'>(se puede añadir HTML extra como un elemento más)</span>" }
-                    ]}
-                ]},
-                { "name": "Etc", "title": "Se pueden tener tantos menús como se quieran", "type": "menu", "list": [
-                    { "name": "etc", "title": "Opción de ejemplo", "type": "check" }
-                ]}
-            ]}
-    });
-    layerswitcher_demo.view.toggle(false);
-    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(layerswitcher_demo.div);
-
-
     // OSM menu
     layerswitcher_osm = new LayerSwitcher({
         "menu": {
@@ -298,8 +210,8 @@ function draw_map() {
             "title": "Pulse aquí para seleccionar mapas alternativos",
             "type": "menulist",
             "list": [
-                { "name": "Mapa", "title": "Muestra el callejero", "type": "menu" },
-                { "name": "Satélite", "title": "Muestra las imágenes de satélite", "type": "menu", "selected": "true" }
+                { "name": "Mapa", "title": "Muestra el callejero", "type": "menu", "selected": "true" },
+                { "name": "Satélite", "title": "Muestra las imágenes de satélite", "type": "menu" }
             ]}
     });
     layerswitcher_mapquest.view.toggle(false);
@@ -307,24 +219,14 @@ function draw_map() {
 
     // Tie the events on the right panel to actions on the layerswitcher control
     google.maps.event.addDomListener(panelcontrol.inputs.google, 'click', function () {
-        layerswitcher_demo.view.toggle(false);    // disable the controls that are not google
         layerswitcher_osm.view.toggle(false);
         layerswitcher_mapquest.view.toggle(false);
         map.setOptions({mapTypeControl: true});   // enable google layer control
         map.setMapTypeId(opts.mapTypeId);         // switch to the default layer
         google.maps.event.trigger(map, 'resize'); // trigger redraw/reflow
     });
-    google.maps.event.addDomListener(panelcontrol.inputs.demo, 'click', function () {
-        map.setOptions({mapTypeControl: false});
-        layerswitcher_osm.view.toggle(false);
-        layerswitcher_mapquest.view.toggle(false);
-        layerswitcher_demo.view.toggle(true);
-        layerswitcher_demo.model.notifySelections(true);
-        google.maps.event.trigger(map, 'resize');
-    });
     google.maps.event.addDomListener(panelcontrol.inputs.osm, 'click', function () {
         map.setOptions({mapTypeControl: false});
-        layerswitcher_demo.view.toggle(false);
         layerswitcher_mapquest.view.toggle(false);
         layerswitcher_osm.view.toggle(true);
         layerswitcher_osm.model.notifySelections(true);
@@ -332,7 +234,6 @@ function draw_map() {
     });
     google.maps.event.addDomListener(panelcontrol.inputs.mapquest, 'click', function () {
         map.setOptions({mapTypeControl: false});
-        layerswitcher_demo.view.toggle(false);
         layerswitcher_osm.view.toggle(false);
         layerswitcher_mapquest.view.toggle(true);
         layerswitcher_mapquest.model.notifySelections(true);
