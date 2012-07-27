@@ -291,8 +291,8 @@ function draw_map() {
     // "Clickable nodes" feature
 
     var clickablenodes = false; // feature initially enabled?
-    markers = new Object(); // associative array with all the markers, visible or not
-    nodes   = new Array();  // current requested nodes, ordered by importance
+    var markers = new Object(); // associative array with all the markers, visible or not
+    var nodes   = new Array();  // current requested nodes, ordered by importance
     markers.length = 0;         // number of current visible markers
     var maxnodes = 1000;            // maximum visiable nodes at the same time
 
@@ -413,11 +413,12 @@ function draw_map() {
             self.lastshown = -1;
         };
     };
-    filter = new filters();
+    var filter = new filters();
 
     // enables/disables the entire "clickable nodes" feature
     var toggleClickableNodes = function () {
-        var id, filters;
+        var id, filters;        
+        
         filters = document.getElementById('filtros');
         if (clickablenodes) {
             for (id in markers) {
@@ -433,6 +434,11 @@ function draw_map() {
             filters.style.display = "none";
         } else {
             filters.style.display = "block";
+
+            // disable static node layer
+            panelcontrol.panel.capas.nodos = false;
+            panelcontrol.inputs.nodos.checked = false;
+            toggleOverlays.call(panelcontrol.inputs.nodos);
         }
         clickablenodes = !clickablenodes;
         google.maps.event.trigger(map, 'bounds_changed');
@@ -552,7 +558,7 @@ function draw_map() {
     };
     var icons = new iconset();
 
-    totalmarkercount = 0;
+    var totalmarkercount = 0;
 
     // draws the markers (nodes) on the map
     var draw_nodes = function () {
