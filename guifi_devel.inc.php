@@ -1,7 +1,7 @@
 <?php
 
 // Services output
-function guifi_devel_services($service_id , $op) {
+function guifi_devel_services($service_id=null, $op=null) {
 
   switch($service_id) {
     case 'add':
@@ -143,7 +143,7 @@ function guifi_devel_services_delete_confirm_submit($form, &$form_state) {
 
 
 // Device Models output
-function guifi_devel_devices($devid , $op) {
+function guifi_devel_devices($devid=null, $op=null) {
 
   switch($devid) {
     case 'add':
@@ -652,7 +652,7 @@ function guifi_devel_devices_delete_confirm_submit($form, &$form_state) {
 
 
 // Device Firmwares output
-function guifi_devel_firmware($firmid , $op) {
+function guifi_devel_firmware($firmid=null, $op=null) {
   switch($firmid) {
     case 'add':
      $firmid = 'New';
@@ -971,7 +971,7 @@ function guifi_devel_firmware_delete_confirm_submit($form, &$form_state) {
 }
 
 // Device Manufacturers output
-function guifi_devel_manufacturer($mid , $op) {
+function guifi_devel_manufacturer($mid=null, $op=null) {
 
   switch($mid) {
     case 'add':
@@ -1132,7 +1132,7 @@ function guifi_devel_manufacturer_delete_confirm_submit($form, &$form_state) {
 }
 
 // Firmware Parameter output
-function guifi_devel_parameter($id , $op) {
+function guifi_devel_parameter($id=null, $op=null) {
   switch($id) {
     case 'add':
       $id = 'New';
@@ -1304,7 +1304,7 @@ function guifi_devel_parameter_delete_confirm_submit($form, &$form_state) {
 }
 
 // Model Feature output
-function guifi_devel_modelfeature($id , $op) {
+function guifi_devel_modelfeature($id=null, $op=null) {
   switch($id) {
     case 'add':
       $id = 'New';
@@ -1449,7 +1449,7 @@ function guifi_devel_modelfeature_delete_confirm_submit($form, &$form_state) {
 }
 
 // Configuracio unsolclic output
-function guifi_devel_configuracio_usc($id , $op) {
+function guifi_devel_configuracio_usc($id=null, $op=null) {
   switch($id) {
     case 'add':
       $id = 'New';
@@ -1684,7 +1684,7 @@ function guifi_devel_configuracio_usc_delete_confirm_submit($form, &$form_state)
 }
 
 // Firmware Parameter output
-function guifi_devel_paramusc($id , $op) {
+function guifi_devel_paramusc($id=null, $op=null) {
 
   switch($id) {
     case 'add':
