@@ -2340,13 +2340,16 @@ function guifi_check_unsolclics( $verbose = FALSE) {
   $array = array();
   
   $range = 0;
-  $trustedSite = 'http://guifimaster';
-  $localSite = 'http://guifilocal';
   $device_id = null;
   
+  // URLS per defecte utilitzats durant les proves del PFC TODO eliminar 
+  $trustedSite = 'http://guifimaster';
+  $localSite = 'http://guifilocal';
+
+  
   if ($_GET["action"])$action = $_GET["action"];
-  if ($_GET["trustedsite"]) $trustedSite = $_GET["trustedsite"];//'http://guifimaster';
-  if ($_GET["testingsite"]) $localSite = $_GET["testingsite"];'http://guifilocal';
+  if ($_GET["trustedsite"]) $trustedSite = $_GET["trustedsite"];
+  if ($_GET["testingsite"]) $localSite = $_GET["testingsite"];
   if ($_GET["range"]) $range = $_GET["range"];
   else $range = 2;
   switch($range) {
@@ -2551,15 +2554,6 @@ $context = stream_context_create($opts);
     default:  // direct string comparison
       $resultat = strcmp($lengthLocal, $lengthTrusted);
   }
-
-  /* gravem els fitxers per comparar */
-  $fp = fopen('/tmp/local/'.$device_id .'_usc.txt', 'w');
-  fwrite($fp, $htmlLocal);
-  fclose($fp);
-
-  $fp = fopen('/tmp/trusted/'.$device_id .'_usc.txt', 'w');
-  fwrite($fp, $htmlTrusted);
-  fclose($fp);
   
   return $resultat;
 }
