@@ -1644,9 +1644,10 @@ function guifi_devel_configuracio_usc_save($edit) {
 
   _guifi_db_sql('guifi_configuracioUnSolclic',array('id' => $edit['id']),$edit,$log,$to_mail);
 
+  // TODO inicialitzar el nom de la combinacio per treure-la despres de gravar
   guifi_notify(
   $to_mail,
-  t('The Configuracio Unsolclic !configuraciousc has been created / updated by !user.',array('!configuraciousc' => $edit['plantilla'], '!user' => $user->name)),
+  t('The Configuracio Unsolclic !configuraciousc has been created / updated by !user.',array('!configuraciousc' => '', '!user' => $user->name)),
   $log);
 }
 
