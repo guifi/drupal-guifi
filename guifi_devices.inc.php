@@ -11,8 +11,15 @@ function guifi_device_load($id,$ret = 'array') {
   guifi_log(GUIFILOG_FULL,'function guifi_device_load()');
 
   $device = db_fetch_array(db_query('
-    SELECT d.*, z.zone_mode, l.nick as node_nick
-    FROM {guifi_devices} d, {guifi_location} l, {guifi_zone} z
+    SELECT d.*,
+           m.model,
+           f.nom firmware,
+           z.zone_mode, l.nick as node_nick
+    FROM {guifi_devices} d
+           inner join {guifi_model} m on m.mid = d.mid
+           inner join {guifi_firmware} f on f.id = d.fid,
+          {guifi_location} l,
+          {guifi_zone} z
     WHERE d.id = %d
      AND d.nid = l.id AND l.zone_id=z.id',
     $id));
@@ -25,6 +32,13 @@ function guifi_device_load($id,$ret = 'array') {
   else
     $device['variable'] = array();
 
+  // sobreescribim a l'array variable provinent de extra de model amb els valors de mid i firmware que em venen de la consulta
+  // hi afegim el nom del model i el identificador de firmware
+  $device['variable']['model_id'] = $device['mid'];
+  $device['variable']['model'] = $device['model'];
+  $device['variable']['firmware_id'] = $device['fid'];
+  $device['variable']['firmware'] = $device['firmware'];
+  
   // getting device radios
   if ($device['type'] == 'radio') {
     // Get radio
@@ -323,6 +337,7 @@ function guifi_device_form_submit($form, &$form_state) {
 //    print_r($_POST);
 //    print_r($form_state['values']);
 //    exit;
+print_r($form_state['values']);die;
     $id = guifi_device_save($form_state['values']);
 //    exit;
     if ($form_state['clicked_button']['#value'] == t('Save & exit'))
@@ -348,7 +363,7 @@ function guifi_device_form($form_state, $params = array()) {
   // Local javascript validations not actve because of bug in Firefox
   // Errors are not displayed when fieldset folder is collapsed
   // guifi_validate_js("#guifi-device-form");
-
+  print_r($params);die;
   // $form['#attributes'] = array('onsubmit' => 'kk');
   if (empty($form_state['values']))
     $form_state['values'] = $params;
@@ -667,6 +682,7 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
   $to_mail = array();
 
   // device
+  // TODO REMOVE EXTRA  comprovar que no es serialitzen els camps de mid, fid, etc.
   $edit['extra'] = serialize($edit['variable']);
   
   // TODO : corretgir que agafi els midi fid de l'estructura qeu toca dins del edit
