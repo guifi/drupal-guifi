@@ -1,8 +1,5 @@
 <?php
 
-// carreguem el Twig , actualitzat a la 1.91
-include_once('contrib/Twig/Autoloader.php');
-
 function guifi_get_alchemy_ifs($dev) {
   $ifs = array (
       'wLan/Lan' => 'br0',
@@ -107,6 +104,9 @@ function guifi_unsolclic($dev, $format = 'html') {
   
   if (isValidConfiguracioUSC($dev->usc_id)) {
 
+    // carreguem el Twig , versió utilitzada 1.91
+    include_once('contrib/Twig/Autoloader.php');
+    
     // FINAL. Treure el fitxer unsolclic resultant com a mime text/plain
     //drupal_set_header('Content-Type: text/plain; charset=utf-8');
 
