@@ -337,7 +337,6 @@ function guifi_device_form_submit($form, &$form_state) {
 //    print_r($_POST);
 //    print_r($form_state['values']);
 //    exit;
-print_r($form_state['values']);die;
     $id = guifi_device_save($form_state['values']);
 //    exit;
     if ($form_state['clicked_button']['#value'] == t('Save & exit'))
@@ -363,7 +362,7 @@ function guifi_device_form($form_state, $params = array()) {
   // Local javascript validations not actve because of bug in Firefox
   // Errors are not displayed when fieldset folder is collapsed
   // guifi_validate_js("#guifi-device-form");
-  print_r($params);die;
+  
   // $form['#attributes'] = array('onsubmit' => 'kk');
   if (empty($form_state['values']))
     $form_state['values'] = $params;

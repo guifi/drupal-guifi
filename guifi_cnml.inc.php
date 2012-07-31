@@ -233,6 +233,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
             case 'timestamp_changed': $deviceXML->addAttribute('updated',date('Ymd hi',$value)); break;
           }
          }
+         // TODO obtenir model_id i firmware del device o no de extra
          if (!empty($device->extra)) {
            $device->variable = unserialize($device->extra);
            if ($device->type == 'radio')
