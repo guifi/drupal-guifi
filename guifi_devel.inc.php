@@ -609,7 +609,7 @@ function guifi_devel_devices_save($edit, $originalmid=null) {
     }
   }
 
-  drupal_set_message( 'Model Actualitzat : '. $strGuardats . $strBorrats);
+  drupal_set_message( 'Model Actualitzat : '. $edit['model']);
   
   guifi_notify(
     $to_mail,

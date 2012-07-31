@@ -303,7 +303,7 @@ function guifi_radio_add_radio_form($edit) {
 function guifi_radio_firmware_field($fid,$mid) {
 /* Consulta anterior al  PFC */
   $model=db_fetch_object(db_query(
-        "SELECT model name " .
+        "SELECT model as name, mid as id " .
         "FROM {guifi_model} " .
         "WHERE mid=%d}",
     $mid));
@@ -328,7 +328,7 @@ function guifi_radio_firmware_field($fid,$mid) {
     '#default_value' => $fid,
     '#prefix' => '<td><div id="select-firmware">',
     '#suffix' => '</div></td>',
-    '#options' => guifi_types('firmware', NULL, NULL,$model->name),
+    '#options' => guifi_types('firmware', NULL, NULL,$model->id),
     '#description' => t('Used for automatic configuration.'),
     '#weight' => 2,
 //    '#description' => $edit['variable']['model_id'],
