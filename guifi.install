@@ -1911,7 +1911,7 @@ function guifi_update_903() {
 function guifi_update_911() {
 
   // inicialitzacio de totes les combinacions de models-firmwares (com a no validades)  
-  $items[] = update_sql("insert into {guifi_configuracioUnSolclic} values
+  $items[] = update_sql("insert into {guifi_configuracioUnSolclic}(mid, fid, enabled, tipologia, notification, user_created) values
   (40,4,0,0,'albertsarle@gmail.com',541),
   (40,21,0,0,'albertsarle@gmail.com',541),
   (40,18,0,0,'albertsarle@gmail.com',541),
