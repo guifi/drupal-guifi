@@ -132,7 +132,7 @@ function guifi_types($type,$start = 24,$end = 0,$relations = NULL) {
           usc.mid,
           usc.fid,
           f.id as text,
-          f.nom as description
+          f.descripcio as description
         from
           guifi_firmware f
           inner join
