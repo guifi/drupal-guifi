@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file guifi_unsolclic.inc.php
+ */
 
 function guifi_get_alchemy_ifs($dev) {
   $ifs = array (

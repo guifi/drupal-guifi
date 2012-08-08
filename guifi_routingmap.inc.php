@@ -1,8 +1,8 @@
 <?php
-/*
+/**
+ * @file guifi_routingmap.inc.php
  * Created on 01/12/2009 by Eduard
- *
- * functions for routing map tools
+ * Functions for routing map tools
  */
 
 function guifi_routingmap($action = 'init',$actionid) {

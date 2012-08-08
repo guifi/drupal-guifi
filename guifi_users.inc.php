@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file guifi_users.inc.php
+ */
 
 function guifi_user_access($op, $id) {
   global $user;

@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file guifi_hosts.inc.php
+ */
 
 /* guifi_host_form(): Main host form (Common parameters)*/
 function guifi_host_form($edit,$form_weight) {

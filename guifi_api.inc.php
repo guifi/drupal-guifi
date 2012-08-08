@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file guifi_api.inc.php
+ */
+
 // The source code packaged with this file is Free Software, Copyright (C) 2010 by
 // Eduard Duran <eduard.duran@iglu.cat>.
 // It's licensed under the GENERAL PUBLIC LICENSE v2.0 unless stated otherwise.
@@ -6,7 +10,11 @@
 // 		http://www.gnu.org/licenses/gpl-2.0.html
 // GENERAL PUBLIC LICENSE v2.0 is also included in the file called "LICENSE.txt".
 
-
+/**
+ *
+ * @return
+ *   NULL
+ */
 function guifi_api() {
   $gapi = new GuifiAPI();
   if( $gapi->ready ) {
@@ -18,9 +26,10 @@ function guifi_api() {
 }
 
 /**
- * Try to autenticate the user, using any method
+ * Try to authenticate the user using any method
+ * At the moment there is only one method available: 'password'
  * 
- * @param GuifiAPI $gapi Guifi API
+ * @param GuifiAPI $gapi GuifiAPI object
  * @param $parameters Parameters to login
  * @return boolean Whether the user authenticated or not
  */
@@ -64,6 +73,15 @@ function guifi_api_auth_login($gapi, $parameters) {
   return FALSE;
 }
 
+/**
+ * Builds an array with the user information and submits it
+ * @param $type
+ *
+ * @param $title
+ *
+ * @return submitted node
+ * @todo node_submit() doesn't exist?
+ */
 function _guifi_api_prepare_node($type, $title) {
   global $user;
   $edit = array();
@@ -83,7 +101,15 @@ function _guifi_api_prepare_node($type, $title) {
   return $node;
 }
 
-function _guifi_api_zone_check_parameters($gapi, $parameters) {
+/**
+ * Checks zone parameters data types (coherency)
+ * 
+ * @param GuifiAPI $gapi GuifiAPI object
+ * @param mixed[] $parameters
+ *
+ * @return TRUE if the parameters values passed all checks, FALSE otherwise
+ */
+function _guifi_api_zone_check_parameters($gapi, &$parameters) {
   extract($parameters);
   
   if (isset($minx) || isset($maxx) || isset($miny) || isset($maxy)) {
@@ -122,6 +148,7 @@ function _guifi_api_zone_check_parameters($gapi, $parameters) {
     }
   }
   
+  //Checks the service id exists and its type is 'SNPgraphs'
   if (!empty($graph_server)) {
     $server = db_fetch_object(db_query("SELECT id FROM {guifi_services} WHERE id = '%d' AND service_type = 'SNPgraphs'", $graph_server));
     if (!$server->id) {
@@ -130,6 +157,7 @@ function _guifi_api_zone_check_parameters($gapi, $parameters) {
     }
   }
   
+  //Checks the service id exists and its type is 'Proxy'
   if (isset($proxy_server)) {
     $server = db_fetch_object(db_query("SELECT id FROM {guifi_services} WHERE id = '%d' AND service_type = 'Proxy'", $proxy_server));
     if (!empty($proxy_server) && !$server->id) {
@@ -140,6 +168,7 @@ function _guifi_api_zone_check_parameters($gapi, $parameters) {
     }
   }
   
+  //Checks the zone_mode is a valid type ('infrastructure' or 'ad-hoc')
   if (isset($zone_mode)) {
     $zone_modes = array('infrastructure', 'ad-hoc' );
     if (!in_array($zone_mode, $zone_modes)) {
@@ -156,6 +185,8 @@ function _guifi_api_zone_check_parameters($gapi, $parameters) {
  *
  * @param GuifiAPI $gapi
  * @param mixed $parameters Paramaters passed to specify zone properties
+ *
+ * @return
  */
 function guifi_api_zone_add($gapi, $parameters) {
   global $user;
@@ -209,6 +240,8 @@ function guifi_api_zone_add($gapi, $parameters) {
  *
  * @param GuifiAPI $gapi
  * @param mixed $parameters Paramaters passed to specify zone properties
+ *
+ * @return
  */
 function guifi_api_zone_update($gapi, $parameters) {
   if (!guifi_api_check_fields($gapi, array('zone_id' ), $parameters)) {
@@ -249,6 +282,15 @@ function guifi_api_zone_update($gapi, $parameters) {
   return TRUE;
 }
 
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
 function guifi_api_zone_remove($gapi, $parameters) {
   if (!guifi_api_check_fields($gapi, array('zone_id' ), $parameters)) {
     return FALSE;
@@ -276,6 +318,15 @@ function guifi_api_zone_remove($gapi, $parameters) {
   return TRUE;
 }
 
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
 function guifi_api_zone_nearest($gapi, $parameters) {
   if (!guifi_api_check_fields($gapi, array('lat', 'lon' ), $parameters)) {
     return FALSE;
@@ -337,6 +388,15 @@ function _guifi_api_node_check_parameters($gapi, $parameters) {
   return TRUE;
 }
 
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
 function guifi_api_node_add($gapi, $parameters) {
   global $user;
   
@@ -387,7 +447,7 @@ function guifi_api_node_add($gapi, $parameters) {
 /**
  * Updates a guifi.net node
  * @param GuifiAPI $gapi
- * @param $parameters
+ * @param mixed[] $parameters
  * @return unknown_type
  */
 function guifi_api_node_update($gapi, $parameters) {
@@ -431,7 +491,7 @@ function guifi_api_node_update($gapi, $parameters) {
 /**
  * Removes a node from guifi.net
  * @param GuifiAPI $gapi
- * @param $parameters
+ * @param mixed[] $parameters
  * @return unknown_type
  */
 function guifi_api_node_remove($gapi, $parameters) {
@@ -461,7 +521,16 @@ function guifi_api_node_remove($gapi, $parameters) {
   return TRUE;
 }
 
-function _guifi_api_device_check_parameters($gapi, $parameters) {
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
+function _guifi_api_device_check_parameters($gapi, &$parameters) {
   extract($parameters);
   
   if (isset($status)) {
@@ -535,6 +604,8 @@ function _guifi_api_device_check_parameters($gapi, $parameters) {
  *
  * @param GuifiAPi $gapi
  * @param mixed $parameters Parameters of the device to be added
+ *
+ * @return
  */
 function guifi_api_device_add($gapi, $parameters) {
   global $user;
@@ -581,6 +652,15 @@ function guifi_api_device_add($gapi, $parameters) {
   return TRUE;
 }
 
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
 function guifi_api_device_update($gapi, $parameters) {
   if (!guifi_api_check_fields($gapi, array('device_id' ), $parameters)) {
     return FALSE;
@@ -615,7 +695,7 @@ function guifi_api_device_update($gapi, $parameters) {
  * Remove a device from guifi.net
  * 
  * @param GuifiAPI $gapi
- * @param $parameters Parameters to remove the device (device_id, basically)
+ * @param mixed[] $parameters Parameters to remove the device (device_id, basically)
  * @return boolean Whether the device was removed or not
  */
 function guifi_api_device_remove($gapi, $parameters) {
@@ -645,6 +725,15 @@ function guifi_api_device_remove($gapi, $parameters) {
   return TRUE;
 }
 
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
 function _guifi_api_radio_check_parameters($gapi, $parameters) {
   extract($parameters);
   
@@ -684,7 +773,7 @@ function _guifi_api_radio_check_parameters($gapi, $parameters) {
   
   if (isset($antenna_mode)) {
     $antenna_modes = array('Main', 'Aux' );
-    if (!in_array($anntena_mode, $antenna_modes)) {
+    if (!in_array($antenna_mode, $antenna_modes)) {
       $gapi->addError(403, "antenna_mode: $antenna_mode");
       return FALSE;
     }
@@ -727,7 +816,7 @@ function _guifi_api_radio_check_parameters($gapi, $parameters) {
 }
 
 /**
- * Adds a radio to a device of guifi.net
+ * Adds a radio to a device
  * @param GuifiAPI $gapi
  * @param mixed[] $parameters Parameters of the radio
  * @return unknown_type
@@ -816,6 +905,15 @@ function guifi_api_radio_add($gapi, $parameters) {
   return TRUE;
 }
 
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
 function guifi_api_radio_update($gapi, $parameters) {
   if (!guifi_api_check_fields($gapi, array('device_id', 'radiodev_counter' ), $parameters)) {
     return FALSE;
@@ -866,6 +964,15 @@ function guifi_api_radio_update($gapi, $parameters) {
   return TRUE;
 }
 
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
 function guifi_api_radio_remove($gapi, $parameters) {
   if (!guifi_api_check_fields($gapi, array('device_id', 'radiodev_counter' ), $parameters)) {
     return FALSE;
@@ -896,6 +1003,15 @@ function guifi_api_radio_remove($gapi, $parameters) {
   return TRUE;
 }
 
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
 function guifi_api_radio_nearest($gapi, $parameters) {
    if (!guifi_api_check_fields($gapi, array('node_id' ), $parameters)) {
     return FALSE;
@@ -973,6 +1089,15 @@ function guifi_api_radio_nearest($gapi, $parameters) {
   $gapi->addResponseField('radios', $devices);
 }
 
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
 function guifi_api_interface_add($gapi, $parameters) {
   if (!guifi_api_check_fields($gapi, array('device_id', 'radiodev_counter' ), $parameters)) {
     return FALSE;
@@ -1030,6 +1155,15 @@ function guifi_api_interface_add($gapi, $parameters) {
   return TRUE;
 }
 
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
 function guifi_api_interface_remove($gapi, $parameters) {
   if (!guifi_api_check_fields($gapi, array('interface_id' ), $parameters)) {
     return FALSE;
@@ -1071,7 +1205,16 @@ function guifi_api_interface_remove($gapi, $parameters) {
   return TRUE;
 }
 
-function _guifi_api_link_check_parameters($gapi, $parameters) {
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
+function _guifi_api_link_check_parameters($gapi, &$parameters) {
   extract($parameters);
   
   if (isset($status)) {
@@ -1094,6 +1237,15 @@ function _guifi_api_link_check_parameters($gapi, $parameters) {
   return TRUE;
 }
 
+
+/**
+ *
+ * @param $l_ipv4
+ *
+ * @param $r_ipv4
+ *
+ * @return
+ */
 function _guifi_api_link_validate_local_ipv4($l_ipv4, $r_ipv4) {
   $item1 = _ipcalc($l_ipv4['ipv4'], $l_ipv4['netmask']);
   $item2 = _ipcalc($r_ipv4['ipv4'], $r_ipv4['netmask']);
@@ -1105,6 +1257,15 @@ function _guifi_api_link_validate_local_ipv4($l_ipv4, $r_ipv4) {
   }
 }
 
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
 function guifi_api_link_add($gapi, $parameters) {
   if (!guifi_api_check_fields($gapi, array('from_device_id', 'from_radiodev_counter' ), $parameters)) {
     return FALSE;
@@ -1241,6 +1402,15 @@ function guifi_api_link_add($gapi, $parameters) {
   }
 }
 
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
 function guifi_api_link_update($gapi, $parameters) {
   if (!guifi_api_check_fields($gapi, array('link_id' ), $parameters)) {
     return FALSE;
@@ -1309,6 +1479,15 @@ function guifi_api_link_update($gapi, $parameters) {
   return TRUE;
 }
 
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
 function guifi_api_link_remove($gapi, $parameters) {
   if (!guifi_api_check_fields($gapi, array('link_id' ), $parameters)) {
     return FALSE;
@@ -1349,7 +1528,16 @@ function guifi_api_link_remove($gapi, $parameters) {
   return TRUE;
 }
 
-function _guifi_api_misc_model_check_parameters($gapi, $parameters) {
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
+function _guifi_api_misc_model_check_parameters($gapi, &$parameters) {
   if (isset($parameters['type'])) {
     $types = array('Extern', 'PCMCIA', 'PCI' );
     if (!in_array($parameters['type'], $types)) {
@@ -1378,8 +1566,18 @@ function _guifi_api_misc_model_check_parameters($gapi, $parameters) {
   return TRUE;
 }
 
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
 function guifi_api_misc_model($gapi, $parameters) {
   $sql = "SELECT mid, fid, model, type, supported FROM {guifi_model}";
+
   
   if (!_guifi_api_misc_model_check_parameters($gapi, $parameters)) {
     return FALSE;
@@ -1414,6 +1612,15 @@ function guifi_api_misc_model($gapi, $parameters) {
   return TRUE;
 }
 
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
 function guifi_api_misc_manufacturer($gapi, $parameters) {
   $sql = "SELECT fid, name, url FROM {guifi_manufacturer} ORDER BY fid ASC";
   
@@ -1427,6 +1634,14 @@ function guifi_api_misc_manufacturer($gapi, $parameters) {
 }
 
 
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
 function guifi_api_misc_firmware($gapi, $parameters) {
   $relation = '';
   if( !empty( $parameters['model_id'] ) ) {
@@ -1453,6 +1668,14 @@ function guifi_api_misc_firmware($gapi, $parameters) {
 }
 
 
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
 function guifi_api_misc_protocol($gapi, $parameters) {
   $types = guifi_types('protocol');
   
@@ -1466,6 +1689,15 @@ function guifi_api_misc_protocol($gapi, $parameters) {
   return TRUE;
 }
 
+
+/**
+ *
+ * @param GuifiAPI $gapi GuifiAPI object
+ *
+ * @param mixed[] $parameters
+ *
+ * @return
+ */
 function guifi_api_misc_channel($gapi, $parameters) {
   if (!guifi_api_check_fields($gapi, array('protocol' ), $parameters)) {
     return FALSE;
@@ -1488,11 +1720,13 @@ function guifi_api_misc_channel($gapi, $parameters) {
 }
 
 /**
- * Check if any fields are present in the parameters passed to the API or not
+ * Check if a set of fields are present in the parameters array passed to the API
  *
- * @param GuifiAPI $gapi
- * @param string[] $required
- * @param mixed[] $parameters
+ * @param GuifiAPI $gapi GuifiAPI object
+ * @param string[] $required Array with required fieldnames
+ * @param mixed[] $parameters Array of parameters to be checked
+ *
+ * @return
  */
 function guifi_api_check_fields($gapi, $required, $parameters) {
   $success = TRUE;

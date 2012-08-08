@@ -1,17 +1,14 @@
 <?php
-// $Id: guifi.module x$
-
 /**
- * @file guifi_node.incp.php
+ * @file guifi_node.inc.php
  * Manage guifi_node
  * rroca
  */
 
 /* main node (locations) hooks */
+
 /** guifi_node_access(): construct node permissions
 */
-
-
 function guifi_node_access($op, $node) {
   global $user;
 
@@ -281,7 +278,7 @@ function guifi_node_form(&$node, $form_state) {
 
   $form['position'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Node postion settings'),
+    '#title' => t('Node position settings'),
     '#weight' => 4,
     '#collapsible' => FALSE,
   );
@@ -1213,6 +1210,8 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
   $query = db_query("SELECT d.id FROM {guifi_devices} d WHERE nid=%d",$id);
   while ($d = db_fetch_object($query)) {
      $device = guifi_device_load($d->id);
+
+     // Edit and delete buttons
      if (guifi_device_access('update',$device['id'])) {
        $edit_radio =  '<table><tr><td>'.l(guifi_img_icon('edit.png'),'guifi/device/'.$device['id'].'/edit',
             array(
@@ -1225,6 +1224,8 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
               'title' => t('delete device'),
               'attributes' => array('target' => '_blank'))).'</td></tr></table>';
      }
+
+     // Traceroute button
      if (user_access('create guifi nodes')) {
        $traceroute = l(guifi_img_icon('discover-routes.png'),'guifi/menu/ip/traceroute/'.$device['id'],
             array(
@@ -1232,17 +1233,23 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
               'title' => t('trace routes, discover services from this device'),
               'attributes' => array('target' => '_blank')));
      } else $traceroute = '';
+
+     // Firmware text which links to unsolclic feature
      if ($device->variable['firmware'] != "n/d") {
        $unsolclic = l($device[variable]['firmware'],
          'guifi/device/'.$device['id'].'/view/unsolclic',
          array('attributes' => array('title' => t("Get radio configuration with singleclick")))
        );
      }
+
+     // Get IP assigned to the device
      $ip = guifi_main_ip($device[id]);
 
+     // Availability image
      $status_url = guifi_cnml_availability(
        array('device' => $device['id'],'format' => 'short'));
 
+     // Groups all this data in an array for the theme() function
      $rows[] = array(
                  '<a href="'.url('guifi/device/'.$device[id]).'">'.$device[nick].'</a>',
                  $device[type],
@@ -1255,6 +1262,7 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
                     );
   }
 
+  // Creates the table with devices if any, otherwise just outputs the node has not devices
   if (count($rows))
     $output = '<h4>'.t('devices').'</h4>'.
       theme('table', $header, $rows,
@@ -1263,6 +1271,7 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
   else
     $output = theme('box',t('This node does not have any device'),$form);
 
+  // Again, it creates a table with the links, if they exist
   if ($links) {
     $node = node_load(array('nid' => $node->id));
     drupal_set_title(t('devices @ %node',array('%node' => $node->title)));

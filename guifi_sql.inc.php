@@ -1,10 +1,9 @@
 <?php
-// $Id: guifi.module x$
-
 /**
  * @file guifi_sql.inc.php
  * Manage the SQL statements against the guifi.net schema
- **/
+ */
+
 /** _guifi_db_sql(): UPSERT (SQL insert or update) on
  * node, device, radios, interfaces, ipv4, links...
  **/

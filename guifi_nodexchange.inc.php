@@ -1,7 +1,7 @@
 <?php
 /**
- * guifi_nodeXchange
-**/
+ * @file guifi_nodexchange.inc.php
+ */
 
 // All commented on 14/8/2008, to check if it's really being used or not
 

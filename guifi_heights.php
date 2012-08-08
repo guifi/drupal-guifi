@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file guifi_heights.php
+ */
 
 /*
   Busca una dada d'elevació dins el cata.grd

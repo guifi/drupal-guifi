@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file guifi_gml.inc.php
+ */
 
 function guifi_gml($zid,$action = "help",$type = 'gml') {
 
