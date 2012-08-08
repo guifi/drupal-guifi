@@ -271,7 +271,7 @@ function guifi_node_form(&$node, $form_state) {
 
   $form['position'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Node postion settings'),
+    '#title' => t('Node position settings'),
     '#weight' => 4,
     '#collapsible' => FALSE,
   );

@@ -773,7 +773,7 @@ function _guifi_api_radio_check_parameters(&$gapi, $parameters) {
   
   if (isset($antenna_mode)) {
     $antenna_modes = array('Main', 'Aux' );
-    if (!in_array($anntena_mode, $antenna_modes)) {
+    if (!in_array($antenna_mode, $antenna_modes)) {
       $gapi->addError(403, "antenna_mode: $antenna_mode");
       return FALSE;
     }
