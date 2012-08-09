@@ -16,8 +16,8 @@ function guifi_device_load($id,$ret = 'array') {
            f.nom firmware,
            z.zone_mode, l.nick as node_nick
     FROM {guifi_devices} d
-           inner join {guifi_model} m on m.mid = d.mid
-           inner join {guifi_firmware} f on f.id = d.fid,
+           left join {guifi_model} m on m.mid = d.mid
+           left join {guifi_firmware} f on f.id = d.fid,
           {guifi_location} l,
           {guifi_zone} z
     WHERE d.id = %d
