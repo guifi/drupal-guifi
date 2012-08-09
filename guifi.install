@@ -124,7 +124,7 @@ function guifi_schema() {
          'comment' => array('type' => 'text', 'size' => 'big', 'not null' => FALSE),
          'flag' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => 'Planned'),
          'extra' => array('type' => 'text', 'size' => 'big', 'not null' => FALSE, 'comment' => 'store variable data depending on guifi_devices(type)'),
-         'usc_id' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, 'comment' => 'Ip Server Logs'),
+         'usc_id' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, 'comment' => 'UnSolClic template id'),
          'mid' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, 'comment' => 'Model Id'),
          'fid' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, '' => 'Firmware Id'),
          'graph_server' => array('type' => 'int',  'size' => 'medium' , 'not null' => TRUE, 'default' => 0, 'comment' => 'FK to guifi_services (SNPGraphs)'),
