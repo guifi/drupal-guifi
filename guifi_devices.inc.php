@@ -36,7 +36,7 @@ function guifi_device_load($id,$ret = 'array') {
   // hi afegim el nom del model i el identificador de firmware
   $device['variable']['model_id'] = $device['mid'];
   $device['variable']['model'] = $device['model'];
-  $device['variable']['firmware_id'] = $device['fid'];
+  $device['variable']['fid'] = $device['fid'];
   $device['variable']['firmware'] = $device['firmware'];
   
   // getting device radios

@@ -61,7 +61,7 @@ function guifi_radio_form($edit, $form_weight) {
   //      $edit['mid']);
 
   $form['radio_settings']['variable']['firmware'] =
-  guifi_radio_firmware_field($edit['variable']['firmware'],
+  guifi_radio_firmware_field($edit['variable']['fid'],
       $edit['variable']['model_id']);
   
   $form['radio_settings']['mac'] = array(
@@ -326,7 +326,7 @@ function guifi_radio_firmware_field($fid,$mid) {
     '#type' => 'select',
     '#title' => t("Firmware"),
 
-     '#parents' => array('variable','firmware'),
+    '#parents' => array('variable','fid'),
     '#required' => TRUE,
     '#default_value' => $fid,
     '#prefix' => '<td><div id="select-firmware">',
