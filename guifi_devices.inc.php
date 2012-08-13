@@ -36,9 +36,9 @@ function guifi_device_load($id,$ret = 'array') {
   // hi afegim el nom del model i el identificador de firmware
   $device['variable']['model_id'] = $device['mid'];
   $device['variable']['model'] = $device['model'];
-  $device['variable']['fid'] = $device['fid'];
+  $device['variable']['firmware_id'] = $device['fid'];
   $device['variable']['firmware'] = $device['firmware'];
-  
+
   // getting device radios
   if ($device['type'] == 'radio') {
     // Get radio
@@ -686,13 +686,13 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
   
   // TODO : corretgir que agafi els midi fid de l'estructura qeu toca dins del edit
   // amb lo de sota els repliquem per poder-hi accedir directament
-  $edit['mid'] = $edit['variable']['mid'];
-  $edit['fid'] = $edit['variable']['fid'];
+  $edit['mid'] = $edit['variable']['model_id'];
+  $edit['fid'] = $edit['variable']['firmware_id'];
   
   // busquem el id de la configuracioUSC per aquests mid i fid
-  $sql = db_query('SELECT id as uscid, enabled  FROM {guifi_configuracioUnSolclic} WHERE mid=%d and fid=%d ', $edit['mid'], $edit['fid']);
+  $sql = db_query('SELECT id as uscid, enabled FROM {guifi_configuracioUnSolclic} WHERE mid=%d and fid=%d ', $edit['mid'], $edit['fid']);
   $configuracio = db_fetch_object($sql);
-  
+
   $edit['usc_id'] = $configuracio->uscid;
   $ndevice = _guifi_db_sql('guifi_devices',array('id' => $edit['id']),$edit,$log,$to_mail);
 
