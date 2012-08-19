@@ -635,10 +635,18 @@ function guifi_api_device_add($gapi, $parameters) {
   foreach ($parameters as $key => $value) {
     $device[$key] = $value;
   }
-  
+
+  $firmware=db_fetch_object(db_query(
+        "SELECT id, nom " .
+        "FROM {guifi_firmware} " .
+        "WHERE nom = '%s'",
+    $device['firmware']));
+
   $device['new'] = TRUE;
-  $device['variable'] = array('model_id' => $device['model_id'], 'firmware' => $device['firmware'] );
-  
+  $device['variable'] = array('model_id' => $device['model_id'], 'firmware' => $device['firmware'], 'firmware_id' => $firmware->id );
+  $device['mid'] = $device['model_id'];
+  $device['fid'] = $firmware->id;
+
   if (!guifi_device_access('create', $device)) {
     $gapi->addError(501);
     return FALSE;
@@ -685,9 +693,17 @@ function guifi_api_device_update($gapi, $parameters) {
   foreach ($parameters as $key => $value) {
     $device[$key] = $value;
   }
-  
-  $device['variable'] = array('model_id' => $device['model_id'], 'firmware' => $device['firmware'] );
-  
+
+  $firmware=db_fetch_object(db_query(
+        "SELECT id, nom " .
+        "FROM {guifi_firmware} " .
+        "WHERE nom = '%s'",
+    $device['firmware']));
+
+  $device['variable'] = array('model_id' => $device['model_id'], 'firmware' => $device['firmware'], 'firmware_id' => $firmware->id );
+  $device['mid'] = $device['model_id'];
+  $device['fid'] = $firmware->id;
+
   $device_id = guifi_device_save($device);
 }
 
@@ -1655,7 +1671,7 @@ function guifi_api_misc_firmware($gapi, $parameters) {
     }
   }
   
-  $types = guifi_types('firmware', NULL, NULL, $relation);
+  $types = guifi_types('firmware', NULL, NULL, $parameters['model_id']);
   
   $firmwares = array();
   
