@@ -36,7 +36,7 @@ function guifi_device_load($id,$ret = 'array') {
   // hi afegim el nom del model i el identificador de firmware
   $device['variable']['model_id'] = $device['mid'];
   $device['variable']['model'] = $device['model'];
-  $device['variable']['fid'] = $device['fid'];
+  $device['variable']['firmware_id'] = $device['fid'];
   $device['variable']['firmware'] = $device['firmware'];
 
   // getting device radios
@@ -377,7 +377,7 @@ function guifi_device_form($form_state, $params = array()) {
     $form_state['values']['links'] = array();
     $form_state['values']['netmask'] = '255.255.255.224';
     if ($form_state['values']['type'] == 'radio') {
-      $form_state['values']['variable']['firmware'] = 'AirOsv30';
+      $form_state['values']['variable']['firmware_id'] = '13';
       $form_state['values']['variable']['model_id'] = '25';
     }
   }

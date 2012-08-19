@@ -60,10 +60,15 @@ function guifi_radio_form($edit, $form_weight) {
   //  guifi_radio_firmware_field($edit['fid'],
   //      $edit['mid']);
 
-  $form['radio_settings']['variable']['firmware'] =
+  $form['radio_settings']['variable']['firmware_id'] =
   guifi_radio_firmware_field($edit['variable']['firmware_id'],
       $edit['variable']['model_id']);
-  
+
+  $form['radio_settings']['variable']['firmware'] = array(
+    '#type' => 'hidden',
+    '#default_value' => $edit['variable']['firmware'],
+  );
+
   $form['radio_settings']['mac'] = array(
     '#type' => 'textfield',
     '#title' => t('Device MAC Address'),
@@ -308,14 +313,13 @@ function guifi_radio_firmware_field($fid,$mid) {
   $model=db_fetch_object(db_query(
         "SELECT model as name, mid as id " .
         "FROM {guifi_model} " .
-        "WHERE mid=%d}",
+        "WHERE mid=%d",
     $mid));
 
   return array(
     '#type' => 'select',
     '#title' => t("Firmware"),
-
-     '#parents' => array('variable','firmware_id'),
+    '#parents' => array('variable','firmware_id'),
     '#required' => TRUE,
     '#default_value' => $fid,
     '#prefix' => '<td><div id="select-firmware">',
