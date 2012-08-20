@@ -694,8 +694,9 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
         "FROM {guifi_firmware} " .
         "WHERE id = '%d'",
         $edit['fid']));
-  }
     $edit['variable']['firmware'] = $firmware->name;
+  }
+
 
   // TODO REMOVE EXTRA  comprovar que no es serialitzen els camps de mid, fid, etc.
   $edit['extra'] = serialize($edit['variable']);
