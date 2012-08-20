@@ -3,43 +3,6 @@
  * @file guifi_unsolclic.inc.php
  */
 
-function guifi_get_alchemy_ifs($dev) {
-  $ifs = array (
-      'wLan/Lan' => 'br0',
-      'wLan' => 'br0',
-      'vlan' => 'br0:1',
-      'vlwan' => 'br0',
-      'vlwan' => 'br0',
-      'wds/p2p' => 'wds0.',
-      'Wan' => 'vlan1',
-      'vlan2' => 'vlan2',
-      'vlan3' => 'vlan3',
-      'vlan4' => 'vlan4'
-  );
-  $ret = array();
-  if (!empty($dev->radios))       foreach ($dev->radios as $radio_id => $radio)
-    if (!empty($radio[interfaces])) foreach ($radio[interfaces] as $interface_id => $interface)
-    if (!empty($interface[ipv4]))   foreach ($interface[ipv4] as $ipv4_id => $ipv4)
-    if (!empty($ipv4[links]))       foreach ($ipv4[links] as $key => $link) {
-    if ($link['link_type'] == 'wds')
-      $wds_links[] = $link ;
-    else {
-      if (!isset($ret[$ifs[$interface['interface_type']]]))
-        $ret[$ifs[$interface['interface_type']]] = true;
-    }
-  }
-  if (count($wds_links))
-    foreach ($wds_links as $key => $wds)
-    $ret['wds0.'.($key+2)] = true;
-
-  if (!empty($dev->interfaces)) foreach ($dev->interfaces as $interface_id => $interface)
-    if (!isset($ret[$ifs[$interface['interface_type']]]))
-    $ret[$ifs[$interface['interface_type']]] = true;
-
-  return $ret;
-}
-
-
 function array_flatten(array $array, array $return = array(), $prefix=null, $parentName=null, $nivell=0) {
 
   $counter = 1;
