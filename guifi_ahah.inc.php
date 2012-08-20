@@ -602,8 +602,8 @@ function guifi_ahah_select_firmware_by_model(){
 
     // Validate the firmware.
     if (isset($form['radio_settings']['variable']['model_id'])) {
-      $form['radio_settings']['variable']['firmware'] =
-        guifi_radio_firmware_field($_POST['variable']['firmware'],
+      $form['radio_settings']['variable']['firmware_id'] =
+        guifi_radio_firmware_field($_POST['variable']['firmware_id'],
           $mid);
       cache_set($cid, $form, 'cache_form', $cache->expire);
 
@@ -611,7 +611,7 @@ function guifi_ahah_select_firmware_by_model(){
       $form_state = array();
       $form['#post'] = array();
       $form = form_builder($form['form_id']['#value'] , $form, $form_state);
-      $output = drupal_render($form['radio_settings']['variable']['firmware']);
+      $output = drupal_render($form['radio_settings']['variable']['firmware_id']);
       drupal_json(array('status' => TRUE, 'data' => $output));
     }
     else {

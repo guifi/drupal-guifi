@@ -681,14 +681,25 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
   $to_mail = array();
 
   // device
-  // TODO REMOVE EXTRA  comprovar que no es serialitzen els camps de mid, fid, etc.
-  $edit['extra'] = serialize($edit['variable']);
   
   // TODO : corretgir que agafi els midi fid de l'estructura qeu toca dins del edit
   // amb lo de sota els repliquem per poder-hi accedir directament
   $edit['mid'] = $edit['variable']['model_id'];
   $edit['fid'] = $edit['variable']['firmware_id'];
-  
+
+
+  if (!$edit['variable']['firmware']) {
+    $firmware = db_fetch_object(db_query(
+        "SELECT id, nom as name " .
+        "FROM {guifi_firmware} " .
+        "WHERE id = '%d'",
+        $edit['fid']));
+  }
+    $edit['variable']['firmware'] = $firmware->name;
+
+  // TODO REMOVE EXTRA  comprovar que no es serialitzen els camps de mid, fid, etc.
+  $edit['extra'] = serialize($edit['variable']);
+
   // busquem el id de la configuracioUSC per aquests mid i fid
   $sql = db_query('SELECT id as uscid, enabled FROM {guifi_configuracioUnSolclic} WHERE mid=%d and fid=%d ', $edit['mid'], $edit['fid']);
   $configuracio = db_fetch_object($sql);
