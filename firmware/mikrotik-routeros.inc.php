@@ -131,7 +131,13 @@ function unsolclic_routeros($dev) {
   // SNMP
   _outln_comment();
   _outln_comment('SNMP');
-  _outln(sprintf('/snmp set contact="guifi@guifi.net" enabled=yes location="%s"',$node->nick));
+  if ($dev->variable['firmware'] == 'RouterOSv5.x') {
+     $community = 'trap-community=public';
+     _outln(sprintf('/snmp community set public addresses=0.0.0.0/0'));
+  } else {
+    $community = '';
+  }
+  _outln(sprintf('/snmp set contact="guifi@guifi.net" enabled=yes location="%s" %s',$node->nick, $community));
 
   // User guest
   _outln_comment();
