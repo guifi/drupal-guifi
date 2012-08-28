@@ -323,6 +323,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
                        'Supertrasto guifiBUS guifi.net',
                        'Routerboard SXT 5HnD',
                        'Routerboard 493/G',
+                       'OmniTIK Uxx-5HnD',
                      ))) {
                  switch ($device->variable['firmware']) {
                  case 'kamikaze':
