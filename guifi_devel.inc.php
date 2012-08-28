@@ -1518,7 +1518,7 @@ function guifi_devel_configuracio_usc($id=null, $op=null) {
 function guifi_devel_configuracio_usc_form($form_state, $id) {
 
   $sql = db_query('SELECT
-      usc.id, usc.mid, usc.fid, usc.enabled, usc.plantilla, mf.fid as mfid, mf.name as manufacturer, m.model, f.nom as nomfirmware
+      usc.id, usc.mid, usc.fid, usc.enabled, usc.snmp_id, usc.plantilla, mf.fid as mfid, mf.name as manufacturer, m.model, f.nom as nomfirmware
   FROM
       guifi_configuracioUnSolclic usc
       inner join guifi_firmware f on f.id = usc.fid
@@ -1601,6 +1601,20 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
     $totalParams++;
   }
   
+  $form['snmp_id'] = array(
+      '#type' => 'textarea',
+      '#type' => 'textfield',
+      '#title' => t('Default SNMP Interface(s) or ID'),
+      '#required' => TRUE,
+      '#default_value' => $configuraciousc->snmp_id,
+      '#description' => t('<b>Use this format: eth0|eth1 </b>, ( ap|client ) where the first interface is in <b>AP</b> mode and the second in <b>STA ( client )</b> mode.'),
+      '#prefix' => '<td>',
+      '#suffix' => '</td>',
+      '#weight' => $form_weight++,
+      '#cols' => 60,
+      '#rows' => 30,
+  );
+
   $form['plantilla'] = array(
       '#type' => 'textarea',
       '#title' => t('Template File'),

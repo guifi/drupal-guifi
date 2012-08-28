@@ -2106,4 +2106,11 @@ function guifi_update_904() {
   
   return $items;  
 }
+
+function guifi_update_905() {
+   $items = array();
+   $items[] = update_sql("ALTER TABLE {guifi_configuracioUnSolclic} ADD snmp_id varchar(32) NOT NULL AFTER enabled");
+  return $items;
+}
+
 ?>

@@ -280,144 +280,24 @@ function guifi_cnml($cnmlid,$action = 'help') {
                }
               }
               if (isset($device->variable['model_id']))
-              if (in_array($model_name,
-                     array('WRT54Gv1-4','WHR-HP-G54, WHR-G54S','WRT54GL','WRT54GSv1-2','WRT54GSv4'))) {
-               switch ($device->variable['firmware']) {
-               case 'whiterussian':
+                $snmp = db_fetch_object(db_query('SELECT snmp_id FROM guifi_configuracioUnSolclic WHERE id=%d', $device->usc_id));
+                list($modeap,$modesta) = explode("|",$snmp->snmp_id);
+                if (empty($modesta))
+                  $modesta = $modeap;
+		if (eregi("^[0-9]+$",$modeap))
+                  $snmp_iname = 'snmp_index';
+                else
+                  $snmp_iname = 'snmp_name';
+	        if (eregi("^[0-9]+$",$modesta))
+                  $snmp_ciname = 'snmp_index';
+                else
+                  $snmp_ciname = 'snmp_name';
+
                 if ($radio->mode == 'client') {
-                  $radioXML->addAttribute('snmp_name','eth1');
+                  $radioXML->addAttribute($snmp_ciname,$modesta);
                  } else {
-                  $radioXML->addAttribute('snmp_name','br0');
+                  $radioXML->addAttribute($snmp_iname,$modeap);
                  }
-                 break;
-               case 'kamikaze':
-                if ($radio->mode == 'client') {
-                  $radioXML->addAttribute('snmp_name','eth0.1');
-                 } else {
-                  $radioXML->addAttribute('snmp_name','br-lan');
-                 }
-                 break;
-               case 'gsffirm':
-                  $radioXML->addAttribute('snmp_name','wifi0');
-                 break;
-               case 'Freifunk-OLSR':
-               case 'Freifunk-BATMAN':
-                 $radioXML->addAttribute('snmp_name','eth1');
-                 break;
-               default:
-                 $radioXML->addAttribute('snmp_index',6);
-               }
-              } else if  (in_array($model_name,
-                // TODO, for mikrotiks would be better to use fid instead of model name?
-                     array(
-                       'Routerboard 112' ,
-                       'Routerboard 133' ,
-                       'Routerboard 133C',
-                       'Routerboard 153',
-                       'Routerboard 333',
-                       'Routerboard 411',
-                       'Routerboard 433',
-                       'Routerboard 532',
-                       'Routerboard 600',
-                       'Routerboard 800',
-                       'Supertrasto guifiBUS guifi.net',
-                       'Routerboard SXT 5HnD',
-                       'Routerboard 493/G',
-                       'OmniTIK Uxx-5HnD',
-                     ))) {
-                 switch ($device->variable['firmware']) {
-                 case 'kamikaze':
-                   $radioXML->addAttribute('snmp_name','ath0');
-                 case 'RouterOSv2.9':
-                 case 'RouterOSv3.x':
-		 case 'RouterOSv4.0+':
-                 case 'RouterOSv4.7+':
-                 case 'RouterOSv5.x':
-                   $radioXML->addAttribute('snmp_name','wlan'.(string) ($id + 1));
-                 break;
-                   }
-              }
-                else if  (in_array($model_name,
-                     array(
-                       'Routerboard 1100',
-	               'Routerboard 750/G'
-                     ))) {
-                   $radioXML->addAttribute('snmp_name','Lan/Lan');
-              }
-                else if  (in_array($model_name,
-                     array('NanoStation2' , 'NanoStation5', 'LiteStation2', 'LiteStation5', 'NanoStation Loco2', 'NanoStation Loco5', 'Bullet2', 'Bullet5'))) {
-                 switch ($device->variable['firmware']) {
-                 case 'kamikaze':
-                 case 'AirOsv3.6+':
-                   $radioXML->addAttribute('snmp_name','ath0');
-                 break;
-                 case 'DD-WRTv23':
-                   $radioXML->addAttribute('snmp_name','br0');
-                 break;
-                 case 'AirOsv30':
-                 case 'AirOsv221':
-                 case 'gsffirm':
-                   $radioXML->addAttribute('snmp_name','wifi0');
-                 break;
-                   }
-              }
-                else if  (in_array($model_name,
-                     array('Meraki/Fonera' , 'Avila GW2348-4', 'Asus WL-500xx', 'Alix1', 'Alix2', 'Alix3'))) {
-                 switch ($device->variable['firmware']) {
-                 case 'kamikaze':
-                   $radioXML->addAttribute('snmp_name','ath0');
-                 break;
-                 case 'gsffirm':
-                   $radioXML->addAttribute('snmp_name','wifi0');
-                 break;
-                   }
-              }
-                 else if  (in_array($model_name,
-                     array('RouterStation',
-                              'RouterStationPro'))) {
-                 switch ($device->variable['firmware']) {
-                 case 'kamikaze':
-                   $radioXML->addAttribute('snmp_name','br-wlanLan');
-                 break;
-                 case 'gsffirm':
-                   $radioXML->addAttribute('snmp_name','wifi0');
-                 break;
-                   }
-              }
-                else if  (in_array($model_name,
-                   array('AirMaxM2 Rocket/Nano/Loco',
-                            'AirMaxM5 Rocket/Nano/Loco',
-                            'AirMaxM2 Bullet/PwBrg/AirGrd/NanoBr',
-                            'AirMaxM5 Bullet/PwBrg/AirGrd/NanoBr'
-                            ))) {
-                   switch ($device->variable['firmware']) {
-                     case 'AirOsv52':
-                       $radioXML->addAttribute('snmp_name','ath0');
-                   break;
-                   }
-               }
-                else if  (in_array($model_name,
-                   array('GuifiStation2',
-                            'GuifiStation5'
-                            ))) {
-                   switch ($device->variable['firmware']) {
-                     case 'GuifiStationOS1.0':
-                       $radioXML->addAttribute('snmp_name','ath0');
-                   break;
-                   }
-               }
-                else if  (in_array($model_name,
-                   array('DIR-600 B1/B2'
-                            ))) {
-                   switch ($device->variable['firmware']) {
-                 case 'DD-WRTv24preSP2':
-                   $radioXML->addAttribute('snmp_name','ra0');
-                   break;
-                   }
-               }
-                else {
-                   $radioXML->addAttribute('snmp_name','eth0');
-               }
             }
             switch ($radio->mode) {
               case 'ap': $nodesummary->ap++; break;
