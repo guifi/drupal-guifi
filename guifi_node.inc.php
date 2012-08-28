@@ -401,6 +401,7 @@ function guifi_node_form(&$node, $form_state) {
     '#length' => 20,
     '#maxlength' => 20,
     '#default_value' => $node->elevation,
+    '#element_validate' => array('guifi_elevation_validate'),
     '#description' => t("Antenna height over the floor level."),
     '#weight' => 10,
   );
@@ -1440,6 +1441,17 @@ function guifi_hwt_img($id, $img) {
   fclose($fd);
 
   return;
+}
+
+function guifi_elevation_validate($element, &$form_state) {
+  if ($element['#value'] != '0') {
+    if (empty($element['#value']))
+      form_error($element,t('Antenna elevation in meters must be specified.'));
+  }
+  if (!is_numeric($element['#value']))
+    form_error($element,t('Antenna elevation in meters must be numeric'));
+  if ($element['#value'] < 0)
+    form_error($element,t('Antenna elevation in meters must be a positive number'));
 }
 
 ?>
