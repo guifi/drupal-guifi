@@ -1675,10 +1675,10 @@ function guifi_api_misc_firmware($gapi, $parameters) {
   
   $firmwares = array();
   
-  foreach( $types as $type_title => $type_description ) {
-    $firmwares[] = array('title' => $type_title, 'description' => $type_description );
+  foreach( $types as $type) {
+    $firmwares[] = array('id' =>$type['fid'], 'title' => $type['name'], 'description' => $type['description'] )
   }
-  
+
   $gapi->addResponseField('firmwares', $firmwares);
   return TRUE;
 }

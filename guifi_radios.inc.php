@@ -316,6 +316,12 @@ function guifi_radio_firmware_field($fid,$mid) {
         "WHERE mid=%d",
     $mid));
 
+  $options = array();
+  $firm = guifi_types('firmware', NULL, NULL,$model->id);
+  foreach( $firm as $key => $i) {
+    $options[$firm[$key]['fid']] = t($firm[$key]['description']);
+  }
+
   return array(
     '#type' => 'select',
     '#title' => t("Firmware"),
@@ -324,7 +330,7 @@ function guifi_radio_firmware_field($fid,$mid) {
     '#default_value' => $fid,
     '#prefix' => '<td><div id="select-firmware">',
     '#suffix' => '</div></td>',
-    '#options' => guifi_types('firmware', NULL, NULL,$model->id),
+    '#options' => $options,
     '#description' => t('Used for automatic configuration.'),
     '#weight' => 2,
   );

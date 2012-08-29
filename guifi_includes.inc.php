@@ -125,28 +125,27 @@ function guifi_types($type,$start = 24,$end = 0,$relations = NULL) {
       $masks['0.0.0.0'] = t('0 - all hosts');
     return $masks;
   }
-  
+
+  $values = array();
+
   if ($type == 'firmware') {
-    // TODO : aquesta consulta haura de filtrar nomes els enableds quan es posi en marxa el mecanisme de plantilles
     $query = db_query("select
           usc.id,
           usc.mid,
           usc.fid,
-          f.id as text,
+          f.nom as name,
           f.descripcio as description
         from
           guifi_firmware f
           inner join
         guifi_configuracioUnSolclic usc ON usc.fid = f.id  and usc.mid = %d
-        order by nom asc", $relations);
-        while ($type = db_fetch_object($query)) {
-          $values[$type->text] = t($type->description);
+        order by name asc", $relations);
+        while ($type = db_fetch_array($query)) {
+          $values[] = $type;
         }
         return $values;
-    
   }
 
-  $values = array();
   if ($relations == NULL) $query = db_query("SELECT text, description FROM {guifi_types} WHERE type='%s' ORDER BY id",$type);
   else
     $query = db_query("SELECT text, description FROM {guifi_types} WHERE type='%s' AND RELATIONS LIKE '%s' ORDER BY id",$type,'%'.$relations.'%');
