@@ -921,11 +921,7 @@ function _guifi_radio_prepare_add_radio($edit) {
         $radio['interfaces'][1]['ipv4'][$rc]['ipv4'] = long2ip(ip2long($net)+1);
         guifi_log(GUIFILOG_BASIC, "Assigned IP: " . $radio['interfaces'][1]['ipv4'][$rc]['ipv4']);
         $radio['interfaces'][1]['ipv4'][$rc]['netmask'] = '255.255.255.224';
-	  }
-	  if ($rc == 0) {
-	    $radio['mac'] = _guifi_mac_sum($edit['mac'], 2);
-	  } else {
-	    $radio['mac'] = '';
+        $radio['mac'] = '';
 	  }
 	  break;
     case 'client':
@@ -935,11 +931,7 @@ function _guifi_radio_prepare_add_radio($edit) {
       $radio['ssid'] = $ssid . 'CPE' . $rc;
       $radio['interfaces'][0]['new'] = TRUE;
       $radio['interfaces'][0]['interface_type'] = 'Wan';
-	  if ($rc == 0) {
-	    $radio['mac'] = _guifi_mac_sum($edit['mac'],1);
-	  } else {
-	    $radio['mac'] = '';
-	  }
+      $radio['mac'] = '';
 	  break;
     case 'ad-hoc':
       $radio['antenna_angle'] = 360;
@@ -962,10 +954,6 @@ function _guifi_radio_prepare_add_radio($edit) {
         $radio['interfaces'][1]['ipv4'][$rc]['ipv4'] = $net;
         guifi_log(GUIFILOG_TRACE,"Assigned IP: " . $radio['interfaces'][1]['ipv4'][$rc]['ipv4']);
         $radio['interfaces'][1]['ipv4'][$rc]['netmask'] = '255.255.255.255';
-      }
-      if ($rc == 0) {
-        $radio['mac'] = _guifi_mac_sum($edit['mac'],2);
-      } else {
         $radio['mac'] = '';
       }
       break;

@@ -5,22 +5,6 @@
  */
 
 /**
- *  _guifi_mac_sum adds an integer to a MAC address
- *    use negative op for substract
- *    returns the resulting new MAC
- */
-function _guifi_mac_sum($mac, $op) {
-  $mac = _guifi_validate_mac($mac);
-  if ($mac) {
-    $mac_first = substr($mac,0,6);
-    $mac_last = str_replace(":","",substr($mac,-11));
-    $dec_mac = base_convert($mac_last,16,10) + $op;
-    return $mac_first .strtoupper(substr(chunk_split(sprintf("%08x",$dec_mac),2,':'),0,11));
-  } else
-    return FALSE;
-}
-
-/**
  * _guifi_validate_mac validates a MAC address
  *
 */
