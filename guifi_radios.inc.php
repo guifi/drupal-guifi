@@ -921,8 +921,8 @@ function _guifi_radio_prepare_add_radio($edit) {
         $radio['interfaces'][1]['ipv4'][$rc]['ipv4'] = long2ip(ip2long($net)+1);
         guifi_log(GUIFILOG_BASIC, "Assigned IP: " . $radio['interfaces'][1]['ipv4'][$rc]['ipv4']);
         $radio['interfaces'][1]['ipv4'][$rc]['netmask'] = '255.255.255.224';
-        $radio['mac'] = '';
 	  }
+        $radio['mac'] = '';
 	  break;
     case 'client':
     case 'client-routed':
@@ -954,8 +954,8 @@ function _guifi_radio_prepare_add_radio($edit) {
         $radio['interfaces'][1]['ipv4'][$rc]['ipv4'] = $net;
         guifi_log(GUIFILOG_TRACE,"Assigned IP: " . $radio['interfaces'][1]['ipv4'][$rc]['ipv4']);
         $radio['interfaces'][1]['ipv4'][$rc]['netmask'] = '255.255.255.255';
-        $radio['mac'] = '';
       }
+        $radio['mac'] = '';
       break;
   }
 
