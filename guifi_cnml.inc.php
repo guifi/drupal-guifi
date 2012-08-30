@@ -280,30 +280,59 @@ function guifi_cnml($cnmlid,$action = 'help') {
                }
               }
               if (isset($device->variable['model_id']))
-                $snmp = db_fetch_object(db_query('SELECT snmp_id FROM guifi_configuracioUnSolclic WHERE id=%d', $device->usc_id));
-                list($modeap,$modesta) = explode("|",$snmp->snmp_id);
-                if (empty($modesta))
-                  $modesta = $modeap;
-		if (eregi("^[0-9]+$",$modeap))
-                  $snmp_iname = 'snmp_index';
-                else
-                  $snmp_iname = 'snmp_name';
-	        if (eregi("^[0-9]+$",$modesta))
-                  $snmp_ciname = 'snmp_index';
-                else
-                  $snmp_ciname = 'snmp_name';
+// TODO resolve issue  wlanX ( 1,2,3,4, etc.. ) incremental.
+                if  (in_array($model_name,
+                     array(
+                       'Routerboard 112' ,
+                       'Routerboard 133' ,
+                       'Routerboard 133C',
+                       'Routerboard 153',
+                       'Routerboard 333',
+                       'Routerboard 411',
+                       'Routerboard 433',
+                       'Routerboard 532',
+                       'Routerboard 600',
+                       'Routerboard 800',
+                       'Supertrasto guifiBUS guifi.net',
+                       'Routerboard SXT 5HnD',
+                       'Routerboard 493/G',
+                       'OmniTIK Uxx-5HnD',
+                     ))) {
+                  switch ($device->variable['firmware']) {
+                    case 'RouterOSv2.9':
+                    case 'RouterOSv3.x':
+		    case 'RouterOSv4.0+':
+                    case 'RouterOSv4.7+':
+                    case 'RouterOSv5.x':
+                      $radioXML->addAttribute('snmp_name','wlan'.(string) ($id + 1));
+                    break;
+                   }
+                }
+                else {
+                  $snmp = db_fetch_object(db_query('SELECT snmp_id FROM guifi_configuracioUnSolclic WHERE id=%d', $device->usc_id));
+                  list($modeap,$modesta) = explode("|",$snmp->snmp_id);
+                  if (empty($modesta))
+                    $modesta = $modeap;
+		  if (eregi("^[0-9]+$",$modeap))
+                    $snmp_iname = 'snmp_index';
+                  else
+                    $snmp_iname = 'snmp_name';
+	          if (eregi("^[0-9]+$",$modesta))
+                    $snmp_ciname = 'snmp_index';
+                  else
+                    $snmp_ciname = 'snmp_name';
 
-                if ($radio->mode == 'client') {
-                  $radioXML->addAttribute($snmp_ciname,$modesta);
-                 } else {
-                  $radioXML->addAttribute($snmp_iname,$modeap);
-                 }
-            }
-            switch ($radio->mode) {
+                  if ($radio->mode == 'client') {
+                    $radioXML->addAttribute($snmp_ciname,$modesta);
+                   } else {
+                    $radioXML->addAttribute($snmp_iname,$modeap);
+                   }
+               }
+              switch ($radio->mode) {
               case 'ap': $nodesummary->ap++; break;
               case 'client': $nodesummary->client++; break;
-            }
-
+              }
+          }
             // device radio interfaces
             if (is_array($interfaces[$device->id][$radio->radiodev_counter])) if (count($interfaces[$device->id][$radio->radiodev_counter])) {
               foreach ($interfaces[$device->id][$radio->radiodev_counter] as $radio_interfaces)
