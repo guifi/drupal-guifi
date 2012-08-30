@@ -867,7 +867,7 @@ function guifi_api_radio_add($gapi, $parameters) {
   
   $radio = _guifi_radio_prepare_add_radio($device);
   
-  $fields = array('antenna_angle', 'antenna_gain', 'antenna_azimuth', 'antenna_mode' );
+  $fields = array('mac', 'antenna_angle', 'antenna_gain', 'antenna_azimuth', 'antenna_mode' );
   if ($parameters['mode'] == 'ap') {
     $fields = array_merge($fields, array('ssid', 'protocol', 'channel', 'clients_accepted' ));
   } else if ($parameters['mode'] == 'ad-hoc') {
@@ -951,7 +951,7 @@ function guifi_api_radio_update($gapi, $parameters) {
   
   $radio = $device['radios'][$radiodev_counter];
   
-  $fields = array('antenna_angle', 'antenna_gain', 'antenna_azimuth', 'antenna_mode' );
+  $fields = array('mac', 'antenna_angle', 'antenna_gain', 'antenna_azimuth', 'antenna_mode' );
   if ($radio['mode'] == 'ap') {
     $fields = array_merge($fields, array('ssid', 'protocol', 'channel', 'clients_accepted' ));
   } else if ($radio['mode'] == 'ad-hoc') {
