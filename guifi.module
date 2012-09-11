@@ -1,5 +1,7 @@
 <?php
-// $Id: guifi.module x$
+/**
+ * @file guifi.module
+ */
 
 include_once("guifi_zone.inc.php");      // zone management
 include_once("guifi_ipv4.inc.php");      // ipv4 network management
@@ -377,6 +379,58 @@ function guifi_menu() {
     'access arguments' => array('guifi module developer'),
     'file' => 'guifi_devel.inc.php'
   );
+  $items['guifi/menu/devel/parameter'] = array(
+    'title' => 'Generic Firmware Parameters',
+    'description' => 'A full list of Generic Firmware parameters that supports certain firmware used on our network, add, edit or delete it.',
+    'page callback' => 'guifi_devel_parameter',
+    'access arguments' => array('guifi module developer'),
+    'weight' => 10,
+    'file' => 'guifi_devel.inc.php'
+  );
+  $items['guifi/menu/devel/parameter/%/%'] = array(
+    'title' => 'Generic Firmware Parameters',
+    'page callback' => 'guifi_devel_parameter',
+    'page arguments' => array(4, 5),
+    'access arguments' => array('guifi module developer'),
+    'file' => 'guifi_devel.inc.php'
+  );
+  $items['guifi/menu/devel/feature'] = array(
+    'title' => 'Device Model Features',
+    'description' => 'A full list of Model Features used on our network, add, edit or delete it.',
+    'page callback' => 'guifi_devel_modelfeature',
+    'access arguments' => array('guifi module developer'),
+    'weight' => 10,
+    'file' => 'guifi_devel.inc.php'
+  );
+  $items['guifi/menu/devel/feature/%/%'] = array(
+    'title' => 'Device Model Features',
+    'page callback' => 'guifi_devel_modelfeature',
+    'page arguments' => array(4, 5),
+    'access arguments' => array('guifi module developer'),
+    'file' => 'guifi_devel.inc.php'
+  );  
+  $items['guifi/menu/devel/configuraciousc'] = array(
+    'title' => 'Configuracions UnSolclic',
+    'description' => 'A full list of Configuracions UnSolclic used on our network, add, edit or delete it.',
+    'page callback' => 'guifi_devel_configuracio_usc',
+    'access arguments' => array('guifi module developer'),
+    'weight' => 10,
+    'file' => 'guifi_devel.inc.php'
+  );
+  $items['guifi/menu/devel/configuraciousc/%/%'] = array(
+    'title' => 'Configuracions UnSolclic',
+    'page callback' => 'guifi_devel_configuracio_usc',
+    'page arguments' => array(4, 5),
+    'access arguments' => array('guifi module developer'),
+    'file' => 'guifi_devel.inc.php'
+  );  
+  $items['guifi/menu/devel/paramusc/%/%'] = array(
+    'title' => 'Configuracions UnSolclic',
+    'page callback' => 'guifi_devel_paramusc',
+    'page arguments' => array(4, 5),
+    'access arguments' => array('guifi module developer'),
+    'file' => 'guifi_devel.inc.php'
+  );  
   $items['guifi/menu/devel/counters'] = array(
     'title' => 'counters',
     'description' => 'get statistics/counters from the network',
@@ -401,6 +455,23 @@ function guifi_menu() {
     'access arguments' => array('access devel information'),
     'weight' => 4,
   );
+    $items['guifi/menu/devel/initdevices'] = array(
+    'title' => 'Update Device Properties',
+    'description' => 'Update devices with info from old extra field',
+    'page callback' => 'guifi_update_devices_fromExtraInfo',
+    'page arguments' => array('TRUE'),
+    'access arguments' => array('access devel information'),
+    'weight' => 5,
+  );
+    $items['guifi/menu/devel/checkunsolclics'] = array(
+    'title' => 'Check UnSolclics',
+    'description' => 'Check local UnsolClics against a trusted remote server ',
+    'page callback' => 'guifi_check_unsolclics',
+    'page arguments' => array('TRUE'),
+    'access arguments' => array('access devel information'),
+    'weight' => 5,
+  );
+  
   // Statistics
   $items['guifi/menu/stats'] = array(
     'title' => 'Statistics',
@@ -2167,6 +2238,336 @@ _guifi_db_delete('guifi_links', array('id' => $r->id, 'device_id' => $r->device_
     return t('Database purgued in %secs', array('%secs' =>
       number_format(microtime(TRUE)-$tstart, 4)));
 
+}
+
+function guifi_update_devices_fromExtraInfo ( $verbose = FALSE) {
+  $tstart = microtime(TRUE);
+  $array = array();
+
+  // inicialitzem un array amb tots els firmwares indexats per nom  
+  $firmsByName = guifi_get_AllfirmwaresByName();
+  
+  $query = db_query("select id, extra, usc_id, mid, fid   from {guifi_devices}  where (usc_id = 0 or mid = 0 or fid = 0) and extra is not null");
+  
+  $to_mail = $user->mail;
+  $log ='';
+
+  while ( $device = db_fetch_object($query) ) {
+  
+    $extraInfo = unserialize($device->extra);
+    // comprovem que el nom que tinc a extra correspon amb un id de la taula de firms
+    if (array_key_exists($extraInfo['firmware'], $firmsByName)) {
+      $params = array(
+        'id'=> $device->id,
+        'mid'=> $extraInfo['model_id'],
+        'fid'=> $firmsByName[$extraInfo['firmware']]
+      );
+     _guifi_db_sql('guifi_devices',array('id' => $params['id']),$params,$log,$to_mail);
+    }
+  }
+  // actualitzar els camps usc_id dels devices als que els concordin fid i mid amb un usc.id 
+  db_query("update {guifi_devices} d 
+        inner join {guifi_configuracioUnSolclic} usc on usc.fid = d.fid and usc.mid = d.mid
+        set d.usc_id = usc.id  where d.mid <> 0 and d.fid <> 0
+        and usc.enabled = 1");
+  
+    return t('Update Devices from extra Info in %secs', array('%secs' =>
+      number_format(microtime(TRUE)-$tstart, 4)));
+}
+
+/**
+ * Gets an array with Firmware Names as keys and Firmware id's as values to reverse serialized Info  
+ * on the extra field of the devices table. If a $firmwareName is supplied gets a unique item 
+ * @param string $firmwareName 
+ * @return
+ *   Array
+ */
+function guifi_get_AllfirmwaresByName($firmwareName=null) {
+  $query = db_query('select id, nom from guifi_firmware order by id asc');
+
+  $firms_tots = null;
+  while ($firmware = db_fetch_array($query)) {
+    // si no em demanen un concret
+    if (!$firmwareName) {
+      $firms_tots[$firmware['nom']] = $firmware['id'];
+    } else {
+      // comprovar que el nom es el que em demanen 
+      if ($firmwareName==$firmwares['nom']) $firms_tots[$firmwares['nom']] = $firmwares['id'];
+    }
+  }
+  return $firms_tots;
+}
+
+/*
+* This function starts out with several checks in an attempt to save time.
+*   1.  The shorter string is always used as the "right-hand" string (as the size of the array is based on its length). 
+*   2.  If the left string is empty, the length of the right is returned.
+*   3.  If the right string is empty, the length of the left is returned.
+*   4.  If the strings are equal, a zero-distance is returned.
+*   5.  If the left string is contained within the right string, the difference in length is returned.
+*   6.  If the right string is contained within the left string, the difference in length is returned.
+* If none of the above conditions were met, the Levenshtein algorithm is used.
+*/
+function LevenshteinDistance($s1, $s2)
+{
+  $sLeft = (strlen($s1) > strlen($s2)) ? $s1 : $s2;
+  $sRight = (strlen($s1) > strlen($s2)) ? $s2 : $s1;
+  $nLeftLength = strlen($sLeft);
+  $nRightLength = strlen($sRight);
+  if ($nLeftLength == 0)
+    return $nRightLength;
+  else if ($nRightLength == 0)
+    return $nLeftLength;
+  else if ($sLeft === $sRight)
+    return 0;
+  else if (($nLeftLength < $nRightLength) && (strpos($sRight, $sLeft) !== FALSE))
+    return $nRightLength - $nLeftLength;
+  else if (($nRightLength < $nLeftLength) && (strpos($sLeft, $sRight) !== FALSE))
+    return $nLeftLength - $nRightLength;
+  else {
+    $nsDistance = range(1, $nRightLength + 1);
+    for ($nLeftPos = 1; $nLeftPos <= $nLeftLength; ++$nLeftPos)
+    {
+      $cLeft = $sLeft[$nLeftPos - 1];
+      $nDiagonal = $nLeftPos - 1;
+      $nsDistance[0] = $nLeftPos;
+      for ($nRightPos = 1; $nRightPos <= $nRightLength; ++$nRightPos)
+      {
+        $cRight = $sRight[$nRightPos - 1];
+        $nCost = ($cRight == $cLeft) ? 0 : 1;
+        $nNewDiagonal = $nsDistance[$nRightPos];
+        $nsDistance[$nRightPos] =
+          min($nsDistance[$nRightPos] + 1,
+              $nsDistance[$nRightPos - 1] + 1,
+              $nDiagonal + $nCost);
+        $nDiagonal = $nNewDiagonal;
+      }
+    }
+    return $nsDistance[$nRightLength];
+  }
+} 
+
+function guifi_check_unsolclics( $verbose = FALSE) {
+  $tstart = microtime(TRUE);
+  $array = array();
+  
+  $range = 0;
+  $device_id = null;
+  
+  // URLS per defecte utilitzats durant les proves del PFC TODO eliminar 
+  $trustedSite = 'http://guifimaster';
+  $localSite = 'http://guifilocal';
+
+  
+  if ($_GET["action"])$action = $_GET["action"];
+  if ($_GET["trustedsite"]) $trustedSite = $_GET["trustedsite"];
+  if ($_GET["testingsite"]) $localSite = $_GET["testingsite"];
+  if ($_GET["range"]) $range = $_GET["range"];
+  else $range = 2;
+  switch($range) {
+    case '2':
+        $selectedRange2 = ' selected';
+        break;
+    case '3':
+        $selectedRange3 = ' selected';
+        break;
+    case '4':
+        $selectedRange4 = ' selected';
+        break;
+    default:
+        $selectedRange1 = ' selected';
+  }  
+  
+  if ($_GET["device_id"]) $device_id = $_GET["device_id"];
+  if ($_GET["maxdevices"]) $maxdevices = $_GET["maxdevices"];
+  else $maxdevices = 5;
+
+  if ($_GET["algorithm"]) $algorithm = $_GET["algorithm"];
+  else $algorithm = 1;
+  
+  switch($algorithm) {
+    case '2':    //text_similar
+        $algorithmDescription  = ' Text_similar';
+        $selected2 = ' selected';
+        break;
+    case '3':   // Levenshtein
+        $algorithmDescription  = ' Levenshtein';
+        $selected3 = ' selected';
+        break;
+    default:  // direct string comparison
+        $algorithmDescription  = ' Direct String Comparison';
+        $selected1 = ' selected';
+  }
+  
+  
+  $avui = new DateTime;
+  $dateLimit = clone $avui;
+  $dateLimit->modify("-$range day");
+  
+  $output = "<form action='checkunsolclics' method='GET'>";
+  $output .= "<table style='width:720px;'>";
+  $output .= "<tr>";
+    $output .= "<td style='width: 90px;'>Trusted Site</td>";
+    $output .= "<td style='width: 130px;'><input type='text' name='trustedsite' value='$trustedSite' style='width: 130px;' /></td>";
+    $output .= "<td style='width: 90px;'>Testing Site</td>";
+    $output .= "<td><input type='text' name='testingsite' value='$localSite'  style='width: 130px;' /></td>";
+    $output .= "<td style='width: 90px;'>Device Id</td>";
+    $output .= "<td colspan=2><input type='text' name='device_id' value='$device_id'  style='width: 30px;' /></td>";
+    
+  $output .= "</tr>";
+  $output .= "<tr>";
+   $output .= "<td>Date Limit</td>";
+    $output .= "<td><select name='range'>
+                    <option value='1'$selectedRange1>1 day</option>
+                    <option value='7'$selectedRange2>1 week</option>
+                    <option value='30'$selectedRange3>1 Month</option>
+                    <option value='365'$selectedRange4>1 year</option>
+    </td>";
+   $output .= "<td>Algorithm</td>";
+    $output .= "<td><select name='algorithm'>
+                    <option value='1'$selected1>Exact</option>
+                    <option value='2'$selected2>Similar Text</option>
+                    <option value='3'$selected3>Levenshtein</option>
+    </td>";
+   $output .= "<td>Max Devices</td>";
+    $output .= "<td><input type='text' name='maxdevices' value='$maxdevices' style='width: 30px;'/></td>";
+    $output .= "<td><input type='submit' name='action' value='TEST!' /></td>";
+  $output .= "</tr>";
+  $output .= "</table>";
+  $output .= "</form>";
+
+  if ($action) {
+  
+    $trustedSite = $_GET["trustedsite"];//'http://guifimaster';
+    $localSite = $_GET["testingsite"];'http://guifilocal';
+    
+    
+    // buscar les configuracions unsolclic validades
+    $sql= db_query("select usc.id, usc.mid, usc.fid, usc.enabled , m.model,f.nom 
+                    from guifi_configuracioUnSolclic usc
+                        inner join guifi_model m  on m.mid = usc.mid
+                        inner join guifi_firmware f on f.id = usc.fid
+                    where usc.enabled = 1 
+                    order by usc.id asc ");
+    while ($configuracio = db_fetch_object($sql)) {
+      $unsolclics[$configuracio->id]['mid'] = $configuracio->mid;
+      $unsolclics[$configuracio->id]['fid'] = $configuracio->fid;
+      $unsolclics[$configuracio->id]['model'] = $configuracio->model;
+      $unsolclics[$configuracio->id]['firmware'] = $configuracio->nom;
+    }
+    
+
+    $totaldevices = 0;
+    $devicesFail = 0;
+    $devicesOK = 0;
+    
+    foreach ($unsolclics as $confkey => $confValues) {
+    
+      $partialFail = 0;
+      $partialOK = 0;
+      $partialdevices = 0;
+    
+    
+      $output .= "<br>Configuració UnSolClic : <a href='/ca/guifi/menu/devel/configuraciousc/$confkey/edit'>". $confValues['model'] ."-". $confValues['firmware'] ."</a> (id $confkey)";
+      
+      // buscar tots els devices que tenen un model i firmware cobert per les USC validades 
+      $sql= db_query("select d.id, d.nid, d.nick, mo.model, mo.fid, mf.name 
+                      from guifi_configuracioUnSolclic  usc
+                           inner join guifi_devices d on d.mid = usc.mid and d.fid = usc.fid and d.flag = 'Working'
+                           inner join guifi_model mo on mo.mid = usc.mid
+                           inner join guifi_manufacturer mf on mf.fid = mo.fid 
+                      where usc.id = %d", $confkey); // 
+  
+      while ($configuracio = db_fetch_object($sql)) {
+        if ($partialdevices >= $maxdevices)  break;
+
+        if ($configuracio->name=='Ubiquiti') $trustedURL = $trustedSite . '/files/nanostation/'. $configuracio->nick .'.cfg';
+        else $trustedURL = $trustedSite . '/guifi/device/'. $configuracio->id .'/view/unsolclic';
+        $localURL = $localSite. '/guifi/device/'. $configuracio->id .'/view/unsolclic';
+        
+        
+        if ($device_id) {
+          //echo "em passen un device conret $device_id ? $configuracio->id";
+          if($device_id==$configuracio->id) {  
+            $resultat = check_unsolclicURL($configuracio->id, $localURL,$trustedURL, $algorithm);
+            $output .= "<br>Checking device <a href='/guifi/device/$configuracio->id'>". $configuracio->id  ."</a> : ". $resultat ." with Comparison Algorithm - ". $algorithmDescription;
+            $output .= " <a href=' $localURL'>Local </a>";
+            $output .= " | <a href='$trustedURL'>Trusted</a>";
+          }
+        } else {
+          $resultat = check_unsolclicURL($configuracio->id, $localURL,$trustedURL, $algorithm);
+          $output .= "<br>Checking device <a href='/guifi/device/$configuracio->id'>". $configuracio->id  ."</a> : ". $resultat ." with Comparison Algorithm - ". $algorithmDescription;
+          if ($resultat) {
+            $partialOK++;
+          } else {
+            $partialFail++;
+          }
+          $output .= " <a href=' $localURL'>Local </a>";
+          $output .= " | <a href='$trustedURL'>Trusted</a>";
+          $partialdevices++;
+        }
+      }
+      $devicesOK  = $devicesOK + $partialOK;
+      $devicesFail = $devicesFail + $partialFail;
+      $totaldevices = $totaldevices + $partialdevices;
+      //$output .= "<br>Results for UnSolClic #". $confValues['model'] ."-". $confValues['firmware'] ."($confkey) -  [Total] : $partialdevices - [OK] : $partialOK - [FAIL] : $partialFail";
+      $output .= "<br>Results for UnSolClic #". $confValues['model'] ."-". $confValues['firmware'] ."($confkey) -  [Total] : $partialdevices";
+      $output .= "<br><br>";
+    }
+    
+    return $output ."<br>". t('Checked Total %unsolclics Unsolclics for %totaldevices devices([OK] %devicesOK - [FAIL] %devicesFAIL) in %secs ', 
+                              array('%unsolclics' => count($unsolclics),
+                                    '%totaldevices' => $totaldevices,
+                                    '%devicesOK' => $devicesOK,
+                                    '%devicesFAIL' => $devicesFail,
+                                    '%secs' => number_format(microtime(TRUE)-$tstart, 4)));    
+  } else {
+    //$output .= "No devices to test!<br><br>";
+    
+  }
+  return $output;
+  // per cadascun dels devices, comprovar la versio local del unsolclic contra la oficial
+  
+  // guardar els resultats dels correctes i dels incorrectes  
+  
+
+}
+
+function check_unsolclicURL($device_id, $localUrl, $trustedUrl, $algorithm) {
+
+// per forçar que la consulta web es faci sempre en Català
+$opts = array(
+  'http'=>array(
+    'method'=>"GET",
+    'header'=>"Accept-language: ca\r\n"
+  )
+);
+
+$context = stream_context_create($opts);
+
+
+  $htmlLocal = trim(file_get_contents($localUrl, false, $context));
+  $htmlTrusted = trim(file_get_contents($trustedUrl, false, $context));
+  
+  if ($htmlLocal) {
+    $htmlLocal = str_replace(' ', '', $htmlLocal);
+  }
+  if ($htmlTrusted) { 
+    $htmlTrusted = str_replace(' ', '', $htmlTrusted);
+  }  
+  switch($algorithm) {
+    case '2':    //text_similar
+        $resultat = similar_text($htmlLocal, $htmlTrusted, $percent);
+        $resultat = number_format($percent, 2);
+        break;
+    case '3':   // Levenshtein
+        $resultat = LevenshteinDistance($htmlLocal, $htmlTrusted);
+        break;
+    default:  // direct string comparison
+      $resultat = strcmp($lengthLocal, $lengthTrusted);
+  }
+  
+  return $resultat;
 }
 
 /**

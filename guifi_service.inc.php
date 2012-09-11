@@ -1,8 +1,6 @@
 <?php
-// $Id: guifi.module x$
-
 /**
- * @file
+ * @file guifi_service.inc.php
  * Manage guifi_service
  */
 
@@ -29,7 +27,15 @@ function guifi_service_access($op, $node) {
   }
 }
 
+/**
+ * @todo Improve asserts in the beginning
+ * @todo what object is expected to be $node?
+ * @todo $node is over used :P
 
+ * @return
+ *   Object with the extra field ($node->var) and link to the node ($node->l)
+ *   or FALSE if $node is not found in database
+ */
 function guifi_service_load($node) {
   if (!$node)
     return FALSE;
@@ -691,14 +697,18 @@ function guifi_list_services_query($param, $typestr = 'by zone', $service = '%')
     $node = node_load(array('nid' => $service->id));
     if ($current_service != $service->service_type) {
       $typedescr = db_fetch_object(db_query("SELECT * FROM {guifi_types} WHERE type='service' AND text = '%s'",$service->service_type));
-      $rows[] = array('<strong>'.t($typedescr->description).'</strong>', NULL, NULL, NULL);
+      $rows[] = array('<strong>'.t($typedescr->description).'</strong>', NULL, NULL, NULL,NULL);
       $current_service = $service->service_type;
     }
 
+    $status_url = guifi_cnml_availability(
+       array('device' => $service->device_id,'format' => 'short'));
+    
     $rows[] = array('<a href="' .base_path() .'node/'.$service->id.'">'.$node->title.'</a>',
                     '<a href="' .base_path() .'node/'.$service->zone_id.'">'.$service->zonename.'</a>',
                     '<a href="' .base_path() .'guifi/device/'.$service->device_id.'">'.guifi_get_hostname($service->device_id).'</a>',
-                    array('data' => t($node->status_flag),'class' => $node->status_flag));
+                    array('data' => t($node->status_flag),'class' => $node->status_flag),
+                    $status_url,);
   }
 
   return array_merge($rows);
@@ -723,7 +733,7 @@ function theme_guifi_services_list($node,$service = '%') {
 
   ($rows) ?
      $box .= theme('table',
-       array(t('service'),t('zone'),t('device'),t('status')),
+       array(t('service'),t('zone'),t('device'),t('status'), t('disponibilitat')),
        array_merge($rows),
        array('width' => '100%'))
      : $box .= t('There are no services defined at the database');
@@ -814,7 +824,7 @@ function guifi_service_view($node, $teaser = FALSE, $page = FALSE, $block = FALS
               '#weight' => 1,
             )
           );
-        } 
+        }
         else {
           $node->content['data'] = array(
             array(

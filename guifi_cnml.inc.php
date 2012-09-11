@@ -1,8 +1,17 @@
 <?php
 /**
- * guifi_cnml
-**/
+ * @file guifi_cnml.inc.php
+ */
 
+
+/**
+ *
+ * @param $cnmlid
+ *
+ * @param $action
+ *
+ * @return
+ */
 function guifi_cnml($cnmlid,$action = 'help') {
 
   guifi_log(GUIFILOG_TRACE,'function guifi_cnml()',$cnmlid);
@@ -233,6 +242,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
             case 'timestamp_changed': $deviceXML->addAttribute('updated',date('Ymd hi',$value)); break;
           }
          }
+         // TODO obtenir model_id i firmware del device o no de extra
          if (!empty($device->extra)) {
            $device->variable = unserialize($device->extra);
            if ($device->type == 'radio')
@@ -270,35 +280,8 @@ function guifi_cnml($cnmlid,$action = 'help') {
                }
               }
               if (isset($device->variable['model_id']))
-              if (in_array($model_name,
-                     array('WRT54Gv1-4','WHR-HP-G54, WHR-G54S','WRT54GL','WRT54GSv1-2','WRT54GSv4'))) {
-               switch ($device->variable['firmware']) {
-               case 'whiterussian':
-                if ($radio->mode == 'client') {
-                  $radioXML->addAttribute('snmp_name','eth1');
-                 } else {
-                  $radioXML->addAttribute('snmp_name','br0');
-                 }
-                 break;
-               case 'kamikaze':
-                if ($radio->mode == 'client') {
-                  $radioXML->addAttribute('snmp_name','eth0.1');
-                 } else {
-                  $radioXML->addAttribute('snmp_name','br-lan');
-                 }
-                 break;
-               case 'gsffirm':
-                  $radioXML->addAttribute('snmp_name','wifi0');
-                 break;
-               case 'Freifunk-OLSR':
-               case 'Freifunk-BATMAN':
-                 $radioXML->addAttribute('snmp_name','eth1');
-                 break;
-               default:
-                 $radioXML->addAttribute('snmp_index',6);
-               }
-              } else if  (in_array($model_name,
-                // TODO, for mikrotiks would be better to use fid instead of model name?
+// TODO resolve issue  wlanX ( 1,2,3,4, etc.. ) incremental.
+                if  (in_array($model_name,
                      array(
                        'Routerboard 112' ,
                        'Routerboard 133' ,
@@ -313,106 +296,43 @@ function guifi_cnml($cnmlid,$action = 'help') {
                        'Supertrasto guifiBUS guifi.net',
                        'Routerboard SXT 5HnD',
                        'Routerboard 493/G',
+                       'OmniTIK Uxx-5HnD',
                      ))) {
-                 switch ($device->variable['firmware']) {
-                 case 'kamikaze':
-                   $radioXML->addAttribute('snmp_name','ath0');
-                 case 'RouterOSv2.9':
-                 case 'RouterOSv3.x':
-		 case 'RouterOSv4.0+':
-                 case 'RouterOSv4.7+':
-                 case 'RouterOSv5.x':
-                   $radioXML->addAttribute('snmp_name','wlan'.(string) ($id + 1));
-                 break;
+                  switch ($device->variable['firmware']) {
+                    case 'RouterOSv2.9':
+                    case 'RouterOSv3.x':
+		    case 'RouterOSv4.0+':
+                    case 'RouterOSv4.7+':
+                    case 'RouterOSv5.x':
+                      $radioXML->addAttribute('snmp_name','wlan'.(string) ($id + 1));
+                    break;
                    }
-              }
-                else if  (in_array($model_name,
-                     array(
-                       'Routerboard 1100',
-	               'Routerboard 750/G'
-                     ))) {
-                   $radioXML->addAttribute('snmp_name','Lan/Lan');
-              }
-                else if  (in_array($model_name,
-                     array('NanoStation2' , 'NanoStation5', 'LiteStation2', 'LiteStation5', 'NanoStation Loco2', 'NanoStation Loco5', 'Bullet2', 'Bullet5'))) {
-                 switch ($device->variable['firmware']) {
-                 case 'kamikaze':
-                 case 'AirOsv3.6+':
-                   $radioXML->addAttribute('snmp_name','ath0');
-                 break;
-                 case 'DD-WRTv23':
-                   $radioXML->addAttribute('snmp_name','br0');
-                 break;
-                 case 'AirOsv30':
-                 case 'AirOsv221':
-                 case 'gsffirm':
-                   $radioXML->addAttribute('snmp_name','wifi0');
-                 break;
-                   }
-              }
-                else if  (in_array($model_name,
-                     array('Meraki/Fonera' , 'Avila GW2348-4', 'Asus WL-500xx', 'Alix1', 'Alix2', 'Alix3'))) {
-                 switch ($device->variable['firmware']) {
-                 case 'kamikaze':
-                   $radioXML->addAttribute('snmp_name','ath0');
-                 break;
-                 case 'gsffirm':
-                   $radioXML->addAttribute('snmp_name','wifi0');
-                 break;
-                   }
-              }
-                 else if  (in_array($model_name,
-                     array('RouterStation',
-                              'RouterStationPro'))) {
-                 switch ($device->variable['firmware']) {
-                 case 'kamikaze':
-                   $radioXML->addAttribute('snmp_name','br-wlanLan');
-                 break;
-                 case 'gsffirm':
-                   $radioXML->addAttribute('snmp_name','wifi0');
-                 break;
-                   }
-              }
-                else if  (in_array($model_name,
-                   array('AirMaxM2 Rocket/Nano/Loco',
-                            'AirMaxM5 Rocket/Nano/Loco',
-                            'AirMaxM2 Bullet/PwBrg/AirGrd/NanoBr',
-                            'AirMaxM5 Bullet/PwBrg/AirGrd/NanoBr'
-                            ))) {
-                   switch ($device->variable['firmware']) {
-                     case 'AirOsv52':
-                       $radioXML->addAttribute('snmp_name','ath0');
-                   break;
-                   }
-               }
-                else if  (in_array($model_name,
-                   array('GuifiStation2',
-                            'GuifiStation5'
-                            ))) {
-                   switch ($device->variable['firmware']) {
-                     case 'GuifiStationOS1.0':
-                       $radioXML->addAttribute('snmp_name','ath0');
-                   break;
-                   }
-               }
-                else if  (in_array($model_name,
-                   array('DIR-600 B1/B2'
-                            ))) {
-                   switch ($device->variable['firmware']) {
-                 case 'DD-WRTv24preSP2':
-                   $radioXML->addAttribute('snmp_name','ra0');
-                   break;
-                   }
-               }
+                }
                 else {
-                   $radioXML->addAttribute('snmp_name','eth0');
+                  $snmp = db_fetch_object(db_query('SELECT snmp_id FROM guifi_configuracioUnSolclic WHERE id=%d', $device->usc_id));
+                  list($modeap,$modesta) = explode("|",$snmp->snmp_id);
+                  if (empty($modesta))
+                    $modesta = $modeap;
+		  if (eregi("^[0-9]+$",$modeap))
+                    $snmp_iname = 'snmp_index';
+                  else
+                    $snmp_iname = 'snmp_name';
+	          if (eregi("^[0-9]+$",$modesta))
+                    $snmp_ciname = 'snmp_index';
+                  else
+                    $snmp_ciname = 'snmp_name';
+
+                  if ($radio->mode == 'client') {
+                    $radioXML->addAttribute($snmp_ciname,$modesta);
+                   } else {
+                    $radioXML->addAttribute($snmp_iname,$modeap);
+                   }
                }
-            }
-            switch ($radio->mode) {
+              switch ($radio->mode) {
               case 'ap': $nodesummary->ap++; break;
               case 'client': $nodesummary->client++; break;
-            }
-
+              }
+          }
             // device radio interfaces
             if (is_array($interfaces[$device->id][$radio->radiodev_counter])) if (count($interfaces[$device->id][$radio->radiodev_counter])) {
               foreach ($interfaces[$device->id][$radio->radiodev_counter] as $radio_interfaces)
@@ -447,7 +367,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
                           case 'id': $linkXML->addAttribute('id',$link->id); break;
                           case 'linked_node_id': $linkXML->addAttribute('linked_node_id',$link->linked_node_id); break;
                           case 'linked_device_id': $linkXML->addAttribute('linked_device_id',$link->linked_device_id); break;
-                          case 'linked_interface_id': $linkXML->addAttribute('linked_interface_id',$link->linked_device_id); break;
+                          case 'linked_interface_id': $linkXML->addAttribute('linked_interface_id',$link->linked_interface_id); break;
                           case 'link_type': $linkXML->addAttribute('link_type',$link->link_type); break;
                           case 'status': $linkXML->addAttribute('link_status',$link->status); break;
                         }
@@ -496,7 +416,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
                       case 'id': $linkXML->addAttribute('id',$link->id); break;
                       case 'linked_node_id': $linkXML->addAttribute('linked_node_id',$link->linked_node_id); break;
                       case 'linked_device_id': $linkXML->addAttribute('linked_device_id',$link->linked_device_id); break;
-                      case 'linked_interface_id': $linkXML->addAttribute('linked_interface_id',$link->linked_device_id); break;
+                      case 'linked_interface_id': $linkXML->addAttribute('linked_interface_id',$link->linked_interface_id); break;
                       case 'link_type': $linkXML->addAttribute('link_type',$link->link_type); break;
                       case 'status': $linkXML->addAttribute('link_status',$link->status); break;
                     }
@@ -677,6 +597,13 @@ function guifi_cnml($cnmlid,$action = 'help') {
 
 }
 
+
+/**
+ *
+ * @param $cnmlid
+ *
+ * @return
+ */
 function fnodecount($cnmlid){
   if($cnmlid<0 or $cnmlid>9){
     $vid=0;
@@ -692,7 +619,7 @@ function fnodecount($cnmlid){
   case 6:
   case 7:
   case 8:
-  case 0: //compte els nodes per any
+  case 0: //count nodes by year
     $result=db_query("select COUNT(*) as num, YEAR(FROM_UNIXTIME(timestamp_created)) as ano from {guifi_location} GROUP BY YEAR(FROM_UNIXTIME(timestamp_created)) ");
     $classXML = $CNML->addChild('nodesxyear');
     $nreg=0;
@@ -704,7 +631,7 @@ function fnodecount($cnmlid){
     };
     $classXML->addAttribute('numyears',$nreg);
     break;
-  case 1:  //compte els nodes per any i estat
+  case 1:  //count nodes by year and status
     $result=db_query("select COUNT(*) as num,status_flag, YEAR(FROM_UNIXTIME(timestamp_created)) as ano from {guifi_location} GROUP BY YEAR(FROM_UNIXTIME(timestamp_created)),status_flag ");
     $classXML = $CNML->addChild('nodesxyearxstatus');
     $nreg=0;
@@ -724,7 +651,7 @@ function fnodecount($cnmlid){
     $classXML->addAttribute('numrecs',$nreg);
     $classXML->addAttribute('numyears',$nyear);
     break;
-  case 2:  //compta els nodes per estat
+  case 2:  //count nodes by status
     $result=db_query("select COUNT(*) as num, status_flag from {guifi_location} GROUP BY status_flag ");
     $classXML = $CNML->addChild('nodesxstatus');
     $nreg=0;
@@ -736,7 +663,7 @@ function fnodecount($cnmlid){
     };
     $classXML->addAttribute('numstatus',$nreg);
     break;
-  case 3:  //torna els nodes actius totals
+  case 3:  //returns total working nodes
     $result=db_query("select COUNT(*) as num from {guifi_location} where status_flag='Working'");
     $classXML = $CNML->addChild('totalactivenodes');
     $nreg=0;
@@ -746,7 +673,7 @@ function fnodecount($cnmlid){
     };
     $classXML->addAttribute('result',$nreg);
     break;
-  case 4:  //torna els nombre i distancies dels enllaços per tipo denllaç'
+  case 4:  //returns name and distance of links by link type
     $oGC = new GeoCalc();
     $dTotals = array();
     $qlinks = db_query('
@@ -809,7 +736,7 @@ function fnodecount($cnmlid){
     };
     $classXML->addAttribute('numrecs',$nreg);
     break;
-  case 9:  //torna els nodes actius totals i els del ultim minut
+  case 9:  //returns total working nodes and those from the last minute
     $afecha=getdate();
     $tiempomin=mktime($afecha[hours],$afecha[minutes]-1,$afecha[seconds],$afecha[mon],$afecha[mday],$afecha[year]);
     $tiempomax=$tiempomin+60;

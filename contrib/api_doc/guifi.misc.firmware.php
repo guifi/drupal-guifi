@@ -136,8 +136,36 @@ dispositius (o trastos) suportats per guifi.net.")?></p>
 			<td>Ubiquti AirOs 3.0</td>
 		</tr>
 		<tr>
-			<td>RouterOSv4.x</td>
-			<td>RouterOS 4.x from Mikrotik</td>
+			<td>RouterOSv4.0+</td>
+			<td>RouterOS 4.0 to 4.6 from Mikrotik</td>
+		</tr>
+		<tr>
+			<td>AirOsv52</td>
+			<td>Ubiquti AirOs 5.2</td>
+		</tr>
+		<tr>
+			<td>RouterOSv4.7+</td>
+			<td>RouterOS 4.7 or newer from Mikrotik</td>
+		</tr>
+		<tr>
+			<td>GuifiStationOS1.0</td>
+			<td>GuifiStationOS v1.0 from Setup Informatica</td>
+		</tr>
+		<tr>
+			<td>gsffirm</td>
+			<td>Firmware de GràciaSenseFils MANET</td>
+		</tr>
+		<tr>
+			<td>RouterOSv5.x</td>
+			<td>RouterOS 5.x or newer from Mikrotik</td>
+		</tr>
+		<tr>
+			<td>AirOsv3.6+</td>
+			<td>Ubiquti AirOs 3.6+</td>
+		</tr>
+		<tr>
+			<td>DD-WRTv24preSP2</td>
+			<td>DD-WRTv24preSP2 from BrainSlayer</td>
 		</tr>
 	</tbody>
 </table>

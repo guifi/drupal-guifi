@@ -1,4 +1,7 @@
 <?php
+/**
+ * @file guifi_links.inc.php
+ */
 
 function guifi_links_form($link,$ipv4,$tree,$multilink) {
   $lweight = 0;

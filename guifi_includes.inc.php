@@ -1,23 +1,8 @@
 <?php
-
-// Miscellaneous and auxiliar routines for guifi.module
-
 /**
- *  _guifi_mac_sum adds an integer to a MAC address
- *    use negative op for substract
- *    returns the resulting new MAC
-**/
-
-function _guifi_mac_sum($mac, $op) {
-  $mac = _guifi_validate_mac($mac);
-  if ($mac) {
-    $mac_first = substr($mac,0,6);
-    $mac_last = str_replace(":","",substr($mac,-11));
-    $dec_mac = base_convert($mac_last,16,10) + $op;
-    return $mac_first .strtoupper(substr(chunk_split(sprintf("%08x",$dec_mac),2,':'),0,11));
-  } else
-    return FALSE;
-}
+ * @file guifi_includes.inc.php
+ * Miscellaneous and auxiliar routines for guifi.module
+ */
 
 /**
  * _guifi_validate_mac validates a MAC address
@@ -126,6 +111,25 @@ function guifi_types($type,$start = 24,$end = 0,$relations = NULL) {
   }
 
   $values = array();
+
+  if ($type == 'firmware') {
+    $query = db_query("select
+          usc.id,
+          usc.mid,
+          usc.fid,
+          f.nom as name,
+          f.descripcio as description
+        from
+          guifi_firmware f
+          inner join
+        guifi_configuracioUnSolclic usc ON usc.fid = f.id  and usc.mid = %d
+        order by name asc", $relations);
+        while ($type = db_fetch_array($query)) {
+          $values[] = $type;
+        }
+        return $values;
+  }
+
   if ($relations == NULL) $query = db_query("SELECT text, description FROM {guifi_types} WHERE type='%s' ORDER BY id",$type);
   else
     $query = db_query("SELECT text, description FROM {guifi_types} WHERE type='%s' AND RELATIONS LIKE '%s' ORDER BY id",$type,'%'.$relations.'%');
@@ -1308,10 +1312,15 @@ function guifi_to_7bits($str) {
  return $str_new;
 }
 
+/**
+ * This function builds an URL to the CNML service target :?
+ *
+ * @todo Assert url != null
+ */
 function guifi_cnml_call_service($target,$service,$params=array(),$extra=NULL) {
 //  guifi_log(GUIFILOG_BASIC,'call CNML service target',$target);
 
-  // processing graphserver
+  // processing graphserver. Needs refactor
   if (is_array($target)) {
 //    print_r($target);
 //    print "\n<br />Key: ".key($target)."\n";
@@ -1330,7 +1339,7 @@ function guifi_cnml_call_service($target,$service,$params=array(),$extra=NULL) {
 
   $basename = basename($url);
 
-  // Temprary, for backward compatibility, to take out later
+  // Temporary, for backward compatibility, to take out later
   if ($basename=='graphs.php') {
     $version = '1.0';
 
@@ -1353,10 +1362,19 @@ function guifi_cnml_call_service($target,$service,$params=array(),$extra=NULL) {
     return $url.'/index.php?call='.$service.'&'.guifi_cnml_args($params,$extra);
 }
 
+/**
+ * Builds url parameters for CNML request
+ *
+ * @param $args
+ *
+ * @param $extra
+ *
+ * @todo Change name to a more appropriate one like build_args
+ */
 function guifi_cnml_args($args,$extra=NULL) {
   $params = array();
 
-  // Temprary, for backward compatibility, to take out later
+  // Temporary, for backward compatibility, to take out later
   foreach ($args as $param => $value) {
     if ($param=='device' and empty($value))
       continue;
@@ -1369,6 +1387,9 @@ function guifi_cnml_args($args,$extra=NULL) {
   return $str;
 }
 
+/**
+ * Returns image url to CNML
+ */
 function guifi_cnml_availability($args,$gs = NULL) {
   if (is_null($gs))
     $gs = guifi_service_load(guifi_graphs_get_server($args['device'],'device'));

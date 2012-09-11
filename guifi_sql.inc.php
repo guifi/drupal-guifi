@@ -1,10 +1,9 @@
 <?php
-// $Id: guifi.module x$
-
 /**
  * @file guifi_sql.inc.php
  * Manage the SQL statements against the guifi.net schema
- **/
+ */
+
 /** _guifi_db_sql(): UPSERT (SQL insert or update) on
  * node, device, radios, interfaces, ipv4, links...
  **/
@@ -121,6 +120,18 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 	        $next_id['id'] = 1;
 	      $data['id']=$next_id['id'];
 	    }
+            break;
+	  case 'guifi_caracteristica':
+	  case 'guifi_caracteristiquesModel':
+	  case 'guifi_configuracioUnSolclic':
+	  case 'guifi_firmware':
+	  case 'guifi_parametres':
+	  case 'guifi_parametresConfiguracioUnsolclic':
+	  case 'guifi_parametresFirmware':
+	    $new_id=db_fetch_array(db_query("SELECT max(id)+1 id FROM {$table}"));
+	    $data['id']=$new_id['id'];
+	    $data['user_created'] = $user->uid;
+	    $data['timestamp_created'] = time();
 	    break;
 	  } // insert triggers switch table
   }
@@ -135,6 +146,14 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
       case 'guifi_dns_hosts':
       case 'guifi_users':
       case 'guifi_model':
+      case 'guifi_manufacturer':
+      case 'guifi_caracteristica':
+      case 'guifi_caracteristiquesModel':
+      case 'guifi_configuracioUnSolclic':
+      case 'guifi_firmware':
+      case 'guifi_parametres':
+      case 'guifi_parametresConfiguracioUnsolclic':
+      case 'guifi_parametresFirmware':
       case 'guifi_manufacturer':
         $data['user_changed'] = $user->uid;
         $data['timestamp_changed'] = time();

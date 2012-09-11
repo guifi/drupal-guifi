@@ -1,6 +1,6 @@
 <?php
 /**
- * @file
+ * @file guifi_devices.inc.php
  * Manage guifi_devices
  */
 
@@ -11,8 +11,15 @@ function guifi_device_load($id,$ret = 'array') {
   guifi_log(GUIFILOG_FULL,'function guifi_device_load()');
 
   $device = db_fetch_array(db_query('
-    SELECT d.*, z.zone_mode
-    FROM {guifi_devices} d, {guifi_location} l, {guifi_zone} z
+    SELECT d.*,
+           m.model,
+           f.nom firmware,
+           z.zone_mode, l.nick as node_nick
+    FROM {guifi_devices} d
+           left join {guifi_model} m on m.mid = d.mid
+           left join {guifi_firmware} f on f.id = d.fid,
+          {guifi_location} l,
+          {guifi_zone} z
     WHERE d.id = %d
      AND d.nid = l.id AND l.zone_id=z.id',
     $id));
@@ -24,6 +31,13 @@ function guifi_device_load($id,$ret = 'array') {
     $device['variable'] = unserialize($device['extra']);
   else
     $device['variable'] = array();
+
+  // sobreescribim a l'array variable provinent de extra de model amb els valors de mid i firmware que em venen de la consulta
+  // hi afegim el nom del model i el identificador de firmware
+  $device['variable']['model_id'] = $device['mid'];
+  $device['variable']['model'] = $device['model'];
+  $device['variable']['firmware_id'] = $device['fid'];
+  $device['variable']['firmware'] = $device['firmware'];
 
   // getting device radios
   if ($device['type'] == 'radio') {
@@ -87,10 +101,15 @@ function guifi_device_load($id,$ret = 'array') {
           $iparr[$a['id']] = $a;
         }
         asort($ipdec);
+        $zone = node_load(array('nid' => $iparr[0]['zone_id']));
+        $iparr[0]['ospf_zone'] = guifi_get_ospf_zone($zone);
 
         foreach($ipdec as $ka => $foo) {
           $a = $iparr[$ka];
+          $item = _ipcalc($a['ipv4'],$a['netmask']);
           $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']] = $a;
+          // barrejem el qeu em ve de ipcalc aixi tinc totes les propietats de les ips definides a dins de (dev)
+          $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']] = array_merge($device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']],$item);
           // get linked devices
           $qlsql = sprintf('
             SELECT l2.*
@@ -134,6 +153,8 @@ function guifi_device_load($id,$ret = 'array') {
           asort($ipdec2);
           foreach ($ipdec2 as $ka2 => $foo) {
             $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']] = $iparr2[$ka2];
+            $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']]['interface']['ipv4'] = array_merge($device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']]['interface']['ipv4'],array('host_name' => guifi_get_hostname($device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']]['interface']['device_id'])));
+            
           }
         }
       }
@@ -179,7 +200,12 @@ function guifi_device_load($id,$ret = 'array') {
 
     foreach($ipdec as $ka => $foo) {
       $a = $iparr[$ka];
+      $item = _ipcalc($a['ipv4'],$a['netmask']);
       $device['interfaces'][$i['id']]['ipv4'][$a['id']] = $a;
+      
+      // barrejem el qeu em ve de ipcalc aixi tinc totes les propietats de les ips definides a dins de (dev)
+      $device['interfaces'][$i['id']]['ipv4'][$a['id']] = array_merge($device['interfaces'][$i['id']]['ipv4'][$a['id']],$item);
+      
 
       // get linked devices
       $ql = db_query('
@@ -336,7 +362,7 @@ function guifi_device_form($form_state, $params = array()) {
   // Local javascript validations not actve because of bug in Firefox
   // Errors are not displayed when fieldset folder is collapsed
   // guifi_validate_js("#guifi-device-form");
-
+  
   // $form['#attributes'] = array('onsubmit' => 'kk');
   if (empty($form_state['values']))
     $form_state['values'] = $params;
@@ -351,7 +377,7 @@ function guifi_device_form($form_state, $params = array()) {
     $form_state['values']['links'] = array();
     $form_state['values']['netmask'] = '255.255.255.224';
     if ($form_state['values']['type'] == 'radio') {
-      $form_state['values']['variable']['firmware'] = 'AirOsv30';
+      $form_state['values']['variable']['firmware_id'] = '13';
       $form_state['values']['variable']['model_id'] = '25';
     }
   }
@@ -655,7 +681,32 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
   $to_mail = array();
 
   // device
-  $edit['extra'] = serialize($edit['variable']);
+  
+  // TODO : corretgir que agafi els midi fid de l'estructura qeu toca dins del edit
+  // amb lo de sota els repliquem per poder-hi accedir directament
+  $edit['mid'] = $edit['variable']['model_id'];
+  $edit['fid'] = $edit['variable']['firmware_id'];
+
+  if ($edit['type'] == 'radio') {
+    if (!$edit['variable']['firmware']) {
+      $firmware = db_fetch_object(db_query(
+        "SELECT id, nom as name " .
+        "FROM {guifi_firmware} " .
+        "WHERE id = '%d'",
+        $edit['fid']));
+      $edit['variable']['firmware'] = $firmware->name;
+    }
+  }
+
+  // TODO REMOVE EXTRA  comprovar que no es serialitzen els camps de mid, fid, etc.
+  if ($edit['variable'])
+    $edit['extra'] = serialize($edit['variable']);
+
+  // busquem el id de la configuracioUSC per aquests mid i fid
+  $sql = db_query('SELECT id as uscid, enabled FROM {guifi_configuracioUnSolclic} WHERE mid=%d and fid=%d ', $edit['mid'], $edit['fid']);
+  $configuracio = db_fetch_object($sql);
+
+  $edit['usc_id'] = $configuracio->uscid;
   $ndevice = _guifi_db_sql('guifi_devices',array('id' => $edit['id']),$edit,$log,$to_mail);
 
   guifi_log(GUIFILOG_TRACE,

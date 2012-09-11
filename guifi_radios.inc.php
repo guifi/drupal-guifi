@@ -1,6 +1,9 @@
 <?php
+/**
+ * @file guifi_radios.inc.php
+ * Radio edit forms & functions
+ */
 
-/* Radio edit forms & functions */
 /* guifi_radio_form(): Main radio form (Common parameters)*/
 function guifi_radio_form($edit, $form_weight) {
   global $hotspot;
@@ -20,20 +23,25 @@ function guifi_radio_form($edit, $form_weight) {
      $models_array[$model["mid"]] = $model["manufacturer"] .", " .$model["model"];
   }
 
+  // codi pfc '#title' => t('Device model, firmware & MAC address').' ('.$models_array[$edit['mid']].')',
   $form['radio_settings'] = array(
     '#type' => 'fieldset',
+    
     '#title' => t('Device model, firmware & MAC address').' ('.$edit['variable']['firmware'].')',
     '#weight' => $form_weight++,
     '#collapsible' => TRUE,
     '#tree' => FALSE,
     '#collapsed' => !is_null($edit['id']),
   );
+  
   $form['radio_settings']['variable'] = array('#tree' => TRUE);
+  // codi del PFC $form['radio_settings']['variable']['mid'] = array(
+  // '#default_value' => $edit['mid'],
   $form['radio_settings']['variable']['model_id'] = array(
     '#type' => 'select',
     '#title' => t("Radio Model"),
     '#required' => TRUE,
-    '#default_value' => $edit['variable']['model_id'],
+     '#default_value' => $edit['variable']['model_id'],
     '#options' => $models_array,
     '#description' => t('Select the readio model that do you have.'),
     '#prefix' => '<table><tr><td>',
@@ -47,9 +55,19 @@ function guifi_radio_form($edit, $form_weight) {
     '#weight' => 0,
   );
 
-  $form['radio_settings']['variable']['firmware'] =
-    guifi_radio_firmware_field($edit['variable']['firmware'],
-        $edit['variable']['model_id']);
+  // codi PFC $form['radio_settings']['variable']['fid'] =
+  //$form['radio_settings']['variable']['firmware'] =
+  //  guifi_radio_firmware_field($edit['fid'],
+  //      $edit['mid']);
+
+  $form['radio_settings']['variable']['firmware_id'] =
+  guifi_radio_firmware_field($edit['variable']['firmware_id'],
+      $edit['variable']['model_id']);
+
+  $form['radio_settings']['variable']['firmware'] = array(
+    '#type' => 'hidden',
+    '#default_value' => $edit['variable']['firmware'],
+  );
 
   $form['radio_settings']['mac'] = array(
     '#type' => 'textfield',
@@ -291,23 +309,30 @@ function guifi_radio_add_radio_form($edit) {
 }
 
 function guifi_radio_firmware_field($fid,$mid) {
+/* Consulta anterior al  PFC */
   $model=db_fetch_object(db_query(
-        "SELECT model name " .
+        "SELECT model as name, mid as id " .
         "FROM {guifi_model} " .
-        "WHERE mid=%d}",
+        "WHERE mid=%d",
     $mid));
+
+  $options = array();
+  $firm = guifi_types('firmware', NULL, NULL,$model->id);
+  foreach( $firm as $key => $i) {
+    $options[$firm[$key]['fid']] = t($firm[$key]['description']);
+  }
+
   return array(
     '#type' => 'select',
     '#title' => t("Firmware"),
-    '#parents' => array('variable','firmware'),
+    '#parents' => array('variable','firmware_id'),
     '#required' => TRUE,
     '#default_value' => $fid,
     '#prefix' => '<td><div id="select-firmware">',
     '#suffix' => '</div></td>',
-    '#options' => guifi_types('firmware', NULL, NULL,$model->name),
+    '#options' => $options,
     '#description' => t('Used for automatic configuration.'),
     '#weight' => 2,
-//    '#description' => $edit['variable']['model_id'],
   );
 }
 
@@ -897,11 +922,7 @@ function _guifi_radio_prepare_add_radio($edit) {
         guifi_log(GUIFILOG_BASIC, "Assigned IP: " . $radio['interfaces'][1]['ipv4'][$rc]['ipv4']);
         $radio['interfaces'][1]['ipv4'][$rc]['netmask'] = '255.255.255.224';
 	  }
-	  if ($rc == 0) {
-	    $radio['mac'] = _guifi_mac_sum($edit['mac'], 2);
-	  } else {
-	    $radio['mac'] = '';
-	  }
+        $radio['mac'] = '';
 	  break;
     case 'client':
     case 'client-routed':
@@ -910,11 +931,7 @@ function _guifi_radio_prepare_add_radio($edit) {
       $radio['ssid'] = $ssid . 'CPE' . $rc;
       $radio['interfaces'][0]['new'] = TRUE;
       $radio['interfaces'][0]['interface_type'] = 'Wan';
-	  if ($rc == 0) {
-	    $radio['mac'] = _guifi_mac_sum($edit['mac'],1);
-	  } else {
-	    $radio['mac'] = '';
-	  }
+      $radio['mac'] = '';
 	  break;
     case 'ad-hoc':
       $radio['antenna_angle'] = 360;
@@ -938,11 +955,7 @@ function _guifi_radio_prepare_add_radio($edit) {
         guifi_log(GUIFILOG_TRACE,"Assigned IP: " . $radio['interfaces'][1]['ipv4'][$rc]['ipv4']);
         $radio['interfaces'][1]['ipv4'][$rc]['netmask'] = '255.255.255.255';
       }
-      if ($rc == 0) {
-        $radio['mac'] = _guifi_mac_sum($edit['mac'],2);
-      } else {
         $radio['mac'] = '';
-      }
       break;
   }
 

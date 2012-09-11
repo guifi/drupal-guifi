@@ -1,10 +1,19 @@
 <?php
-/*
+/**
+ * @file guifi_ahah.inc.php
  * Created on 01/06/2008
- *
- * Functions for Asynchrnous HTTP and HTML (AHAH) at some forms
+ * Functions for Asynchronous HTTP and HTML (AHAH) at some forms
  */
 
+/**
+ * @param $fields
+ *
+ * @param $name
+ *
+ * @return
+ *
+ * @todo unused?
+ */
 function guifi_ahah_render_newfields($fields, $name) {
   $form_state = array('submitted' => FALSE);
   $form_build_id = $_POST['form_build_id'];
@@ -26,6 +35,12 @@ function guifi_ahah_render_newfields($fields, $name) {
   return drupal_render($new_form);
 }
 
+/**
+ *
+ * @param $field
+ *
+ * @todo unused?
+ */
 function guifi_ahah_render_field($field){
   $cid = 'form_'. $_POST['form_build_id'];
   $cache = cache_get($cid, 'cache_form');
@@ -50,6 +65,11 @@ function guifi_ahah_render_field($field){
   exit;
 }
 
+/**
+ * Select server
+ *
+ * URL: http://guifi.net/guifi/js/select-server/%
+ */
 function guifi_ahah_select_server(){
   $matches = array();
 
@@ -78,6 +98,12 @@ function guifi_ahah_select_server(){
   exit();
 }
 
+/**
+ * Select service
+ *
+ * URL: http://guifi.net/guifi/js/select-service/%/%
+ *
+ */
 function guifi_ahah_select_service(){
   $matches = drupal_map_assoc(array(t('No service'),t('Take from parents')));
 
@@ -104,6 +130,11 @@ function guifi_ahah_select_service(){
   exit();
 }
 
+/**
+ * Select node
+ *
+ * URL: http://guifi.net/guifi/js/select-node/%
+ */
 function guifi_ahah_select_node(){
   $matches = array();
 
@@ -128,6 +159,11 @@ function guifi_ahah_select_node(){
   exit();
 }
 
+/**
+ * Select device by node/zone/device nickname
+ *
+ * URL: http://guifi.net/guifi/js/select-node-device/%
+ */
 function guifi_ahah_select_node_device(){
   $matches = array();
 
@@ -153,6 +189,11 @@ function guifi_ahah_select_node_device(){
   exit();
 }
 
+/**
+ * Select zone
+ *
+ * URL: http://guifi.net/guifi/js/select-zone/%
+ */
 function guifi_ahah_select_zone() {
   $cid = 'form_'. $_POST['form_build_id'];
   $cache = cache_get($cid, 'cache_form');
@@ -182,6 +223,11 @@ function guifi_ahah_select_zone() {
   exit;
 }
 
+/**
+ * Select device
+ *
+ * URL: http://guifi.net/guifi/js/select-device/%
+ */
 function guifi_ahah_select_device() {
   $cid = 'form_'. $_POST['form_build_id'];
   $cache = cache_get($cid, 'cache_form');
@@ -212,6 +258,11 @@ function guifi_ahah_select_device() {
   exit;
 }
 
+/**
+ * Add wireless radio
+ *
+ * URL: http://guifi.net/guifi/js/add-radio
+ */
 function guifi_ahah_add_radio() {
   $cid = 'form_'. $_POST['form_build_id'];
   $cache = cache_get($cid, 'cache_form');
@@ -234,6 +285,11 @@ function guifi_ahah_add_radio() {
   exit;
 }
 
+/**
+ * Add cable link
+ *
+ * URL: http://guifi.net/guifi/js/add-cable-link/%
+ */
 function guifi_ahah_add_cable_link() {
   $cid = 'form_'. $_POST['form_build_id'];
   $cache = cache_get($cid, 'cache_form');
@@ -250,7 +306,6 @@ function guifi_ahah_add_cable_link() {
     $submit =  array('guifi_interfaces_add_cable_p2p_link_submit');
     $parents = array('interfaces',$interface_id);
   }
-
 
   $node = explode('-',$_POST['movenode']);
 
@@ -332,6 +387,11 @@ function guifi_ahah_add_cable_link() {
   exit;
 }
 
+/**
+ * Add public subnetwork mask
+ *
+ * URL: http://guifi.net/guifi/js/add-subnet-mask/%
+ */
 function guifi_ahah_add_subnet_mask() {
   $cid = 'form_'. $_POST['form_build_id'];
   $cache = cache_get($cid, 'cache_form');
@@ -374,6 +434,11 @@ function guifi_ahah_add_subnet_mask() {
   exit;
 }
 
+/**
+ * Move device
+ *
+ * URL: http://guifi.net/guifi/js/move-device/%
+ */
 function guifi_ahah_move_device() {
   $cid = 'form_'. $_POST['form_build_id'];
   $cache = cache_get($cid, 'cache_form');
@@ -458,6 +523,11 @@ function guifi_ahah_move_device() {
   exit;
 }
 
+/**
+ * Add interface
+ *
+ * URL: http://guifi.net/guifi/js/add-interface
+ */
 function guifi_ahah_add_interface() {
   $interfaces = $_POST['interfaces'];
 
@@ -515,7 +585,11 @@ function guifi_ahah_add_interface() {
   exit;
 }
 
-
+/**
+ * Select firmware by model
+ *
+ * URL: http://guifi.net/guifi/js/firmware_by_model
+ */
 function guifi_ahah_select_firmware_by_model(){
 
   $cid = 'form_'. $_POST['form_build_id'];
@@ -528,8 +602,8 @@ function guifi_ahah_select_firmware_by_model(){
 
     // Validate the firmware.
     if (isset($form['radio_settings']['variable']['model_id'])) {
-      $form['radio_settings']['variable']['firmware'] =
-        guifi_radio_firmware_field($_POST['variable']['firmware'],
+      $form['radio_settings']['variable']['firmware_id'] =
+        guifi_radio_firmware_field($_POST['variable']['firmware_id'],
           $mid);
       cache_set($cid, $form, 'cache_form', $cache->expire);
 
@@ -537,7 +611,7 @@ function guifi_ahah_select_firmware_by_model(){
       $form_state = array();
       $form['#post'] = array();
       $form = form_builder($form['form_id']['#value'] , $form, $form_state);
-      $output = drupal_render($form['radio_settings']['variable']['firmware']);
+      $output = drupal_render($form['radio_settings']['variable']['firmware_id']);
       drupal_json(array('status' => TRUE, 'data' => $output));
     }
     else {
@@ -550,6 +624,13 @@ function guifi_ahah_select_firmware_by_model(){
   exit;
 }
 
+/**
+ * Select channel by protocol
+ *
+ * URL: http://guifi.net/guifi/js/channel/%
+ *
+ * @param $rid
+ */
 function guifi_ahah_select_channel($rid){
  $rid = arg(3);
   $cid = 'form_'. $_POST['form_build_id'];
@@ -579,6 +660,11 @@ function guifi_ahah_select_channel($rid){
   exit;
 }
 
+/**
+ * Add domain
+ *
+ * URL: http://guifi.net/guifi/js/add-domain
+ */
 function guifi_ahah_add_domain() {
   $form_state = array('storage' => NULL, 'submitted' => FALSE);
   $form_build_id = $_POST['form_build_id'];

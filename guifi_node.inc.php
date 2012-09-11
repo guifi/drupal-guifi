@@ -1,17 +1,14 @@
 <?php
-// $Id: guifi.module x$
-
 /**
- * @file guifi_node.incp.php
+ * @file guifi_node.inc.php
  * Manage guifi_node
  * rroca
  */
 
 /* main node (locations) hooks */
+
 /** guifi_node_access(): construct node permissions
 */
-
-
 function guifi_node_access($op, $node) {
   global $user;
 
@@ -281,7 +278,7 @@ function guifi_node_form(&$node, $form_state) {
 
   $form['position'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Node postion settings'),
+    '#title' => t('Node position settings'),
     '#weight' => 4,
     '#collapsible' => FALSE,
   );
@@ -404,6 +401,7 @@ function guifi_node_form(&$node, $form_state) {
     '#length' => 20,
     '#maxlength' => 20,
     '#default_value' => $node->elevation,
+    '#element_validate' => array('guifi_elevation_validate'),
     '#description' => t("Antenna height over the floor level."),
     '#weight' => 10,
   );
@@ -695,8 +693,8 @@ function guifi_node_distances_map($node) {
   if (guifi_gmap_key()) {
     drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_dist.js','module');
 
-    $rows[] = array(array('data' => t('Click on the map to get a new path profile to check the Line Of Sight<br />Click on the path profile to see the point on the map'),'align' => 'center'));
-    $rows[] = array(array('data' => '<a href="javascript:;" onclick="profileclick(event)"><img id="profile" src="'.drupal_get_path('module', 'guifi').'/js/marker_start.png" /></a>','align' => "center"));
+    $rows[] = array(array('data' => t('Click on the map to get a new path profile ( Thanks to <a href="http://www.heywhatsthat.com">HeyWhatsThat</a> ) to check the Line Of Sight<br />Click on the path profile to see the point on the map'),'align' => 'center'));
+    $rows[] = array(array('data' => 'Profile graph and Countour Layer provided by: <a href="http://www.heywhatsthat.com">HeyWhatsThat</a> Copyright 2012 Michael Kosowsky. <b>All rights reserved</b><br>Visit <a href="http://wisp.heywhatsthat.com">HeyWhatsThat WISP</a> for tools for planning wireless networks.<br><a href="javascript:;" onclick="profileclick(event)"><img id="profile" src="'.drupal_get_path('module', 'guifi').'/js/marker_start.png" /></a>','align' => "center"));
     $rows[] = array('<div id="map" style="width: 100%; height: 600px; margin:5px;"></div>');
     $rows[] = array(array('data' => '<div style="float:left;">'.t('Distance:').'&nbsp;</div>'.'<div id="tdistance" style="float:left;">0</div>'.'<div style="float:left;">&nbsp;Km.&nbsp;&nbsp;&nbsp;&nbsp;'.t('Azimuth:').'&nbsp;</div>'.'<div id="tazimut" style="float:left;">0</div>&nbsp;'.t('degrees')));
     $output = theme('table', NULL,$rows);
@@ -797,7 +795,7 @@ function guifi_node_distances_list($filters,$node) {
       $node->id);
 ***/
 
-  $result = db_query("SELECT n.id, n.lat, n.lon, n.nick, n.status_flag, n.zone_id, count(*) radios FROM {guifi_location} n LEFT JOIN {guifi_radios} r ON n.id = r.nid WHERE n.id !=%d AND (n.lat != '' AND n.lon != '')AND (n.lat != 0 AND n.lon != 0) GROUP BY 1",$node->id);
+  $result = db_query("SELECT n.id, n.lat, n.lon, n.nick, n.status_flag, n.zone_id, n.timestamp_changed, count(*) radios FROM {guifi_location} n LEFT JOIN {guifi_radios} r ON n.id = r.nid WHERE n.id !=%d AND (n.lat != '' AND n.lon != '')AND (n.lat != 0 AND n.lon != 0) GROUP BY 1",$node->id);
 
   $oGC = new GeoCalc();
   $nodes = array();
@@ -889,7 +887,9 @@ function guifi_node_distances_list($filters,$node) {
   $form['z'][-1]['h_heights'] = array(
     '#type'=> 'item',
     '#title'=> t('Heights image'),
-    '#description'=> t('Click over the image to view in large format'),
+    '#description'=> t('Click over the image to view in large format<br>
+      Visit <a href="http://wisp.heywhatsthat.com">HeyWhatsThat WISP</a> for tools
+      for planning wireless networks.<br><a href="http://www.heywhatsthat.com">HeyWhatsThat</a>. Copyright 2012 Michael Kosowsky. <b>All rights reserved</b>'),
     '#prefix' => '<th>',
     '#suffix' => '</th></tr>',
     '#weight' => $fw++,
@@ -985,7 +985,7 @@ function guifi_node_distances_list($filters,$node) {
       '#type'=> 'item',
       '#parents'=> array('z',$nc,'d_distance'),
       '#title'=> $node['distance'].' '.t('kms'),
-      '#value'=> $node['status_flag'],
+      '#value'=> $node['status_flag']." (". date('d/m/Y',$node["timestamp_changed"]). ")",
       '#description'=> $dAz.'º - '.$dOr,
       '#prefix' => '<td>',
       '#suffix' => '</td>',
@@ -1211,6 +1211,8 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
   $query = db_query("SELECT d.id FROM {guifi_devices} d WHERE nid=%d",$id);
   while ($d = db_fetch_object($query)) {
      $device = guifi_device_load($d->id);
+
+     // Edit and delete buttons
      if (guifi_device_access('update',$device['id'])) {
        $edit_radio =  '<table><tr><td>'.l(guifi_img_icon('edit.png'),'guifi/device/'.$device['id'].'/edit',
             array(
@@ -1223,6 +1225,8 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
               'title' => t('delete device'),
               'attributes' => array('target' => '_blank'))).'</td></tr></table>';
      }
+
+     // Traceroute button
      if (user_access('create guifi nodes')) {
        $traceroute = l(guifi_img_icon('discover-routes.png'),'guifi/menu/ip/traceroute/'.$device['id'],
             array(
@@ -1230,17 +1234,23 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
               'title' => t('trace routes, discover services from this device'),
               'attributes' => array('target' => '_blank')));
      } else $traceroute = '';
+
+     // Firmware text which links to unsolclic feature
      if ($device->variable['firmware'] != "n/d") {
        $unsolclic = l($device[variable]['firmware'],
          'guifi/device/'.$device['id'].'/view/unsolclic',
          array('attributes' => array('title' => t("Get radio configuration with singleclick")))
        );
      }
+
+     // Get IP assigned to the device
      $ip = guifi_main_ip($device[id]);
 
+     // Availability image
      $status_url = guifi_cnml_availability(
        array('device' => $device['id'],'format' => 'short'));
 
+     // Groups all this data in an array for the theme() function
      $rows[] = array(
                  '<a href="'.url('guifi/device/'.$device[id]).'">'.$device[nick].'</a>',
                  $device[type],
@@ -1253,6 +1263,7 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
                     );
   }
 
+  // Creates the table with devices if any, otherwise just outputs the node has not devices
   if (count($rows))
     $output = '<h4>'.t('devices').'</h4>'.
       theme('table', $header, $rows,
@@ -1261,6 +1272,7 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
   else
     $output = theme('box',t('This node does not have any device'),$form);
 
+  // Again, it creates a table with the links, if they exist
   if ($links) {
     $node = node_load(array('nid' => $node->id));
     drupal_set_title(t('devices @ %node',array('%node' => $node->title)));
@@ -1404,16 +1416,6 @@ function theme_guifi_node_links_by_type($id = 0, $ltype = '%') {
 
 }
 
-function guifi_hwt_query($lat,$lon,$elev) {
-  $url = 'http://www.heywhatsthat.com/bin/query.cgi?lat='.$lat.'&lon='.$lon.'&elev='.$elev.
-  '&elev_is_absolute=0&name=tmp&public=0&return_data=1';
-  $fd = fopen($url, "r");
-  echo fread($fd, 8);
-  fclose($fd);
-
-  return;
-}
-
 function guifi_hwt_list($id) {
   $url='http://www.heywhatsthat.com/results/'.$id.'/data';
 
@@ -1439,6 +1441,17 @@ function guifi_hwt_img($id, $img) {
   fclose($fd);
 
   return;
+}
+
+function guifi_elevation_validate($element, &$form_state) {
+  if ($element['#value'] != '0') {
+    if (empty($element['#value']))
+      form_error($element,t('Antenna elevation in meters must be specified.'));
+  }
+  if (!is_numeric($element['#value']))
+    form_error($element,t('Antenna elevation in meters must be numeric'));
+  if ($element['#value'] < 0)
+    form_error($element,t('Antenna elevation in meters must be a positive number'));
 }
 
 ?>

@@ -10,8 +10,8 @@ function unsolclic_airos($dev) {
   $dns[] .=$primary_dns;
   $dns[] .=$secondary_dns;
 
-   foreach ($dev->radios[0]['interfaces'] as $interface_id => $interface) 
-     foreach ($interface['ipv4'] as $ipv4_id => $ipv4) 
+   foreach ($dev->radios[0]['interfaces'] as $interface_id => $interface)
+     foreach ($interface['ipv4'] as $ipv4_id => $ipv4)
        if (isset($ipv4['links'])) foreach ($ipv4['links'] as $key => $link)
          $gateway = $link['interface']['ipv4']['ipv4'];
 
@@ -229,8 +229,8 @@ radio.1.mcastrate=$mcastrate
   _outln_comment(' Device: '.$dev->nick.'');
   _outln_comment();
   _outln_comment(' Methods to upload/execute the file:');
-  _outln_comment(' 1.- As a file. Upload this through web managment:'); 
-  _outln_comment('     a.System->Configuratuion Managment->Locate file');
+  _outln_comment(' 1.- As a file. Upload this through web management:'); 
+  _outln_comment('     a.System->Configuration Management->Locate file');
   _outln_comment('     b.Upload');
   _outln_comment(' 2.- Telnet: Open a terminal session, create new /tmp/system.cfg file and cut&paste');
   _outln_comment('     the contents of the file. Save it an execute the command:');

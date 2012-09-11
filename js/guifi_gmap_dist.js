@@ -1,9 +1,5 @@
 var map = null;
 var markers = Array();
-var cloak_overlays = Array();
-var cloak_query = false;
-
-var cloakControl = null;
 
 if(Drupal.jsEnabled) {
     $(document).ready(function(){
@@ -30,14 +26,6 @@ function wt_request_array_of_lines(url, name) {
                 // pop off last element, which will be blank (if response ends with \n)
                 a.pop();
 
-                for (var i = 0; i < a.length; i++) {
-                    var b = CloakOverlayByName(a[i]);
-                    if (b) {
-                        cloak_overlays.push(b);
-                        b.setMap(map);
-                    }
-                }
-                cloakControl.enable();
             },
   });
 }
@@ -126,64 +114,12 @@ function CloakOverlayByName(name) {
   return new OneDegreeImgOverlay(a[0], a[1], .5/3600, name, map);
 }
 
-function show_cloak() {
-
-    if (!cloak_query) {
-        handle_query();
-        cloak_query = true;
-    }
-
-    cloak_overlays.length = 0;
-    wt_request_array_of_lines('../list_cloakm/'+id, 'CLOAK');
-}
-
-function remove_cloak() {
-    for (var i = 0; i < cloak_overlays.length; i++) {
-        cloak_overlays[i].setMap(null);
-    }
-    cloak_overlays.length = 0;
-}
-
-function handle_query() {
-  var name = "tst";
-  var lat = document.getElementById("lat").value;
-  var lon = document.getElementById("lon").value;
-
-  if (lat < -54 || lat >= 71 || (lat > 60 && (lon < -173 || lon >= -139))) {
-    alert('Invalid latitude.\nWe currently cover latitude 60N to 54S and most of Alaska.');
-    return;
-  }
-
-  var elev = document.getElementById("elevation").value;
-
-  $.ajax( {
-            url: '../query/' + lat + '/' + lon + '/' + elev,
-            success: function(data) {
-                cloak_overlays.length = 0;
-                id = data;
-                wt_request_array_of_lines('../list_cloakm/' + data, 'CLOAK');
-            }
-  });
-
-}
-
 // CONTOUR
 var contourLayer = new google.maps.ImageMapType({
   //contour_overlay = new GTileLayerOverlay(TileLayer(0, 17, 'Contours (C) 2007', 'Michael Kosowsky',
      tileSize: new google.maps.Size(256, 256),
      getTileUrl: function(point, zoom) {
          console.log(point);
-        return 'http://contour.heywhatsthat.com/bin/contour_tiles.cgi?x=' + 
-            point.x+'&y='+point.y+'&zoom='+zoom+'&interval='+contour_interval(zoom) +
-	        '&color=0000FF30&src=guifi.net';
-        },
-});
-
-// VISIBILITY CLOAK
-var cloakLayer = new google.maps.ImageMapType({
-  //cloak_overlay = new GTileLayerOverlay(TileLayer(0, 17, 'Contours (C) 2007', 'Michael Kosowsky',
-     tileSize: new google.maps.Size(256, 256),
-     getTileUrl: function(point, zoom) {
         return 'http://contour.heywhatsthat.com/bin/contour_tiles.cgi?x=' + 
             point.x+'&y='+point.y+'&zoom='+zoom+'&interval='+contour_interval(zoom) +
 	        '&color=0000FF30&src=guifi.net';
@@ -295,24 +231,6 @@ function draw_map() {
         }
     });
 
-    // Visibility cloak control
-    cloakControl = new Control("visibility cloak layer", true, true, 140);
-    map.overlayMapTypes.push(null);
-    cloakControl.div.index = 1;
-    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(cloakControl.div);
-
-    // Setup the click event listeners: simply set the map to Chicago
-    google.maps.event.addDomListener(cloakControl.ui, 'click', function() {
-        if (cloakControl.enabled) {
-            remove_cloak(); 
-            cloakControl.disable();
-        } else {
-            cloakControl.loading();
-            // Add the guifi layer
-            show_cloak();
-        }
-    });
-
     if (document.getElementById("lon2").value != "NA") {
         lon2 = document.getElementById("lon2").value;      
         if (document.getElementById("lat2").value != "NA") {
@@ -350,11 +268,7 @@ function initialPosition(ppoint) {
         "pt0="+document.getElementById("lat").value+","+document.getElementById("lon").value+
         ",ff0000,"+document.getElementById("elevation").value+
         "&pt1="+point.lat()+","+point.lng()+
-        ",00c000,9";   
-  
-    for (var i = 0; i < cloak_overlays.length; i++) {
-        cloak_overlays[i].setMap(map);
-    }
+        ",00c000,9";
 
     pLine = new google.maps.Polyline({ path: [node, point], strokeColor: "#ff0000", strokeWeight: 5, strokeOpacity: .4, map:map });
     markers.push(pLine);
