@@ -351,7 +351,7 @@ function guifi_schema() {
     'comment' => 'store guifi dns hosts',
     'fields' => array(
       'id' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE),
-      'counter' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE),
+      'counter' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE),
       'host' => array('type' => 'varchar', 'length' => '128', 'not null' => TRUE, 'default' => ''),
       'ipv4' => array('type' => 'varchar', 'length' => '16', 'not null' => TRUE, 'default' => ''),
       'ipv6' => array('type' => 'varchar', 'length' => '128', 'not null' => TRUE, 'default' => ''),
@@ -2146,7 +2146,15 @@ function guifi_update_906() {
 }
 
 function guifi_update_907() {
-   $items = array();
-   $items[] = update_sql("ALTER TABLE guifi_links ADD INDEX nid_index USING BTREE (nid);"); return $items;
+  $items = array();
+  $items[] = update_sql("ALTER TABLE guifi_links ADD INDEX nid_index USING BTREE (nid);");
+  return $items;
+}
+
+function guifi_update_908() {
+  $items = array();
+  $items[] = update_sql("ALTER TABLE {guifi_dns_hosts} CHANGE `counter` `counter` INT( 11 ) NOT NULL;");
+  return $items;
+}
 
 ?>
