@@ -802,7 +802,8 @@ function draw_map() {
         var point = event.latLng;
 
         if (map.getZoom() <= 15 ) {
-            map.setZoom(map.getZoom()+3);
+            map.setCenter(point);
+            map.setZoom(map.getZoom()+2)
         } else {
 
             marcador.setPosition(point);
