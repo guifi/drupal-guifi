@@ -796,13 +796,11 @@ function draw_map() {
     marker_move.savePoint = marker_move.getPosition() ;			// Save for later
 
     var infoWindow = new google.maps.InfoWindow({});
-    var update_timeout = null;
 
-    google.maps.event.addListener(map, "click", function(event) {
+    google.maps.event.addListener(map, "dblclick", function(event) {
 
         var point = event.latLng;
 
-        update_timeout = setTimeout(function(){
         if (map.getZoom() <= 15 ) {
             map.setCenter(point);
             map.setZoom(map.getZoom()+2)
@@ -817,14 +815,9 @@ function draw_map() {
                     + point.lng() + '&lat=' + point.lat() +
                     '&zone='+document.getElementById("zone_id").value+
                     '" TARGET=fijo APPEND=blank>Add a new node here</a>');
-            infoWindow.open(map, marcador);    
+            infoWindow.open(map, marcador);
         }
-        }, 500);
     });
-
-    google.maps.event.addListener(map, 'dblclick', function(event) {
-    clearTimeout(update_timeout);
-});
 
     var bounds = new google.maps.LatLngBounds();
 
