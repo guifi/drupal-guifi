@@ -564,7 +564,8 @@ function unsolclic_routeros($dev) {
   _outln(':foreach i in [/routing filter find chain=ebgp-in] do={/routing filter remove $i;}');
   _outln(':foreach i in [/routing filter find chain=ebgp-out] do={/routing filter remove $i;}');
   _outln("/ routing filter");
-  _outln(sprintf('add action=discard chain=ebgp-in comment="1. Discard insert non 10.x routes from BGP peer" disabled=no invert-match=no prefix=!10.0.0.0/8 prefix-length=8-32 set-pref-src="%s"',$ospf_routerid));
+  _outln(sprintf('add chain=ebgp-in comment="0. Set ebgp-in preferred source." set-pref-src="%s" disabled=no',$ospf_routerid));
+  _outln('add action=discard chain=ebgp-in comment="1. Discard insert non 10.x routes from BGP peer" disabled=no invert-match=no prefix=!10.0.0.0/8 prefix-length=8-32');
   _outln('add action=discard chain=ebgp-out comment="2. Discard send non 10.x routes to BGP peer" disabled=no invert-match=no prefix=!10.0.0.0/8 prefix-length=8-32');
   _outln(sprintf('add action=accept chain=ospf-in comment="3. Accept insert 10.x routes from OSPF neighbor" disabled=no invert-match=no prefix=10.0.0.0/8 prefix-length=8-32 set-pref-src="%s"',$ospf_routerid));
   _outln('add action=accept chain=ospf-in comment="4. Accept insert 172.x routes from OSPF neighbor" disabled=no invert-match=no prefix=172.16.0.0/12 prefix-length=8-32');
