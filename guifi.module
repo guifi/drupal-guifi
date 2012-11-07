@@ -714,6 +714,14 @@ function guifi_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK
   );
+  $items['node/%guifi_zone/delete'] = array(
+    'title' => 'Delete',
+    'page callback' => 'guifi_zone_delete',
+    'page arguments' => array(1),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer guifi networks'),
+    'type' => MENU_LOCAL_TASK
+  );
   $items['guifi/user/%/edit'] = array(
     'page callback' => 'guifi_user_edit',
     'page arguments' => array(2),

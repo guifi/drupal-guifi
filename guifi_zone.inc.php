@@ -777,61 +777,81 @@ function guifi_zone_update($node) {
    guifi_clear_cache($node->nid);
 }
 
+/** guifi_zone_delete_confirm():
+**/
+function guifi_zone_delete_confirm($form_state,$params) {
+
+  $form['help'] = array(
+    '#type' => 'item',
+    '#title' => t('Are you sure you want to delete this zone?'),
+    '#value' => $params['name'],
+    '#description' => t('WARNING: This action cannot be undone. Press "Confirm delete".'),
+    '#weight' => 0,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Confirm delete'),
+    '#name'  => 'confirm',
+    '#weight' => 1,
+  );
+  drupal_set_title(t('Delete zone: (%name)',array('%name' => $params['name'])));
+
+  return $form;
+}
+
 /** guifi_zone_delete(): Delete a zone
 **/
-function guifi_zone_delete(&$node) {
+function guifi_zone_delete($zone, $notify = TRUE, $verbose = TRUE) {
   global $user;
   $log = '';
 
-  $delete = TRUE;
-  $qn = db_fetch_object(db_query("
-    SELECT count(*) count
-    FROM {guifi_networks}
-    WHERE zone=%d",
-    $node->nid));
-  if ($qn->count) {
-    drupal_set_message(t('FATAL ERROR: Can\'t delete a zone which have networks allocated. Database broken. Contact your system administrator'),'error');
-    $delete = FALSE;
-  }
-  $ql = db_fetch_object(db_query("
-    SELECT count(*) count
-    FROM {guifi_location}
-    WHERE zone_id=%d",
-    $node->nid));
-  if ($ql->count) {
-    drupal_set_message(t('FATAL ERROR: Can\'t delete a zone with nodes. Database broken. Contact your system administrator'),'error');
-    $delete = FALSE;
+  if ($_POST['confirm']) {
+    $delete = TRUE;
+    $qn = db_fetch_object(db_query("
+      SELECT count(*) count
+      FROM {guifi_networks}
+      WHERE zone=%d",
+      $zone->id));
+    if ($qn->count) {
+      drupal_set_message(t('ERROR: Can\'t delete a zone which have networks allocated. If you need to delete the zone, contact your system administrator.'),'error');
+      $delete = FALSE;
+    }
+    $ql = db_fetch_object(db_query("
+      SELECT count(*) count
+      FROM {guifi_location}
+      WHERE zone_id=%d",
+      $zone->id));
+    if ($ql->count) {
+      drupal_set_message(t('ERROR: Can\'t delete a zone with nodes. If you need to delete the zone, contact your system administrator.'),'error');
+      $delete = FALSE;
+    }
+    if ($delete == FALSE) {
+      drupal_goto('node/'.$zone->id);
+    }
+
+    if ($delete == TRUE) {
+    // perform deletion
+      $nzone = _guifi_db_sql(
+        'guifi_zone',
+        array('id' => $zone->id),
+        (array)$zone,
+        $log,
+        $to);
+      guifi_notify(
+        $to,
+        t('Zone %nick-%name has been deleted',
+        array('%nick' => $zone->nick,'%name' => $zone->title)),
+        $log);
+      cache_clear_all();
+      variable_set('guifi_refresh_cnml',time());
+      variable_set('guifi_refresh_maps',time());
+      drupal_goto('/portada');
+    }
   }
 
-  $to = explode(',',$node->notification);
-  $to[] = variable_get('guifi_contact','webmestre@guifi.net');
-  if (!$delete) {
-    $messages = drupal_get_messages(NULL, FALSE);
-    guifi_notify(
-    $to,
-    t('ALERT: Zone %nick-%name has been deleted, but have errors:',
-      array('%nick' => $node->nick,'%name' => $node->title)),
-    implode("\n",$messages['error']));
-    return;
-  }
-
-  // perform deletion
-  $node->deleted = TRUE;
-  $nzone = _guifi_db_sql(
-    'guifi_zone',
-    array('id' => $node->id),
-    (array)$node,
-    $log,
-    $to);
-  guifi_notify(
-    $to,
-    t('Zone %nick-%name has been deleted',
-      array('%nick' => $node->nick,'%name' => $node->title)),
-    $log);
-  cache_clear_all();
-  variable_set('guifi_refresh_cnml',time());
-  variable_set('guifi_refresh_maps',time());
-
+  $output = drupal_get_form('guifi_zone_delete_confirm',
+    array('name' => $zone->nick,'id' => $zone->id));
+  print theme('page',$output, FALSE);
   return;
 }
 /** guifi_zone_get_parents(): Get the guifi zone parents
