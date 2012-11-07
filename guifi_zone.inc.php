@@ -1478,7 +1478,8 @@ function theme_guifi_zone_data($zone,$links = TRUE) {
 /** theme_guifi_zone_stats():  outputs the stats graph
 **/
 function theme_guifi_zone_stats($zone,$links = TRUE) {
-  $output = '<script type="text/javascript" src="'.base_path().'/misc/collapse.js"></script>';
+  global $base_url;
+  $output = '<script type="text/javascript" src="'.$base_url.'/misc/collapse.js"></script>';
   $output .= '<fieldset class="collapsible collapsed">';
   $output .= '<legend>'.t('zone statistics').'</legend>';
   $output .= '<div>'.theme('table', NULL, guifi_zone_stats_data($zone->id),array('width' => '100%')).'</div>';
@@ -1488,8 +1489,7 @@ function theme_guifi_zone_stats($zone,$links = TRUE) {
 /** guifi_zone_stats_data(): outputs the zone statistics data
 **/
 function guifi_zone_stats_data($zone) {
-
-  $rows[] = array('<a href="'.base_path().'/guifi/menu/stats/nodes?zone='.$zone.'"><img src="'.base_path().'/guifi/stats/chart?id=1&amp;zone='.$zone.'&amp;width=400&amp;height=300&amp;title=void" /></a>','&nbsp;');
+  $rows[] = array('<a href="'.$base_url.'guifi/menu/stats/nodes?zone='.$zone.'"><img src="'.$base_url.'guifi/stats/chart?id=1&amp;zone='.$zone.'&amp;width=400&amp;height=300&amp;title=void" /></a>','&nbsp;');
   return array_merge($rows);
 }
 ?>
