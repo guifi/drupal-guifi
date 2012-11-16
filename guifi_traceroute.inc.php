@@ -73,7 +73,7 @@ function guifi_cnml_live($cmd,$device_id,$ipv4,$gs) {
   return theme('box',t('output'),$output);
 }
 
-function guifi_traceroute($path, $to, &$routes, $maxhops = 15,$cost = 0, $alinks = array()) {
+function guifi_traceroute($path, $to, &$routes, $maxhops = 10,$cost = 0, $alinks = array()) {
   $btime = microtime(TRUE);
 
   $hop = count($path);
