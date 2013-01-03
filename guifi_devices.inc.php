@@ -418,7 +418,7 @@ function guifi_device_form($form_state, $params = array()) {
     $form_state['values']['zone_mode'] = $zone->zone_mode;
 
     // That's a new device, because zone_mode was NULL, otherwise would have a value
-    // If ad-hoc, add a radio & a public IP (/32)
+    // If ad-hoc, add a radio & a public IP (/27)
     if ($zone->zone_mode == 'ad-hoc') {
       if ($form_state['values']['type'] == 'radio') {
         $form_state['values']['newradio_mode'] = $zone->zone_mode;
@@ -428,15 +428,15 @@ function guifi_device_form($form_state, $params = array()) {
         $intf['new']=TRUE;
         $intf['interface_type']='wLan/Lan';
         $ips_allocated=guifi_ipcalc_get_ips('0.0.0.0','0.0.0.0',$edit,1);
-        $net = guifi_ipcalc_get_subnet_by_nid($form_state['values']['nid'],'255.255.255.255','public',$ips_allocated,'Yes', TRUE);
-        $i = _ipcalc($net,'255.255.255.255');
-        guifi_log(GUIFILOG_TRACE,"IPS allocated: ".count($ips_allocated)." got net: ".$net.'/32',$i);
+        $net = guifi_ipcalc_get_subnet_by_nid($form_state['values']['nid'],'255.255.255.224','public',$ips_allocated,'Yes', TRUE);
+        $i = _ipcalc($net,'255.255.255.224');
+        guifi_log(GUIFILOG_TRACE,"IPS allocated: ".count($ips_allocated)." got net: ".$net.'/27',$i);
         $intf['ipv4'][0]=array();
         $intf['ipv4'][0]['new']=TRUE;
         $intf['ipv4'][0]['ipv4_type']=1;
         $intf['ipv4'][0]['ipv4']=$net;
         guifi_log(GUIFILOG_TRACE,"Assigned IP: ".$intf['ipv4'][0]['ipv4']);
-        $intf['ipv4'][0]['netmask']='255.255.255.255';
+        $intf['ipv4'][0]['netmask']='255.255.255.224';
         $form_state['values']['interfaces'][0] = $intf;
 
       }

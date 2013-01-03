@@ -944,16 +944,16 @@ function _guifi_radio_prepare_add_radio($edit) {
         $radio['interfaces'][1]['interface_type'] = 'wLan/Lan';
         $ips_allocated = guifi_ipcalc_get_ips('0.0.0.0','0.0.0.0',$edit,1);
         // $net = guifi_ipcalc_get_meship($edit['nid'],$ips_allocated);
-        $net = guifi_ipcalc_get_subnet_by_nid($edit['nid'],'255.255.255.255','public',$ips_allocated,'No', TRUE);
-        $i = _ipcalc($net,'255.255.255.255');
-        guifi_log(GUIFILOG_TRACE,"IPS allocated: " . count($ips_allocated)." got net: ".$net.'/32',$i);
+        $net = guifi_ipcalc_get_subnet_by_nid($edit['nid'],'255.255.255.224','public',$ips_allocated,'No', TRUE);
+        $i = _ipcalc($net,'255.255.255.224');
+        guifi_log(GUIFILOG_TRACE,"IPS allocated: " . count($ips_allocated)." got net: ".$net.'/27',$i);
         
         $radio['interfaces'][1]['ipv4'][$rc] = array();
         $radio['interfaces'][1]['ipv4'][$rc]['new'] = TRUE;
         $radio['interfaces'][1]['ipv4'][$rc]['ipv4_type'] = 1;
         $radio['interfaces'][1]['ipv4'][$rc]['ipv4'] = $net;
         guifi_log(GUIFILOG_TRACE,"Assigned IP: " . $radio['interfaces'][1]['ipv4'][$rc]['ipv4']);
-        $radio['interfaces'][1]['ipv4'][$rc]['netmask'] = '255.255.255.255';
+        $radio['interfaces'][1]['ipv4'][$rc]['netmask'] = '255.255.255.224';
       }
         $radio['mac'] = '';
       break;
