@@ -214,7 +214,7 @@ function draw_map() {
     });
 
     // Contour control
-    var contourControl = new Control("contour layer", true, false, 95);
+    var contourControl = new Control("contour layer", true, false, 100);
     map.overlayMapTypes.push(null);
     contourControl.div.index = 1;
     map.controls[google.maps.ControlPosition.TOP_RIGHT].push(contourControl.div);
@@ -262,13 +262,11 @@ function initialPosition(ppoint) {
     var curvature = distance > 0.1 ? 1 : 0; // 0.1 a ojimetro son 10Km xD
 
     document.getElementById("profile").src =
-        "http://www.heywhatsthat.com/bin/profile.cgi?"+
-        "axes=1&curvature="+curvature+"&metric=1&groundrelative=1&"+
-        "src=guifi.net&"+
-        "pt0="+document.getElementById("lat").value+","+document.getElementById("lon").value+
-        ",ff0000,"+document.getElementById("elevation").value+
-        "&pt1="+point.lat()+","+point.lng()+
-        ",00c000,9";
+        "http://wisp.heywhatsthat.com/api/profile-rf.png?"+
+	"user=guifi&src=guifi.net&" +
+        "axes=1&curvature=" + curvature + "&metric=1&" +
+        "lle0=" + document.getElementById("lat").value + "," + document.getElementById("lon").value+ "," + document.getElementById("elevation").value + ",ff0000&" +
+        "lle1=" + point.lat() + "," + point.lng( )+ ",9,00c000" ;
 
     pLine = new google.maps.Polyline({ path: [node, point], strokeColor: "#ff0000", strokeWeight: 5, strokeOpacity: .4, map:map });
     markers.push(pLine);
