@@ -417,8 +417,10 @@ function guifi_device_form($form_state, $params = array()) {
   if (is_null($form_state['values']['zone_mode'])) {
     $form_state['values']['zone_mode'] = $zone->zone_mode;
 
+    // DEPRECATED IN FAVOR OF MESH (mesh)
     // That's a new device, because zone_mode was NULL, otherwise would have a value
     // If ad-hoc, add a radio & a public IP (/27)
+/*
     if ($zone->zone_mode == 'ad-hoc') {
       if ($form_state['values']['type'] == 'radio') {
         $form_state['values']['newradio_mode'] = $zone->zone_mode;
@@ -441,6 +443,7 @@ function guifi_device_form($form_state, $params = array()) {
 
       }
     }
+*/
   }
 
   if (isset($form_state['action'])) {
@@ -1041,11 +1044,6 @@ function guifi_device_create_form($form_state, $node) {
   $types = guifi_types('device');
 
   $zone = guifi_zone_load($node->zone_id);
-  if ($zone->zone_mode == 'ad-hoc') {
-    $rows = db_result(db_query('SELECT count(*) FROM {guifi_devices} WHERE type="radio" AND nid=%d',$node->nid));
-    if ($rows)
-      unset($types['radio']);
-  }
 
   if (!guifi_node_access('create',$node->nid)) {
     $form['text_add'] = array(

@@ -264,19 +264,15 @@ function guifi_radio_add_radio_form($edit) {
       $firewall = TRUE;
   } // foreach $radio
 
-  if ($edit['zone_mode']=='ad-hoc')
-    $modes_arr=array('ad-hoc' => t('Ad-hoc mode for mesh'));
-  else {
-	  // print "Max radios: ".$maxradios->radiodev_max." Current: $cr Total: $tr Firewall: $firewall Edit details: $edit[edit_details]\n<br />";
-	  $modes_arr = guifi_types('mode');
-	  //  print_r($modes_arr);
+  // print "Max radios: ".$maxradios->radiodev_max." Current: $cr Total: $tr Firewall: $firewall Edit details: $edit[edit_details]\n<br />";
+  $modes_arr = guifi_types('mode');
+  //  print_r($modes_arr);
 
-	  if ($cr>0)
-		  if (!$firewall)
-			  $modes_arr = array_diff_key($modes_arr,array('client' => 0));
-		  else
-			  $modes_arr = array_intersect_key($modes_arr,array('client' => 0));
-  }
+  if ($cr>0)
+	  if (!$firewall)
+		  $modes_arr = array_diff_key($modes_arr,array('client' => 0));
+	  else
+		  $modes_arr = array_intersect_key($modes_arr,array('client' => 0));
 
   $form['newradio_mode'] = array(
     '#type' => 'select',
@@ -415,7 +411,7 @@ function guifi_radio_radio_form($radio, $key, &$form_weight = -200) {
 
     switch ($radio['mode']) {
 	    case 'ap':
-	    case 'ad-hoc':
+	    case 'mesh':
 		    $f['s']['ssid'] = array(
 			    '#type' => 'textfield',
 					'#title' => t('SSID'),
@@ -903,11 +899,11 @@ function _guifi_radio_prepare_add_radio($edit) {
   switch ($radio['mode']) {
     case 'ap':
       $radio['antenna_angle'] = 120;
-	  $radio['clients_accepted'] = "Yes";
-	  $radio['ssid'] = $ssid.'AP'.$rc;
-	  $radio['interfaces'][0]['interface_type'] = 'wds/p2p';
-	  // first radio, force wlan/Lan bridge and get an IP
-	  if ($tc == 0) {
+      $radio['clients_accepted'] = "Yes";
+      $radio['ssid'] = $ssid.'AP'.$rc;
+      $radio['interfaces'][0]['interface_type'] = 'wds/p2p';
+      // first radio, force wlan/Lan bridge and get an IP
+      if ($tc == 0) {
         $radio['interfaces'][1] = array();
         $radio['interfaces'][1]['new'] = TRUE;
         $radio['interfaces'][1]['interface_type']='wLan/Lan';
@@ -933,9 +929,9 @@ function _guifi_radio_prepare_add_radio($edit) {
       $radio['interfaces'][0]['interface_type'] = 'Wan';
       $radio['mac'] = '';
 	  break;
-    case 'ad-hoc':
-      $radio['antenna_angle'] = 360;
-      $radio['clients_accepted'] = "Yes";
+    case 'mesh':
+      $radio['antenna_angle'] = 0;
+      $radio['clients_accepted'] = "No";
       $radio['ssid'] = $ssid.t('MESH');
       // first radio, force wlan/Lan bridge and get an IP
       if ($tc == 0) {
@@ -944,14 +940,13 @@ function _guifi_radio_prepare_add_radio($edit) {
         $radio['interfaces'][1]['interface_type'] = 'wLan/Lan';
         $ips_allocated = guifi_ipcalc_get_ips('0.0.0.0','0.0.0.0',$edit,1);
         // $net = guifi_ipcalc_get_meship($edit['nid'],$ips_allocated);
-        $net = guifi_ipcalc_get_subnet_by_nid($edit['nid'],'255.255.255.224','public',$ips_allocated,'No', TRUE);
-        $i = _ipcalc($net,'255.255.255.224');
-        guifi_log(GUIFILOG_TRACE,"IPS allocated: " . count($ips_allocated)." got net: ".$net.'/27',$i);
-        
+        $net = guifi_ipcalc_get_subnet_by_nid($edit['nid'],'255.255.255.224','public',$ips_allocated,'Yes', TRUE);
+        guifi_log(GUIFILOG_BASIC,"IPS allocated: ".count($ips_allocated)." got net: ".$net.'/27');
         $radio['interfaces'][1]['ipv4'][$rc] = array();
         $radio['interfaces'][1]['ipv4'][$rc]['new'] = TRUE;
         $radio['interfaces'][1]['ipv4'][$rc]['ipv4_type'] = 1;
         $radio['interfaces'][1]['ipv4'][$rc]['ipv4'] = $net;
+        //$radio['interfaces'][1]['ipv4'][$rc]['ipv4'] = long2ip(ip2long($net)+1);
         guifi_log(GUIFILOG_TRACE,"Assigned IP: " . $radio['interfaces'][1]['ipv4'][$rc]['ipv4']);
         $radio['interfaces'][1]['ipv4'][$rc]['netmask'] = '255.255.255.224';
       }

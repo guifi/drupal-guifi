@@ -278,20 +278,12 @@ function guifi_zone_form(&$node, &$param) {
   );
   $form['zone_mode'] = array(
     '#type' => 'select',
-    '#title' => t('Zone dynamic mesh mode'),
-    '#required' => TRUE,
+    '#title' => t('Zone dynamic mode'),
+    '#required' => FALSE,
     '#default_value' => $node->zone_mode,
-    '#options' => array('infrastructure' => t('infrastructure'),'ad-hoc' => t('ad-hoc')),
-    '#description' => t('<ul><li>Select <strong>Infrastructure</strong> ' .
-        'for traditional dynamic protocols in infrastructure mode ' .
-        'like OSPF, BGP, etc. This mode is very much used on static nodes ' .
-        'with known and permanent links already planned or backbones, ' .
-        'point-to-point links...</li>' .
-        '<li>Select <strong>Ad-hoc</strong> for dynamic mesh routing protocols ' .
-        'like BATMAN or OLSR. This mode doesn\'t require planned ' .
-        'and known links, and can grow spontaneously just by density. ' .
-        'I.e. appropiated for networks deployed at street level ' .
-        'in urban areas.</li></ul>'),
+    '#options' => array('infrastructure' => t('infrastructure')),
+    '#description' => t('<ul><li>No zone modes for now on. ' .
+        'A zone can include links between OSPF, BGP, etc. and mesh protocols like BMX, OLSR, etc.</li>'),
     '#weight' => $form_weight++,
   );
   $form['time_zone'] = array(

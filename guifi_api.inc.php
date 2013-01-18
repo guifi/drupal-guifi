@@ -169,6 +169,7 @@ function _guifi_api_zone_check_parameters($gapi, &$parameters) {
   }
   
   //Checks the zone_mode is a valid type ('infrastructure' or 'ad-hoc')
+  // ad-hoc zone mode deprecated and pending for delete (mesh radio only in every zone)
   if (isset($zone_mode)) {
     $zone_modes = array('infrastructure', 'ad-hoc' );
     if (!in_array($zone_mode, $zone_modes)) {
@@ -804,6 +805,7 @@ function _guifi_api_radio_check_parameters($gapi, $parameters) {
           return FALSE;
         }
       }
+    // Pending to revise, for mesh
     case 'ad-hoc':
       if (isset($protocol)) {
         if (!guifi_validate_types('protocol', $protocol)) {
@@ -870,7 +872,7 @@ function guifi_api_radio_add($gapi, $parameters) {
   $fields = array('mac', 'antenna_angle', 'antenna_gain', 'antenna_azimuth', 'antenna_mode' );
   if ($parameters['mode'] == 'ap') {
     $fields = array_merge($fields, array('ssid', 'protocol', 'channel', 'clients_accepted' ));
-  } else if ($parameters['mode'] == 'ad-hoc') {
+  } else if ($parameters['mode'] == 'mesh') {
     $fields = array_merge($fields, array('ssid', 'protocol', 'channel' ));
   }
   
@@ -954,7 +956,7 @@ function guifi_api_radio_update($gapi, $parameters) {
   $fields = array('mac', 'antenna_angle', 'antenna_gain', 'antenna_azimuth', 'antenna_mode' );
   if ($radio['mode'] == 'ap') {
     $fields = array_merge($fields, array('ssid', 'protocol', 'channel', 'clients_accepted' ));
-  } else if ($radio['mode'] == 'ad-hoc') {
+  } else if ($radio['mode'] == 'mesh') {
     $fields = array_merge($fields, array('ssid', 'protocol', 'channel' ));
   }
   
