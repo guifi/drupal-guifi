@@ -1,5 +1,6 @@
 var map = null;
 var markers = Array();
+var cloakControl = null;
 
 if(Drupal.jsEnabled) {
     $(document).ready(function(){
@@ -14,22 +15,6 @@ var point; //end point
 var node;
 var pLine;
 var id;
-var r;
-
-function wt_request_array_of_lines(url, name) {
-
-  $.ajax({
-            url: url,
-            success: function(data) {
-                if (!data) return null;
-                var a = data.split('\n');
-                // pop off last element, which will be blank (if response ends with \n)
-                a.pop();
-
-            },
-  });
-}
-
 
 // IMGOVERLAY CLASS
 function ImgOverlay(bounds, url, map) {
@@ -119,7 +104,6 @@ var contourLayer = new google.maps.ImageMapType({
   //contour_overlay = new GTileLayerOverlay(TileLayer(0, 17, 'Contours (C) 2007', 'Michael Kosowsky',
      tileSize: new google.maps.Size(256, 256),
      getTileUrl: function(point, zoom) {
-         console.log(point);
         return 'http://contour.heywhatsthat.com/bin/contour_tiles.cgi?x=' + 
             point.x+'&y='+point.y+'&zoom='+zoom+'&interval='+contour_interval(zoom) +
 	        '&color=0000FF30&src=guifi.net';
@@ -214,7 +198,7 @@ function draw_map() {
     });
 
     // Contour control
-    var contourControl = new Control("contour layer", true, false, 95);
+    var contourControl = new Control("contour layer", true, false, 100);
     map.overlayMapTypes.push(null);
     contourControl.div.index = 1;
     map.controls[google.maps.ControlPosition.TOP_RIGHT].push(contourControl.div);
@@ -228,6 +212,34 @@ function draw_map() {
             // Add the guifi layer
             map.overlayMapTypes.setAt(1, contourLayer);
             contourControl.enable();
+        }
+    });
+
+    // Visibility cloak control
+    cloakControl = new Control("visibility cloak", true, true, 100);
+    map.overlayMapTypes.push(null);
+    cloakControl.div.index = 1;
+    map.controls[google.maps.ControlPosition.TOP_RIGHT].push(cloakControl.div);
+
+    var cloakLayer;
+
+    // Setup the click event listeners: simply set the map to Chicago
+    google.maps.event.addDomListener(cloakControl.ui, 'click', function() {
+        if (cloakControl.enabled) {
+            cloakLayer.setMap(null);
+            cloakControl.disable();
+        } else {
+            var lat = document.getElementById("lat").value;
+            var lon = document.getElementById("lon").value;
+            var elevation = document.getElementById("elevation").value;
+            cloakLayer = new google.maps.KmlLayer('http://wisp.heywhatsthat.com/api/viewshed.kmz?user=guifi&src=guifi.net&lat=' + lat + '&lon=' + lon + '&elev_agl=' + elevation + '&radius=25000&far_end_elev=10', {
+                      suppressInfoWindows: true,
+                      map: map,
+                      preserveViewport: true
+                  });
+
+            //cloakLayer.setMap(map);
+            cloakControl.enable();
         }
     });
 
@@ -262,13 +274,11 @@ function initialPosition(ppoint) {
     var curvature = distance > 0.1 ? 1 : 0; // 0.1 a ojimetro son 10Km xD
 
     document.getElementById("profile").src =
-        "http://www.heywhatsthat.com/bin/profile.cgi?"+
-        "axes=1&curvature="+curvature+"&metric=1&groundrelative=1&"+
-        "src=guifi.net&"+
-        "pt0="+document.getElementById("lat").value+","+document.getElementById("lon").value+
-        ",ff0000,"+document.getElementById("elevation").value+
-        "&pt1="+point.lat()+","+point.lng()+
-        ",00c000,9";
+        "http://wisp.heywhatsthat.com/api/profile-rf.png?"+
+	"user=guifi&src=guifi.net&" +
+        "axes=1&curvature=" + curvature + "&metric=1&" +
+        "lle0=" + document.getElementById("lat").value + "," + document.getElementById("lon").value+ "," + document.getElementById("elevation").value + ",ff0000&" +
+        "lle1=" + point.lat() + "," + point.lng( )+ ",9,00c000" ;
 
     pLine = new google.maps.Polyline({ path: [node, point], strokeColor: "#ff0000", strokeWeight: 5, strokeOpacity: .4, map:map });
     markers.push(pLine);

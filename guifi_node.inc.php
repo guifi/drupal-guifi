@@ -699,13 +699,13 @@ function guifi_node_distances_map($node) {
     $rows[] = array(array('data' => '<div style="float:left;">'.t('Distance:').'&nbsp;</div>'.'<div id="tdistance" style="float:left;">0</div>'.'<div style="float:left;">&nbsp;Km.&nbsp;&nbsp;&nbsp;&nbsp;'.t('Azimuth:').'&nbsp;</div>'.'<div id="tazimut" style="float:left;">0</div>&nbsp;'.t('degrees')));
     $output = theme('table', NULL,$rows);
     $output .=  '<form>' .
-      '<input type=hidden value='.$node->lat.' id=lat />'.
-      '<input type=hidden value='.$node->lon.' id=lon />' .
-      '<input type=hidden value='.$lat2.' id=lat2 />'.
-      '<input type=hidden value='.$lon2.' id=lon2 />' .
-      '<input type=hidden value='.base_path().drupal_get_path('module','guifi').'/js/'.' id=edit-jspath />' .
-      '<input type=hidden value='.variable_get('guifi_wms_service','').' id=guifi-wms />' .
-      '<input type=hidden value='.$node->elevation.' id=elevation />' .
+      '<input type="hidden" value="'.$node->lat.'" id="lat" />'.
+      '<input type="hidden" value="'.$node->lon.'" id="lon" />' .
+      '<input type="hidden" value="'.$lat2.'" id="lat2" />'.
+      '<input type="hidden" value="'.$lon2.'" id="lon2" />' .
+      '<input type="hidden" value="'.base_path().drupal_get_path('module','guifi').'/js/'.'" id="edit-jspath" />' .
+      '<input type="hidden" value="'.variable_get('guifi_wms_service','').'" id="guifi-wms" />' .
+      '<input type="hidden" value="'.$node->elevation.'" id="elevation" />' .
       '</form>';
   }
 
@@ -1414,33 +1414,6 @@ function theme_guifi_node_links_by_type($id = 0, $ltype = '%') {
 //        '</p>';
   return theme('box',$titlebox,$output);
 
-}
-
-function guifi_hwt_list($id) {
-  $url='http://www.heywhatsthat.com/results/'.$id.'/data';
-
-  do {
-    $fd = fopen($url, "r");
-    $data = fread($fd, 2);
-    fclose($fd);
-    sleep(1);
-  } while($data != "ok");
-
-  $url = 'http://www.heywhatsthat.com/bin/list_cloakm.cgi?id='.$id;
-  $fd = fopen($url, "r");
-  echo fread($fd, 1024);
-  fclose($fd);
-
-  return;
-}
-
-function guifi_hwt_img($id, $img) {
-  $url = 'http://www.heywhatsthat.com/results/'.$id.'/'.$img;
-  $fd = fopen($url, "rb");
-  echo stream_get_contents($fd);
-  fclose($fd);
-
-  return;
 }
 
 function guifi_elevation_validate($element, &$form_state) {
