@@ -693,27 +693,6 @@ function guifi_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK
   );
-  $items['node/%guifi_node/query/%/%/%'] = array(
-    'page callback' => 'guifi_hwt_query',
-    'page arguments' => array(3, 4, 5),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK
-  );
-  $items['node/%guifi_node/list_cloakm/%'] = array(
-    'page callback' => 'guifi_hwt_list',
-    'page arguments' => array(3),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK
-  );
-  $items['node/%guifi_node/results/%/%'] = array(
-    'page callback' => 'guifi_hwt_img',
-    'page arguments' => array(3, 4),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK
-  );
   $items['guifi/user/%/edit'] = array(
     'page callback' => 'guifi_user_edit',
     'page arguments' => array(2),
