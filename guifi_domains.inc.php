@@ -322,7 +322,7 @@ function guifi_domain_form($form_state, $params = array()) {
     '#title' => t('Transfer Options'),
     '#default_value' => $form_state['values']['allow'],
     '#options' => array('slave' => t('Allow to be enslaved (Recommended)'), 'forward' => t('Allow Forward'), 'disabled' => t('Disabled')),
-    '#description' =>  t('<strong>Ensalved</strong>, Allow other DNS servers on the network have an exact copy of the domain, so, if the original DNS does not work, can access to the hosts.')
+    '#description' =>  t('<strong>Enslaved</strong>, Allow other DNS servers on the network have an exact copy of the domain, so, if the original DNS does not work, can access to the hosts.')
                                    .'<br \>'
                                    .t('<strong>Forward</strong>, Allow other DNS servers on the network to forward the request to the master server transparently saving bandwidth.')
                                    .'<br \>'
@@ -903,7 +903,7 @@ function guifi_domain_create_form($form_state, $node) {
     $form['domain_type_form']['name'] = array(
       '#type' => 'textfield',
       '#title' => t('Add a new delegated Domain Name'),
-      '#description' => t('Just the hostname (HOSTNAME.domain.com), master domain will be added before'),
+      '#description' => t('Just the hostname (HOSTNAME.domain.com) will be added before master domain.'),
       '#prefix' => '<table style="width: 0px"><tr><td>',
       '#suffix' => '</td>',
     );

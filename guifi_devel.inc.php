@@ -1628,7 +1628,7 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
       '#rows' => 30,
   );
   //$form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
-  $headers = array(t('Parametre'), t('Origen'), t('Valor Fixe'),t('Edit'), t('Delete'));
+  $headers = array(t('Params'), t('Origin'), t('Fixed Value'),t('Edit'), t('Delete'));
   $output .= theme('table',$headers,$rows);
   $form['submit'] = array(
     '#type' => 'submit',
