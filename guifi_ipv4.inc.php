@@ -83,8 +83,10 @@ function guifi_ipv4_form($form_state, $params = array()) {
   guifi_log(GUIFILOG_TRACE,'guifi_ipv4_form()',$params);
 
   $network_types = array('public'   => t('public - for any device available to everyone'),
-                        'backbone' => t("backbone - used for internal management, links..."));
-  $network_types = array_merge($network_types,guifi_types('adhoc'));
+                         'backbone' => t("backbone - used for internal management, links..."),
+                         'mesh' => t('mesh - for any device in Mesh'));
+
+ // $network_types = array_merge($network_types,guifi_types('adhoc'));
 
   if (empty($form_state['values'])) {
     // first execution, initializing the form
@@ -225,6 +227,7 @@ function guifi_ipv4_form_validate($form,$form_state) {
 
   $zone = guifi_zone_load($form_state['values']['zone']);
 
+/* NO MORE AD-HOC ZONES
   if (($zone->master != 0) and
       ($zone->zone_mode != 'ad-hoc')) {
     if (!in_array($form_state['values']['network_type'],array('public','backbone')))
@@ -235,6 +238,7 @@ function guifi_ipv4_form_validate($form,$form_state) {
      ($form_state['values']['network_type'] == 'backbone'))
     form_set_error('network_type',
       t('You must specify the protocol for backbone ranges on ad-hoc/mesh zones'));
+*/
 }
 
 /* outputs the network information data

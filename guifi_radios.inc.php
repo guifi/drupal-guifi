@@ -940,7 +940,7 @@ function _guifi_radio_prepare_add_radio($edit) {
         $radio['interfaces'][1]['interface_type'] = 'wLan/Lan';
         $ips_allocated = guifi_ipcalc_get_ips('0.0.0.0','0.0.0.0',$edit,1);
         // $net = guifi_ipcalc_get_meship($edit['nid'],$ips_allocated);
-        $net = guifi_ipcalc_get_subnet_by_nid($edit['nid'],'255.255.255.224','public',$ips_allocated,'Yes', TRUE);
+        $net = guifi_ipcalc_get_subnet_by_nid($edit['nid'],'255.255.255.224','mesh',$ips_allocated,'Yes', TRUE);
         guifi_log(GUIFILOG_BASIC,"IPS allocated: ".count($ips_allocated)." got net: ".$net.'/27');
         $radio['interfaces'][1]['ipv4'][$rc] = array();
         $radio['interfaces'][1]['ipv4'][$rc]['new'] = TRUE;
