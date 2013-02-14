@@ -277,8 +277,8 @@ function initialPosition(ppoint) {
         "http://wisp.heywhatsthat.com/api/profile-rf.png?"+
 	"user=guifi&src=guifi.net&" +
         "axes=1&curvature=" + curvature + "&metric=1&" +
-        "lle0=" + document.getElementById("lat").value + "," + document.getElementById("lon").value+ "," + document.getElementById("elevation").value + ",ff0000&" +
-        "lle1=" + point.lat() + "," + point.lng( )+ ",9,00c000" ;
+        "pt0=" + document.getElementById("lat").value + "," + document.getElementById("lon").value+ ",ff0000&" +
+        "pt1=" + point.lat() + "," + point.lng( )+ ",00c000" ;
 
     pLine = new google.maps.Polyline({ path: [node, point], strokeColor: "#ff0000", strokeWeight: 5, strokeOpacity: .4, map:map });
     markers.push(pLine);

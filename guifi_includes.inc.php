@@ -976,7 +976,7 @@ function guifi_ipcalc_get_subnet_by_nid(
 
     if ($verbose)
       drupal_set_message(t(
-        'Finding if %mask is available at %zone, elapsed: %secs',
+        'Searching if %mask is available at %zone, elapsed: %secs',
          array('%mask' => $mask_allocate,
            '%zone' => $zone->title,
            '%secs' => round(microtime(TRUE)-$lbegin,4))));

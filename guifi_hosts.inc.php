@@ -85,13 +85,13 @@ function guifi_host_form($edit,$form_weight) {
      if (($host['host'] == 'ns1' ) AND ($host['counter'] == '0')) {
         $access = FALSE;
         $options = array('MX' => 'MX');
-        $optionsdesc = t('Select these options only if this feature has made by this host.
+        $optionsdesc = t('Select these options only if this feature has been made by this host.
                                    <br /><b>NS</b>: Selected as default on host \'ns1\'. This is your primary NameServer forced, cannot uncheck it.
                                    <br /><b>MX</b>: Choose this option if this host has to perform tasks of <b>MailHost</b> server. Select, then Save and edit again to set priority on a new field.');
       } else {
         $access = TRUE;
         $options = array('NS' => 'NS','MX' => 'MX');
-        $optionsdesc = t('Select these options only if this feature has made by this host.
+        $optionsdesc = t('Select these options only if this feature has been made by this host.
                                    <br /><b>NS</b>: Choose this option if this host has to perform tasks of <b>NameServer</b>.
                                    <br /><b>MX</b>: Choose this option if this host has to perform tasks of <b>MailHost</b> server. Select, then Save and edit again to set priority on a new field.');
       }
@@ -139,7 +139,7 @@ function guifi_host_form($edit,$form_weight) {
           '#size' => 3,
           '#maxlength' => 3,
           '#default_value' => $mxprior,
-          '#description' => t('One can have several mail servers, with priorities of 10, 20 and so on. A mail server attempting to deliver to example.org would first try the highest priority MX (the record with the lowest priority number), then the second highest, etc, until the mail can be properly delivered. Must be a multiple of 10 and can not be repeated.'),
+          '#description' => t('One can have several mail servers, with priorities of 10, 20 and so on. A mail server attempting to deliver to example.org would first try the highest priority MX (the record with the lowest priority number), then the second highest, etc, until the mail can be properly delivered. They must be a multiple of 10 and can not be repeated.'),
         );
       }
       $bw = $form_weight - 1000;
