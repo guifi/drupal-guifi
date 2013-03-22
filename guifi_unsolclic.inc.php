@@ -466,8 +466,10 @@ function guifi_get_paramsMMF($devId) {
 
 // DEPRECATED!!!
 function guifi_get_paramsDevice($device_id) {
+/*  $qry = db_query("select
+    z.id zone_id, z.title zone_name, z.dns_servers zone_dns_servers, z.ntp_servers zone_ntp_servers, z.graph_server zone_graph_server, z.ospf_zone zone_ospf_zone,  z.zone_mode zone_zone_mode, z.proxy_id zone_proxy_id, z.voip_id zone_voip_id, */
   $qry = db_query("select
-    z.id zone_id, z.title zone_name, z.dns_servers zone_dns_servers, z.ntp_servers zone_ntp_servers, z.graph_server zone_graph_server, z.ospf_zone zone_ospf_zone,  z.zone_mode zone_zone_mode, z.proxy_id zone_proxy_id, z.voip_id zone_voip_id,
+    z.id zone_id, z.title zone_name, z.dns_servers zone_dns_servers, z.ntp_servers zone_ntp_servers, z.graph_server zone_graph_server, z.ospf_zone zone_ospf_zone, z.proxy_id zone_proxy_id, z.voip_id zone_voip_id,
     n.nid node_id, n.title node_name, loc.lat node_lat, loc.lon node_lon, loc.graph_server node_node_graph_server,
     u.uid user_id, u.name user_name, u.mail user_mail,
     d.nick as device_name, d.type device_type,
@@ -499,9 +501,13 @@ function guifi_get_paramsDevice($device_id) {
 
 
 function guifi_get_paramsClientDevice($device_id) {
-  $qry = db_query("
+/*  $qry = db_query("
           SELECT
               z.id zone_id, z.title zone_name, z.dns_servers zone_dns_servers, z.ntp_servers zone_ntp_servers, z.graph_server zone_graph_server, z.ospf_zone zone_ospf_zone,  z.zone_mode zone_zone_mode, z.proxy_id zone_proxy_id, z.voip_id zone_voip_id,
+*/
+  $qry = db_query("
+          SELECT
+              z.id zone_id, z.title zone_name, z.dns_servers zone_dns_servers, z.ntp_servers zone_ntp_servers, z.graph_server zone_graph_server, z.ospf_zone zone_ospf_zone, z.proxy_id zone_proxy_id, z.voip_id zone_voip_id,
               n.nid node_id, n.title node_name, loc.lat node_lat, loc.lon node_lon, loc.graph_server node_node_graph_server,
               u.uid user_id, u.name user_name, u.mail user_mail,
               d.nick as device_name, d.type device_type, d.id as device_id,

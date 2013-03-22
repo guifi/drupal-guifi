@@ -10,11 +10,16 @@
 function guifi_device_load($id,$ret = 'array') {
   guifi_log(GUIFILOG_FULL,'function guifi_device_load()');
 
+/*  $device = db_fetch_array(db_query('
+    SELECT d.*,
+           m.model,
+           f.nom firmware,
+           z.zone_mode, l.nick as node_nick*/
   $device = db_fetch_array(db_query('
     SELECT d.*,
            m.model,
            f.nom firmware,
-           z.zone_mode, l.nick as node_nick
+           l.nick as node_nick
     FROM {guifi_devices} d
            left join {guifi_model} m on m.mid = d.mid
            left join {guifi_firmware} f on f.id = d.fid,
@@ -413,14 +418,14 @@ function guifi_device_form($form_state, $params = array()) {
     $form_state['values']['nick'] = guifi_device_get_default_nick($node, $form_state['values']['type'], $form_state['values']['nid'] );
   }
 
+// DEPRECATED IN FAVOR OF MESH (mesh)
+/*
   // if device zone_mode was NULL, get the zone mode (ad-hoc or infrastructure)
   if (is_null($form_state['values']['zone_mode'])) {
     $form_state['values']['zone_mode'] = $zone->zone_mode;
 
-    // DEPRECATED IN FAVOR OF MESH (mesh)
     // That's a new device, because zone_mode was NULL, otherwise would have a value
     // If ad-hoc, add a radio & a public IP (/27)
-/*
     if ($zone->zone_mode == 'ad-hoc') {
       if ($form_state['values']['type'] == 'radio') {
         $form_state['values']['newradio_mode'] = $zone->zone_mode;
@@ -443,9 +448,9 @@ function guifi_device_form($form_state, $params = array()) {
 
       }
     }
-*/
-  }
 
+  }
+*/
   if (isset($form_state['action'])) {
     guifi_log(GUIFILOG_TRACE,'action',$form_state['action']);
     if (function_exists($form_state['action'])) {
@@ -474,11 +479,11 @@ function guifi_device_form($form_state, $params = array()) {
     '#name' => 'type',
     '#value'=> $form_state['values']['type']
   );
-  $form['zone_mode'] = array(
+/*  $form['zone_mode'] = array(
     '#type' => 'hidden',
     '#name' => 'zone_mode',
     '#value'=> $form_state['values']['zone_mode']
-  );
+  );*/
 
 
 

@@ -91,7 +91,7 @@ function guifi_schema() {
          'nick' => array('type' => 'varchar', 'length' => '10', 'not null' => FALSE),
          'body' => array('type' => 'text', 'size' => 'big', 'not null' => TRUE),
          'master' => array('type' => 'int', 'size' => 'medium', 'unsigned' => TRUE, 'not null' => TRUE, 'comment' => 'references parent zone guifi_zone(id)'),
-         'zone_mode' => array('type' => 'varchar', 'length' => 25, 'not null' => TRUE, 'default' => 'infrastructure', 'comment' => 'infrastructure/ad-hoc'),
+//      'zone_mode' => array('type' => 'varchar', 'length' => 25, 'not null' => TRUE, 'default' => 'infrastructure', 'comment' => 'infrastructure/ad-hoc'),
          'graph_server' => array('type' => 'int',  'size' => 'medium', 'not null' => TRUE, 'default' => '0', 'comment' => 'FK to guifi_services (SNPGraphs)'),
          'proxy_id' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, 'default' => 0, 'comment' => 'FK to guifi_services (proxy)'),
          'voip_id' => array('type' => 'int',  'size' => 'medium', 'not null' => TRUE, 'default' => 0, 'comment' => 'FK to guifi_services (VoIP)'),

@@ -276,7 +276,8 @@ function guifi_zone_form(&$node, &$param) {
     '#description' => t('Single word, 7-bits characters. Used while default values as hostname, SSID, etc...'),
     '#weight' => $form_weight++,
   );
-  $form['zone_mode'] = array(
+/*
+   $form['zone_mode'] = array(
     '#type' => 'select',
     '#title' => t('Zone dynamic mode'),
     '#required' => FALSE,
@@ -286,6 +287,7 @@ function guifi_zone_form(&$node, &$param) {
         'A zone can include links between OSPF, BGP, etc. and mesh protocols like BMX, OLSR, etc.</li>'),
     '#weight' => $form_weight++,
   );
+*/
   $form['time_zone'] = array(
     '#type' => 'select',
     '#title' => t('Time zone'),
@@ -906,7 +908,7 @@ function guifi_zone_data($zone) {
     'colspan' => 2));
 
   $rows[] = array(t('network global information').':', NULL);
-  $rows[] = array(t('Mode'),t($zone->zone_mode));
+//  $rows[] = array(t('Mode'),t($zone->zone_mode));
   $rows[] = array(t('DNS Servers'),$zone->dns_servers);
   $rows[] = array(t('NTP Servers'),$zone->ntp_servers);
   $rows[] = array(t('OSPF zone'),$zone->ospf_zone);

@@ -170,14 +170,14 @@ function _guifi_api_zone_check_parameters($gapi, &$parameters) {
   
   //Checks the zone_mode is a valid type ('infrastructure' or 'ad-hoc')
   // ad-hoc zone mode deprecated and pending for delete (mesh radio only in every zone)
-  if (isset($zone_mode)) {
+/*  if (isset($zone_mode)) {
     $zone_modes = array('infrastructure', 'ad-hoc' );
     if (!in_array($zone_mode, $zone_modes)) {
       $gapi->addError(403, "zone_mode: $zone_mode");
       return FALSE;
     }
   }
-  
+  */
   return TRUE;
 }
 
