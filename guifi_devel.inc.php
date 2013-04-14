@@ -1960,7 +1960,7 @@ function getUSCid($model, $firmware){
 
 function unsolclicDefaultTemplate($model, $firmware) {
   $version = "vX.XX-TODO";
-  $listsURL = 'https://lists.guifi.net/listinfo/guifi-rdes';
+  $listsURL = 'https://llistes.guifi.net/sympa/info/guifi-dev';
   $sourceURL = 'https://gitorious.org/guifi/drupal-guifi';
   $getStartedURL = 'http://wiki.guifi.net/wiki/Documentaci%C3%B3_de_guifi.net';
 
@@ -1970,7 +1970,7 @@ function unsolclicDefaultTemplate($model, $firmware) {
   $output .= _outln_comment_get();
   $output .= _outln_comment_get(t("This firmware configuration is under construction or not yet started development."));
   $output .= _outln_comment_get(t("If you want to collaborate and contribute with code to make it work,"));
-  $output .= _outln_comment_get(t("please subscibre to our development lists at:"));
+  $output .= _outln_comment_get(t("please subscribre to our development lists at:"));
   $output .= _outln_comment_get($listsURL);
   $output .= _outln_comment_get(t("The source for this application can be downloaded from the GIT repository:"));
   $output .= _outln_comment_get($sourceURL);
