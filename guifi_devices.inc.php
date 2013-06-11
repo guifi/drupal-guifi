@@ -1126,11 +1126,16 @@ function guifi_ADSL_form($edit) {
   return $form;
 }
 
+function guifi_confine_form($edit) {
+    $form = guifi_generic_form($edit);
+  return $form;
+}
+
 function guifi_generic_form($edit) {
 
   $form['variable'] = array(
     '#type' => 'fieldset',
-    '#title' => t('DSL information & MRTG parameters'),
+    '#title' => t('MRTG parameters'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#tree' => TRUE
@@ -1221,7 +1226,7 @@ function guifi_device_print_data($device) {
             '/'.$bandwidth[$device['variable']['upload']]);
     $rows[] = array(t('SNMP index to graph'),$device['variable']['mrtg_index']);
   }
-  if (($device['type'] == 'generic') and ($device['variable'] != '')) {
+  if (($device['type'] == 'generic' || 'confine') and ($device['variable'] != '')) {
     $rows[] = array(t('SNMP index to graph'),$device['variable']['mrtg_index']);
   }
 
