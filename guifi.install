@@ -405,6 +405,7 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('2', 'mode', 'client', 'Wireless client', 'ap');");
   //db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('3', 'mode', 'bridge', 'Wireless Bridge', 'bridge');");
   //db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('4', 'mode', 'routedclient', 'Routed client',     'ap');");
+  //db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('5', 'mode', 'mesh', 'Mesh radio', NULL);");
   //db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('9999', 'mode', 'NAT Client', 'NAT Client', 'ap|client');");
   //db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('8888', 'mode', 'Routed Client', 'Routed Client', 'ap|client');");
   //db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('7777', 'mode', 'Bridged Client', 'Bridged  Client', 'ap|client');");
@@ -2161,6 +2162,18 @@ function guifi_update_908() {
 function guifi_update_909() {
   $items = array();
   $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('9', 'device', 'confine', 'Node Confine/Clommunity');");
+  return $items;
+}
+
+function guifi_update_910() {
+  $items = array();
+  // Remove 'zone_mode' field
+  $items[] = update_sql("ALTER TABLE {guifi_zone} DROP `zone_mode`;");
+  // Add "Mesh" radio and IPv4 types
+  $items = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('5', 'mode', 'mesh', 'Mesh radio', NULL);");
+  $items = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('9', 'ipv4_types', '9', 'mesh', NULL);");
+  // Add reserved IPv4 type
+  $items = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('10', 'ipv4_types', '10', 'reserved', NULL);");
   return $items;
 }
 
