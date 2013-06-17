@@ -399,13 +399,25 @@ function guifi_install() {
   //db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('9999', 'interface', 'vlan1',   'vlan #1 (plugged into port #1)', '3');");
 
   // --
+  // -- IPv4 types
+  // --
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('1', 'ipv4_types', '1', 'public', '');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('2', 'ipv4_types', '2', 'backbone', '');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('3', 'ipv4_types', '3', 'ad-hoc mesh - OLSR', 'kamikaze|freifunk-OLSR');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('4', 'ipv4_types', '4', 'ad-hoc mesh - BATMAN', 'kamikaze|freifunk-BATMAN');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('5', 'ipv4_types', '5', 'ad-hoc mesh - BMX', 'kamikaze');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('6', 'ipv4_types', '6', 'ad-hoc mesh - RouterOS', 'RouterOSv3.x');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('7', 'ipv4_types', '7', 'mesh', NULL);");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('8', 'ipv4_types', '8', 'reserved', NULL);");
+
+  // --
   // -- radio mode types
   // --
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('1', 'mode', 'ap', 'AP or AP with WDS', 'ap|client');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('2', 'mode', 'client', 'Wireless client', 'ap');");
   //db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('3', 'mode', 'bridge', 'Wireless Bridge', 'bridge');");
   //db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('4', 'mode', 'routedclient', 'Routed client',     'ap');");
-  //db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('5', 'mode', 'mesh', 'Mesh radio', NULL);");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('5', 'mode', 'mesh', 'Mesh radio', NULL);");
   //db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('9999', 'mode', 'NAT Client', 'NAT Client', 'ap|client');");
   //db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('8888', 'mode', 'Routed Client', 'Routed Client', 'ap|client');");
   //db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('7777', 'mode', 'Bridged Client', 'Bridged  Client', 'ap|client');");
@@ -2171,9 +2183,9 @@ function guifi_update_910() {
   $items[] = update_sql("ALTER TABLE {guifi_zone} DROP `zone_mode`;");
   // Add "Mesh" radio and IPv4 types
   $items = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('5', 'mode', 'mesh', 'Mesh radio', NULL);");
-  $items = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('9', 'ipv4_types', '9', 'mesh', NULL);");
+  $items = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('7', 'ipv4_types', '7', 'mesh', NULL);");
   // Add reserved IPv4 type
-  $items = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('10', 'ipv4_types', '10', 'reserved', NULL);");
+  $items = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('8', 'ipv4_types', '8', 'reserved', NULL);");
   return $items;
 }
 
