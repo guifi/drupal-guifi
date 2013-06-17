@@ -429,6 +429,7 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('6', 'device', 'ADSL', 'ADSL router or device providing internet access');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('7', 'device', 'cam', 'Network camera. Live view.');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('8', 'device', 'generic', 'Any device that uses a public IP (PC, game console, laptop, pda..)');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('9', 'device', 'confine', 'Node Confine/Clommunity');");
 
   // --
   // -- service types
@@ -2154,6 +2155,12 @@ function guifi_update_907() {
 function guifi_update_908() {
   $items = array();
   $items[] = update_sql("ALTER TABLE {guifi_dns_hosts} CHANGE `counter` `counter` INT( 11 ) NOT NULL;");
+  return $items;
+}
+
+function guifi_update_909() {
+  $items = array();
+  $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('9', 'device', 'confine', 'Node Confine/Clommunity');");
   return $items;
 }
 
