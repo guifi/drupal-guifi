@@ -85,7 +85,7 @@ function guifi_ipv4_form($form_state, $params = array()) {
   $network_types = array('public'   => t('public - for any device available to everyone'),
                          'backbone' => t("backbone - used for internal management, links..."),
                          'mesh' => t('mesh - for any device in Mesh'),
-                         'reserved' => t('reserved - used for reserved addressing');
+                         'reserved' => t('reserved - used for reserved addressing'));
 
   // $network_types = array_merge($network_types,guifi_types('adhoc'));
 
