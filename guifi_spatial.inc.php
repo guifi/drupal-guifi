@@ -31,7 +31,7 @@ function guifi_spatialsearch($what="nodes", $type="air", $status="all", $latitud
                             'plan',  // reserved, planned, building
                             'test',  // testing, working
                             'nodrop',// all but dropped
-                            'Reserved', 'Planned', 'Building', 'Testing', 'Working', 'Dropped');
+                            'Reserved', 'Planned', 'Building', 'Testing', 'Working', 'Dropped', 'Inactive');
     $valid_types = array('all',  // all link types
                          'air',  // only aerial links (no cable)
                          'cable','client' /* ap/client */,'wds');

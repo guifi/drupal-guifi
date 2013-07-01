@@ -36,6 +36,11 @@
   text-decoration: none;
   text-align: right;
 }
+#guifi th.Inactive, td.Inactive {
+  background-color: #dddddd; color: black;
+  text-decoration: none;
+  text-align: right;
+}
 #guifi th.Online25, td.Online25, th.Working25, td.Working25, td.Up25 {
   background-color: #33FF00; color: black;
   text-decoration: none;
@@ -68,6 +73,12 @@
 }
 #guifi th.Dropped25, td.Dropped25 {
   background-color: white; color: black;
+  text-decoration: none;
+  text-align: right;
+  width: 25%;
+}
+#guifi th.Inactive25, td.Inactive25 {
+  background-color: #dddddd; color: black;
   text-decoration: none;
   text-align: right;
   width: 25%;

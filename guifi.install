@@ -485,6 +485,7 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('4', 'status', 'Testing',  'Testing');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('5', 'status', 'Working',  'Online');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('6', 'status', 'Dropped',  'Dropped');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('7', 'status', 'Inactive',  'Inactive');");
 
   // --
   // -- protocol types
@@ -2186,6 +2187,12 @@ function guifi_update_910() {
   $items = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('7', 'ipv4_types', '7', 'mesh', NULL);");
   // Add reserved IPv4 type
   $items = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('8', 'ipv4_types', '8', 'reserved', NULL);");
+  return $items;
+}
+
+function guifi_update_911() {
+  // Add new status Inactive
+  $items = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('7', 'status', 'Inactive', 'Inactive', NULL);");
   return $items;
 }
 

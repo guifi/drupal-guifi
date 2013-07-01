@@ -1042,11 +1042,12 @@ function guifi_node_set_flag($id) {
 
   $scores = array(
     'Dropped' => 0,
-    'Planned' => 1,
-    'Reserved' => 2,
-    'Building' => 3,
-    'Testing' => 4,
-    'Working' => 5
+    'Inactive' => 1,
+    'Planned' => 2,
+    'Reserved' => 3,
+    'Building' => 4,
+    'Testing' => 5,
+    'Working' => 6
     );
   $score = -1;
   $query = db_query(
