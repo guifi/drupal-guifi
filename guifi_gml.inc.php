@@ -125,11 +125,7 @@ function guifi_gml_links($zid,$type) {
     if (count($nl) == 2)
       if ((in_array($nl[0]->zone_id,$zchilds)) || (in_array($nl[1]->zone_id,$zchilds))) {
         $distance = round($oGC->EllipsoidDistance($nl[0]->lat,$nl[0]->lon, $nl[1]->lat, $nl[1]->lon),3);
-        
-        if (($nl[0]->status_flag != 'Working') or ($nl[1]->status_flag != 'Working'))
-          $status = 'Reserved';
-        else
-          $status = $row->flag;
+        $status = $row->flag;
         
         if ($type == 'gml') $output .= '
           <gml:featureMember>
