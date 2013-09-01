@@ -1034,7 +1034,7 @@ function guifi_zone_availability($zone,$desc = "all") {
     $oneyearfromnow = (time()- '31622400');
 
   function _guifi_zone_availability_devices($nid) {
-    global $oneyearfromnow;
+    $oneyearfromnow = (time()- '31622400');
     $qry  = db_query(
       'SELECT d.id did, d.nick dnick, d.flag dflag, d.timestamp_changed changed ' .
       'FROM {guifi_devices} d ' .
