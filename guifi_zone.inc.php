@@ -1033,7 +1033,7 @@ function guifi_zone_availability($zone,$desc = "all") {
 
   function _guifi_zone_availability_devices($nid) {
     $qry  = db_query(
-      'SELECT d.id did, d.nick dnick, d.flag dflag ' .
+      'SELECT d.id did, d.nick dnick, d.flag dflag, d.timestamp_changed changed ' .
       'FROM {guifi_devices} d ' .
       'WHERE d.type = "radio" ' .
       '  AND d.nid=%d ' .
@@ -1078,7 +1078,8 @@ function guifi_zone_availability($zone,$desc = "all") {
             'target' => '_blank'))),
           'align' => 'right'
         ),
-        array('data' => $d['dflag'].$status_url,'class' => $d['dflag'])
+        array('data' => $d['dflag'].$status_url,'class' => $d['dflag']),
+        array('data' => format_date($d['changed'],'custom', t('d F, Y')))
       );
     }
     guifi_log(GUIFILOG_TRACE,'function guifi_zone_availability_device()',$rows);
@@ -1091,7 +1092,7 @@ function guifi_zone_availability($zone,$desc = "all") {
 
   switch ($desc) {
     case 'pending':
-      $msg = t('Pending/to review');
+      $msg = t('Pending/to review & date last changed.');
       $lbreadcrumb = 'node/%d/view/pending';
       $qstatus = "Working";
       break;
@@ -1107,7 +1108,7 @@ function guifi_zone_availability($zone,$desc = "all") {
 
   $sql =
     'SELECT z.id zid, z.title ztitle, z.nick znick, ' .
-    '  l.id nid, l.nick nnick, l.status_flag nstatus ' .
+    '  l.id nid, l.nick nnick, l.status_flag nstatus, l.timestamp_changed nchanged ' .
     'FROM {guifi_zone} z, {guifi_location} l ' .
     'WHERE z.id=l.zone_id ' .
     '  AND l.status_flag != "'.$qstatus.'"' .
@@ -1154,7 +1155,10 @@ function guifi_zone_availability($zone,$desc = "all") {
        'rowspan' => $nsr),
       array('data' => $d['nstatus'],
        'class' => $d['nstatus'],
-       'rowspan' => $nsr)
+       'rowspan' => $nsr),
+        array('data' => format_date($d['nchanged'],'custom', t('d F, Y')),
+       'class' => $d['nchanged'],
+       'rowspan' => $nsr),
     );
     end($rows);
     $krow = key($rows);
