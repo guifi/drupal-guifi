@@ -1070,10 +1070,13 @@ function guifi_zone_availability($zone,$desc = "all") {
       $status_url = guifi_cnml_availability(
          array('device' => $d['did'],'format' => 'long'));
 
-      if ( $d['changed'] < $oneyearfromnow )
-        $dchanged = array('data' => '<b><font color="#AA0000">'.format_date($d['changed'],'custom', t('d/m/Y')).'</font></b>');
-      else
-        $dchanged = array('data' => format_date($d['changed'],'custom', t('d/m/Y')));
+      if ( !empty($d['changed'])) {
+        if ( $d['changed'] < $oneyearfromnow )
+          $dchanged = array('data' => '<b><font color="#AA0000">'.format_date($d['changed'],'custom', t('d/m/Y')).'</font></b>');
+        else
+          $dchanged = array('data' => format_date($d['changed'],'custom', t('d/m/Y')));
+      } else
+        $dchanged = array('data' => t('never changed'));
 
       $rows[] = array(
         array('data'=>
@@ -1152,10 +1155,13 @@ function guifi_zone_availability($zone,$desc = "all") {
           array('html' => TRUE,'attributes' => array('target' => '_blank')));
     else
       $edit = NULL;
+   if ( !empty($d['nchanged'])) {
       if ( $d['nchanged'] < $oneyearfromnow )
         $dnchanged = array('data' => '<b><font color="#AA0000">'.format_date($d['nchanged'],'custom', t('d/m/Y')).'</font></b>', 'class' => $d['nchanged'], 'rowspan' => $nsr);
       else
         $dnchanged = array('data' => format_date($d['nchanged'],'custom', t('d/m/Y')), 'class' => $d['nchanged'], 'rowspan' => $nsr);
+   } else
+       $dnchanged = array('data' => t('never changed'));
 
     $rows[] = array(
       array('data' => $d['nid'],
