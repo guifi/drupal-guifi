@@ -1031,7 +1031,10 @@ function guifi_zone_availability($zone,$desc = "all") {
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_zone_availability(%s)',
     $desc),$zone);
 
+    $oneyearfromnow = (time()- '31622400');
+
   function _guifi_zone_availability_devices($nid) {
+    global $oneyearfromnow;
     $qry  = db_query(
       'SELECT d.id did, d.nick dnick, d.flag dflag, d.timestamp_changed changed ' .
       'FROM {guifi_devices} d ' .
@@ -1067,6 +1070,11 @@ function guifi_zone_availability($zone,$desc = "all") {
       $status_url = guifi_cnml_availability(
          array('device' => $d['did'],'format' => 'long'));
 
+      if ( $d['changed'] < $oneyearfromnow )
+        $dchanged = array('data' => '<b><font color="#AA0000">'.format_date($d['changed'],'custom', t('d/m/Y')).'</font></b>');
+      else
+        $dchanged = array('data' => format_date($d['changed'],'custom', t('d/m/Y')));
+
       $rows[] = array(
         array('data'=>
           $edit.l($d['dnick'],'guifi/device/'.$d['did'])
@@ -1079,7 +1087,7 @@ function guifi_zone_availability($zone,$desc = "all") {
           'align' => 'right'
         ),
         array('data' => $d['dflag'].$status_url,'class' => $d['dflag']),
-        array('data' => format_date($d['changed'],'custom', t('d F, Y')))
+        $dchanged,
       );
     }
     guifi_log(GUIFILOG_TRACE,'function guifi_zone_availability_device()',$rows);
@@ -1144,6 +1152,10 @@ function guifi_zone_availability($zone,$desc = "all") {
           array('html' => TRUE,'attributes' => array('target' => '_blank')));
     else
       $edit = NULL;
+      if ( $d['nchanged'] < $oneyearfromnow )
+        $dnchanged = array('data' => '<b><font color="#AA0000">'.format_date($d['nchanged'],'custom', t('d/m/Y')).'</font></b>', 'class' => $d['nchanged'], 'rowspan' => $nsr);
+      else
+        $dnchanged = array('data' => format_date($d['nchanged'],'custom', t('d/m/Y')), 'class' => $d['nchanged'], 'rowspan' => $nsr);
 
     $rows[] = array(
       array('data' => $d['nid'],
@@ -1156,9 +1168,7 @@ function guifi_zone_availability($zone,$desc = "all") {
       array('data' => $d['nstatus'],
        'class' => $d['nstatus'],
        'rowspan' => $nsr),
-        array('data' => format_date($d['nchanged'],'custom', t('d F, Y')),
-       'class' => $d['nchanged'],
-       'rowspan' => $nsr),
+        $dnchanged,
     );
     end($rows);
     $krow = key($rows);
