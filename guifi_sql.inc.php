@@ -276,14 +276,14 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
      if (is_float($value))
        $values_data[$k] = $k.'=%f';
      else if (is_numeric($value))
-       $values_data[$k] = $k.'=%d';
+       $values_data[$k] = $k.'=%f';
      else
        $values_data[$k] = $k."='%s'";
    }
    $sql_str .= "UPDATE {".$table."} SET ".implode(', ',$values_data).
                " WHERE ".implode(' AND ',$where_data);
  }
-    
+
   // execute SQL statement
   $log .= $sql_str . ' (' . implode(', ', $new_data) . ')<br />';
   db_query($sql_str, $new_data);

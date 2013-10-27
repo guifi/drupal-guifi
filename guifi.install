@@ -50,6 +50,8 @@ function guifi_schema() {
          'status_flag' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => 'Planned'),
          'stable' => array('type' => 'varchar', 'length' => '25', 'not null' => TRUE, 'default' => 'Yes', 'comment' => 'Yes,No'),
          'graph_server' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, 'default' => 0, 'comment' => 'FK to guifi_services (SNPGraphs)'),
+         'funder'=>array('type'=>'text','not null'=>false,'comment'=>'Funders/Donors/Owners of the node'),
+         'maintainer'=>array('type'=>'text','not null'=>false,'comment'=>'Maintainers of the node (if there are)'),
          'user_created' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, 'default' => 0),
          'user_changed' => array('type' => 'int', 'size' => 'medium',' not null' => FALSE),
          'timestamp_created' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
@@ -110,6 +112,8 @@ function guifi_schema() {
          'nodexchange_url' => array('type' => 'varchar', 'length' => '255', 'not null' => FALSE),
          'refresh' => array('type' => 'int', 'not null' => FALSE),
          'remote_server_id' => array('type' => 'int',  'size' => 'medium', 'not null' => FALSE),
+         'maintainer'=>array('type'=>'text','not null'=>false,'comment'=>'Maintainers of the zone (if there are)'),
+         'host_nodes' => array('type' => 'int', 'not null' => TRUE,'default'=>0,'comment'=>'The zone can host nodes? (TRUE=1, FALSE=0)'),
          'weight' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
          'user_created' => array('type' => 'int',  'size' => 'medium', 'not null' => TRUE, 'default' => 0),
          'user_changed' => array('type' => 'int',  'size' => 'medium', 'not null' => TRUE, 'default' => 0),
@@ -129,6 +133,8 @@ function guifi_schema() {
          'nick' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE),
          'type' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE),
          'notification' => array('type' => 'varchar', 'length' => '1024', 'not null' => TRUE),
+         'funder'=>array('type'=>'text','not null'=>false,'comment'=>'Funders/Donors/Owners of the node'),
+         'maintainer'=>array('type'=>'text','not null'=>false,'comment'=>'Maintainers of the device (if there are)'),
          'mac' => array('type' => 'varchar', 'length' => '20', 'not null' => TRUE, 'default' => '00:00:00:00:00:00'),
          'comment' => array('type' => 'text', 'size' => 'big', 'not null' => FALSE),
          'flag' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => 'Planned'),
@@ -137,7 +143,7 @@ function guifi_schema() {
          'mid' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, 'comment' => 'Model Id'),
          'fid' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, '' => 'Firmware Id'),
          'graph_server' => array('type' => 'int',  'size' => 'medium' , 'not null' => TRUE, 'default' => 0, 'comment' => 'FK to guifi_services (SNPGraphs)'),
-	 'logserver' => array('type' => 'varchar','length' => '60', 'not null' => TRUE, 'comment' => 'Ip Server Logs'), 
+	 'logserver' => array('type' => 'varchar','length' => '60', 'not null' => TRUE, 'comment' => 'Ip Server Logs'),
 	 'last_online' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'comment' => 'Last time that this device has been seen online'),
          'last_flag' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => 'N/A', 'comment' => 'N/A, Online, Offline...'),
          'ly_availability' => array('type' => 'numeric', 'precision' => '11', 'scale' => '2', 'not null' => FALSE, 'default' => NULL),
@@ -430,6 +436,9 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('3', 'link', 'bridge', 'Wireless Bridge', 'wLan/Lan|Lan');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('4', 'link', 'wds', 'Wireless WDS', 'wds/p2p');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('5', 'link', 'ap/client', 'Wireless AP/Client', 'Wan/wLan|wLan/Lan');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('6', 'link', 'xPON', 'Passive Splitted Fibre Optics (xPON)', '');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('7', 'link', 'DuplexFO', 'Duplex P2P', '');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('8', 'link', 'SimplexFO', 'Simplex P2P', '');");
 
   // --
   // -- device types
@@ -443,6 +452,9 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('7', 'device', 'cam', 'Network camera. Live view.');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('8', 'device', 'generic', 'Any device that uses a public IP (PC, game console, laptop, pda..)');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('9', 'device', 'confine', 'Node Confine/Clommunity');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('10', 'device', 'ONU', 'xPON User Unit (Final)');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('11', 'device', 'OLT', 'xPON Concentrator (Terminal)');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('12', 'device', 'splitter', 'xPON Splitter');");
 
   // --
   // -- service types
@@ -523,7 +535,7 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('18', 'firmware', 'gsffirm', 'Firmware de GràciaSenseFils MANET', 'Alix2|Alix3|WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Asus WL-500xx|WHR-HP-G54, WHR-G54S|NanoStation2|NanoStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Meraki/Fonera');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('19', 'firmware', 'RouterOSv5.x', 'RouterOS 5.x or newer from Mikrotik', 'Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|Routerboard 600|Routerboard 411|Routerboard 333|Routerboard 433|Routerboard 800|Routerboard 750/750G');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('20', 'firmware', 'AirOsv3.6+', 'Ubiquti AirOs 3.6+', 'NanoStation2|NanoStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5')");
-  
+
   // --
   // -- antenna types
   // --
@@ -827,6 +839,24 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('11', 'filter', 'redirect', 'Redirectors');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('12', 'filter', 'spyware', 'Spyware');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('13', 'filter', 'cracks', 'Illegal warez exchange, cracks...');");
+
+  // --
+  // -- maintenance types
+  // --
+  update_sql("DELETE FROM `guifi_types` WHERE `type` = 'maintainer'");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('1', 'maintainer', 'Volunteer', 'Volunteer');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('2', 'maintainer', 'FO', 'Fibre Optics - Professional');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('3', 'maintainer', 'Wireless', 'Wireless - Professional');");
+
+  // --
+  // -- SLA types
+  // --
+  update_sql("DELETE FROM `guifi_types` WHERE `type` = 'sla'");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('1', 'sla', 'none', 'Best effort');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('2', 'sla', '8x5', '8x5: Labour times/days');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('3', 'sla', '8x7', '8x7: All days/labour times');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('4', 'sla', '24x5', '24x5: Labour days/all times');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('5', 'sla', '24x7', '24x7: All days/times');");
 
 }
 
@@ -1152,7 +1182,7 @@ function guifi_update_700() {
   $items = array();
 
   $items[] = update_sql("INSERT INTO {guifi_manufacturer} (fid ,nom ,url) VALUES ('12', 'Gateworks', 'http://www.gateworks.com'),('13', 'Asus', 'http://www.asus.com');");
-  $items[] = update_sql("INSERT INTO {guifi_model} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES 
+  $items[] = update_sql("INSERT INTO {guifi_model} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES
   ('34', '10', 'NanoStation Loco2', 'Extern', '1', '400', '802.11bg', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes'),
   ('35', '10', 'NanoStation Loco5', 'Extern', '1', '400', '802.11a', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes'),
   ('36', '10', 'Bullet2', 'Extern', '1', '400', '802.11bg', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes'),
@@ -1173,7 +1203,7 @@ function guifi_update_736() {
   $items = array();
 
   $items[] = update_sql("INSERT INTO {guifi_manufacturer} (fid ,nom ,url) VALUES ('14', 'Pcengines', 'http://www.pcengines.ch');");
-  $items[] = update_sql("INSERT INTO {guifi_model} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES 
+  $items[] = update_sql("INSERT INTO {guifi_model} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES
   (41, 14, 'Alix1', 'Extern', 5, 400, '802.11bg', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'wLan/Lan', 'http://www.pcengines.ch/alix1d.htm', 'Permet Firmwares de tercers', 'Yes'),
   (42, 14, 'Alix2', 'Extern', 2, 400, '802.11bg', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'wLan/Lan|ether2', 'http://www.pcengines.ch/alix2d.htm', 'Permet Firmwares de tercers', 'Yes'),
   (43, 14, 'Alix3', 'Extern', 2, 400, '802.11bg', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'wLan/Lan', 'http://www.pcengines.ch/alix3d.htm', 'Permet Firmwares de tercers', 'Yes'),
@@ -1187,7 +1217,7 @@ function guifi_update_736() {
 
 function guifi_update_743() {
   $items = array();
-  
+
   $items[] = update_sql("CREATE TABLE IF NOT EXISTS `guifi_api_tokens` (
 	  `uid` int(8) unsigned NOT NULL,
 	  `token` varchar(255) NOT NULL,
@@ -1200,7 +1230,7 @@ function guifi_update_743() {
 
 function guifi_update_768() {
   $items = array();
- 
+
   $items[] = update_sql("INSERT INTO {guifi_model} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES
    (45, 10, 'AirMaxM2 Rocket/Nano/Loco', 'Extern', 1, 100, '802.11bg', 'Yes', 'No', 'Si', 'Si','Si', NULL, '1', 'Si', 'Si', NULL, 'Si', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers','Yes'),
    (46, 10, 'AirMaxM5 Rocket/Nano/Loco', 'Extern', 1, 100, '802.11a', 'Yes', 'No', 'si', 'Si', 'Si', NULL, '1', 'Si', 'Si', NULL, 'Si', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers','Yes'),
@@ -1243,7 +1273,7 @@ function guifi_update_852() {
 
 function guifi_update_873() {
    $items = array();
-   $items[] = update_sql("ALTER TABLE {guifi_dns_domains} ADD externalmx VARCHAR( 128 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL AFTER allow"); 
+   $items[] = update_sql("ALTER TABLE {guifi_dns_domains} ADD externalmx VARCHAR( 128 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL AFTER allow");
   return $items;
 }
 
@@ -1271,10 +1301,10 @@ function guifi_update_874() {
 function guifi_update_891() {
    $items = array();
    $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('18', 'firmware', 'gsffirm', 'Firmware de GràciaSenseFils MANET', 'Alix2|Alix3|WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Asus WL-500xx|WHR-HP-G54, WHR-G54S|NanoStation2|NanoStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Meraki/Fonera');");
-   $items[] = update_sql("INSERT INTO {guifi_model} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES 
-                                        (51, 10, 'RouterStationPro', 'Extern', 4, 400, '802.11abg', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'Wan', 'http://ubnt.com/rspro', 'Permet Firmwares de tercers', 'Yes');"); 
+   $items[] = update_sql("INSERT INTO {guifi_model} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES
+                                        (51, 10, 'RouterStationPro', 'Extern', 4, 400, '802.11abg', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'Wan', 'http://ubnt.com/rspro', 'Permet Firmwares de tercers', 'Yes');");
    $items[] = update_sql("UPDATE {guifi_types} SET relations = 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Asus WL-500xx|WHR-HP-G54, WHR-G54S|NanoStation2|NanoStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Avila GW2348-4' WHERE id = 4 AND type = 'firmware'");
-   $items[] = update_sql("UPDATE {guifi_types} SET relations = 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Meraki/Fonera|Wrap|Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|NanoStation2|NanoStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Avila GW2348-4|Asus WL-500xx|Alix1|Alix2|Alix3' WHERE id = 8 AND type = 'firmware'"); 
+   $items[] = update_sql("UPDATE {guifi_types} SET relations = 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Meraki/Fonera|Wrap|Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|NanoStation2|NanoStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Avila GW2348-4|Asus WL-500xx|Alix1|Alix2|Alix3' WHERE id = 8 AND type = 'firmware'");
   return $items;
 }
 
@@ -1309,7 +1339,7 @@ function guifi_update_900() {
  $items[] = update_sql("ALTER TABLE {guifi_model} ADD etherdev_max tinyint(2) NOT NULL DEFAULT 1 AFTER radiodev_max");
  $items[] = update_sql("ALTER TABLE {guifi_interfaces} ADD etherdev_counter tinyint(2) AFTER radiodev_counter");
  $items[] = update_sql("ALTER TABLE {guifi_radios} ADD etherdev_counter tinyint(2) AFTER radiodev_counter");
- $items[] = update_sql("INSERT INTO {guifi_model} (mid ,fid ,model ,tipus ,radiodev_max , etherdev_max, potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES 
+ $items[] = update_sql("INSERT INTO {guifi_model} (mid ,fid ,model ,tipus ,radiodev_max , etherdev_max, potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES
                                       (52, 8, 'Routerboard 750/750G', 'Extern', '0', '5', '400', '802.11abg', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'None', '0', 'Yes','Yes', 'Yes', 'Yes', 'Yes', 'ether1|ether2|ether3|ether4|ether5', 'http://www.routerboard.com/pricelist.php?showProduct=90', 'Permet Firmwares de tercers', 'Yes');");
  $items[] = update_sql("UPDATE {guifi_types} SET `relations` = 'Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|Routerboard 600|Routerboard 411|Routerboard 333|Routerboard 433|Routerboard 800|Routerboard 750/750G' WHERE id = 16 AND type = 'firmware'");
  $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('19', 'firmware', 'RouterOSv5.x', 'RouterOS 5.x or newer from Mikrotik', 'Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|Routerboard 600|Routerboard 411|Routerboard 333|Routerboard 433|Routerboard 800|Routerboard 750/750G');");
@@ -1318,7 +1348,7 @@ function guifi_update_900() {
 
 function guifi_update_901() {
    $items = array();
-   $items[] = update_sql("ALTER TABLE {guifi_dns_domains} ADD externalns VARCHAR( 128 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL AFTER externalmx"); 
+   $items[] = update_sql("ALTER TABLE {guifi_dns_domains} ADD externalns VARCHAR( 128 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL AFTER externalmx");
   return $items;
 }
 
@@ -1368,7 +1398,7 @@ function guifi_update_902() {
 
    $items[] = update_sql("ALTER TABLE {guifi_manufacturer} CHANGE nom name VARCHAR( 40 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT ''");
    $items[] = update_sql("ALTER TABLE {guifi_model} CHANGE tipus type VARCHAR( 10 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT 'Extern, PCI, PCMCIA'");
-   $items[] = update_sql("ALTER TABLE {guifi_model} CHANGE comentaris comments VARCHAR( 240 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL"); 
+   $items[] = update_sql("ALTER TABLE {guifi_model} CHANGE comentaris comments VARCHAR( 240 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL");
 
    $items[] = update_sql("UPDATE {guifi_model} SET mid = '3', fid = '1' WHERE mid =99;");
    $items[] = update_sql("UPDATE {guifi_manufacturer} SET fid = '99' WHERE fid =1;");
@@ -1387,7 +1417,7 @@ function guifi_update_902() {
 function guifi_update_903() {
 
   $items = array();
-  
+
   // creació de la taula de firmwares
   $items[] = update_sql("CREATE TABLE IF NOT EXISTS `guifi_firmware` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -1403,7 +1433,7 @@ function guifi_update_903() {
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Firmwares'");
 
-  // insert de firmwares 
+  // insert de firmwares
   $items[] = update_sql("INSERT INTO {guifi_firmware} (id,nom,descripcio,relations,enabled,notification,user_created,user_changed,timestamp_created,timestamp_changed) VALUES (1,'n/a','not available','Other',0,'albertsarle@gmailcom',541,0,0,0);");
   $items[] = update_sql("INSERT INTO {guifi_firmware} (id,nom,descripcio,relations,enabled,notification,user_created,user_changed,timestamp_created,timestamp_changed) VALUES (2,'Alchemy','Alchemy from sveasoft','WRT54Gv1-4|WRT54GSv1-2',0,'albertsarle@gmailcom',541,0,0,0);");
   $items[] = update_sql("INSERT INTO {guifi_firmware} (id,nom,descripcio,relations,enabled,notification,user_created,user_changed,timestamp_created,timestamp_changed) VALUES (3,'Talisman','Talisman from sveasoft','WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4',0,'albertsarle@gmailcom',541,0,0,0);");
@@ -1632,8 +1662,8 @@ function guifi_update_903() {
   $items[] = update_sql("INSERT INTO {guifi_parametres} (id,nom,default_value,origen,dinamic,notification,user_created,user_changed,timestamp_created,timestamp_changed) VALUES (36,'firmware_description','firmware_description','firmware_description',1,'',541,541,1331597765,1332450428);");
   $items[] = update_sql("INSERT INTO {guifi_parametres} (id,nom,default_value,origen,dinamic,notification,user_created,user_changed,timestamp_created,timestamp_changed) VALUES (37,'zone_ternary_dns','','zone_ternary_dns',1,'',541,0,1332286041,0);");
   $items[] = update_sql("INSERT INTO {guifi_parametres} (id,nom,default_value,origen,dinamic,notification,user_created,user_changed,timestamp_created,timestamp_changed) VALUES (38,'ternary_dns','','zone_ternary_dns',1,'',541,0,1332286090,0);");
-  $items[] = update_sql("INSERT INTO {guifi_parametres} (id,nom,default_value,origen,dinamic,notification,user_created,user_changed,timestamp_created,timestamp_changed) VALUES (39,'ternarydns','','zone_ternary_dns',1,'',541,0,1332286115,0);");  
-  
+  $items[] = update_sql("INSERT INTO {guifi_parametres} (id,nom,default_value,origen,dinamic,notification,user_created,user_changed,timestamp_created,timestamp_changed) VALUES (39,'ternarydns','','zone_ternary_dns',1,'',541,0,1332286115,0);");
+
 
   // creació de la taula de característiques
   $items[] = update_sql("CREATE TABLE IF NOT EXISTS `guifi_caracteristica` (
@@ -1673,7 +1703,7 @@ function guifi_update_903() {
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='UnSolclic Configurations'
   ");
-  
+
   // creació de la taula de Parametres dels UnSolclics
   $items[] = update_sql("CREATE TABLE IF NOT EXISTS `guifi_parametresConfiguracioUnsolclic` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
@@ -1689,7 +1719,7 @@ function guifi_update_903() {
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1 DEFAULT CHARSET=utf8 COMMENT='Parameters forUnSolclic Configurations'
   ");
-  
+
   $items[] = update_sql("INSERT INTO {guifi_parametresConfiguracioUnsolclic} (id,pid,uscid,valor,dinamic,notification,user_created,user_changed,timestamp_created,timestamp_changed) VALUES (1,1,1,'',0,'albertsarle@gmailcom',541,0,0,0);");
   $items[] = update_sql("INSERT INTO {guifi_parametresConfiguracioUnsolclic} (id,pid,uscid,valor,dinamic,notification,user_created,user_changed,timestamp_created,timestamp_changed) VALUES (2,2,1,'',0,'albertsarle@gmailcom',541,0,0,0);");
   $items[] = update_sql("INSERT INTO {guifi_parametresConfiguracioUnsolclic} (id,pid,uscid,valor,dinamic,notification,user_created,user_changed,timestamp_created,timestamp_changed) VALUES (3,3,1,'',0,'albertsarle@gmailcom',541,0,0,0);");
@@ -1929,21 +1959,21 @@ function guifi_update_903() {
   $items[] = update_sql("INSERT INTO {guifi_parametresConfiguracioUnsolclic} (id,pid,uscid,valor,dinamic,notification,user_created,user_changed,timestamp_created,timestamp_changed) VALUES (315,39,20,'',1,'albert.sarle@gmail.com',541,NULL,1332286129,NULL);");
   $items[] = update_sql("INSERT INTO {guifi_parametresConfiguracioUnsolclic} (id,pid,uscid,valor,dinamic,notification,user_created,user_changed,timestamp_created,timestamp_changed) VALUES (316,39,22,'',1,'albert.sarle@gmail.com',541,NULL,1332286355,NULL);");
   $items[] = update_sql("INSERT INTO {guifi_parametresConfiguracioUnsolclic} (id,pid,uscid,valor,dinamic,notification,user_created,user_changed,timestamp_created,timestamp_changed) VALUES (317,39,21,'',1,'albert.sarle@gmail.com',541,NULL,1332286488,NULL);");
-  $items[] = update_sql("INSERT INTO {guifi_parametresConfiguracioUnsolclic} (id,pid,uscid,valor,dinamic,notification,user_created,user_changed,timestamp_created,timestamp_changed) VALUES (318,36,24,'firmware_description',1,'albert.sarle@gmail.com',541,NULL,1332454981,NULL);");  
+  $items[] = update_sql("INSERT INTO {guifi_parametresConfiguracioUnsolclic} (id,pid,uscid,valor,dinamic,notification,user_created,user_changed,timestamp_created,timestamp_changed) VALUES (318,36,24,'firmware_description',1,'albert.sarle@gmail.com',541,NULL,1332454981,NULL);");
 
-  // claus foranies de la taula device a model i firmware 
+  // claus foranies de la taula device a model i firmware
   $items[] = update_sql("ALTER TABLE {guifi_devices} ADD COLUMN usc_id INT(11) NOT NULL  AFTER extra;");
   $items[] = update_sql("ALTER TABLE {guifi_devices} ADD COLUMN mid INT(11) NOT NULL  AFTER usc_id;");
   $items[] = update_sql("ALTER TABLE {guifi_devices} ADD COLUMN fid INT(11) NOT NULL  AFTER `mid`;");
-  
+
   guifi_update_devices_fromExtraInfo();
-  
+
   return $items;
 }
 
 function guifi_update_904() {
 
-  // inicialitzacio de totes les combinacions de models-firmwares (com a no validades)  
+  // inicialitzacio de totes les combinacions de models-firmwares (com a no validades)
   $items[] = update_sql("insert into {guifi_configuracioUnSolclic}(mid, fid, enabled, tipologia, notification, user_created) values
   (40,4,0,0,'albertsarle@gmail.com',541),
   (40,21,0,0,'albertsarle@gmail.com',541),
@@ -2136,8 +2166,8 @@ function guifi_update_904() {
   (48,21,0,0,'albertsarle@gmail.com',541),
   (45,15,0,0,'albertsarle@gmail.com',541),
   (45,21,0,0,'albertsarle@gmail.com',541);");
-  
-  return $items;  
+
+  return $items;
 }
 
 function guifi_update_905() {
@@ -2193,6 +2223,58 @@ function guifi_update_910() {
 function guifi_update_911() {
   // Add new status Inactive
   $items = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('7', 'status', 'Inactive', 'Inactive', NULL);");
+  return $items;
+}
+
+function guifi_update_1000() {
+
+  $items = array();
+  db_add_field($items,'guifi_location','funder',
+      array('type'=>'text','not null'=>false,'comment'=>'Funders/Donors/Owners of the location'));
+  db_add_field($items,'guifi_location','maintainer',
+      array('type'=>'text','not null'=>false,'comment'=>'Maintainers of the location (if there are)'));
+  db_add_field($items,'guifi_zone','maintainer',
+      array('type'=>'text','not null'=>false,'comment'=>'Maintainers of the zone (if there are)'));
+  db_add_field($items,'guifi_zone','host_nodes',
+      array('type' => 'int', 'size' => 'small', 'not null'  => FALSE, 'default' => 0));
+  db_add_field($items,'guifi_devices','funder',
+      array('type'=>'text','not null'=>false,'comment'=>'Funders/Donors/Owners of the device'));
+  db_add_field($items,'guifi_devices','maintainer',
+      array('type'=>'text','not null'=>false,'comment'=>'Maintainers of the device (if there are)'));
+
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('6', 'link', 'xPON', 'Passive Splitted Fiber Optics (xPON) link', '');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('7', 'link', 'DuplexFO', 'Duplex P2P link', '');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('8', 'link', 'SimplexFO', 'Simplex P2P link', '');");
+
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('10', 'device', 'ONU', 'xPON User Unit (Final)');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('11', 'device', 'OLT', 'xPON Concentrator (Terminal)');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('12', 'device', 'splitter', 'xPON Splitter');");
+
+  return $items;
+}
+
+function guifi_update_1002() {
+
+  // --
+  // -- maintenance types
+  // --
+  update_sql("DELETE FROM `guifi_types` WHERE `type` = 'maintainer'");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('1', 'maintainer', 'Volunteer', 'Volunteer');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('2', 'maintainer', 'FO', 'Fibre Optics - Professional');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('3', 'maintainer', 'Wireless', 'Wireless - Professional');");
+
+  // --
+  // -- SLA types
+  // --
+  update_sql("DELETE FROM `guifi_types` WHERE `type` = 'sla'");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('1', 'sla', 'none',  'Best effort');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('2', 'sla', '8x5',   '8x5: Labour times and days');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('3', 'sla', 'dayx5', 'Dx5: Daylight - Labour days');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('4', 'sla', '8x7',   '8x7: Labour times - all days');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('5', 'sla', 'dayx7', 'Dx7: Daylight - All days');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('6', 'sla', '24x5',  '24x5: All times - Labour days');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('7', 'sla', '24x7',  '24x7: All times - days');");
+
   return $items;
 }
 

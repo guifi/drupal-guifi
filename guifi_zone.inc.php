@@ -70,6 +70,8 @@ function guifi_zone_load($node) {
     $loaded->maxy = $coords['maxy'];
   }
 
+  $loaded->maintainers=guifi_maintainers_load($loaded->maintainer);
+
   // if notification is NULL, take from the user who created the zone
   if (empty($loaded->notification)) {
     $u = user_load($node->uid);
@@ -81,6 +83,23 @@ function guifi_zone_load($node) {
 
   return FALSE;
 }
+
+function _guifi_get_supplier_name($node) {
+
+  if (is_object($node))
+    $k = $node->nid;
+  else
+    $k = $node;
+
+  $node = db_fetch_object(
+    db_query("SELECT title FROM {supplier} WHERE id = '%d'", $k));
+
+  if (is_null($node->title))
+    return FALSE;
+
+  return $node->title;
+}
+
 
 function guifi_zone_get_coords($zid) {
   guifi_log(GUIFILOG_TRACE,
@@ -113,7 +132,31 @@ function guifi_zone_root() {
   return $root->id;
 }
 
+function guifi_zone_autocomplete_field($zid,$fname) {
+  if ($fname == 'master') {
+    $title = t('Parent zone');
+  }
+  elseif ($fname == 'guifi_default_zone') {
+    $title = t('Default zone for new nodes');
+  }
+  else {
+    $title = t('Zone');
+  }
+
+  return array(
+     '#type' => 'textfield',
+     '#title' => t($title),
+     '#description' => t('Find and select the appropriate zone'),
+     '#size' => 80,
+     '#default_value'=> ($zid!='') ?
+         $zid.'-'.guifi_get_zone_name($zid) : NULL,
+     '#maxsize'=> 256,
+     '#autocomplete_path' => 'budgets/js/select-zone',
+  );
+}
+
 function guifi_zone_select_field($zid,$fname) {
+
   $parents = array();
   $parent=$zid;
   $c = 1;
@@ -249,7 +292,7 @@ function guifi_zone_form(&$node, &$param) {
    '#value'=> base_path().drupal_get_path('module','guifi').'/js/'
   );
 
-  $form['master'] = guifi_zone_select_field($node->master,'master');
+  $form['master'] = guifi_zone_autocomplete_field($node->master,'master');
   $form['master']['#weight'] = $form_weight++;
 
   if (($type->has_body)) {
@@ -270,24 +313,19 @@ function guifi_zone_form(&$node, &$param) {
     '#title' => t('Short abreviation'),
     '#required' => FALSE,
     '#default_value' => $node->nick,
-    '#size' => 10,
+    '#size' => 8,
     '#maxlength' => 10,
     '#element_validate' => array('guifi_zone_nick_validate'),
     '#description' => t('Single word, 7-bits characters. Used while default values as hostname, SSID, etc...'),
     '#weight' => $form_weight++,
   );
-/*
-   $form['zone_mode'] = array(
-    '#type' => 'select',
-    '#title' => t('Zone dynamic mode'),
-    '#required' => FALSE,
-    '#default_value' => $node->zone_mode,
-    '#options' => array('infrastructure' => t('infrastructure')),
-    '#description' => t('<ul><li>No zone modes for now on. ' .
-        'A zone can include links between OSPF, BGP, etc. and mesh protocols like BMX, OLSR, etc.</li>'),
-    '#weight' => $form_weight++,
-  );
-*/
+
+  /*
+   * maintainers fieldset
+   */
+  $form['maintainers'] = guifi_maintainers_form($node,$form_weight);
+
+
   $form['time_zone'] = array(
     '#type' => 'select',
     '#title' => t('Time zone'),
@@ -325,6 +363,7 @@ function guifi_zone_form(&$node, &$param) {
     '#weight' => $form_weight++,
     '#collapsible' => FALSE,
     '#collapsed' => TRUE,
+    '#prefix'=>'<div>',
   );
 
   $proxystr = guifi_service_str($node->proxy_id);
@@ -370,15 +409,17 @@ function guifi_zone_form(&$node, &$param) {
   $form['zone_services']['graph_server'] = array(
     '#type' => 'hidden',
     '#value'=> $node->graph_server,
+    '#suffix'=>'</div>',
   );
 
   // Separació Paràmetre globals de xarxa
   $form['zone_network_settings'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Zone global network parameters'),
-    '#weight' => $form_weight++,
+    '#type'        => 'fieldset',
+    '#title'       => t('Zone global network parameters'),
+    '#weight'      => $form_weight++,
     '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#collapsed'   => TRUE,
+    '#preffix'     => '<div>',
   );
   $form['zone_network_settings']['sep-global-param'] = array(
     '#value' => '<hr /><h2>'.t('zone global network parameters').'</h2>',
@@ -414,6 +455,7 @@ function guifi_zone_form(&$node, &$param) {
     '#element_validate' => array('guifi_zone_ospf_validate'),
     '#description' => t('The id that will be used when creating configuration files for the OSPF routing protocol so all the routers within the zone will share a dynamic routing table.'),
     '#weight' => $form_weight++,
+    '#suffix'=>'</div>',
   );
 
   // Separació Paràmetres dels mapes
@@ -503,6 +545,8 @@ function guifi_zone_form(&$node, &$param) {
     '#description' => t('Latitude'),
     '#weight' => $form_weight++,
   );
+
+  $form['#attributes'] = array('class'=>zone_form);
 
   return $form;
 }
@@ -699,6 +743,11 @@ function guifi_zone_validate($node) {
   if ($node->miny > $node->maxy)
     form_set_error('miny', t("Latitude: Min should be less than Max"),
       ' '.$node->miny.'/'.$node->maxy);
+
+  /*
+   * Validate maintainer(s)
+   */
+  guifi_maintainers_validate($node);
 }
 
 /** guifi_zone_insert(): Insert a zone into the database.
@@ -713,6 +762,9 @@ function guifi_zone_insert($node) {
   $node->miny = (float)$node->miny;
   $node->maxy = (float)$node->maxy;
   $to_mail = explode(',',$node->notification);
+
+  $node->maintainer=guifi_maintainers_save($node->maintaners);
+
   $nzone = _guifi_db_sql(
     'guifi_zone',
     array('id' => $node->id),(array)$node,$log,$to_mail);
@@ -750,6 +802,8 @@ function guifi_zone_update($node) {
 
     cache_clear_all();
   }
+
+  $node->maintainer=guifi_maintainers_save($node->maintainers);
 
   $node->minx = (float)$node->minx;
   $node->maxx = (float)$node->maxx;
@@ -890,6 +944,13 @@ function guifi_zone_ariadna($id = 0, $link = 'node/%d') {
 function guifi_zone_data($zone) {
 
   $rows[] = array(t('zone name'),$zone->nick.' - <b>' .$zone->title .'</b>');
+
+  if (count($zone->maintainers) > 1) {
+    $rows[] = array(
+      t('Maintenance & SLAs'),
+      implode(', ',guifi_maintainers_links($zone->maintainers)));
+  }
+
   if ($zone->homepage)
     $rows[] = array(t('homepage'),l($zone->homepage,$zone->homepage));
   $rows[] = array(t('default proxy'),
@@ -1238,7 +1299,7 @@ function guifi_zone_get_nearest($lat, $lon, $zones = NULL) {
   if( $zones == NULL ) {
     $zones = guifi_zone_get_nearest_candidates($lat, $lon);
   }
-  
+
   if( $zones ) {
     $maxd = 0;
     $oGC = new GeoCalc();
@@ -1248,7 +1309,7 @@ function guifi_zone_get_nearest($lat, $lon, $zones = NULL) {
         $d2 = $oGC->EllipsoidDistance($lat, $lon, $zone['min_lat'], $zone['min_lon']);
         $zone['d'] = sqrt( $d1 * $d1 + $d2 * $d2 );
       }
-      
+
       if( empty( $maxd ) || $zone['d'] < $maxd ) {
         $maxd = $zone['d'];
         $candidate_zone = $zone;
@@ -1272,18 +1333,18 @@ function guifi_zone_get_nearest_candidates($lat, $lon, $max_distance = 15, $zone
   if( $zones == NULL ) {
     $zones = guifi_zone_get_containing($lat, $lon);
   }
-  
+
   if( !$zones ) {
     return FALSE;
   }
-  
+
   $candidates = array();
   foreach( $zones as $zone ) {
     $oGC = new GeoCalc();
     $d1 = $oGC->EllipsoidDistance($lat, $lon, $zone['max_lat'], $zone['max_lon']);
     $d2 = $oGC->EllipsoidDistance($lat, $lon, $zone['min_lat'], $zone['min_lon']);
     $zone['d'] = sqrt( $d1 * $d1 + $d2 * $d2 );
-    
+
     if( $zone['d'] < $max_distance ) {
       $candidates[] = $zone;
     }

@@ -36,7 +36,7 @@ function guifi_node_ariadna($node, $nlink = 'node/%d',$dlink = 'guifi/device/%d'
     $node = guifi_node_load($node);
     $node->title = $node->nick; // hack to show the node title
   }
-  
+
   $ret = array();
   $ret[] = l(t('Home'), NULL);
   $ret[] = l(t('Main menu'),'guifi');
@@ -70,7 +70,7 @@ function guifi_node_ariadna($node, $nlink = 'node/%d',$dlink = 'guifi/device/%d'
     $child[count($child)-1] = $child[count($child)-1].')</small>';
     $ret = array_merge($ret,$child);
   }
-  
+
   return $ret;
 }
 
@@ -94,6 +94,9 @@ function guifi_node_load($node) {
     $k = $node;
 
   $node = db_fetch_object(db_query("SELECT * FROM {guifi_location} WHERE id = '%d'", $k));
+
+  $node->maintainers=guifi_maintainers_load($node->maintainer);
+
 
   if (!$node->id == NULL)
     return $node;
@@ -146,6 +149,8 @@ function guifi_node_prepare(&$node){
 function guifi_node_form(&$node, $form_state) {
   global $user;
 
+  $form_weight = 0;
+
   $type = node_get_types('type',$node);
 
   if (!empty($node->zone_id))
@@ -164,6 +169,11 @@ function guifi_node_form(&$node, $form_state) {
       '#default_value' => $node->title,
     );
   }
+
+    /*
+   * maintainers fieldset
+   */
+  $form['maintainers'] = guifi_maintainers_form($node,$form_weight);
 
   $form['nick'] = array(
     '#type' => 'textfield',
@@ -268,7 +278,9 @@ function guifi_node_form(&$node, $form_state) {
     $zone_id = $node->zone_id;
   }
 
-  $form['zone_id'] = guifi_zone_select_field($zone_id,'zone_id');
+  $form['zone_id'] = guifi_zone_autocomplete_field($zone_id,'zone_id');
+
+//  $form['zone_id'] = guifi_zone_select_field($zone_id,'zone_id');
   $form['zone_id']['#weight'] = 3;
 
 
@@ -494,6 +506,11 @@ function guifi_node_validate($node,$form) {
       t('Do you mean that you are flying over the earth??? :)'));
   }
 
+  /*
+   * Validate maintainer(s)
+   */
+  guifi_maintainers_validate($node);
+
 }
 
 /** guifi_node_insert(): Create a new node in the database
@@ -501,6 +518,8 @@ function guifi_node_validate($node,$form) {
 function guifi_node_insert($node) {
   global $user;
   $log = '';
+
+  $node->maintainer=guifi_maintainers_save($node->maintaners);
 
   $coord=guifi_coord_dmstod($node->latdeg,$node->latmin,$node->latseg);
   if($coord!=NULL){
@@ -569,6 +588,8 @@ function guifi_node_update($node) {
 
   $node->lat = (float)$node->lat;
   $node->lon = (float)$node->lon;
+
+  $node->maintainer=guifi_maintainers_save($node->maintainers);
 
   $nnode = _guifi_db_sql(
     'guifi_location',
