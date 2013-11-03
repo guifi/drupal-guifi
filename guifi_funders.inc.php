@@ -184,6 +184,7 @@ function guifi_funders_form($node,&$form_weight) {
       '#value' =>$node->funders[$funder_id]['user_created'],
       '#weight'      => $form_weight++,
   	);
+
     $form['funders'][$funder_id]['comment'] = array (
       '#title'=>t('Comment'),
       '#disabled'=> $disabled,
@@ -197,7 +198,7 @@ function guifi_funders_form($node,&$form_weight) {
     );
     if ($node->funders[$funder_id])
     $form['funders'][$funder_id]['created'] = array (
-      '#title'=>t('Created'),
+      '#title'=> t('Created'),
       '#disabled'=> yes,
       '#type' => 'item',
       '#value' => format_date($node->funders[$funder_id]['timestamp_created']),
