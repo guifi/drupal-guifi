@@ -151,7 +151,7 @@ function guifi_maintainers_form($node,&$form_weight) {
   $maintainer_id=0;
   $nmaintainers = count($node->maintainers);
 //  guifi_log(GUIFILOG_BASIC, 'function guifi_zone_form(mantainers)', $node->maintainers[$maintainer_id]);
-  guifi_log(GUIFILOG_BASIC, 'function guifi_maintainers_form(mantainers)', $nmaintainers);
+  guifi_log(GUIFILOG_TRACE, 'function guifi_maintainers_form(mantainers)', $nmaintainers);
   do {
     $form['maintainers'][$maintainer_id]['maintainer'] = array (
       '#title'=>t('maintainer'),

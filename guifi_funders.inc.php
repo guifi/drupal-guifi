@@ -135,7 +135,8 @@ function guifi_funders_form($node,&$form_weight) {
     '#type'        => 'fieldset',
     '#title'       => t('Funder(s)'),
     '#description' => t('Funders for this item.<br>'.
-      'Use "Preview" button if you need more rows to fill.'),
+      'Use "Preview" button if you need more rows to fill.<br>' .
+      'Leave all fields in blank for delete a row.'),
     '#collapsible' => TRUE,
     '#collapsed'   => ($node->funders[0]!='') ? TRUE : FALSE,
     '#attributes'  => array('class'=>'funders'),
@@ -153,11 +154,6 @@ function guifi_funders_form($node,&$form_weight) {
     $form['funders'][$funder_id]['user'] = array (
       '#title'=>t('User'),
       '#type' => 'textfield',
-      '#description'=>(($node->funders[$funder_id]['user']!='')
-         and ($node->funders[$funder_id]['supplier']!='')
-         and ($node->funders[$funder_id]['comment']!=''))
-         ?
-         t('Leave all blank for delete this funder'):t('Fill for register a new funder'),
       '#size' => 50,
       '#default_value'=> ($node->funders[$funder_id]['user']!='') ?
          $node->funders[$funder_id]['user'] : NULL,
@@ -197,6 +193,14 @@ function guifi_funders_form($node,&$form_weight) {
       '#maxsize'=> 256,
       '#required' => FALSE,
       '#default_value' => $node->funders[$funder_id]['comment'],
+      '#weight' => $form_weight++,
+    );
+    if ($node->funders[$funder_id])
+    $form['funders'][$funder_id]['created'] = array (
+      '#title'=>t('Created'),
+      '#disabled'=> yes,
+      '#type' => 'item',
+      '#value' => format_date($node->funders[$funder_id]['timestamp_created']),
       '#weight' => $form_weight++,
     );
     $funder_id++;
