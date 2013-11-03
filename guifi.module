@@ -5,6 +5,7 @@
 
 include_once("guifi_zone.inc.php");      // zone management
 include_once("guifi_maintainers.inc.php"); // maintainers
+include_once("guifi_funders.inc.php");   // funders
 include_once("guifi_ipv4.inc.php");      // ipv4 network management
 include_once("guifi_node.inc.php");      // node (location) management
 include_once("guifi_service.inc.php");   // services management
@@ -581,15 +582,49 @@ function guifi_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_LOCAL_TASK
   );
-  if (module_exists('budgets'))
-    $items['node/%guifi_zone/view/suppliers'] = array(
-      'title' => 'suppliers',
+  if (module_exists('budgets')) {
+    $items['node/%guifi_zone/suppliers'] = array(
+      'title' => 'Suppliers',
+      'page callback' => 'budgets_supplier_list_by_zone',
+      'page arguments' => array(1,4),
+      'access callback' => 'user_access',
+      'access arguments' => array('access content'),
+      'weight'=> 99,
+      'type' => MENU_LOCAL_TASK
+    );
+    $items['node/%guifi_zone/suppliers/all'] = array(
+      'title' => 'all',
       'page callback' => 'budgets_supplier_list_by_zone',
       'page arguments' => array(1),
       'access callback' => 'user_access',
       'access arguments' => array('access content'),
       'type' => MENU_LOCAL_TASK
     );
+    $items['node/%guifi_zone/suppliers/caps_services=isp'] = array(
+      'title' => 'isp',
+      'page callback' => 'budgets_supplier_list_by_zone',
+      'page arguments' => array(1,4),
+      'access callback' => 'user_access',
+      'access arguments' => array('access content'),
+      'type' => MENU_LOCAL_TASK
+    );
+    $items['node/%guifi_zone/suppliers/role=professional'] = array(
+      'title' => 'professional',
+      'page callback' => 'budgets_supplier_list_by_zone',
+      'page arguments' => array(1,4),
+      'access callback' => 'user_access',
+      'access arguments' => array('access content'),
+      'type' => MENU_LOCAL_TASK
+    );
+    $items['node/%guifi_zone/suppliers/role=volunteer'] = array(
+      'title' => 'volunteer',
+      'page callback' => 'budgets_supplier_list_by_zone',
+      'page arguments' => array(1,4),
+      'access callback' => 'user_access',
+      'access arguments' => array('access content'),
+      'type' => MENU_LOCAL_TASK
+    );
+  }
   $items['node/%guifi_zone/view/userqueue'] = array(
     'title' => 'users queue',
     'page callback' => 'guifi_users_queue',
@@ -1002,6 +1037,12 @@ function guifi_menu() {
   $items['guifi/js/select-zone/%'] = array(
     'title' => 'Javascript Select Zone',
     'page callback' => 'guifi_ahah_select_zone',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['guifi/js/select-user/%'] = array(
+    'title' => 'Javascript Select User',
+    'page callback' => 'guifi_ahah_select_user',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );

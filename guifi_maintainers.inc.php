@@ -4,30 +4,59 @@
  * Manage guifi_maintainers fieldssets, validations, etc...
  */
 
- function guifi_maintainers_load($m) {
-   $maintainers=unserialize($m);
+ function guifi_maintainers_load($id, $subject_type) {
+   $qsql = sprintf('SELECT * FROM {guifi_maintainers} ' .
+   		'WHERE subject_id = %d ' .
+   		' AND subject_type = "%s" ' .
+   		'ORDER BY id',
+   		$id,$subject_type);
+   $result = db_query($qsql);
+//   $result = db_query('SELECT * FROM {guifi_maintainers} ' .
+//   		'WHERE subject_id = :id ' .
+//   		' AND subject_type = ":subject_type" ' .
+//   		'ORDER BY weight, id',
+//   		array(':id'=>$id,':subject_type'=>$subject_type));
+   guifi_log(GUIFILOG_TRACE,
+     'function guifi_zone_load(sql)',
+     $qsql);
 
-   foreach ($maintainers as $k => $v) {
-   	 $mid=explode('-',$v['maintainer']);
-     $maintainers[$k]['maintainer'] .= '-'.budgets_supplier_get_suppliername($mid[0]);
+   while ($m = db_fetch_array($result)) {
+   	 $m['maintainer'] = $m['supplier_id'].'-'.budgets_supplier_get_suppliername($m['supplier_id']);
+     $maintainers[] = $m;
    }
+   guifi_log(GUIFILOG_TRACE,
+     'function guifi_zone_load(maintainers)',
+     $maintainers);
 
    return $maintainers;
  }
 
- function guifi_maintainers_save($maintainer) {
-  $m=array();
+ function guifi_maintainers_save($subject_id, $subject_type, $maintainers) {
 
-  foreach ($maintainer as $k=>$v)
-    if (!empty($v['maintainer'])) {
-      $mid = explode('-',$v['maintainer']);
-      $v['maintainer'] = $mid[0];
-      $m[]=$v;
-    }
-  return serialize($m);
+  foreach ($maintainers as $k => $m) {
+
+  	$m['subject_type']=$subject_type;
+  	$m['subject_id']=$subject_id;
+
+    if ((empty($m['maintainer'])) and !(empty($m['id'])))
+      $m['deleted']=true;
+
+    if (empty($m['id']))
+      $m['new']=true;
+
+    if ($m['new']==true and (empty($m['maintainer'])))
+      continue;
+
+    $mid = explode('-',$m['maintainer']);
+    $m['supplier_id'] = $mid[0];
+
+    _guifi_db_sql('guifi_maintainers',array('id'=>$m['id']),$m);
+  }
+  return;
  }
 
 function guifi_maintainers_validate($node) {
+
   /*
    * Validate maintainer(s)
    */
@@ -111,8 +140,8 @@ function guifi_maintainers_form($node,&$form_weight) {
   $form['maintainers'] = array(
     '#type'        => 'fieldset',
     '#title'       => t('Maintainer(s)'),
-    '#description' => t('If they are, maintainer(s) at this zone.<br>If there aren\'t, either take from parents, or use zone notification contacts.<br>'.
-      'Use "Preview" button if all nodes are filled, and you need more rows to fill.'),
+    '#description' => t('If they are, maintainer(s) for this item.<br>If there aren\'t, either take from parents, or use notification contacts.<br>'.
+      'Use "Preview" button if you need more rows to fill.'),
     '#collapsible' => TRUE,
     '#collapsed'   => ($node->maintainers[0]!='') ? TRUE : FALSE,
     '#attributes'  => array('class'=>'maintainers'),
@@ -121,20 +150,28 @@ function guifi_maintainers_form($node,&$form_weight) {
   );
   $maintainer_id=0;
   $nmaintainers = count($node->maintainers);
-  guifi_log(GUIFILOG_TRACE, 'function guifi_zone_form(mantainers)', $node->maintainers);
+//  guifi_log(GUIFILOG_BASIC, 'function guifi_zone_form(mantainers)', $node->maintainers[$maintainer_id]);
+  guifi_log(GUIFILOG_BASIC, 'function guifi_maintainers_form(mantainers)', $nmaintainers);
   do {
     $form['maintainers'][$maintainer_id]['maintainer'] = array (
       '#title'=>t('maintainer'),
       '#type' => 'textfield',
+      '#description'=>($node->maintainers[$maintainer_id]['maintainer']!='') ?
+         t('Leave blank for delete this maintainer'):t('Fill for register a new maintainer'),
       '#size' => 40,
       '#default_value'=> ($node->maintainers[$maintainer_id]['maintainer']!='') ?
          $node->maintainers[$maintainer_id]['maintainer'] : NULL,
       '#maxsize'=> 256,
       '#autocomplete_path' => 'budgets/js/select-supplier',
 //      '#attributes'  => array('class'=>'maintainers'),
-      '#weight'      => $form_weight++,
       '#prefix'     => '<div class="maintainer-item">',
+      '#weight'      => $form_weight++,
     );
+  	$form['maintainers'][$maintainer_id]['id'] = array (
+      '#type' => 'hidden',
+      '#value' =>$node->maintainers[$maintainer_id]['id'],
+      '#weight'      => $form_weight++,
+  	);
     $form['maintainers'][$maintainer_id]['commitment'] = array (
       '#title'=>t('commitment type'),
       '#type' => 'select',
@@ -163,7 +200,7 @@ function guifi_maintainers_form($node,&$form_weight) {
     );
     $form['maintainers'][$maintainer_id]['sla_fix'] = array (
       '#title'=>t('fix'),
-      '#description'=>t('hours'),
+      '#description'=>t('Hours'),
       '#type' => 'select',
       '#required' => FALSE,
       '#default_value' => $node->maintainers[$maintainer_id]['sla_fix'],

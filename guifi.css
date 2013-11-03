@@ -2,14 +2,15 @@
   text-decoration: none;
 }
 
-.maintainer-item {
+.maintainer-item, .funder-item {
   margin-top: 0em;
   margin-bottom: 0em;
   border: 0em;
   float: left;
 }
 
-.maintainer-item >  .form-item {
+.maintainer-item >  .form-item,
+.funder-item >  .form-item {
   float: left;
   margin-top: 0em;
   margin-bottom: 0em;

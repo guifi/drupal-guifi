@@ -32,10 +32,15 @@ function guifi_device_load($id,$ret = 'array') {
     drupal_set_message(t('Device (%num) does not exist.',array('%num' => $id)));
     return;
   }
+
   if (!empty($device['extra']))
     $device['variable'] = unserialize($device['extra']);
   else
     $device['variable'] = array();
+
+  $device['maintainers']=guifi_maintainers_load($device['id'],'device');
+  $device['funders']=guifi_funders_load($device['id'],'device');
+  guifi_log(GUIFILOG_TRACE,'function guifi_device_load()',$device['maintainers']);
 
   // sobreescribim a l'array variable provinent de extra de model amb els valors de mid i firmware que em venen de la consulta
   // hi afegim el nom del model i el identificador de firmware
@@ -159,7 +164,7 @@ function guifi_device_load($id,$ret = 'array') {
           foreach ($ipdec2 as $ka2 => $foo) {
             $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']] = $iparr2[$ka2];
             $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']]['interface']['ipv4'] = array_merge($device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']]['interface']['ipv4'],array('host_name' => guifi_get_hostname($device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']]['interface']['device_id'])));
-            
+
           }
         }
       }
@@ -207,10 +212,10 @@ function guifi_device_load($id,$ret = 'array') {
       $a = $iparr[$ka];
       $item = _ipcalc($a['ipv4'],$a['netmask']);
       $device['interfaces'][$i['id']]['ipv4'][$a['id']] = $a;
-      
+
       // barrejem el qeu em ve de ipcalc aixi tinc totes les propietats de les ips definides a dins de (dev)
       $device['interfaces'][$i['id']]['ipv4'][$a['id']] = array_merge($device['interfaces'][$i['id']]['ipv4'][$a['id']],$item);
-      
+
 
       // get linked devices
       $ql = db_query('
@@ -367,7 +372,7 @@ function guifi_device_form($form_state, $params = array()) {
   // Local javascript validations not actve because of bug in Firefox
   // Errors are not displayed when fieldset folder is collapsed
   // guifi_validate_js("#guifi-device-form");
-  
+
   // $form['#attributes'] = array('onsubmit' => 'kk');
   if (empty($form_state['values']))
     $form_state['values'] = $params;
@@ -568,6 +573,18 @@ function guifi_device_form($form_state, $params = array()) {
     '#description' =>  t('If you have a log server for mikrotik (dude), add your ip.')
   );
 
+  /*
+   * maintainers fieldset
+   */
+  $form['maintainers'] = guifi_maintainers_form(array2object($form_state['values']),$form_weight);
+  guifi_log(GUIFILOG_TRACE,'function guifi_device_form(maintainers)',$form_state['values']['maintainers']);
+  /*
+   * funders fieldset
+   */
+  $form['funders'] = guifi_funders_form(array2object($form_state['values']),$form_weight);
+  guifi_log(GUIFILOG_TRACE,'function guifi_device_form(funders)',$form_state['values']['funders']);
+
+
   if (user_access('administer guifi zones')
        and $form_state['values']['type'] == 'radio') {
     $form['main']['graph_server'] = array(
@@ -675,6 +692,9 @@ function guifi_device_form_validate($form,&$form_state) {
     }
     $ifs[] = $interface['interface_type'];
   }
+
+  guifi_maintainers_validate(array2object($form_state['values']));
+  guifi_funders_validate(array2object($form_state['values']));
 }
 
 /* guifi_device_edit_save(): Save changes/insert devices */
@@ -689,7 +709,7 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
   $to_mail = array();
 
   // device
-  
+
   // TODO : corretgir que agafi els midi fid de l'estructura qeu toca dins del edit
   // amb lo de sota els repliquem per poder-hi accedir directament
   $edit['mid'] = $edit['variable']['model_id'];
@@ -716,6 +736,9 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
 
   $edit['usc_id'] = $configuracio->uscid;
   $ndevice = _guifi_db_sql('guifi_devices',array('id' => $edit['id']),$edit,$log,$to_mail);
+
+  guifi_maintainers_save($ndevice['id'],'device',$edit['maintainers']);
+  guifi_funders_save($ndevice['id'],'device',$edit['funders']);
 
   guifi_log(GUIFILOG_TRACE,
     sprintf('device saved:'),
@@ -1196,6 +1219,17 @@ function guifi_device_print_data($device) {
 
   $rows[] = array(t($device[type]),'<b>' .$device[nick] .'</b>');
 
+  if (count($device['funders'])) {
+    $rows[] = array( count($device['funders']) == 1 ?
+      t('Funder') : t('Funders'),
+      implode(', ',guifi_funders_links($device['funders'])));
+  }
+  if (count($device['maintainers'])) {
+    $rows[] = array(
+      t('Maintenance & SLAs'),
+      implode(', ',guifi_maintainers_links($device['maintainers'])));
+  }
+
   // If radio, print model & firmware
   if ($device['type'] == 'radio') {
     $model = db_fetch_object(db_query("
@@ -1251,7 +1285,7 @@ function guifi_device_print_data($device) {
 
   $rows[] = array(t('status &#038; availability'),array('data' => t($device[flag]).$status_url,'class' => $device['flag']));
 
-  $rows[] = array(array('data' => theme_guifi_contacts($device),'colspan' => 0));
+  $rows[] = array(array('data' => theme_guifi_contacts($device),'colspan' => 2));
 
   return array_merge($rows);
 }

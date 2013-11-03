@@ -130,6 +130,33 @@ function guifi_ahah_select_service(){
   exit();
 }
 
+
+/**
+ * Select user
+ *
+ * URL: http://guifi.net/guifi/js/select-user/%
+ */
+function guifi_ahah_select_user(){
+  $matches = array();
+
+  $string = strtoupper(arg(3));
+
+  $qry = db_query('SELECT ' .
+                  '  CONCAT(u.uid,"-",u.name," (",u.mail,")") str '.
+                  'FROM {users} u '.
+                  'WHERE (UPPER(CONCAT(u.uid,"-",u.name," (",u.mail,")")) ' .
+                  ' like "%'.$string.'%")'
+                 );
+  $c = 0;
+  while (($value = db_fetch_array($qry)) and ($c < 50)) {
+    $c++;
+    $matches[$value['str']] = $value['str'];
+  }
+  print drupal_to_js($matches);
+  exit();
+}
+
+
 /**
  * Select node
  *

@@ -2255,6 +2255,7 @@ function guifi_update_1000() {
 
 function guifi_update_1002() {
 
+  $items = array();
   // --
   // -- maintenance types
   // --
@@ -2277,5 +2278,64 @@ function guifi_update_1002() {
 
   return $items;
 }
+
+function guifi_update_1003() {
+
+  $items = array();
+
+  db_create_table($items, 'guifi_maintainers',
+    array(
+    'fields' => array(
+      'id' => array('type' => 'int', 'not null'  => TRUE, 'default' => 0, 'disp-width' => '11'),
+      'supplier_id' => array('type' => 'int', 'unsigned' => TRUE, 'not null'  => TRUE, 'disp-width' => '11', 'default' => 0, 'comment' => 'Foreign key to supplier'),
+      'subject_id' => array('type' => 'int', 'unsigned' => TRUE, 'not null'  => TRUE, 'disp-width' => '11', 'default' => 0, 'comment' => 'Foreign key to subject maintained (zone/node/device...)'),
+      'subject_type' => array('type' => 'varchar', 'length' => 15, 'not null'  => TRUE, 'default' => '', 'comment' => 'subject type (values zone, node, device....)'),
+      'commitment' => array('type' => 'varchar', 'length' => 15, 'not null'  => TRUE, 'default' => '', 'comment' => 'type of commitment: volunteer, FO, Wireless...'),
+      'sla' => array('type' => 'varchar', 'length' => 15, 'not null'  => TRUE, 'default' => '', 'comment' => 'SLA: bone, 24x7, 8x5...'),
+      'sla_resp' => array('type' => 'int', 'size'=>'small','not null'  => FALSE, 'comment' => 'Objective for response time' ),
+      'sla_fix' => array('type' => 'int', 'size'=>'small','not null'  => FALSE,  'comment' => 'Objective for solving time' ),
+      'weight' => array('type' => 'int', 'size'=>'small','not null'  => FALSE),
+      'comment' => array('type' => 'text', 'not null'  => false),
+      'user_created' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, 'default' => 0),
+      'user_changed' => array('type' => 'int', 'size' => 'medium',' not null' => FALSE),
+      'timestamp_created' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
+      'timestamp_changed' => array('type' => 'int', 'not null' => FALSE),
+      ),
+    'primary key' => array('id'),
+    )
+  );
+
+  return $items;
+
+}
+
+function guifi_update_1006() {
+
+  $items = array();
+
+  db_create_table($items, 'guifi_funders',
+    array(
+    'fields' => array(
+      'id' => array('type' => 'int', 'not null'  => TRUE, 'default' => 0, 'disp-width' => '11'),
+      'supplier_id' => array('type' => 'int', 'unsigned' => TRUE, 'not null'  => false, 'disp-width' => '11', 'default' => 0, 'comment' => 'Foreign key to supplier'),
+      'user_id' => array('type' => 'int', 'size' => 'medium', 'unsigned' => TRUE, 'not null'  => false, 'disp-width' => '11', 'default' => 0, 'comment' => 'Foreign key to userid'),
+      'comment' => array('type' => 'text', 'not null'  => TRUE),
+//      'removed' => array('type' => 'int', 'size'=>'small','not null'  => TRUE, 'default' => FALSE),
+      'subject_id' => array('type' => 'int', 'unsigned' => TRUE, 'not null'  => TRUE, 'disp-width' => '11', 'default' => 0, 'comment' => 'Foreign key to subject maintained (node/device...)'),
+      'subject_type' => array('type' => 'varchar', 'length' => 15, 'not null'  => TRUE, 'default' => '', 'comment' => 'subject type (values node, device....)'),
+      'weight' => array('type' => 'int', 'size'=>'small','not null'  => FALSE),
+      'user_created' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, 'default' => 0),
+      'user_changed' => array('type' => 'int', 'size' => 'medium',' not null' => FALSE),
+      'timestamp_created' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
+      'timestamp_changed' => array('type' => 'int', 'not null' => FALSE),
+      ),
+    'primary key' => array('id'),
+    )
+  );
+
+  return $items;
+
+}
+
 
 ?>

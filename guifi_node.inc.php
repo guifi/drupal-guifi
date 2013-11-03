@@ -57,14 +57,22 @@ function guifi_node_ariadna($node, $nlink = 'node/%d',$dlink = 'guifi/device/%d'
   $child = array();
   $query = db_query('SELECT d.id, d.nick, d.type ' .
       'FROM {guifi_devices} d ' .
-      'WHERE d.nid = %d ',
+      'WHERE d.nid = %d ' .
+      'ORDER BY d.id DESC',
       $node->id);
-  while ($dChild = db_fetch_array($query)) {
+  $c = 0;
+  while ($dChild = db_fetch_array($query) and ($c <= 10)) {
     $child[] = l($dChild['nick'],sprintf($dlink,$dChild['id']),
       array(
         'attributes' => array('title' => $dChild['type'])
       ));
+    $c++;
   }
+
+  if ($c>=10)
+    $child[] = l(t('more...'),'node/'.$node->id.'/view/devices');
+
+
   if (count($child)) {
     $child[0] = '<br /><small>('.$child[0];
     $child[count($child)-1] = $child[count($child)-1].')</small>';
@@ -95,8 +103,8 @@ function guifi_node_load($node) {
 
   $node = db_fetch_object(db_query("SELECT * FROM {guifi_location} WHERE id = '%d'", $k));
 
-  $node->maintainers=guifi_maintainers_load($node->maintainer);
-
+  $node->maintainers=guifi_maintainers_load($node->id,'location');
+  $node->funders=guifi_funders_load($node->id,'location');
 
   if (!$node->id == NULL)
     return $node;
@@ -169,11 +177,16 @@ function guifi_node_form(&$node, $form_state) {
       '#default_value' => $node->title,
     );
   }
-
-    /*
+  $form_weight=2;
+   /*
    * maintainers fieldset
    */
   $form['maintainers'] = guifi_maintainers_form($node,$form_weight);
+   /*
+   * funders fieldset
+   */
+  $form_weight++;
+  $form['funders'] = guifi_funders_form($node,$form_weight);
 
   $form['nick'] = array(
     '#type' => 'textfield',
@@ -184,7 +197,7 @@ function guifi_node_form(&$node, $form_state) {
     '#element_validate' => array('guifi_node_nick_validate'),
     '#default_value' => $node->nick,
     '#description' => t("Unique identifier for this node. Avoid generic names such 'MyNode', use something that really identifies your node.<br />Short name, single word with no spaces, 7-bit chars only, will be used for  hostname, reports, etc."),
-    '#weight' => 1,
+    '#weight' => $form_weight++,
   );
   $form['notification'] = array(
     '#type' => 'textfield',
@@ -195,13 +208,13 @@ function guifi_node_form(&$node, $form_state) {
     '#element_validate' => array('guifi_emails_validate'),
     '#default_value' => $node->notification,
     '#description' => t("Who did possible this node or who to contact with regarding this node if it is distinct of the owner of this page. Use valid emails, if you like to have more than one, separated by commas.'"),
-    '#weight' => 2,
+    '#weight' => $form_weight++,
   );
 
   $form['settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Node settings'),
-    '#weight' => 4,
+    '#weight' => $form_weight++,
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
@@ -510,6 +523,10 @@ function guifi_node_validate($node,$form) {
    * Validate maintainer(s)
    */
   guifi_maintainers_validate($node);
+  /*
+   * Validate funder(s)
+   */
+  guifi_funders_validate($node);
 
 }
 
@@ -518,8 +535,6 @@ function guifi_node_validate($node,$form) {
 function guifi_node_insert($node) {
   global $user;
   $log = '';
-
-  $node->maintainer=guifi_maintainers_save($node->maintaners);
 
   $coord=guifi_coord_dmstod($node->latdeg,$node->latmin,$node->latseg);
   if($coord!=NULL){
@@ -545,6 +560,10 @@ function guifi_node_insert($node) {
     $to_mail,
     t('The node %name has been CREATED by %user.',array('%name' => $node->title, '%user' => $user->name)),
     $log);
+
+  guifi_maintainers_save($nnode,'location',$node->maintainers);
+  guifi_funders_save($nnode,'location',$node->funders);
+
 
   // Refresh maps
   variable_set('guifi_refresh_cnml',time());
@@ -589,7 +608,8 @@ function guifi_node_update($node) {
   $node->lat = (float)$node->lat;
   $node->lon = (float)$node->lon;
 
-  $node->maintainer=guifi_maintainers_save($node->maintainers);
+  guifi_maintainers_save($node->nid,'location',$node->maintainers);
+  guifi_funders_save($node->nid,'location',$node->funders);
 
   $nnode = _guifi_db_sql(
     'guifi_location',
@@ -1105,6 +1125,20 @@ function theme_guifi_node_data($node,$links = FALSE) {
   $rows[] = array(t('position (lat/lon)'),sprintf('<a href="http://maps.guifi.net/world.phtml?Lat=%f&Lon=%f&Layers=all" target="_blank">Lat:%f<br />Lon:%f</a>',
                    $node->lat,$node->lon,$node->lat,$node->lon),$node->elevation .'&nbsp;'.t('meters above the ground'));
   $rows[] = array(t('available for mesh &#038; status'),$node->stable,array('data' => t($node->status_flag),'class' => $node->status_flag));
+
+  if (count($node->funders)) {
+    $rows[] = array(
+      count($node->funders) == 1 ?
+      t('Funder') : t('Funders'),
+      array('data'=>implode(', ',guifi_funders_links($node->funders)),
+            'colspan'=>2));
+  }
+  if (count($node->maintainers)) {
+    $rows[] = array(
+      t('Maintenance & SLAs'),
+      array('data'=>implode(', ',guifi_maintainers_links($node->maintainers)),
+            'colspan'=>2));
+  }
 
   if ($node->graph_server > 0)
     $gs = node_load(array('nid' => $node->graph_server));

@@ -82,6 +82,8 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 	    break;
 	  case 'guifi_devices':
 	  case 'guifi_dns_domains':
+	  case 'guifi_maintainers':
+	  case 'guifi_funders':
 	  case 'guifi_users':
 	    $next_id = db_fetch_array(db_query("SELECT max(id)+1 id FROM {$table}"));
 	    if (is_null($next_id['id']))
@@ -154,7 +156,8 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
       case 'guifi_parametres':
       case 'guifi_parametresConfiguracioUnsolclic':
       case 'guifi_parametresFirmware':
-      case 'guifi_manufacturer':
+      case 'guifi_maintainers':
+      case 'guifi_funders':
         $data['user_changed'] = $user->uid;
         $data['timestamp_changed'] = time();
         break;
@@ -231,7 +234,7 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
    if ($ck != 1)
    {
      drupal_set_message(
-       t('Can\'t update %table while primary key (%where) doesn\'t give 1 row' .
+       t('Can\'t update %table if primary key (%where) doesn\'t give 1 row' .
           '<br />%sql gives %rows rows.',
        array(
          '%table' => $table,
@@ -318,8 +321,16 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
     while ($quser = db_fetch_array($qc))
       $log .= '<br />'._guifi_db_delete('guifi_users',$quser,$to_mail,$depth);
 
-    break;
   // delete Device
+
+    // cascade to node maintainers
+    $qc = db_query("SELECT id FROM {guifi_maintainers} where subject_id = '%s' and subject_type='location'",
+                    $key['id']);
+    while ($quser = db_fetch_array($qc))
+      $log .= '<br />'._guifi_db_delete('guifi_maintainers',$quser,$to_mail,$depth);
+
+    break;
+
 
   case 'guifi_dns_domains':
     $item=db_fetch_object(db_query(
@@ -353,6 +364,12 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
     $qc = db_query('SELECT id, radiodev_counter FROM {guifi_interfaces} WHERE device_id=%d',$key['id']);
     while ($interface = db_fetch_array($qc))
       $log .= '<br />'._guifi_db_delete('guifi_interfaces',$interface,$to_mail,$depth);
+
+    // cascade to node maintainers
+    $qc = db_query("SELECT id FROM {guifi_maintainers} where subject_id = '%s' and subject_type='device'",
+                    $key['id']);
+    while ($quser = db_fetch_array($qc))
+      $log .= '<br />'._guifi_db_delete('guifi_maintainers',$quser,$to_mail,$depth);
 
     break;
 

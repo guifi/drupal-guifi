@@ -70,7 +70,11 @@ function guifi_zone_load($node) {
     $loaded->maxy = $coords['maxy'];
   }
 
-  $loaded->maintainers=guifi_maintainers_load($loaded->maintainer);
+  $loaded->maintainers=guifi_maintainers_load($loaded->id,'zone');
+
+  guifi_log(GUIFILOG_TRACE,
+    'function guifi_zone_load()',
+    $loaded->maintainers);
 
   // if notification is NULL, take from the user who created the zone
   if (empty($loaded->notification)) {
@@ -763,11 +767,13 @@ function guifi_zone_insert($node) {
   $node->maxy = (float)$node->maxy;
   $to_mail = explode(',',$node->notification);
 
-  $node->maintainer=guifi_maintainers_save($node->maintaners);
+  // $node->maintainer=guifi_maintainers_save($node->maintaners);
 
   $nzone = _guifi_db_sql(
     'guifi_zone',
     array('id' => $node->id),(array)$node,$log,$to_mail);
+
+  guifi_maintainers_save($nzone,'zone',$node->maintainers);
 
   guifi_notify(
     explode(',',$node->notification),
@@ -803,7 +809,7 @@ function guifi_zone_update($node) {
     cache_clear_all();
   }
 
-  $node->maintainer=guifi_maintainers_save($node->maintainers);
+//  $node->maintainer=guifi_maintainers_save($node->maintainers);
 
   $node->minx = (float)$node->minx;
   $node->maxx = (float)$node->maxx;
@@ -816,6 +822,9 @@ function guifi_zone_update($node) {
     (array)$node,
     $log,
     $to_mail);
+
+  guifi_maintainers_save($node->nid,'zone',$node->maintainers);
+
   guifi_notify(
     explode(',',$node->notification),
     t('Zone %nick-%name has been updated',
@@ -945,7 +954,7 @@ function guifi_zone_data($zone) {
 
   $rows[] = array(t('zone name'),$zone->nick.' - <b>' .$zone->title .'</b>');
 
-  if (count($zone->maintainers) > 1) {
+  if (count($zone->maintainers)) {
     $rows[] = array(
       t('Maintenance & SLAs'),
       implode(', ',guifi_maintainers_links($zone->maintainers)));
