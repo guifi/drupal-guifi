@@ -2,6 +2,7 @@
 /**
  * @file guifi_node.inc.php
  * Manage guifi_node
+ *
  * rroca
  */
 

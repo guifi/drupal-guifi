@@ -3,6 +3,8 @@
  * @file guifi_ahah.inc.php
  * Created on 01/06/2008
  * Functions for Asynchronous HTTP and HTML (AHAH) at some forms
+ *
+ *
  */
 
 /**

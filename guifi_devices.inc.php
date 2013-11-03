@@ -1,7 +1,7 @@
 <?php
 /**
  * @file guifi_devices.inc.php
- * Manage guifi_devices
+ * Manage guifi_devices -
  */
 
 /*

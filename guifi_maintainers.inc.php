@@ -2,6 +2,7 @@
 /**
  * @file guifi_maintainers.inc.php
  * Manage guifi_maintainers fieldssets, validations, etc...
+ *
  */
 
  function guifi_maintainers_load($id, $subject_type) {

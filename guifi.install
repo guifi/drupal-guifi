@@ -50,8 +50,6 @@ function guifi_schema() {
          'status_flag' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => 'Planned'),
          'stable' => array('type' => 'varchar', 'length' => '25', 'not null' => TRUE, 'default' => 'Yes', 'comment' => 'Yes,No'),
          'graph_server' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, 'default' => 0, 'comment' => 'FK to guifi_services (SNPGraphs)'),
-         'funder'=>array('type'=>'text','not null'=>false,'comment'=>'Funders/Donors/Owners of the node'),
-         'maintainer'=>array('type'=>'text','not null'=>false,'comment'=>'Maintainers of the node (if there are)'),
          'user_created' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, 'default' => 0),
          'user_changed' => array('type' => 'int', 'size' => 'medium',' not null' => FALSE),
          'timestamp_created' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
@@ -112,7 +110,6 @@ function guifi_schema() {
          'nodexchange_url' => array('type' => 'varchar', 'length' => '255', 'not null' => FALSE),
          'refresh' => array('type' => 'int', 'not null' => FALSE),
          'remote_server_id' => array('type' => 'int',  'size' => 'medium', 'not null' => FALSE),
-         'maintainer'=>array('type'=>'text','not null'=>false,'comment'=>'Maintainers of the zone (if there are)'),
          'host_nodes' => array('type' => 'int', 'not null' => TRUE,'default'=>0,'comment'=>'The zone can host nodes? (TRUE=1, FALSE=0)'),
          'weight' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0),
          'user_created' => array('type' => 'int',  'size' => 'medium', 'not null' => TRUE, 'default' => 0),
@@ -133,8 +130,6 @@ function guifi_schema() {
          'nick' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE),
          'type' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE),
          'notification' => array('type' => 'varchar', 'length' => '1024', 'not null' => TRUE),
-         'funder'=>array('type'=>'text','not null'=>false,'comment'=>'Funders/Donors/Owners of the node'),
-         'maintainer'=>array('type'=>'text','not null'=>false,'comment'=>'Maintainers of the device (if there are)'),
          'mac' => array('type' => 'varchar', 'length' => '20', 'not null' => TRUE, 'default' => '00:00:00:00:00:00'),
          'comment' => array('type' => 'text', 'size' => 'big', 'not null' => FALSE),
          'flag' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => 'Planned'),
@@ -2229,18 +2224,8 @@ function guifi_update_911() {
 function guifi_update_1000() {
 
   $items = array();
-  db_add_field($items,'guifi_location','funder',
-      array('type'=>'text','not null'=>false,'comment'=>'Funders/Donors/Owners of the location'));
-  db_add_field($items,'guifi_location','maintainer',
-      array('type'=>'text','not null'=>false,'comment'=>'Maintainers of the location (if there are)'));
-  db_add_field($items,'guifi_zone','maintainer',
-      array('type'=>'text','not null'=>false,'comment'=>'Maintainers of the zone (if there are)'));
   db_add_field($items,'guifi_zone','host_nodes',
       array('type' => 'int', 'size' => 'small', 'not null'  => FALSE, 'default' => 0));
-  db_add_field($items,'guifi_devices','funder',
-      array('type'=>'text','not null'=>false,'comment'=>'Funders/Donors/Owners of the device'));
-  db_add_field($items,'guifi_devices','maintainer',
-      array('type'=>'text','not null'=>false,'comment'=>'Maintainers of the device (if there are)'));
 
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('6', 'link', 'xPON', 'Passive Splitted Fiber Optics (xPON) link', '');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('7', 'link', 'DuplexFO', 'Duplex P2P link', '');");

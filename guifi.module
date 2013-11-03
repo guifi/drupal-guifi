@@ -1,6 +1,7 @@
 <?php
 /**
  * @file guifi.module
+ *
  */
 
 include_once("guifi_zone.inc.php");      // zone management
