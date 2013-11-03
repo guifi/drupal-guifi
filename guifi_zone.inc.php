@@ -2,7 +2,6 @@
 /**
  * @file guifi_zone.inc.php
  * Manage guifi_zone and guifi_networks
- *
  */
 
 /**

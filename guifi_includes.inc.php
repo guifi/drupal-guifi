@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file guifi_includes.inc.php
  * Miscellaneous and auxiliar routines for guifi.module
@@ -147,7 +148,7 @@ function guifi_validate_types($type, $text, $relations = NULL) {
     $query = db_query("SELECT COUNT(*) AS count FROM {guifi_types} WHERE type='%s' AND text = '%s' AND relations LIKE '%s' ORDER BY id", $type, $text, "%$relations%" );
   }
   $count = db_fetch_object($query);
-  
+
   return $count->count > 0;
 }
 
@@ -339,7 +340,7 @@ function guifi_devices_select($filters, $action = '') {
       $devarr[$k]->distance = $distance;
     }
   }
-  
+
   asort($devdist);
 
 //  ob_start();
@@ -813,7 +814,7 @@ function guifi_abbreviate($str,$len = 5) {
   $str = guifi_to_7bits($str);
   if  (strlen($str) > $len) {
     $words = str_word_count(ucwords($str),1,'1234567890');
-    
+
     if (count($words) > 1) {
       $s = "";
       foreach ($words as $k => $word) {

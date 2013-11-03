@@ -2,6 +2,7 @@
 /**
  * @file guifi_sql.inc.php
  * Manage the SQL statements against the guifi.net schema
+ *
  */
 
 /** _guifi_db_sql(): UPSERT (SQL insert or update) on

@@ -5,8 +5,6 @@
  */
 
 
-
-
 function guifi_uninstall() {
 
   drupal_uninstall_schema('guifi');

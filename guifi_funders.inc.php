@@ -2,7 +2,6 @@
 /**
  * @file guifi_funders.inc.php
  * Manage guifi_funders fieldssets, validations, etc...
- *
  */
 
  function guifi_funders_load($id, $subject_type) {
