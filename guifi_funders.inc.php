@@ -154,7 +154,7 @@ function guifi_funders_form($node,&$form_weight) {
     $form['funders'][$funder_id]['user'] = array (
       '#title'=>t('User'),
       '#type' => 'textfield',
-      '#size' => 50,
+      '#size' => 40,
       '#default_value'=> ($node->funders[$funder_id]['user']!='') ?
          $node->funders[$funder_id]['user'] : NULL,
       '#maxsize'=> 256,
@@ -196,14 +196,18 @@ function guifi_funders_form($node,&$form_weight) {
       '#default_value' => $node->funders[$funder_id]['comment'],
       '#weight' => $form_weight++,
     );
-    if ($node->funders[$funder_id])
-    $form['funders'][$funder_id]['created'] = array (
-      '#title'=> t('Created'),
-      '#disabled'=> yes,
-      '#type' => 'item',
-      '#value' => format_date($node->funders[$funder_id]['timestamp_created']),
-      '#weight' => $form_weight++,
-    );
+
+    if ($node->funders[$funder_id]) {
+      $u = user_load($node->funders[$funder_id]['user_created']);
+      $form['funders'][$funder_id]['created'] = array (
+        '#title'=> t('Created'),
+        '#disabled'=> yes,
+        '#type' => 'item',
+        '#value' => l($u->name,'user/'.$u->uid).
+          ', '.format_date($node->funders[$funder_id]['timestamp_created'],'small'),
+        '#weight' => $form_weight++,
+      );
+    }
     $funder_id++;
   } while ($funder_id < ($nfunders + 1));
 
