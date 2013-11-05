@@ -181,13 +181,15 @@ function guifi_node_form(&$node, $form_state) {
    /*
    * maintainers fieldset
    */
+  $form_weight=-3;
   $form['maintainers'] = guifi_maintainers_form($node,$form_weight);
    /*
    * funders fieldset
    */
-  $form_weight++;
+  $form_weight=-4;
   $form['funders'] = guifi_funders_form($node,$form_weight);
 
+  $form_weight=0;
   $form['nick'] = array(
     '#type' => 'textfield',
     '#title' => t('Nick'),
