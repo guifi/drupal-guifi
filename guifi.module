@@ -1256,6 +1256,8 @@ function guifi_menu() {
 /* guifi_init(): Initialization hook: Load stylesheet */
 function guifi_init() {
   drupal_add_css(drupal_get_path('module', 'guifi') .'/guifi.css');
+  if (module_exists('event'))
+    drupal_add_css(drupal_get_path('module', 'event') .'/event.css');
 }
 
 function guifi_nodeapi($node, $op, $arg = 0) {
