@@ -80,6 +80,9 @@ function guifi_maintainers_validate($node) {
      if ($m['commitment']=='Volunteer') {
        if ($m['sla'] != 'none')
          form_set_error('maintainers]['.$k.'][commitment',t('%supplier has to act as a professional for commiting a SLA',array('%supplier'=>$m['maintainer'])));
+       if ($maintainer->role == 'professional')
+         form_set_error('maintainers]['.$k.'][commitment',t('%supplier act as professional, so has to commit a SLA objective.<br>' .
+         		'Use values ​​relaxed enough to best ensure objectives',array('%supplier'=>$m['maintainer'])));
      } else {
        // SLA set, validate that is professional, and is enabled for
        if ($maintainer->role != 'professional') {
