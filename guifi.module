@@ -586,7 +586,7 @@ function guifi_menu() {
     $items['node/%guifi_zone/suppliers'] = array(
       'title' => 'Suppliers',
       'page callback' => 'budgets_supplier_list_by_zone',
-      'page arguments' => array(1,4),
+      'page arguments' => array(1,3),
       'access callback' => 'user_access',
       'access arguments' => array('access content'),
       'weight'=> 99,
