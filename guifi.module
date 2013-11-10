@@ -603,7 +603,7 @@ function guifi_menu() {
     $items['node/%guifi_zone/suppliers/caps_services=isp'] = array(
       'title' => 'isp',
       'page callback' => 'budgets_supplier_list_by_zone',
-      'page arguments' => array(1,4),
+      'page arguments' => array(1,3),
       'access callback' => 'user_access',
       'access arguments' => array('access content'),
       'type' => MENU_LOCAL_TASK
@@ -611,7 +611,7 @@ function guifi_menu() {
     $items['node/%guifi_zone/suppliers/role=professional'] = array(
       'title' => 'professional',
       'page callback' => 'budgets_supplier_list_by_zone',
-      'page arguments' => array(1,4),
+      'page arguments' => array(1,3),
       'access callback' => 'user_access',
       'access arguments' => array('access content'),
       'type' => MENU_LOCAL_TASK
@@ -619,7 +619,7 @@ function guifi_menu() {
     $items['node/%guifi_zone/suppliers/role=volunteer'] = array(
       'title' => 'volunteer',
       'page callback' => 'budgets_supplier_list_by_zone',
-      'page arguments' => array(1,4),
+      'page arguments' => array(1,3),
       'access callback' => 'user_access',
       'access arguments' => array('access content'),
       'type' => MENU_LOCAL_TASK
