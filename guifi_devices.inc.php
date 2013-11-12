@@ -1245,6 +1245,13 @@ function guifi_device_print_data($device) {
     // going to list all device radios
     if (count($device['radios'])) {
       foreach ($device['radios'] as $radio_id => $radio) {
+        if ($radio['fund_required']=='')
+          $policy = t('n/d, ask to node contacts');
+        else
+          if ($radio['fund_required']=='yes')
+            $policy = t('Fund: :fund :curr',array(':fund'=>$radio['fund_amount'], ':curr'=>$radio['fund_currency']));
+          else
+            $policy =  t($radio['fund_required']);
         $rowsr[] = array(
           $radio['ssid'],
           $radio['mode'],
@@ -1252,11 +1259,7 @@ function guifi_device_print_data($device) {
           $radio['channel'],
           $radio['mac'],
           $radio['clients_accepted'],
-          empty($radio['fund_required']) ? null :
-            $radio['fund_required']== 'yes' ?
-              t('Fund. req.: :fund :curr',array(':fund'=>$radio['fund_amount'], ':curr'=>$radio['fund_currency'])) :
-              t($radio['fund_required'])
-
+          $policy
         );
       }
       $rows[] =  array(array('data' => theme('table',
