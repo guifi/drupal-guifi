@@ -1251,12 +1251,17 @@ function guifi_device_print_data($device) {
           $radio['protocol'],
           $radio['channel'],
           $radio['mac'],
-          $radio['clients_accepted']
+          $radio['clients_accepted'],
+          empty($radio['fund_required']) ? null :
+            $radio['fund_required']== 'yes' ?
+              t('Fund. req.: :fund :curr',array(':fund'=>$radio['fund_amount'], ':curr'=>$radio['fund_currency'])) :
+              t($radio['fund_required'])
+
         );
       }
       $rows[] =  array(array('data' => theme('table',
         array(t('ssid'),t('mode'),t('protocol'),t('ch'),t('wireless mac'),
-            t('clients')),$rowsr),'colspan' => 2));
+            t('clients'),t('connection policy')),$rowsr),'colspan' => 2));
     }
   }
 
