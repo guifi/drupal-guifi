@@ -443,6 +443,7 @@ function guifi_radio_radio_form($radio, $key, &$form_weight = -200) {
               $f['ap'] = array(
                 '#type' => 'fieldset',
                 '#title' => t('Connection acceptance policy'),
+                '#description' => t('Please specify if this radio do accepts simple client connections and if a funding is required to contribute for the coverage infrastructure'),
                 '#collapsible' => TRUE,
                 '#collapsed' => ($radio["clients_accepted"]=='Yes')?false:true,
                 '#tree'=> TRUE,
@@ -458,11 +459,11 @@ function guifi_radio_radio_form($radio, $key, &$form_weight = -200) {
 			  );
 			  $f['ap']['fund_required'] = array(
 			    '#type' => 'select',
-				'#title' => t("Funding policy"),
+				'#title' => t("Policy"),
 				'#parents' => array('radios',$key,'fund_required'),
 				'#default_value' =>  $radio["fund_required"],
 				'#options' => guifi_types('contribution'),
-				'#description' => t('Funding policy'),
+				'#description' => t('Funding required?'),
 			  );
 			  $f['ap']['fund_amount'] = array(
 			    '#type' => 'textfield',
