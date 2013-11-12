@@ -1258,7 +1258,7 @@ function guifi_device_print_data($device) {
           $radio['protocol'],
           $radio['channel'],
           $radio['mac'],
-          $radio['clients_accepted'],
+          t($radio['clients_accepted']),
           $policy
         );
       }
