@@ -206,6 +206,9 @@ function guifi_schema() {
          'ly_mb_in' => array('type' => 'numeric', 'precision' => '10', 'scale' => '6', 'not null' => FALSE, 'default' => NULL),
          'ly_mb_out' => array('type' => 'numeric', 'precision' => '10', 'scale' => '6', 'not null' => FALSE, 'default' => NULL),
          'clients_accepted' => array('comment' => 'Yes, No', 'type' => 'varchar', 'length' => '5', 'not null' => TRUE, 'default' => 'Yes'),
+         'fund_required' => array('comment' => 'Null n/d, free, yes', 'type' => 'varchar', 'length' => '5', 'not null' => FALSE),
+         'fund_amount' => array('type' => 'numeric', 'not null'  => TRUE, 'default' => 0, 'precision' => '10', 'scale' => '2'),
+         'fund_currency' => array('type' => 'varchar', 'length' => '10', 'not null'  => TRUE, 'default' => 'Euros'),
         ),
     'primary key' => array('id', 'radiodev_counter'),
     'indexes' => array(
@@ -745,6 +748,14 @@ function guifi_install() {
   db_query("INSERT INTO `guifi_types` (`id`, `type`, `text`, `description`, `relations`) VALUES ('31', 'antenna_gain', '35', '35', NULL);");
   db_query("INSERT INTO `guifi_types` (`id`, `type`, `text`, `description`, `relations`) VALUES ('32', 'antenna_gain', '36', '36', '');");
   db_query("INSERT INTO `guifi_types` (`id`, `type`, `text`, `description`, `relations`) VALUES ('33', 'antenna_gain', 'more...', 'more...', NULL);");
+
+  // --
+  // -- Contribution types
+  // --
+
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('1', 'contribution', '',  'Not defined, contact admins');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('2', 'contribution', 'free',   'Free - No funding required');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('3', 'contribution', 'yes', 'Funding required');");
 
   // --
   // -- Volcant dades de la taula guifi_manufacturer
@@ -2320,5 +2331,24 @@ function guifi_update_1006() {
 
 }
 
+
+function guifi_update_1007() {
+
+  $items = array();
+
+  db_add_field($items,'guifi_radios','fund_required',
+      array('comment' => 'Null n/d, free, yes', 'type' => 'varchar', 'length' => '5', 'not null' => FALSE));
+  db_add_field($items,'guifi_radios','fund_amount',
+      array('type' => 'numeric', 'not null'  => TRUE, 'default' => 0, 'precision' => '10', 'scale' => '2'));
+  db_add_field($items,'guifi_radios','fund_currency',
+      array('type' => 'varchar', 'length' => '10', 'not null'  => TRUE, 'default' => 'Euros'));
+
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('1', 'contribution', '',  'Not defined, contact admins');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('2', 'contribution', 'free',   'Free - No funding required');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('3', 'contribution', 'yes', 'Funding required');");
+
+  return $items;
+
+}
 
 ?>

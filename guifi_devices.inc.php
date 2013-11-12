@@ -1,7 +1,7 @@
 <?php
 /**
  * @file guifi_devices.inc.php
- * Manage guifi_devices 
+ * Manage guifi_devices
  */
 
 /*
@@ -692,6 +692,10 @@ function guifi_device_form_validate($form,&$form_state) {
     }
     $ifs[] = $interface['interface_type'];
   }
+
+  if (count($form_state['values']['radios']))
+    foreach ($form_state['values']['radios'] as $k => $v)
+      guifi_radios_validate($k,$v,$form_state['values']);
 
   guifi_maintainers_validate(array2object($form_state['values']));
   guifi_funders_validate(array2object($form_state['values']));
