@@ -134,7 +134,9 @@ function guifi_funders_form($node,&$form_weight) {
   $form['funders'] = array(
     '#type'        => 'fieldset',
     '#title'       => t('Funder(s)'),
-    '#description' => t('Funders for this item.<br>'.
+    '#description' => t('Funders for this infratsructure. Used to recognize the ownership.<br>' .
+      'A funder is who contribute to this infrastructure. When a funder claims for refunds, new funder contributors become co-owners.<br>' .
+      'Use web username, supplier or a free text description, whatever is more suitable.<br>'.
       'Use "Preview" button if you need more rows to fill.<br>' .
       'Leave all fields in blank for delete a row.'),
     '#collapsible' => TRUE,

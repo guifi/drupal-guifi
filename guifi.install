@@ -448,9 +448,10 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('7', 'device', 'cam', 'Network camera. Live view.');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('8', 'device', 'generic', 'Any device that uses a public IP (PC, game console, laptop, pda..)');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('9', 'device', 'confine', 'Node Confine/Clommunity');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('10', 'device', 'ONU', 'xPON User Unit (Final)');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('11', 'device', 'OLT', 'xPON Concentrator (Terminal)');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('10', 'device', 'ONU', 'xPON ONU User Unit (Final)');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('11', 'device', 'OLT', 'xPON OLT Concentrator (Terminal)');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('12', 'device', 'splitter', 'xPON Splitter');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('13', 'device', 'FOMConv', 'FO Media Converter');");
 
   // --
   // -- service types
@@ -2240,8 +2241,8 @@ function guifi_update_1000() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('7', 'link', 'DuplexFO', 'Duplex P2P link', '');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('8', 'link', 'SimplexFO', 'Simplex P2P link', '');");
 
-  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('10', 'device', 'ONU', 'xPON User Unit (Final)');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('11', 'device', 'OLT', 'xPON Concentrator (Terminal)');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('10', 'device', 'ONU', 'xPON ONU User Unit (Final)');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('11', 'device', 'OLT', 'xPON OLT Concentrator (Terminal)');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('12', 'device', 'splitter', 'xPON Splitter');");
 
   return $items;
@@ -2346,6 +2347,17 @@ function guifi_update_1007() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('1', 'contribution', '',  'Not defined, contact admins');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('2', 'contribution', 'free',   'Free - No funding required');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('3', 'contribution', 'yes', 'Funding required');");
+
+  return $items;
+
+}
+
+function guifi_update_1008() {
+
+  $items = array();
+
+
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('13', 'device', 'FOMConv', 'FO Media Converter');");
 
   return $items;
 

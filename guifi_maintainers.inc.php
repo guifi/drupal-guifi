@@ -143,7 +143,9 @@ function guifi_maintainers_form($node,&$form_weight) {
   $form['maintainers'] = array(
     '#type'        => 'fieldset',
     '#title'       => t('Maintainer(s)'),
-    '#description' => t('If they are, maintainer(s) for this item.<br>If there aren\'t, either take from parents, or use notification contacts.<br>'.
+    '#description' => t('If they are, maintainer(s) for this infrastructure.<br>' .
+      'If there aren\'t, either take from parents, or use notification contacts.<br>' .
+      'A maintainer is who takes care of this infrastructure. Can be also a founder, but is a distinct role.<br>'.
       'Use "Preview" button if you need more rows to fill.'),
     '#collapsible' => TRUE,
     '#collapsed'   => ($node->maintainers[0]!='') ? TRUE : FALSE,
