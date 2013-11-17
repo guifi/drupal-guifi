@@ -219,4 +219,31 @@ function guifi_maintainers_form($node,&$form_weight) {
   return $form['maintainers'];
 }
 
+function guifi_maintainers_parents($zid) {
+  guifi_log(GUIFILOG_TRACE,
+     'function guifi_maintainers(parent maintainers)',
+      $pmaintainers);
+
+  $m = array();
+  $parent=$zid;
+  while ($parent > 0 and empty($m)) {
+    $result = db_query('
+      SELECT z.master master
+      FROM {guifi_zone} z
+      WHERE z.id = %d',
+      $parent);
+    $row = db_fetch_object($result);
+    $parent = $row->master;
+
+    if ($parent) {
+      $m=guifi_maintainers_load($parent,'zone');
+    }
+  }
+  guifi_log(GUIFILOG_TRACE,
+     'function guifi_maintainers(loaded parent maintainers)',
+      $m);
+
+  return $m;
+}
+
 ?>

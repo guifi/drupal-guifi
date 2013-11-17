@@ -1118,6 +1118,8 @@ function guifi_node_set_flag($id) {
 /* Themes (presentation) functions */
 
 function theme_guifi_node_data($node,$links = FALSE) {
+  guifi_log(GUIFILOG_TRACE,'function guifi_node_data(node)',$node);
+
 /*  $zone = db_fetch_object(db_query('SELECT id, title, master, zone_mode FROM {guifi_zone} WHERE id = %d',
                       $node->zone_id));*/
   $zone = db_fetch_object(db_query('SELECT id, title, master FROM {guifi_zone} WHERE id = %d', $node->zone_id));
@@ -1140,6 +1142,15 @@ function theme_guifi_node_data($node,$links = FALSE) {
       t('Maintenance & SLAs'),
       array('data'=>implode(', ',guifi_maintainers_links($node->maintainers)),
             'colspan'=>2));
+  } else {
+  	$radios = db_fetch_object(db_query(
+      'SELECT count(id) c FROM {guifi_radios} WHERE nid=%d',$node->id));
+    if ($radios->c > 1) {
+  	  $pmaintainers = guifi_maintainers_parents($node->zone_id);
+      $rows[] = array(
+        t('Maintenance & SLAs').' '.t('(from parents)'),
+        implode(', ',guifi_maintainers_links($pmaintainers)));
+    }
   }
 
   if ($node->graph_server > 0)

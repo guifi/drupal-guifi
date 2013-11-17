@@ -958,6 +958,11 @@ function guifi_zone_data($zone) {
     $rows[] = array(
       t('Maintenance & SLAs'),
       implode(', ',guifi_maintainers_links($zone->maintainers)));
+  } else {
+  	$pmaintainers = guifi_maintainers_parents($zone->id);
+    $rows[] = array(
+      t('Maintenance & SLAs').' '.t('(from parents)'),
+      implode(', ',guifi_maintainers_links($pmaintainers)));
   }
 
   if ($zone->homepage)
