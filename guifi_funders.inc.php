@@ -4,7 +4,7 @@
  * Manage guifi_funders fieldssets, validations, etc...
  */
 
- function guifi_funders_load($id, $subject_type) {
+ function guifi_funders_load($id, $subject_type, $ret = "txt") {
    $qsql = sprintf('SELECT * FROM {guifi_funders} ' .
    		'WHERE subject_id = %d ' .
    		' AND subject_type = "%s" ' .
@@ -16,17 +16,29 @@
      $qsql);
 
    while ($m = db_fetch_array($result)) {
-   	 if (!(empty($m['supplier_id'])))
-   	   $m['supplier'] = $m['supplier_id'].'-'.budgets_supplier_get_suppliername($m['supplier_id']);
-   	 if (!(empty($m['user_id']))) {
-   	   $u = user_load($m['user_id']);
-       $m['user'] = $m['user_id'].'-'.$u->name.' ('.$u->mail.') ';
+   	 switch ($ret) {
+   	   case "txt":
+   	     if (!(empty($m['supplier_id'])))
+   	       $m['supplier'] = $m['supplier_id'].'-'.budgets_supplier_get_suppliername($m['supplier_id']);
+   	     if (!(empty($m['user_id']))) {
+   	       $u = user_load($m['user_id']);
+           $m['user'] = $m['user_id'].'-'.$u->name.' ('.$u->mail.') ';
+         }
+         $funders[] = $m;
+         break;
+       case "uid":
+   	     if (!(empty($m['supplier_id']))) {
+   	       $s = node_load($m['supplier_id']);
+   	       $funders[] = $s->uid;
+   	     }
+   	     if (!(empty($m['user_id'])))
+   	       $funders[] = $m['user_id'];
+         guifi_log(GUIFILOG_TRACE,
+           'function guifi_funders_load(funders)',
+           $funders);
+         break;
    	 }
-     $funders[] = $m;
    }
-   guifi_log(GUIFILOG_TRACE,
-     'function guifi_funders_load(funders)',
-     $funders);
 
    return $funders;
  }
@@ -60,12 +72,14 @@
     if (!(empty($f['supplier']))) {
       $mid = explode('-',$f['supplier']);
       $f['supplier_id'] = $mid[0];
-    }
+    } else
+      $f['supplier_id'] = 0;
 
     if (!(empty($f['user']))) {
       $mid = explode('-',$f['user']);
       $f['user_id'] = $mid[0];
-    }
+    } else
+      $f['user_id'] = 0;
 
     guifi_log(GUIFILOG_TRACE,
      'function guifi_funders_save(sql)',
@@ -110,20 +124,21 @@ function guifi_funders_links($funders) {
       $mid=explode('-',$v['supplier']);
       $mstr[] = l($mid[1],
         'node/'.$mid[0],
-        array('attributes'=>
+        array('html'=>false,'attributes'=>
           array('title'=> $v['comment']))
         );
-  	} else
+  	}
   	if (!empty($v['user'])) {
       $mid=explode('-',$v['user']);
       $u=user_load($mid[0]);
       $mstr[] = l($u->name,
         'user/'.$mid[0],
-        array('attributes'=>
+        array('html'=>false,'attributes'=>
           array('title'=> $v['comment']))
         );
-  	} else
-    	$mstr[] = $v['comment'];
+  	}
+  	if (empty($v['user']) and empty($v['supplier']))
+      $mstr[] = $v['comment'];
 
   }
   return $mstr;
