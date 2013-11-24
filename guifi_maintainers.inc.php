@@ -115,12 +115,12 @@ function guifi_maintainers_validate($node) {
 function guifi_maintainers_links($maintainers) {
   foreach ($maintainers as $k=>$v) {
     $mid=explode('-',$v['maintainer']);
-    $mstr[] = l($mid[1].' ('.$v['commitment'].')',
+    $mstr[] = l($mid[1].' ('.t($v['commitment']).')',
       'node/'.$mid[0],
       array('attributes'=>
         array('title'=> ($v['sla'] == 'none') ?
-          $v['commitment']
-          : $v['commitment'].' - '.$v['sla'].': '.
+          t($v['commitment'])
+          : t($v['commitment']).' - '.t($v['sla']).': '.
           t('Resp. %resp, Fix: %fix',
             array('%resp'=>$v['sla_resp'],
               '%fix'=>$v['sla_fix']

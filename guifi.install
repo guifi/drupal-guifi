@@ -2363,4 +2363,17 @@ function guifi_update_1008() {
 
 }
 
+function guifi_update_1009() {
+
+  $items = array();
+
+
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('14', 'device', 'Torpedo', 'Torpedo - Joint enclosure');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('15', 'device', 'Switch', 'Switch');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('16', 'device', 'Rack', 'Rack');");
+
+  return $items;
+
+}
+
 ?>
