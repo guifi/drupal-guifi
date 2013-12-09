@@ -232,7 +232,7 @@ function unsolclic_routeros($dev) {
             $band = '2.4ghz-b';
           }
         if ($protocol == '802.11a')
-          if ( $dev->variable['firmware'] == 'RouterOSv5.x' ) or ( $dev->variable['firmware'] == 'RouterOSv6.x' )) {
+          if (( $dev->variable['firmware'] == 'RouterOSv5.x' ) or ( $dev->variable['firmware'] == 'RouterOSv6.x' )) {
             $band = '5ghz-a';
           } else {
             $band = '5ghz';
