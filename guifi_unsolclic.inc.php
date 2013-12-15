@@ -201,6 +201,7 @@ function guifi_unsolclic($dev, $format = 'html') {
   foreach (glob(drupal_get_path('module', 'guifi') .'/firmware/*.inc.php', GLOB_BRACE) as $firm_inc_php){
     include_once("$firm_inc_php");
    // echo "<br>$firm_inc_php";
+
   }
  if ($dev->radios[0]['mode'] == 'client') {
     $links = 0;
@@ -249,7 +250,15 @@ function guifi_unsolclic($dev, $format = 'html') {
       unsolclic_guifistationos($dev);
       exit;
       break;
+//    case 'qMpv1':   // Use a generic one is better
+    case preg_match('/^qMp/',$dev->variable['firmware']) == 1:
+//      print_r(preg_match('/^qMpv1/',$dev->variable['firmware']));
+      unsolclic_qmp($dev);
+      exit;
+      break;
+
   }
+
 
   $unsolclic='unsolclic_'.$dev->variable['firmware'];
    
