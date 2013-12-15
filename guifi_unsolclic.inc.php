@@ -252,7 +252,6 @@ function guifi_unsolclic($dev, $format = 'html') {
       break;
 //    case 'qMpv1':   // Use a generic one is better
     case preg_match('/^qMp/',$dev->variable['firmware']) == 1:
-//      print_r(preg_match('/^qMpv1/',$dev->variable['firmware']));
       unsolclic_qmp($dev);
       exit;
       break;
