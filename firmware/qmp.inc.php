@@ -1,7 +1,7 @@
 <?php
 
 function unsolclic_qmp($dev) {
-  $version = "v1.0b3";
+  $version = "v1.0.2";
 
 //  sed 's/<br \/>//g'
 
@@ -16,14 +16,14 @@ function unsolclic_qmp($dev) {
   _outln_comment("&nbsp;&nbsp;&nbsp;&nbsp;|_|&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|_| ");
   _outln_comment("&nbsp;quick MESH project </x> ");
   _outln_comment("");
-  _outln_comment("To apply this configuration in your node, follow the instructions: ");
-  _outln_comment("<a href='http://dev.qmp.cat/wiki/LINK' target='_blank'>http://dev.qmp.cat/wiki/[LINK NOT YET]</a> ");
+  _outln_comment("<b>Important:</b> You should have <b>'qmp-guifi'</b> package installed in your node.");
   _outln_comment("");
-  _outln_comment("<b>Important:</b> If you don't have qMp v2.x (>201311xx) assure you have <b>'Guifi-oneclick'</b> installed in your node. ");
+  _outln_comment("To apply this configuration in your node, you can follow this instructions: ");
+  _outln_comment("<a href='http://dev.qmp.cat/projects/qmp/wiki/Guifi_oneclick' target='_blank'>http://dev.qmp.cat/projects/qmp/wiki/Guifi_oneclick</a> ");
   _outln_comment("");
  
   // ONLY THE FIRST MESH IP FOUND IS GET 
-  // NEED TO CHECK IF TWO MESH RADIOS AND/OR TWO INTERFACES
+  // TO DO: Check if there are more than one MESH radios and/or interfaces
   //
   $mesh="no";
   $ipv4="-";
@@ -36,7 +36,7 @@ function unsolclic_qmp($dev) {
 
       $i=0;
       foreach ($radio['interfaces'] as $interface) {
-        // If interface has IP addresses we get the first one
+        // If interface has any IP addresses we get the first one
         if (isset($interface['ipv4'])) {
           $ipv4 = $interface['ipv4'][0]['ipv4'];
           $netmask = $interface['ipv4'][0]['netmask'];
@@ -60,12 +60,12 @@ function unsolclic_qmp($dev) {
   _outln("meshradio='".$mesh."'");
 
   if ($mesh == 'yes') {
-    _outln("nodename='".$node->nick."'");  // THIS IS NODE NAME
-    _outln("devname='".$dev->nick."'");  // THIS IS DEVICE NAME
+    _outln("nodename='".$node->nick."'"); // This is the node name
+    _outln("devname='".$dev->nick."'");   // This is the device name with mesh radio
     _outln("devmodel='".$dev->model."'");
-    _outln("ip='".$ipv4."'");
-    _outln("mask='".$netmask."'");
-    _outln("zone='".$zonename."'");
+    _outln("ipv4='".$ipv4."'");
+    _outln("netmask='".$netmask."'");
+    _outln("zoneid='".$zonename."'");
   }
   else {
     _outln();
