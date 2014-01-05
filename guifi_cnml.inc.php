@@ -292,13 +292,17 @@ function guifi_cnml($cnmlid,$action = 'help') {
                        'Routerboard SXT 5HnD',
                        'Routerboard 493/G',
                        'OmniTIK Uxx-5HnD',
+                       'Routerboard SXT Lite2',
+                       'Routerboard SXT Lite5',
+                       'Routerboard 2011',
                      ))) {
                   switch ($device->variable['firmware']) {
                     case 'RouterOSv2.9':
                     case 'RouterOSv3.x':
-		    case 'RouterOSv4.0+':
+                    case 'RouterOSv4.0+':
                     case 'RouterOSv4.7+':
                     case 'RouterOSv5.x':
+                    case 'RouterOSv6.x':
                       $radioXML->addAttribute('snmp_name','wlan'.(string) ($id + 1));
                     break;
                    }

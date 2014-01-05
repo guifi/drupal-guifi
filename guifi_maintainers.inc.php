@@ -4,28 +4,32 @@
  * Manage guifi_maintainers fieldssets, validations, etc...
  */
 
- function guifi_maintainers_load($id, $subject_type) {
+ function guifi_maintainers_load($id, $subject_type, $ret = "maintainer") {
    $qsql = sprintf('SELECT * FROM {guifi_maintainers} ' .
    		'WHERE subject_id = %d ' .
    		' AND subject_type = "%s" ' .
    		'ORDER BY id',
    		$id,$subject_type);
    $result = db_query($qsql);
-//   $result = db_query('SELECT * FROM {guifi_maintainers} ' .
-//   		'WHERE subject_id = :id ' .
-//   		' AND subject_type = ":subject_type" ' .
-//   		'ORDER BY weight, id',
-//   		array(':id'=>$id,':subject_type'=>$subject_type));
    guifi_log(GUIFILOG_TRACE,
-     'function guifi_zone_load(sql)',
-     $qsql);
+     'function guifi_maintainers_load(sql)',
+     $ret . ' - '. $qsql);
 
    while ($m = db_fetch_array($result)) {
-   	 $m['maintainer'] = $m['supplier_id'].'-'.budgets_supplier_get_suppliername($m['supplier_id']);
-     $maintainers[] = $m;
+   	 switch ($ret ) {
+   	 	case "maintainer":
+          $m['maintainer'] = $m['supplier_id'].'-'.budgets_supplier_get_suppliername($m['supplier_id']);
+          $maintainers[] = $m;
+          break;
+        case "uid":
+          $s = node_load(array('nid'=>$m['supplier_id']));
+          $maintainers[] = $s->uid;
+          break;
+   	 }
+
    }
    guifi_log(GUIFILOG_TRACE,
-     'function guifi_zone_load(maintainers)',
+     'function guifi_maintainers_load(maintainers)',
      $maintainers);
 
    return $maintainers;
@@ -77,6 +81,10 @@ function guifi_maintainers_validate($node) {
     'function guifi_zone_validate(maintainer)',
     $maintainer);
 
+     // Check if it has signed the maintenance agreements
+     if (empty($maintainer->certs['guifi_certs']['AEconomics']))
+       form_set_error('maintainers]['.$k.'][commitment',t('%supplier needs to sign the economics activity agreement for maintaining network infrastructure',array('%supplier'=>$m['maintainer'])));
+
      if ($m['commitment']=='Volunteer') {
        if ($m['sla'] != 'none')
          form_set_error('maintainers]['.$k.'][commitment',t('%supplier has to act as a professional for commiting a SLA',array('%supplier'=>$m['maintainer'])));
@@ -88,22 +96,6 @@ function guifi_maintainers_validate($node) {
        if ($maintainer->role != 'professional') {
          form_set_error('maintainers]['.$k.'][sla',t('%supplier is registered as a volunteer, needs to become a professional for commiting a SLA',array('%supplier'=>$m['maintainer'])));
        }
-       // Check if it has signed the maintenance agreements
-       if ($m['commitment'] == 'FO') {
-         if (empty($maintainer->certs['guifi_certs']['FO-Mgmt']) and
-             empty($maintainer->certs['guifi_certs']['FO-Dist']))
-           form_set_error('maintainers]['.$k.'][commitment',t('%supplier needs to sign the agreement for maintaining fibre optics network infrastructure',array('%supplier'=>$m['maintainer'])));
-//         form_set_error('maintainers]['.$k.'][commitment',t('%supplier needs to sign the agreement for maintaining fibre optics ( %fo-mgmt - %fo-dist )',
-//           array('%supplier'=>$m['maintainer'],
-//             '%fo-mgmt'=> $maintainer->certs['guifi_certs']['FO-Mgmt'],
-//             '%fo-dist'=> serialize($maintainer->certs),)));
-       }
-       if ($m['commitment'] == 'Wireless') {
-         if (empty	($maintainer->certs['guifi_certs']['W-Mgmt']) and
-             empty($maintainer->certs['guifi_certs']['W-Dist']))
-           form_set_error('maintainers]['.$k.'][commitment',t('%supplier needs to sign the agreement for maintaining wireless network infrastructure',array('%supplier'=>$m['maintainer'])));
-       }
-
      }
      if ($m['sla'] == 'none') {
        if ($m['sla_resp'])
@@ -123,12 +115,12 @@ function guifi_maintainers_validate($node) {
 function guifi_maintainers_links($maintainers) {
   foreach ($maintainers as $k=>$v) {
     $mid=explode('-',$v['maintainer']);
-    $mstr[] = l($mid[1].' ('.$v['commitment'].')',
+    $mstr[] = l($mid[1].' ('.t($v['commitment']).')',
       'node/'.$mid[0],
       array('attributes'=>
         array('title'=> ($v['sla'] == 'none') ?
-          $v['commitment']
-          : $v['commitment'].' - '.$v['sla'].': '.
+          t($v['commitment'])
+          : t($v['commitment']).' - '.t($v['sla']).': '.
           t('Resp. %resp, Fix: %fix',
             array('%resp'=>$v['sla_resp'],
               '%fix'=>$v['sla_fix']
@@ -219,7 +211,7 @@ function guifi_maintainers_form($node,&$form_weight) {
   return $form['maintainers'];
 }
 
-function guifi_maintainers_parents($zid) {
+function guifi_maintainers_parents($zid,$ret = 'maintainer') {
   guifi_log(GUIFILOG_TRACE,
      'function guifi_maintainers(parent maintainers)',
       $pmaintainers);
@@ -236,7 +228,7 @@ function guifi_maintainers_parents($zid) {
     $parent = $row->master;
 
     if ($parent) {
-      $m=guifi_maintainers_load($parent,'zone');
+      $m=guifi_maintainers_load($parent,'zone',$ret);
     }
   }
   guifi_log(GUIFILOG_TRACE,

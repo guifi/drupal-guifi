@@ -10,21 +10,40 @@
 function guifi_zone_access($op, $node) {
   global $user;
 
+  guifi_log(GUIFILOG_TRACE,
+    'function guifi_zone_access()',
+    $op);
+
   if (is_numeric($node))
     $node = node_load(array('nid' => $node));
 
+
+  if ($op == 'view') {
+    return TRUE;
+  }
   if ($op == 'create') {
     return user_access('create guifi zones');
   }
 
-  if ($op == 'update') {
-    if ((user_access('administer guifi zones')) || ($node->uid == $user->uid)) {
+  guifi_log(GUIFILOG_TRACE,
+    'function guifi_zone_access(maintainers_load_uid)',
+    // guifi_maintainers_load($node->nid,'zone','uid'));
+    $node->nid);
+
+
+  if (($op == 'update') or ($op == 'delete')) {
+    if ((user_access('administer guifi zones')) ||
+        (($node->uid == $user->uid) and (user_access('edit own guifi zones'))) ||
+        (in_array($user->uid,guifi_maintainers_load($node->nid,'zone','uid')))
+        ) {
       return TRUE;
-    }
-    else {
+    } else {
+      if (in_array($user->uid,guifi_maintainers_parents($node->nid,'uid')))
+        return TRUE;
       return FALSE;
     }
   }
+  return FALSE;
 }
 
 
@@ -934,12 +953,17 @@ function guifi_zone_ariadna($id = 0, $link = 'node/%d') {
       'WHERE z.master = %d ' .
       'ORDER BY z.weight, z.title',
       $id);
-  while ($zoneChild = db_fetch_array($query)) {
+  $c=0;
+  while ($zoneChild = db_fetch_array($query) and ($c < 50)) {
     $child[] = l($zoneChild['nick'],sprintf($link,$zoneChild['id']),
       array(
         'attributes' => array('title' => $zoneChild['title'])
       ));
+    $c++;
   }
+  if ($c >= 50)
+    $child[] = l(t('more...'),'node/'.$id.'/view/nodes');
+
   if (count($child)) {
     $child[0] = '<br /><small>('.$child[0];
     $child[count($child)-1] = $child[count($child)-1].')</small>';
@@ -960,9 +984,10 @@ function guifi_zone_data($zone) {
       implode(', ',guifi_maintainers_links($zone->maintainers)));
   } else {
   	$pmaintainers = guifi_maintainers_parents($zone->id);
-    $rows[] = array(
-      t('Maintenance & SLAs').' '.t('(from parents)'),
-      implode(', ',guifi_maintainers_links($pmaintainers)));
+    if (!empty($pmaintainers))
+      $rows[] = array(
+        t('Maintenance & SLAs').' '.t('(from parents)'),
+        implode(', ',guifi_maintainers_links($pmaintainers)));
   }
 
   if ($zone->homepage)

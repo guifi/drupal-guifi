@@ -283,6 +283,9 @@ function guifi_device_access($op, $id) {
   if (empty($id) || ($id < 1))
    return FALSE;
 
+  if ($op == 'view')
+    return true;
+
   if (is_array($id))
     $device = $id;
   else
@@ -294,13 +297,27 @@ function guifi_device_access($op, $id) {
     case 'create':
       return user_access("create guifi nodes");
     case 'update':
+    case 'delete':
       if ((user_access('administer guifi networks')) ||
         (user_access('administer guifi zones')) ||
         ($device['user_created'] == $user->uid) ||
-        ($node->uid == $user->uid))
+        // ($node->uid == $user->uid) ||
+        // if it's a mantainer
+        (in_array($user->uid,guifi_maintainers_load($device['id'],'device','uid'))) ||
+        // if it's a funder
+        (in_array($user->uid,guifi_funders_load($device['id'],'device','uid')))
+        )
         return TRUE;
-      return FALSE;
+      else {
+//      	guifi_log(GUIFILOG_BASIC,'guifi_device_access(update)',$device);
+
+        if ((empty($device['maintainers'])) and (guifi_node_access($op,$node)))
+          return TRUE;
+        if ((empty($device['funders'])) and (guifi_node_access($op,$node)))
+          return TRUE;
+      }
   }
+  return FALSE;
 }
 
 function guifi_device_admin_url($d,$ip) {

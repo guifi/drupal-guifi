@@ -15,17 +15,37 @@ function guifi_node_access($op, $node) {
   if (is_numeric($node))
     $node = node_load(array('nid' => $node));
 
+  if ($op == 'view')
+    return TRUE;
+
   if ($op == 'create') {
     return user_access('create guifi nodes');
   }
 
   if ($op == 'update' or $op == 'delete') {
-    if ((user_access('administer guifi zones')) || ($node->uid == $user->uid)) {
+
+  	guifi_log(GUIFILOG_TRACE,
+      'function guifi_node_access()',
+      $op. ' - '.$node->nid);
+
+    if (((user_access('administer guifi zones')) || ($node->uid == $user->uid)) ||
+        (($node->uid == $user->uid) and (user_access('edit own guifi nodes'))) ||
+        // if it's a mantainer
+        (in_array($user->uid,guifi_maintainers_load($node->nid,'location','uid'))) ||
+        // if it's a funder
+        (in_array($user->uid,guifi_funders_load($node->nid,'location','uid')))
+       )
+    {
       return TRUE;
     } else {
+      // Check is authorized for being a maintainer of the zone and there is not maintainer
+      if ((empty($node->maintainers)) and (guifi_zone_access($op,$node->zone_id)))
+        return TRUE;
+
       return FALSE;
     }
   }
+  return FALSE;
 }
 
 /** guifi_node_ariadna(): Get an array of zone hierarchy and node devices
@@ -1147,9 +1167,10 @@ function theme_guifi_node_data($node,$links = FALSE) {
       'SELECT count(id) c FROM {guifi_radios} WHERE nid=%d',$node->id));
     if ($radios->c > 1) {
   	  $pmaintainers = guifi_maintainers_parents($node->zone_id);
-      $rows[] = array(
-        t('Maintenance & SLAs').' '.t('(from parents)'),
-        implode(', ',guifi_maintainers_links($pmaintainers)));
+  	  if (!empty($pmaintainers))
+        $rows[] = array(
+          t('Maintenance & SLAs').' '.t('(from parents)'),
+          implode(', ',guifi_maintainers_links($pmaintainers)));
     }
   }
 
@@ -1284,16 +1305,17 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
 
      // Edit and delete buttons
      if (guifi_device_access('update',$device['id'])) {
-       $edit_radio =  '<table><tr><td>'.l(guifi_img_icon('edit.png'),'guifi/device/'.$device['id'].'/edit',
+        $edit_radio =  l(guifi_img_icon('edit.png'),'guifi/device/'.$device['id'].'/edit',
             array(
               'html' => TRUE,
-              'title' => t('edit device'),
-              'attributes' => array('target' => '_blank'))).'</td><td>'.
-          l(guifi_img_icon('drop.png'),'guifi/device/'.$device['id'].'/delete',
+              'attributes' => array('target' => '_blank','title' => t('edit device'))));
+        $delete_radio = l(guifi_img_icon('drop.png'),'guifi/device/'.$device['id'].'/delete',
             array(
               'html' => TRUE,
-              'title' => t('delete device'),
-              'attributes' => array('target' => '_blank'))).'</td></tr></table>';
+              'attributes' => array('target' => '_blank','title' => t('delete device'))));
+     } else {
+       $edit_radio = '';
+       $delete_radio = '';
      }
 
      // Traceroute button
@@ -1301,8 +1323,9 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
        $traceroute = l(guifi_img_icon('discover-routes.png'),'guifi/menu/ip/traceroute/'.$device['id'],
             array(
               'html' => TRUE,
-              'title' => t('trace routes, discover services from this device'),
-              'attributes' => array('target' => '_blank')));
+              'attributes' => array(
+                'target' => '_blank',
+                'title' => t('trace routes, discover services from this device'))));
      } else $traceroute = '';
 
      // Firmware text which links to unsolclic feature
@@ -1329,6 +1352,7 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
                  array('data' => $status_url,'class' => $device['flag']),
                  $unsolclic,
                  $edit_radio,
+                 $delete_radio,
                  $traceroute
                     );
   }

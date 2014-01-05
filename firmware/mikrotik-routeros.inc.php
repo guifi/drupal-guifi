@@ -98,13 +98,13 @@ function unsolclic_routeros($dev) {
   $dns[] .= $primary_dns;
   $dns[] .= $secondary_dns;
   if ($secondary_dns != null) {
-    if (($dev->variable['firmware'] == 'RouterOSv4.7+') or ($dev->variable['firmware'] == 'RouterOSv5.x'))
+    if (( $dev->variable['firmware'] == 'RouterOSv4.7+' ) or ( $dev->variable['firmware'] == 'RouterOSv5.x' ) or ( $dev->variable['firmware'] == 'RouterOSv6.x' ))
       _outln(sprintf('/ip dns set servers=%s,%s allow-remote-requests=yes',$primary_dns,$secondary_dns));
     else
       _outln(sprintf('/ip dns set primary-dns=%s secondary-dns=%s allow-remote-requests=yes',$primary_dns,$secondary_dns));
   }
   else if ($primary_dns != null) {
-    if (($dev->variable['firmware'] == 'RouterOSv4.7+') or ($dev->variable['firmware'] == 'RouterOSv5.x'))
+    if (( $dev->variable['firmware'] == 'RouterOSv4.7+' ) or ( $dev->variable['firmware'] == 'RouterOSv5.x' ) or ( $dev->variable['firmware'] == 'RouterOSv6.x' ))
       _outln(sprintf('/ip dns set servers=%s allow-remote-requests=yes',$primary_dns));
     else
       _outln(sprintf('/ip dns set primary-dns=%s allow-remote-requests=yes',$primary_dns));
@@ -131,7 +131,7 @@ function unsolclic_routeros($dev) {
   // SNMP
   _outln_comment();
   _outln_comment('SNMP');
-  if ($dev->variable['firmware'] == 'RouterOSv5.x') {
+  if (( $dev->variable['firmware'] == 'RouterOSv5.x' ) or ( $dev->variable['firmware'] == 'RouterOSv6.x' )) {
      $community = 'trap-community=public';
      _outln(sprintf('/snmp community set public addresses=0.0.0.0/0'));
   } else {
@@ -199,7 +199,7 @@ function unsolclic_routeros($dev) {
       $ssid = $radio['ssid'];
       $gain = $radio['antenna_gain'];
       if ($radio[channel] < 5000)
-        if ($dev->variable['firmware'] == 'RouterOSv5.x') {
+        if (( $dev->variable['firmware'] == 'RouterOSv5.x' ) or ( $dev->variable['firmware'] == 'RouterOSv6.x' )) {
           $band = '2ghz-b';
           $chwidth = 'channel-width=20mhz';
         } else {
@@ -207,7 +207,7 @@ function unsolclic_routeros($dev) {
           $chwidth = '';
         }
       else
-        if ($dev->variable['firmware'] == 'RouterOSv5.x') {
+        if (( $dev->variable['firmware'] == 'RouterOSv5.x' ) or ( $dev->variable['firmware'] == 'RouterOSv6.x' )) {
           $band = '5ghz-a';
           $chwidth = 'channel-width=20mhz';
         } else {
@@ -226,13 +226,13 @@ function unsolclic_routeros($dev) {
         $protocol = guifi_get_ap_protocol($link['interface']['device_id'],$link['interface']['radiodev_counter']);
         $channel = guifi_get_ap_channel($link['interface']['device_id'],$link['interface']['radiodev_counter']);
         if ($protocol == '802.11b')
-          if ($dev->variable['firmware'] == 'RouterOSv5.x') {
+          if (( $dev->variable['firmware'] == 'RouterOSv5.x' ) or ( $dev->variable['firmware'] == 'RouterOSv6.x' )){
             $band = '2ghz-b';
           } else {
             $band = '2.4ghz-b';
           }
         if ($protocol == '802.11a')
-          if ($dev->variable['firmware'] == 'RouterOSv5.x') {
+          if (( $dev->variable['firmware'] == 'RouterOSv5.x' ) or ( $dev->variable['firmware'] == 'RouterOSv6.x' )) {
             $band = '5ghz-a';
           } else {
             $band = '5ghz';
@@ -551,6 +551,7 @@ function unsolclic_routeros($dev) {
   case 'RouterOSv4.0+' :
   case 'RouterOSv4.7+':
   case 'RouterOSv5.x':
+  case 'RouterOSv6.x':
     _outln(sprintf('add chain=srcnat src-address="192.168.0.0/16" dst-address=!192.168.0.0/16 action=src-nat to-addresses=%s comment="" disabled=no',$ospf_routerid));
   break;
 }
@@ -582,6 +583,7 @@ function unsolclic_routeros($dev) {
   case 'RouterOSv4.0+':
   case 'RouterOSv4.7+':
   case 'RouterOSv5.x':
+  case 'RouterOSv6.x':
      _outln('redistribute-connected=no redistribute-static=no redistribute-rip=no \ ');
   break;
  default:
@@ -603,6 +605,7 @@ function unsolclic_routeros($dev) {
   case 'RouterOSv4.0+':
   case 'RouterOSv4.7+':
   case 'RouterOSv5.x':
+  case 'RouterOSv6.x':
    _outln(sprintf('/routing ospf instance set default name=default router-id=%s comment="" disabled=no distribute-default=never \ ',$ospf_routerid));
    _outln(sprintf('redistribute-bgp=as-type-1 redistribute-connected=no redistribute-other-ospf=no redistribute-rip=no redistribute-static=no in-filter=ospf-in out-filter=ospf-out'));
   break;
