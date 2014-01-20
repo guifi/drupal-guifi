@@ -295,6 +295,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
                        'Routerboard SXT Lite2',
                        'Routerboard SXT Lite5',
                        'Routerboard 2011',
+                       'Routerboard Sextant',
                      ))) {
                   switch ($device->variable['firmware']) {
                     case 'RouterOSv2.9':

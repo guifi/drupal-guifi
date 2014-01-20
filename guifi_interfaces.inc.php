@@ -35,6 +35,19 @@ function guifi_interfaces_form(&$interface,$ptree) {
     $ptree
   );
 
+  // wds/p2p link, allow to create new links
+    $f['interface']['riname'] = array(
+      '#type' => 'textfield',
+      '#parents' => array_merge($ptree,array('riname')),
+      '#size' => 10,
+      '#maxlength' => 60,
+      '#default_value' => $interface['riname'],
+      '#description' => t('Optional Real in device interface name. ex: ether6 , vlan5'),
+        '#prefix'=> '<div id="'.
+        'editInterName-'.$interface['interface_type'].'-'.$interface['id'].'">',
+        '#suffix'=> '</div>',
+);
+
   // Cable interface buttons
   if (($ptree[0]=='interfaces')
        and (!$interface['deleted'])
@@ -94,7 +107,6 @@ function guifi_interfaces_form(&$interface,$ptree) {
     }
   }
 
-  // wds/p2p link, allow to create new links
   if ($it == 'wds/p2p')
     $f['interface']['AddWDS'] = array(
       '#type' => 'image_button',
@@ -103,7 +115,6 @@ function guifi_interfaces_form(&$interface,$ptree) {
       '#attributes' => array('title' => t('Add WDS/P2P link to extend the backbone')),
       '#submit' => array('guifi_radio_add_wds_submit'),
     );
-
   if ($interface['deleted']){
     $f['interface']['deleteMsg'] = array(
       '#type' => 'item',
