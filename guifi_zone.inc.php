@@ -1224,7 +1224,7 @@ function guifi_zone_availability($zone,$desc = "all") {
     'WHERE z.id=l.zone_id ' .
     '  AND l.status_flag != "'.$qstatus.'"' .
     '  AND z.id IN ('.implode(',',$childs).') '.
-    'ORDER BY z.title, z.id, ncreated DESC';
+    'ORDER BY ncreated DESC';
   guifi_log(GUIFILOG_TRACE,'function guifi_zone_availability()',$sql);
 
   $Msql = pager_query($sql,variable_get("guifi_pagelimit", 50));
@@ -1266,7 +1266,7 @@ function guifi_zone_availability($zone,$desc = "all") {
        'class' => $d['nstatus'],
        'rowspan' => $nsr),
      array('data' => format_date($d['ncreated'],'custom', t('d/m/Y')),
-       'class' => $d['created'],
+       'class' => $d['ncreated'],
        'rowspan' => $nsr),
     );
     end($rows);
