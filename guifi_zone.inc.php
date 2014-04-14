@@ -1219,12 +1219,12 @@ function guifi_zone_availability($zone,$desc = "all") {
 
   $sql =
     'SELECT z.id zid, z.title ztitle, z.nick znick, ' .
-    '  l.id nid, l.nick nnick, l.status_flag nstatus, l.timestamp_changed nchanged ' .
+    '  l.id nid, l.nick nnick, l.status_flag nstatus, l.timestamp_created ncreated, l.timestamp_changed nchanged ' .
     'FROM {guifi_zone} z, {guifi_location} l ' .
     'WHERE z.id=l.zone_id ' .
     '  AND l.status_flag != "'.$qstatus.'"' .
     '  AND z.id IN ('.implode(',',$childs).') '.
-    'ORDER BY z.title, z.id, l.nick';
+    'ORDER BY z.title, z.id, ncreated DESC';
   guifi_log(GUIFILOG_TRACE,'function guifi_zone_availability()',$sql);
 
   $Msql = pager_query($sql,variable_get("guifi_pagelimit", 50));
@@ -1232,15 +1232,6 @@ function guifi_zone_availability($zone,$desc = "all") {
   $rows = array();
   $currZ = -1;
   while ($d = db_fetch_array($Msql)) {
-    if ($currZ != $d['zid']) {
-      $rows[] = array(array('data'=>
-        l($d['znick'],'node/'.$d['zid']
-          ).' <strong>'.
-        $d['ztitle'].'</strong>',
-        'colspan' => 0
-      ));
-      $currZ = $d['zid'];
-    }
     $drows = _guifi_zone_availability_devices($d['nid']);
 
     $nsr = count($drows);
@@ -1274,7 +1265,9 @@ function guifi_zone_availability($zone,$desc = "all") {
       array('data' => $d['nstatus'],
        'class' => $d['nstatus'],
        'rowspan' => $nsr),
-        $dnchanged,
+     array('data' => format_date($d['ncreated'],'custom', t('d/m/Y')),
+       'class' => $d['created'],
+       'rowspan' => $nsr),
     );
     end($rows);
     $krow = key($rows);
@@ -1287,8 +1280,18 @@ function guifi_zone_availability($zone,$desc = "all") {
     }
 
   }
+  $header = array(
+      array('data' => t('node ID')),
+      array('data' => t('node'), NULL, NULL,'style' => 'text-align: center'),
+      array('data' => t('status'), NULL, NULL,'style' => 'text-align: center'),
+      array('data' => t('created'), NULL, NULL,'style' => 'text-align: center'),
+      array('data' => t('device'), NULL, NULL,'style' => 'text-align: center'),
+      array('data' => t('device IP'), NULL, NULL,'style' => 'text-align: center'),
+      array('data' => t('device status'), NULL, NULL,'style' => 'text-align: center'),
+      array('data' => t('updated'), NULL, NULL,'style' => 'text-align: center')
+  );
 
-  $output .= theme('table', NULL, $rows,array('width' => '100%'));
+  $output .= theme('table', $header, $rows,array('width' => '100%'));
   $output .= theme_pager(NULL, variable_get("guifi_pagelimit", 50));
   $node = node_load(array('nid' => $zone->id));
   $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
