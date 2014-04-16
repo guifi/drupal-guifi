@@ -1289,7 +1289,7 @@ function guifi_zone_availability($zone,$desc = "all") {
       array('data' => t('node'), NULL, NULL,'style' => 'text-align: center'),
       array('data' => t('status'), NULL, NULL,'style' => 'text-align: center'),
       array('data' => t('created'), NULL, NULL,'style' => 'text-align: center'),
-      array('data' => t('Updated'), NULL, NULL,'style' => 'text-align: center'),
+      array('data' => t('updated'), NULL, NULL,'style' => 'text-align: center'),
       array('data' => t('device'), NULL, NULL,'style' => 'text-align: center'),
       array('data' => t('device IP'), NULL, NULL,'style' => 'text-align: center'),
       array('data' => t('device status'), NULL, NULL,'style' => 'text-align: center'),
