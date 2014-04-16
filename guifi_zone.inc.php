@@ -1219,7 +1219,7 @@ function guifi_zone_availability($zone,$desc = "all") {
 
   $sql =
     'SELECT z.id zid, z.title ztitle, z.nick znick, ' .
-    '  l.id nid, l.nick nnick, l.status_flag nstatus, l.timestamp_created ncreated, l.timestamp_changed nchanged ' .
+    '  l.id nid, l.nick nnick, l.status_flag nstatus, l.notification as contact, l.timestamp_created ncreated, l.timestamp_changed nchanged ' .
     'FROM {guifi_zone} z, {guifi_location} l ' .
     'WHERE z.id=l.zone_id ' .
     '  AND l.status_flag != "'.$qstatus.'"' .
@@ -1243,9 +1243,12 @@ function guifi_zone_availability($zone,$desc = "all") {
         l(guifi_img_icon('edit.png'),'node/'.$d['nid'].'/edit',
           array('html' => TRUE,'attributes' => array('target' => '_blank'))).
         l(guifi_img_icon('drop.png'),'node/'.$d['nid'].'/delete',
+          array('html' => TRUE,'attributes' => array('target' => '_blank'))).
+        l(guifi_img_icon('mail.png'),'mailto:'.$d['contact'],
           array('html' => TRUE,'attributes' => array('target' => '_blank')));
     else
       $edit = NULL;
+
    if ( !empty($d['nchanged'])) {
       if ( $d['nchanged'] < $oneyearfromnow )
         $dnchanged = array('data' => '<b><font color="#AA0000">'.format_date($d['nchanged'],'custom', t('d/m/Y')).'</font></b>', 'class' => $d['nchanged'], 'rowspan' => $nsr);
@@ -1268,6 +1271,7 @@ function guifi_zone_availability($zone,$desc = "all") {
      array('data' => format_date($d['ncreated'],'custom', t('d/m/Y')),
        'class' => $d['ncreated'],
        'rowspan' => $nsr),
+      $dnchanged,
     );
     end($rows);
     $krow = key($rows);
@@ -1285,10 +1289,11 @@ function guifi_zone_availability($zone,$desc = "all") {
       array('data' => t('node'), NULL, NULL,'style' => 'text-align: center'),
       array('data' => t('status'), NULL, NULL,'style' => 'text-align: center'),
       array('data' => t('created'), NULL, NULL,'style' => 'text-align: center'),
+      array('data' => t('Updated'), NULL, NULL,'style' => 'text-align: center'),
       array('data' => t('device'), NULL, NULL,'style' => 'text-align: center'),
       array('data' => t('device IP'), NULL, NULL,'style' => 'text-align: center'),
       array('data' => t('device status'), NULL, NULL,'style' => 'text-align: center'),
-      array('data' => t('updated'), NULL, NULL,'style' => 'text-align: center')
+      array('data' => t('device updated'), NULL, NULL,'style' => 'text-align: center')
   );
 
   $output .= theme('table', $header, $rows,array('width' => '100%'));
