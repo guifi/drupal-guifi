@@ -536,7 +536,7 @@ function guifi_node_validate($node,$form) {
     form_set_error('elevation',
       t('Elevation must be above the floor! :)'));
   }
-  if (($node->elevation > 100) && ($node->elevation != NULL)){
+  if (($node->elevation > 261) && ($node->elevation != NULL)){
     form_set_error('elevation',
       t('Do you mean that you are flying over the earth??? :)'));
   }
