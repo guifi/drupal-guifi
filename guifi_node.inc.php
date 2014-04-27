@@ -460,11 +460,26 @@ function guifi_node_form(&$node, $form_state) {
       $type->min_word_count
     );
   }
-  $form['status_flag']= array(
-    '#type' => 'hidden',
-    '#default_value' => $node->status_flag,
-  );
+  $radios = array();
+  $query = db_query("SELECT * FROM {guifi_radios} WHERE nid=%d",$node->id);
+  while ($radio = db_fetch_array($query)) {
+    $radios[] = $radio;
+  }
 
+  if (count($radios) < 1) {
+    $form['status_flag'] = array(
+      '#type' => 'select',
+      '#title' => t("Node status"),
+      '#default_value' => ( $node->status_flag ? $node->status_flag : 'Planned') ,
+      '#required' => FALSE,
+      '#options' => array('Dropped' => t('Dropped'),'Inactive' => t('Inactive'),'Planned' => t('Planned')),
+    );
+  } else {
+    $form['status_flag'] = array(
+      '#type' => 'hidden',
+      '#default_value' => $node->status_flag,
+    );
+  }
   return $form;
 }
 
