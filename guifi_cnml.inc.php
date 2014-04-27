@@ -170,7 +170,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
 
   // load radio models in memory for faster execution
   global $models;
-  $qmodel = db_query("SELECT mid, fid, model FROM guifi_model ORDER BY mid");
+  $qmodel = db_query("SELECT mid, fid, model FROM guifi_model_specs ORDER BY mid");
   while ($model = db_fetch_object($qmodel)) {
      $models[$model->mid] = $model->model;
   }

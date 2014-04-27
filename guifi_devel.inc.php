@@ -154,14 +154,14 @@ function guifi_devel_devices($devid=null, $op=null) {
   }
   switch($op) {
     case 'edit':
-      
+
       $jquery1 = HelperMultipleSelect('guifi-devel-devices-form','firmwaresCompatibles', 'firmwaresTots');
       drupal_add_js("if (Drupal.jsEnabled) { $jquery1 }", 'inline');
       return drupal_get_form('guifi_devel_devices_form',$devid);
-      
+
     case 'duplicate':
       return drupal_get_form('guifi_devel_devices_duplicate_form',$devid);
-      
+
     case 'delete':
       guifi_log(GUIFILOG_TRACE,'guifi_devel_devices_delete()',$devid);
       return drupal_get_form(
@@ -174,47 +174,76 @@ function guifi_devel_devices($devid=null, $op=null) {
   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/device/add\'"/>';
   $output .= '</form>';
 
-  $headers = array(t('ID Model'), t('Manufacturer'), t('Model'), t('Enabled Firms'), t('Edit'), t('Delete'), t('Duplicate'));
+  $headers = array(t('Manufacturer'), t('Model'), t('Class'), t('#<br>Radios'), t('# Eth<br>ports'),
+    t('# Opt.<br>ports'), t('Enabled<br>Firms'),
+    array('data'=>t('Action'),'colspan'=>3));
 
   $sql = db_query('SELECT
                         m.mid, m.url as model_url , m.model,  mf.name as manufacturer_name, mf.url as manufacturer_url
                     FROM
-                        {guifi_model} m
+                        {guifi_model_specs} m
                         inner join {guifi_manufacturer} mf on mf.fid  = m.fid
                     ORDER BY mf.name asc , m.model ASC');
   $sql = db_query('SELECT
-                          m.mid, m.url as model_url , m.model,  mf.name as manufacturer_name, mf.url as manufacturer_url, count(usc.id) as enabledUSCs
+                          m.mid, m.model_class, m.etherdev_max, m.optoports_max, m.radiodev_max, m.url as model_url , m.model,  mf.name as manufacturer_name, mf.url as manufacturer_url, count(usc.id) as enabledUSCs
                       FROM
-                          {guifi_model} m
+                          {guifi_model_specs} m
                           inner join {guifi_manufacturer} mf on mf.fid  = m.fid
                           left join {guifi_configuracioUnSolclic} usc on usc.mid = m.mid and usc.enabled = 1
                       GROUP BY  m.mid, model_url, m.model,manufacturer_name, manufacturer_url
-                      ORDER BY enabledUSCs desc , mf.name asc , m.model ASC');
-  
+                      ORDER BY mf.name asc , m.model ASC, enabledUSCs desc');
+
+  $manufacturer = 'none';
+  $manufacturers = array();
   while ($dev = db_fetch_object($sql)) {
-    $rows[] = array($dev->mid,
-                      '<a href="'.$dev->manufacturer_url.'">'.$dev->manufacturer_name.'</a>',
-                      '<a href="'.$dev->model_url.'">'.$dev->model.'</a>',
-                      $dev->enabledUSCs,
-    l(guifi_img_icon('edit.png'),'guifi/menu/devel/device/'.$dev->mid.'/edit',
-    array(
-                'html' => TRUE,
-                'title' => t('edit device'),
-    )).'</td><td>'.
-    l(guifi_img_icon('drop.png'),'guifi/menu/devel/device/'.$dev->mid.'/delete',
-    array(
-                'html' => TRUE,
-                'title' => t('delete device'),
-    )).'</td><td>'.
-    l(guifi_img_icon('edit.png'),'guifi/menu/devel/device/'.$dev->mid.'/duplicate',
-    array(
-                'html' => TRUE,
-                'title' => t('duplicatedevice')
-    ))
-    );
+
+  	$aclass = array();
+  	if (!empty($dev->model_class)) {
+  	  foreach (explode('|',$dev->model_class) as $k => $v)
+  	    $aclass[] = t($v);
+  	}
+
+    if ($manufacturer != $dev->manufacturer_name) {
+      $manufacturer = $dev->manufacturer_name;
+      $manufacturers[] = $manufacturer;
+      $l_manufacturer =  '<a name="M'.count($manufacturers).
+        '"><a href="'.$dev->manufacturer_url.'">'.$dev->manufacturer_name.'</a>';
+    } else {
+      $l_manufacturer = '';
+    }
+
+    $rows[] = array(
+      $l_manufacturer,
+      '<a href="'.$dev->model_url.'">'.$dev->mid.'-'.$dev->model.'</a>',
+      implode(', ',$aclass),
+      $dev->radiodev_max,
+      $dev->etherdev_max,
+      $dev->optoports_max,
+      $dev->enabledUSCs,
+        l(guifi_img_icon('edit.png'),'guifi/menu/devel/device/'.$dev->mid.'/edit',
+          array(
+            'html' => TRUE,
+            'attributes' => array('target' => '_blank','title' => t('edit device'))
+          )),
+        l(guifi_img_icon('copy.png'),'guifi/menu/devel/device/'.$dev->mid.'/duplicate',
+          array(
+            'html' => TRUE,
+            'attributes' => array('target' => '_blank','title' => t('copy device'))
+          )),
+        l(guifi_img_icon('drop.png'),'guifi/menu/devel/device/'.$dev->mid.'/delete',
+          array(
+            'html' => TRUE,
+            'attributes' => array('target' => '_blank','title' => t('delete device'))
+          )),
+      );
   }
-  
-  $output .= theme('table',$headers,$rows);
+
+  $output .= '<hr>';
+
+  foreach ($manufacturers as $k => $v)
+    $output .= '<a href="#M'.($k + 1).'">'.$v.'</a> - ';
+
+  $output .= '<hr>'.theme('table',$headers,$rows,array('style' => 'width: 0%;'));
   print theme('page',$output, FALSE);
   return;
 }
@@ -222,7 +251,7 @@ function guifi_devel_devices($devid=null, $op=null) {
 // Duplicate Device Form
 function guifi_devel_devices_duplicate_form($form_state, $devid) {
 
-  $sql = db_query('SELECT * FROM {guifi_model} WHERE mid = %d', $devid);
+  $sql = db_query('SELECT * FROM {guifi_model_specs} WHERE mid = %d', $devid);
   $dev = db_fetch_object($sql);
 
   // indicador de new pq volem insertar
@@ -252,107 +281,235 @@ function guifi_devel_devices_duplicate_form($form_state, $devid) {
 
 // Device Models Form
 function guifi_devel_devices_form($form_state, $devid) {
-
-  $sql = db_query('SELECT * FROM {guifi_model} WHERE mid = %d', $devid);
-  $dev = db_fetch_object($sql);
+  global $user;
 
   if ($devid == 'New' ) {
-   $form['new'] = array('#type' => 'hidden', '#value' => TRUE);
+    $form['new'] = array('#type' => 'hidden', '#value' => TRUE);
+
   } else {
+    $sql = db_query('SELECT * FROM {guifi_model_specs} WHERE mid = %d', $devid);
+    $dev = db_fetch_object($sql);
+    $dev->arr_model_class = explode('|',$dev->model_class);
     $form['mid'] = array('#type' => 'hidden','#value' => $devid);
-}
+  }
+
   $query = db_query('SELECT * FROM {guifi_manufacturer}');
   while ($manufacturers = db_fetch_array($query)) {
      $manuf_array[$manufacturers["fid"]] = $manufacturers["name"];
   }
   $form_weight=0;
-  $form['fid'] = array(
+
+  $form['general'] = array(
+    '#type'        => 'fieldset',
+    '#title'       => (isset($form['new'])) ? t('General'):
+      t('General').' ('.$dev->model.' - '.implode(', ',$dev->arr_model_class).')',
+    '#attributes'  => array('class'=>"model-item"),
+    '#collapsible' => TRUE,
+    '#collapsed'   => (isset($form['new'])) ? FALSE : TRUE,
+ );
+  $form['general']['fid'] = array(
     '#type' => 'select',
     '#title' => t('Manufacturer'),
     '#required' => TRUE,
     '#default_value' => $dev->fid,
     '#options' => $manuf_array,
     '#description' => t('Select Device Manufacturer.'),
-    '#prefix' => '<table><tr><td>',
-    '#suffix' => '</td>',
     '#weight' => $form_weight++,
   );
-  $form['model'] = array(
+  $form['general']['arr_model_class'] = array(
+    '#type'=>'select',
+    '#title'=>t('Model Class'),
+    '#required' => TRUE,
+    '#options'=>guifi_types('model_class'),
+    '#multiple'=>true,
+    '#size'=>8,
+    '#default_value'=>explode('|',$dev->model_class),
+    '#weight' => $form_weight++,
+  );
+  $form['general']['model'] = array(
     '#type' => 'textfield',
     '#title' => t('Model Name'),
     '#required' => TRUE,
     '#default_value' => $dev->model,
     '#size' => 32,
     '#maxlength' => 50,
-    '#description' => t('Device model name, please, use a clear and short description.'),
-    '#prefix' => '<td>',
-    '#suffix' => '</td>',
+    '#description' => t('Device model name, please,<br>use a clear and short description.'),
+    '#weight' => $form_weight++,
+  );
+  $form['general']['url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('URL'),
+    '#required' => TRUE,
+    '#default_value' => $dev->url,
+    '#size' => 32,
+    '#maxlength' => 128,
+    '#description' => t('Url where we can see a specs from device model.'),
+    '#weight' => $form_weight++,
+  );
+  $form['general']['rackeable'] = array(
+    '#type' => 'select',
+    '#title' => t('Rackeable'),
+    '#required' => TRUE,
+    '#default_value' => $dev->rackeable,
+    '#options' => array('no',1,2,3,4,5,6,7,8,9,10,11,12),
+    '#description' => t("Not rackeable or<br>number of U's"),
+    '#weight' => $form_weight++,
+  );
+  $form['general']['notification'] = array(
+    '#type' => 'textfield',
+    '#size' => 60,
+    '#maxlength' => 1024,
+    '#title' => t('contact'),
+    '#required' => FALSE,
+    '#element_validate' => array('guifi_emails_validate'),
+    '#default_value' => (empty($dev->notification)) ? $user->mail : $dev->notification,
+    '#weight' => $form_weight++,
+//    '#prefix'=>'<br><br>',
+    '#description' =>  t('Mailid where changes on the device will be notified, if many, separated by \',\'<br />used for network administration.'),
+  );
+
+  $form['continue'] = array(
+    '#type' => 'submit',
+    '#weight' => 99, '#value' => t('Save & continue edit'));
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#weight' => 100, '#value' => t('Save'));
+
+  if (isset($form['new'])) {
+    return $form;
+  }
+
+
+  $form['ethernet'] = array(
+    '#type'        => 'fieldset',
+    '#title'       => ($dev->etherdev_max) ?
+      t('Ethernet').' ('.$dev->etherdev_max.' ports)' :
+      t('Ethernet'),
+    '#attributes'  => array('class'=>"model-item"),
+    '#collapsible' => TRUE,
+    '#collapsed'   => ($dev->etherdev_max) ? TRUE: FALSE,
+    '#weight' => $form_weight++,
+  );
+  $form['ethernet']['etherdev_max'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Ethernet Ports'),
+    '#required' => TRUE,
+    '#default_value' => ($dev->etherdev_max) ? ($dev->etherdev_max) : 0,
+    '#size' => 2,
+    '#maxlength' => 2,
+    '#description' => t('# of ethernet ports<br>on this device.'),
+    '#weight' => $form_weight++,
+  );
+  $form['ethernet']['interfaces'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Interfaces'),
+    '#required' => FALSE,
+    '#default_value' => $dev->interfaces,
+    '#size' => 80,
+    '#maxlength' => 240,
+    '#description' => t('Device interface names for this device model.<br>Use | to split de the names, ex: wlan1|wlan2|ether1|ether2'),
     '#weight' => $form_weight++,
   );
 
-  $form['radiodev_max'] = array(
+  $form['fiber'] = array(
+    '#type'        => 'fieldset',
+    '#access'      => in_array('fiber',$dev->arr_model_class),
+    '#title'       => ($dev->optoports_max) ?
+      t('Fiber Optics').' ('.$dev->optoports_max.' ports)' :
+      t('Fiber Optics'),
+    '#attributes'  => array('class'=>"model-item"),
+    '#collapsible' => TRUE,
+    '#collapsed'   => ($dev->optoports_max) ? TRUE : FALSE,
+    '#weight' => $form_weight++,
+  );
+  $form['fiber']['optoports_max'] = array(
     '#type' => 'textfield',
+    '#access'      => in_array('fiber',$dev->arr_model_class),
+    '#title' => t('Optical ports'),
+    '#required' => FALSE,
+    '#default_value' => $dev->optoports_max,
+    '#size' => 2,
+    '#maxlength' => 2,
+    '#description' => t('# of optical ports<br>on this device.'),
+    '#weight' => $form_weight++,
+  );
+  $form['fiber']['opto_interfaces'] = array(
+    '#type' => 'textfield',
+    '#access'      => in_array('fiber',$dev->arr_model_class),
+    '#title' => t('Optical Interfaces'),
+    '#required' => FALSE,
+    '#default_value' => $dev->opto_interfaces,
+    '#size' => 80,
+    '#maxlength' => 240,
+    '#description' => t('Map to optical ports interface name.<br>Use | to split de the names'),
+    '#weight' => $form_weight++,
+  );
+
+  $form['wireless'] = array(
+    '#type'        => 'fieldset',
+    '#access'      => in_array('wireless',$dev->arr_model_class),
+    '#title'       => ($dev->radiodev_max) ?
+      t('Wireless').' ('.$dev->radiodev_max.' ports)' :
+      t('Wireless'),
+    '#attributes'  => array('class'=>"model-item"),
+    '#collapsible' => TRUE,
+    '#collapsed'   => ($dev->radiodev_max) ? TRUE : FALSE,
+    '#weight' => $form_weight++,
+  );
+  $form['wireless']['radiodev_max'] = array(
+    '#type' => 'textfield',
+    '#access'      => in_array('wireless',$dev->arr_model_class),
     '#title' => t('Max Radios'),
     '#required' => TRUE,
     '#default_value' => $dev->radiodev_max,
     '#size' => 2,
     '#maxlength' => 2,
-    '#description' => t('Maximum number of radios that can handle this device.'),
-    '#prefix' => '<td>',
-    '#suffix' => '</td>',
+    '#description' => t('Maximum number of radios<br>that can handle this device.'),
     '#weight' => $form_weight++,
-  );
-
-  $form['etherdev_max'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Ethernet Ports'),
-    '#required' => TRUE,
-    '#default_value' => $dev->etherdev_max,
-    '#size' => 2,
-    '#maxlength' => 2,
-    '#description' => t('Number of ethernet ports on this device.'),
-    '#prefix' => '<td>',
-    '#suffix' => '</td></tr></table>',
-    '#weight' => $form_weight++,
-  );
-
-  $form['AP'] = array(
+  );  $form['wireless']['AP'] = array(
     '#type' => 'select',
+    '#access'      => in_array('wireless',$dev->arr_model_class),
     '#title' => t('Acces Point'),
     '#required' => TRUE,
     '#default_value' => $dev->AP,
     '#options' => array('Yes' => t('Yes'), 'No' => t("No")),
-    '#description' => t('Select yes if this device can be an Access Point.'),
-    '#prefix' => '<table><tr><td>',
-    '#suffix' => '</td>',
+    '#description' => t('Select yes if this device<br>can be an Access Point.'),
     '#weight' => $form_weight++,
   );
-
-  $form['virtualAP'] = array(
+  $form['wireless']['virtualAP'] = array(
     '#type' => 'select',
+    '#access'      => in_array('wireless',$dev->arr_model_class),
     '#title' => t('HostPot / Vlan'),
     '#required' => TRUE,
     '#default_value' => $dev->virtualAP,
     '#options' => array('Yes' => t('Yes'), 'No' => t("No")),
-    '#description' => t('Select yes if this device can be a Hostpot or can create vlans.'),
-    '#prefix' => '<td>',
-    '#suffix' => '</td>',
+    '#description' => t('Select yes if this device<br>can be a Hostpot or can create vlans.'),
     '#weight' => $form_weight++,
   );
-
-  $form['client'] = array(
+  $form['wireless']['client'] = array(
     '#type' => 'select',
+    '#access'      => in_array('wireless',$dev->arr_model_class),
     '#title' => t('Statiton capable'),
     '#required' => TRUE,
     '#options' => array('Yes' => t('Yes'), 'No' => t("No")),
     '#default_value' => $dev->client,
-    '#description' => t('Select yes if this device can be a station.'),
-    '#prefix' => '<td>',
-    '#suffix' => '</td>',
+    '#description' => t('Select yes if this device<br>can be a station.'),
     '#weight' => $form_weight++,
   );
-  $form['supported'] = array(
+
+
+  $form['firmware'] = array(
+    '#type'        => 'fieldset',
+    '#access'      => in_array('wireless',$dev->arr_model_class),
+    '#title'       => t('Firmware'),
+    '#attributes'  => array('class'=>"model-item"),
+    '#collapsible' => TRUE,
+    '#collapsed'   => FALSE,
+    '#weight' => $form_weight++,
+  );
+  $form['firmware']['supported'] = array(
     '#type' => 'select',
+    '#access'      => in_array('wireless',$dev->arr_model_class),
     '#title' => t('Supported'),
     '#required' => TRUE,
     '#options' => array('Yes' => t('Yes'), 'Deprecated' => t("Deprecated")),
@@ -362,32 +519,6 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#suffix' => '</td></tr></table>',
     '#weight' => $form_weight++,
   );
-  $form['interfaces'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Interfaces'),
-    '#required' => TRUE,
-    '#default_value' => $dev->interfaces,
-    '#size' => 64,
-    '#maxlength' => 128,
-    '#description' => t('Device interface names for this device model. User | to split de the names, ex: wlan1|wlan2|ether1|ether2'),
-    '#prefix' => '<table><tr><td>',
-    '#suffix' => '</td></tr></table>',
-    '#weight' => $form_weight++,
-  );
-  $form['url'] = array(
-    '#type' => 'textfield',
-    '#title' => t('URL'),
-    '#required' => TRUE,
-    '#default_value' => $dev->url,
-    '#size' => 64,
-    '#maxlength' => 128,
-    '#description' => t('Url where we can see a specs from device model.'),
-    '#prefix' => '<tr><td colspan="2" align="left">',
-    '#suffix' => '</td></tr>',
-    '#weight' => $form_weight++,
-  );
-
-  
   $query = db_query("select
                     usc.id, usc.mid, usc.fid, f.id as firmware_id, f.nom
                     from
@@ -395,7 +526,7 @@ function guifi_devel_devices_form($form_state, $devid) {
                     left join
                     guifi_configuracioUnSolclic usc ON usc.fid = f.id  and usc.mid = %d order by nom asc", $devid);
 
-  
+
   while ($firmwares = db_fetch_array($query)) {
     //echo "<hr>firmwares[fid]=". $firmwares["fid"] ."firmwares[mid]=". $firmwares["mid"]. " firmwares[nom]=". $firmwares["nom"];
     //echo "<br>firmwares[fid]=". firmwares["fid"];
@@ -404,9 +535,10 @@ function guifi_devel_devices_form($form_state, $devid) {
     else
     $firms_tots[$firmwares["firmware_id"]] = $firmwares["nom"];
   }
-  
-  $form['firmwaresCompatibles'] = array(
+
+  $form['firmware']['firmwaresCompatibles'] = array(
       '#type' => 'select',
+      '#access'      => in_array('wireless',$dev->arr_model_class),
       '#title' => t('firmwares compatibles'),
       '#default_value' => 0,
       '#options' => $firms_compatibles,
@@ -420,7 +552,7 @@ function guifi_devel_devices_form($form_state, $devid) {
       '#weight' => $form_weight++,
       '#attributes'=>array('style'=>'width:250px;height:350px')
   );
-  
+
   $disponiblesButtonOne = '<input type="button" value=">" id="associatsButtonOne" class="selectButtons" style="width:40px;margin:5px 0;">';
   $disponiblesButtonAll = '<input type="button" value=">>" id="associatsButtonAll" class="selectButtons" style="width:40px;margin:5px 0;">';
   $associatsButtonOne = '<input type="button" value="<" id="disponiblesButtonOne" class="selectButtons" style="width:40px;margin:5px 0;">';
@@ -429,9 +561,10 @@ function guifi_devel_devices_form($form_state, $devid) {
   $botons .= $disponiblesButtonAll.'<br>';
   $botons .= $associatsButtonOne.'<br>';
   $botons .= $associatsButtonAll.'<br>';
-  
-  $form['firmwaresTots'] = array(
+
+  $form['firmware']['firmwaresTots'] = array(
         '#type' => 'select',
+        '#access'      => in_array('wireless',$dev->arr_model_class),
         '#title' => t('Tots els firmwares'),
         '#default_value' => 0,
         '#options' => $firms_tots,
@@ -445,55 +578,40 @@ function guifi_devel_devices_form($form_state, $devid) {
         '#weight' => $form_weight++,
         '#attributes'=>array('style'=>'width:250px;height:350px')
   );
-  
-  $form['notification'] = array(
-      '#type' => 'textfield',
-      '#size' => 60,
-      '#maxlength' => 1024,
-      '#title' => t('contact'),
-      '#required' => TRUE,
-      '#element_validate' => array('guifi_emails_validate'),
-      '#default_value' => $dev->notification,
-      '#weight' => $form_weight++,
-      '#description' =>  t('Mailid where changes on the device will be notified, if many, separated by \',\'<br />used for network administration.'),
-      '#prefix' => '<tr><td colspan="2">',
-      '#suffix' => '</td></tr>',
-  
-  );
-
-  $form['submit'] = array(
-  '#type' => 'submit',
-  '#prefix' => '<tr><td colspan="2">',
-        '#suffix' => '</td></tr></table>',
-  '#weight' => 99, '#value' => t('Save'));
 
   return $form;
 }
 
 
 function guifi_devel_devices_form_submit($form, &$form_state) {
-  guifi_log(GUIFILOG_TRACE,'function guifi_devel_devices_form_submit()',$form_state);
+  guifi_log(GUIFILOG_TRACE,'function guifi_devel_devices_form_submit()',$form_state['values']);
 
-  guifi_devel_devices_save($form_state['values']);
-  
-  drupal_goto('guifi/menu/devel/device');
-   return;
+  if (isset($form_state['values']['new']))
+    $form_state['values']['etherdev_max'] = 0;
+
+  $id = guifi_devel_devices_save($form_state['values']);
+
+  if ($form_state['values']['op']==t('Save & continue edit'))
+    drupal_goto('guifi/menu/devel/device/'.$id.'/edit');
+  else
+    drupal_goto('guifi/menu/devel/device');
+  return;
 }
 
 function guifi_devel_devices_duplicate_form_submit($form, &$form_state) {
   guifi_log(GUIFILOG_TRACE,'function guifi_devel_devices_duplicate_form_submit()',$form_state);
 
   $originalmid = $form_state['values']['originalmid'];
-  
-  $sql = db_query('SELECT * FROM {guifi_model} WHERE mid = %d', $originalmid);
+
+  $sql = db_query('SELECT * FROM {guifi_model_specs} WHERE mid = %d', $originalmid);
   $originaldev = db_fetch_object($sql);
-  
+
   foreach($originaldev as $property => $value)  {
-    
+
     // el nom del model no el volem duplicar
     if ($property!='model') $form_state['values'][$property] = $value;
   }
-  
+
   // eliminem els camps addicionals del control de formularis
   unset($form_state['values']['originalmid']);
   unset($form_state['values']['op']);
@@ -501,13 +619,13 @@ function guifi_devel_devices_duplicate_form_submit($form, &$form_state) {
   unset($form_state['values']['form_build_id']);
   unset($form_state['values']['form_token']);
   unset($form_state['values']['form_id']);
-  
+
   // recuperar els firmwares suportats del model original
   $sql= db_query("SELECT distinct(fid) FROM {guifi_configuracioUnSolclic} WHERE mid = %d order by fid asc", $originalmid);
   while ($originalFirms = db_fetch_object($sql)) {
     $form_state['values']['firmwaresCompatibles'][$originalFirms->fid] = $originalFirms->fid;
   }
-  
+
   // desar el nou device
   guifi_devel_devices_save($form_state['values'], $originalmid);
 
@@ -519,20 +637,22 @@ function guifi_devel_devices_duplicate_form_submit($form, &$form_state) {
 function guifi_devel_devices_save($edit, $originalmid=null) {
   global $user;
 
+  $edit['model_class'] = implode('|',$edit['arr_model_class']);
+
   $to_mail = $edit['notification'];
   $log ='';
 
   guifi_log(GUIFILOG_TRACE,'function guifi_devel_devices_save()',$edit);
-  
+
   // guardem primer perque si vinc de un insert  poder tenir el id i operar amb els camps relacionats
-  $edit2 = _guifi_db_sql('guifi_model',array('mid' => $edit['mid']),$edit,$log,$to_mail);
-  
+  $edit2 = _guifi_db_sql('guifi_model_specs',array('mid' => $edit['mid']),$edit,$log,$to_mail);
+
   // si estic fent un model nou, copia de $originalmid vull qeu la consulta dels firmwares es basi en les de l'original
   $midFirms = $edit2['mid'];
   if ($originalmid){
     $midFirms = $originalmid;
   }
-  
+
   // recollida de parametresFirmware actuals
   $sql= db_query("SELECT distinct(fid), plantilla FROM {guifi_configuracioUnSolclic} WHERE mid = %d order by fid asc", $midFirms);
   while ($oldFirms = db_fetch_object($sql)) {
@@ -547,7 +667,7 @@ function guifi_devel_devices_save($edit, $originalmid=null) {
 
       // si ja el teniem abans no l'insertem, pero si estem fent una copia aleshores si (quan $originalmid != null)
       if (!in_array($firmware, $alreadyPresent)||$originalmid) {
-       
+
         $params = array(
           'mid' => $edit2['mid'],
           'fid'=> $firmware,
@@ -557,45 +677,45 @@ function guifi_devel_devices_save($edit, $originalmid=null) {
           'new' => true
         );
         // per copiar el valor de la plantilla origen  'planitlla' => $plantilles[$firmware]
-        
+
         // insertem una nova configuracio USC
         $params = _guifi_db_sql('guifi_configuracioUnSolclic',array('mid' => $params['mid']),$params,$log,$to_mail);
-         
+
          // TODO si fem el params = de sobre aleshores no cal tornar a el ultim mid, ja em ve del insert!
          // recuperem el id del uscid que acabem de crear
          $uscid = db_fetch_array(db_query("SELECT max(id) mid FROM {guifi_configuracioUnSolclic} "));
-         
+
          // aqui cal agafar tots els parametres del firmware i entrarlos a la taula guifi_parametresConfiguracioUnsolclic
          crearParametresConfiguracioUSC($uscid['mid'], $firmware, $to_mail, $user->id);
-         
+
       }
       // guardem els firmwares que hem afegit
       $kept[] = $firmware;
     }
-    
+
     // de tots els que tenia a la BD, mirar si me'ls han tret i esborrar-los
     foreach ($alreadyPresent as $firmware) {
       if (!in_array($firmware, $edit['firmwaresCompatibles'])) {
         // IMPORTANT abans de esborrar comprovar que no tinguin configuracions USC validades
-        
+
         $sql = db_query('SELECT id as uscid, enabled  FROM {guifi_configuracioUnSolclic} WHERE mid=%d and fid=%d ', $edit['mid'], $firmware);
         $configuracions = db_fetch_object($sql);
-        
+
         // si la configuracion USC no esta enabled la borrem
         if (!$configuracions->enabled) {
-          
+
           // si esborrem la configuracio USC tambe hauriem d'esborrarli els parametres associats
           db_query("DELETE FROM {guifi_configuracioUnSolclic} WHERE mid=%d and fid=%d ", $edit['mid'], $firmware);
-          
+
           // si esborrem la configuracio USC tambe hauriem d'esborrarli els parametres associats
           db_query("DELETE FROM {guifi_parametresConfiguracioUnsolclic} WHERE uscid=%d", $configuracions->uscid);
-          
+
           $deleted[] = $firmware;
         } else {
-          
+
           // si la configuracio USC estava enabled la desem per notificar que no s'ha esobrrat
           $kept[] = $firmware;
-        
+
         }
       }
     }
@@ -610,18 +730,20 @@ function guifi_devel_devices_save($edit, $originalmid=null) {
   }
 
   drupal_set_message( 'Model Actualitzat : '. $edit['model']);
-  
+
   guifi_notify(
     $to_mail,
     t('The device model !device has been created / updated by !user.',array('!device' => $edit['model'], '!user' => $user->name)),
     $log);
+
+  return $edit2['mid'];
 }
 
 function guifi_devel_devices_delete_confirm($form_state,$mid) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_device_delete_confirm()',$mid);
 
   $form['mid'] = array('#type' => 'hidden', '#value' => $mid);
-  $qry= db_fetch_object(db_query("SELECT model FROM {guifi_model} WHERE mid = %d", $mid));
+  $qry= db_fetch_object(db_query("SELECT model FROM {guifi_model_specs} WHERE mid = %d", $mid));
   return confirm_form(
     $form,
     t('Are you sure you want to delete the device model " %model "?',
@@ -641,7 +763,7 @@ function guifi_devel_devices_delete_confirm_submit($form, &$form_state) {
     return;
 
   $to_mail = explode(',',$node->notification);
-  $log = _guifi_db_delete('guifi_model',array('mid' => $form_state['values']['mid']),$to_mail,$depth);
+  $log = _guifi_db_delete('guifi_model_specs',array('mid' => $form_state['values']['mid']),$to_mail,$depth);
   drupal_set_message($log);
   guifi_notify(
            $to_mail,
@@ -737,7 +859,7 @@ function guifi_devel_firmware_form($form_state, $firmid) {
     '#suffix' => '</td>',
     '#weight' => $form_weight++,
   );
-  
+
   $form['enabled'] = array(
       '#type' => 'checkbox',
       '#title' => t('Enabled'),
@@ -747,7 +869,7 @@ function guifi_devel_firmware_form($form_state, $firmid) {
       '#suffix' => '</td></tr>',
       '#weight' => $form_weight++,
   );
-  
+
   $form['descripcio'] = array(
     '#type' => 'textarea',
     '#title' => t('Firmware Description'),
@@ -768,14 +890,14 @@ function guifi_devel_firmware_form($form_state, $firmid) {
                               left join
                           guifi_parametresFirmware pf ON pf.pid = p.id and pf.fid = %d
                       order by p.nom asc",$firmid);
-  
+
   while ($parametres = db_fetch_array($query)) {
     if ($parametres["pid"])
       $params_associats[$parametres["pid"]] = $parametres["nom"];
     else
       $params_disponibles[$parametres["id"]] = $parametres["nom"];
   }
-  
+
   $form['parametres_associats'] = array(
     '#type' => 'select',
     '#title' => t('Parametres associats'),
@@ -791,7 +913,7 @@ function guifi_devel_firmware_form($form_state, $firmid) {
     '#weight' => $form_weight++,
     '#attributes'=>array('style'=>'width:250px;height:350px')
   );
-  
+
   $disponiblesButtonOne = '<input type="button" value=">" id="associatsButtonOne" class="selectButtons" style="width:40px;margin:5px 0;">';
   $disponiblesButtonAll = '<input type="button" value=">>" id="associatsButtonAll" class="selectButtons" style="width:40px;margin:5px 0;">';
   $associatsButtonOne = '<input type="button" value="<" id="disponiblesButtonOne" class="selectButtons" style="width:40px;margin:5px 0;">';
@@ -800,7 +922,7 @@ function guifi_devel_firmware_form($form_state, $firmid) {
   $botons .= $disponiblesButtonAll.'<br>';
   $botons .= $associatsButtonOne.'<br>';
   $botons .= $associatsButtonAll.'<br>';
-  
+
   $form['parametres_disponibles'] = array(
     '#type' => 'select',
     '#title' => t('Parametres disponibles'),
@@ -816,8 +938,8 @@ function guifi_devel_firmware_form($form_state, $firmid) {
     '#weight' => $form_weight++,
     '#attributes'=>array('style'=>'width:250px;height:350px')
   );
-  
-  
+
+
   $form['notification'] = array(
         '#type' => 'textfield',
         '#size' => 60,
@@ -830,15 +952,15 @@ function guifi_devel_firmware_form($form_state, $firmid) {
         '#description' =>  t('Mailid where changes on the device will be notified, if many, separated by \',\'<br />used for network administration.'),
         '#prefix' => '<tr><td colspan="2">',
         '#suffix' => '</td></tr>',
-  
+
   );
-  
+
   $form['submit'] = array(
     '#type' => 'submit',
     '#prefix' => '<tr><td>',
           '#suffix' => '</td></tr></table>',
     '#weight' => 99, '#value' => t('Save'));
-  
+
   //$form['submit'] = array('#type' => 'submit',    '#weight' => $form_weight, '#value' => t('Save'));
 
   return $form;
@@ -859,16 +981,16 @@ function guifi_devel_firmware_save($edit) {
   $to_mail = $user->mail;
   $log ='';
   $query = db_query(" SELECT id, nom, descripcio, relations, enabled FROM {guifi_firmware} " );
-  
+
   // recollida de parametresFirmware actuals
   $sql= db_query("SELECT distinct(pid) FROM {guifi_parametresFirmware} WHERE fid = %d order by pid asc", $edit['id']);
   while ($oldParamsFirm = db_fetch_object($sql)) {
     $alreadyPresent[] = $oldParamsFirm->pid;
   }
-  
+
   // recollida  de parametres del firmware
   if (isset($edit['parametres_associats'])){
-    
+
     // de tots els que em passen, si encara no els tenia afegir-los
     foreach ($edit['parametres_associats'] as $parametre) {
       if (!in_array($parametre, $alreadyPresent)) {
@@ -879,11 +1001,11 @@ function guifi_devel_firmware_save($edit) {
           'new' => true
         );
         _guifi_db_sql('guifi_parametresFirmware',array('mid' => $params['mid']),$params,$log,$to_mail);
-        
+
         // busquem les propietats d'aquest nou parametre, dinamic i default_value
         $sql = db_query('SELECT id, dinamic, default_value FROM {guifi_parametres} WHERE id = %d',$parametre);
         $paramInfo = db_fetch_array($sql);
-        
+
         // aqui cal agafar tots els unsolclic que funcionen amb aquest firmware i a cadascun afegir-li el parametre nou.
         afegirParametreConfiguracionsUSC($edit['id'], $paramInfo, $to_mail, $user->id);
       }
@@ -891,7 +1013,7 @@ function guifi_devel_firmware_save($edit) {
     // de tots els que tenia a la BD, mirar si me'ls han tret i esborrar-los
     foreach ($alreadyPresent as $parametre) {
       if (!in_array($parametre, $edit['parametres_associats'])) {
-        
+
         // IMPORTANT abans de esborrar comprovar que no formin part de configuracions USC validades
         $sql = db_query('select
                                   pusc.pid, usc.enabled, usc.id uscid
@@ -899,20 +1021,20 @@ function guifi_devel_firmware_save($edit) {
                                   {guifi_parametresConfiguracioUnsolclic} pusc
                                   inner join {guifi_configuracioUnSolclic} usc on usc.id = pusc.uscid
                               where usc.fid = %d and pusc.pid = %d ', $edit['id'], $parametre);
-        
+
         $configuracions = db_fetch_object($sql);
-        
+
         if (!$configuracions->enabled) {
-        
+
           db_query("DELETE FROM {guifi_parametresFirmware} WHERE fid=%d and pid=%d ", $edit['id'], $parametre);
           db_query("DELETE FROM {guifi_parametresConfiguracioUnsolclic} WHERE uscid=%d and pid=%d ", $configuracions->uscid, $parametre);
-          
+
           $deleted[] = $parametre;
         } else {
-          
+
           // si la configuracio USC estava enabled la desem per notificar que no s'ha esobrrat
           $kept[] = $parametre;
-        
+
         }
       }
     }
@@ -929,7 +1051,7 @@ function guifi_devel_firmware_save($edit) {
 
   //guifi_log(GUIFILOG_TRACE,'function guifi_devel_firmware_save()',$edit);
   _guifi_db_sql('guifi_firmware',array('id' => $edit['id']),$edit,$log,$to_mail);
-  
+
 drupal_set_message( $edit['nom'].' Actualitzat : '. $strGuardats . $strBorrats);
   guifi_notify(
     $to_mail,
@@ -1202,7 +1324,7 @@ function guifi_devel_parameter_form($form_state, $id) {
     '#suffix' => '</td></tr>',
     '#weight' => $form_weight++
   );
-  
+
   $form['origen'] = array(
     '#type' => 'textfield',
     '#title' => t('Parameter Origin'),
@@ -1215,7 +1337,7 @@ function guifi_devel_parameter_form($form_state, $id) {
     '#suffix' => '</td></tr>',
     '#weight' => $form_weight++
   );
-  
+
   $form['default_value'] = array(
     '#type' => 'textfield',
     '#title' => t('Default Value'),
@@ -1228,7 +1350,7 @@ function guifi_devel_parameter_form($form_state, $id) {
     '#suffix' => '</td></tr>',
     '#weight' => $form_weight++
   );
-  
+
   $form['dinamic'] = array(
     '#type' => 'checkbox',
     '#title' => t('Dinamic'),
@@ -1242,7 +1364,7 @@ function guifi_devel_parameter_form($form_state, $id) {
       '#prefix' => '<tr><td>',
       '#suffix' => '</td></tr></table>',
       '#weight' => 99, '#value' => t('Save'));
-  
+
   return $form;
 }
 
@@ -1476,15 +1598,15 @@ function guifi_devel_configuracio_usc($id=null, $op=null) {
     FROM
         {guifi_configuracioUnSolclic} usc
         inner {join guifi_firmware} f on f.id = usc.fid
-        inner {join guifi_model} m on m.mid = usc.mid
+        inner {join guifi_model_specs} m on m.mid = usc.mid
         inner {join guifi_manufacturer} mf on mf.fid = m.fid
         left {join guifi_parametresConfiguracioUnsolclic} pusc on pusc.uscid = usc.id
      group by usc.id, usc.mid, usc.fid, usc.enabled, usc.tipologia
      order by usc.enabled desc, fabricant asc, model asc, nomfirmware asc
   ');
-  
-  
-  
+
+
+
   $radioMode  = array(0 => "Ap or AP with WDS",
                       1 => "Wireless Client",
                       2 => "Wireless Bridge",
@@ -1522,7 +1644,7 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
   FROM
       guifi_configuracioUnSolclic usc
       inner join guifi_firmware f on f.id = usc.fid
-      inner join guifi_model m on m.mid = usc.mid
+      inner join guifi_model_specs m on m.mid = usc.mid
       inner join guifi_manufacturer mf on mf.fid = m.fid
    where usc.id= %d', $id);
   $configuraciousc = db_fetch_object($sql);
@@ -1532,15 +1654,15 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
   } else {
     $form['id'] = array('#type' => 'hidden','#value' => $id);
   }
-  
+
   $manufacturerName = $configuraciousc->manufacturer;
   $modelName = $configuraciousc->model;
   $firmwareName = $configuraciousc->nomfirmware;
-  
+
   $manufacturerLink = '<a href="'.base_path().'guifi/menu/devel/manufacturer/'.$configuraciousc->mfid.'/edit">'.$configuraciousc->manufacturer.'</a>';
   $modelLink = '<a href="'.base_path().'guifi/menu/devel/device/'.$configuraciousc->mid.'/edit">'.$configuraciousc->model.'</a>';
   $firmwareLink = '<a href="'.base_path().'guifi/menu/devel/firmware/'.$configuraciousc->fid.'/edit">'.$configuraciousc->nomfirmware.'</a>';
-  
+
   $form['mid'] = array(
     '#type' => 'hidden',
     '#size' => 32,
@@ -1568,8 +1690,8 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
     '#suffix' => '</th></tr>',
     '#weight' => $form_weight++,
   );
-  
-  
+
+
   $sql = db_query('select
                         usc.id, usc.pid, usc.valor, p.dinamic, p.nom, p.origen
                     from
@@ -1600,7 +1722,7 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
     );
     $totalParams++;
   }
-  
+
   $form['snmp_id'] = array(
       '#type' => 'textarea',
       '#type' => 'textfield',
@@ -1635,7 +1757,7 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
     '#prefix' => $output. '</td></tr><tr><td colspan="4">',
           '#suffix' => '</td></tr></table>',
     '#weight' => 99, '#value' => t('Save'));
-  
+
 
   return $form;
 }
@@ -1755,12 +1877,12 @@ function guifi_devel_paramusc_form($form_state, $id) {
                       inner join guifi_parametres p on p.id = pusc.pid
                       inner join guifi_configuracioUnSolclic usc on usc.id = pusc.uscid
                       inner join guifi_firmware f on f.id = usc.fid
-                      inner join guifi_model d on d.mid = usc.mid
+                      inner join guifi_model_specs d on d.mid = usc.mid
                       inner join guifi_manufacturer mf on mf.fid = d.fid
                   where
                       pusc.id = %d', $id);
   $parameter = db_fetch_object($sql);
-  
+
   $manufacturerLink = '<a href="'.base_path().'guifi/menu/devel/device/'.$parameter->mfid.'/edit">'.$parameter->manufacturer.'</a>';
   $modelLink = '<a href="'.base_path().'guifi/menu/devel/model/'.$parameter->mid.'/edit">'.$parameter->model.'</a>';
   $firmwareLink = '<a href="'.base_path().'guifi/menu/devel/firmware/'.$parameter->fid.'/edit">'.$parameter->nomfirmware.'</a>';
@@ -1770,7 +1892,7 @@ function guifi_devel_paramusc_form($form_state, $id) {
   } else {
     $form['id'] = array('#type' => 'hidden','#value' => $id);
     $form['uscid'] = array('#type' => 'hidden','#value' => $parameter->uscid);
-    
+
   }
   if (!$parameter->dinamic){
     $form['valor'] = array(
@@ -1790,7 +1912,7 @@ function guifi_devel_paramusc_form($form_state, $id) {
     '#prefix' => '<tr><td colspan="4">',
     '#suffix' => '</td></tr></table>',
     '#weight' => 99, '#value' => t('Save'));
-  
+
   return $form;
 }
 
@@ -1829,7 +1951,7 @@ function guifi_devel_paramusc_delete_confirm($form_state,$id) {
                                       inner join guifi_parametres p on p.id = pusc.pid
                                   WHERE
                                       pusc.id = %d", $id));
-  
+
   return confirm_form(
   $form,
   t('Are you sure you want to delete the USC Configuration parameter " %parameter "?' ,
@@ -1860,7 +1982,7 @@ function guifi_devel_paramusc_delete_confirm_submit($form, &$form_state) {
 
 
 function HelperMultipleSelect($formName, $nomSelectAssignats='assignats', $nomSelectDisponibles='disponibles') {
-  
+
   $jquery1 = '
         $().ready(function() {
           $("#disponiblesButtonOne").click(function() {
@@ -1875,7 +1997,7 @@ function HelperMultipleSelect($formName, $nomSelectAssignats='assignats', $nomSe
           $("#associatsButtonAll").click(function() {
             return !$("#edit-'.$nomSelectAssignats.' option").remove().appendTo("#edit-'.$nomSelectDisponibles.'");
           });
-          
+
           $("#'.$formName.'").submit(function() {
             $("#edit-'.$nomSelectAssignats.' option").each(function(i) {
               $(this).attr("selected", "selected");
@@ -1891,10 +2013,10 @@ function crearParametresConfiguracioUSC($uscid, $fid, $notification, $userid) {
                      FROM
                       guifi_parametres p
                      INNER JOIN guifi_parametresFirmware pf ON pf.pid = p.id  AND pf.fid = %d", $uscid,  $fid);
-  
+
   while ($paramsFirmware = db_fetch_object($sql)) {
-    
-    
+
+
     $params = array(
               'pid' => $paramsFirmware->id,
               'uscid' => $uscid,
@@ -1905,9 +2027,9 @@ function crearParametresConfiguracioUSC($uscid, $fid, $notification, $userid) {
               'new' => true
     );
     _guifi_db_sql('guifi_parametresConfiguracioUnsolclic',array('id' => $params['id']),$params,$log,$notification);
-    
-    
-    
+
+
+
     //db_query("INSERT INTO  {guifi_parametresConfiguracioUnsolclic} (pid, uscid, dinamic, notification, user_created)
     //VALUES (%d, %d, 0,'%s', %d)", $paramsFirmware->id, $uscid, $notification, $userid);
   }
@@ -1954,7 +2076,7 @@ function getUSCid($model, $firmware){
                   where
                       pusc.pid = %d and usc.fid = %d', $model, $firmware);
   $usc = db_fetch_object($sql);
-  
+
   return $uscId->id;
 }
 

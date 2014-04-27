@@ -93,7 +93,8 @@ function guifi_ahah_select_server(){
   $matches[$na] = $na;
   while (($value = db_fetch_array($qry)) and ($c < 50)) {
     $c++;
-    $matches[$value['str']] = $value['str'];
+    $matches[json_encode($value['str'],JSON_UNESCAPED_UNICODE)] =
+       json_encode($value['str'],JSON_UNESCAPED_UNICODE);
   }
   print drupal_to_js($matches);
   exit();

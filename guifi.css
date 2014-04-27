@@ -16,6 +16,11 @@
   margin-bottom: 0em;
 } 
 
+.model-item > div.form-item {
+  float: left;
+  margin-right: 0em;
+}
+
 #guifi th.Online, td.Online, th.Working, td.Working, td.Up {
   background-color: #33FF00; color: black;
   text-decoration: none;

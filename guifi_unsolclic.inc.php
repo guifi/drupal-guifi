@@ -394,7 +394,7 @@ function guifi_get_ntp($zone,$max = 3) {
 
 function guifi_get_model($mid) {
 
-    $modelInfo = db_fetch_array(db_query("select * from {guifi_model} where mid=%d limit 1",$mid));
+    $modelInfo = db_fetch_array(db_query("select * from {guifi_model_specs} where mid=%d limit 1",$mid));
     if (!empty($modelInfo)){
       //var_dump($modelInfo);
     }
@@ -464,7 +464,7 @@ function guifi_get_paramsMMF($devId) {
                         guifi_devices d
                         JOIN guifi_configuracioUnSolclic usc on usc.id = d.usc_id
                         JOIN users u ON u.uid = usc.user_created
-                        JOIN guifi_model m on m.mid = usc.mid
+                        JOIN guifi_model_specs m on m.mid = usc.mid
                         JOIN guifi_manufacturer mf on mf.fid = m.fid
                         JOIN guifi_firmware f on f.id = usc.fid
                     

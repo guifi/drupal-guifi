@@ -322,7 +322,7 @@ function guifi_menu() {
     'weight' => 100,
   );
   $items['guifi/menu/devel/device'] = array(
-    'title' => 'Device Models',
+    'title' => 'Device Model Specs',
     'description' => 'A full list of devices we use in the network, add, edit or delete it.',
     'page callback' => 'guifi_devel_devices',
     'access arguments' => array('guifi module developer'),
@@ -330,7 +330,7 @@ function guifi_menu() {
     'file' => 'guifi_devel.inc.php'
   );
   $items['guifi/menu/devel/device/%/%'] = array(
-    'title' => 'Device Models',
+    'title' => 'Device Models Specs',
     'page callback' => 'guifi_devel_devices',
     'page arguments' => array(4, 5),
     'access arguments' => array('guifi module developer'),
@@ -2468,7 +2468,7 @@ function guifi_check_unsolclics( $verbose = FALSE) {
     // buscar les configuracions unsolclic validades
     $sql= db_query("select usc.id, usc.mid, usc.fid, usc.enabled , m.model,f.nom
                     from guifi_configuracioUnSolclic usc
-                        inner join guifi_model m  on m.mid = usc.mid
+                        inner join guifi_model_specs m  on m.mid = usc.mid
                         inner join guifi_firmware f on f.id = usc.fid
                     where usc.enabled = 1
                     order by usc.id asc ");
@@ -2497,7 +2497,7 @@ function guifi_check_unsolclics( $verbose = FALSE) {
       $sql= db_query("select d.id, d.nid, d.nick, mo.model, mo.fid, mf.name
                       from guifi_configuracioUnSolclic  usc
                            inner join guifi_devices d on d.mid = usc.mid and d.fid = usc.fid and d.flag = 'Working'
-                           inner join guifi_model mo on mo.mid = usc.mid
+                           inner join guifi_model_specs mo on mo.mid = usc.mid
                            inner join guifi_manufacturer mf on mf.fid = mo.fid
                       where usc.id = %d", $confkey); //
 

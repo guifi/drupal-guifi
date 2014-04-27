@@ -572,7 +572,7 @@ function _guifi_api_device_check_parameters($gapi, &$parameters) {
       if (!guifi_api_check_fields($gapi, array('mac', 'model_id', 'firmware' ), $parameters)) {
         return FALSE;
       }
-      $model = db_fetch_object(db_query("SELECT model name FROM {guifi_model} WHERE mid = '%d' LIMIT 1", $model_id));
+      $model = db_fetch_object(db_query("SELECT model name FROM {guifi_model_specs} WHERE mid = '%d' LIMIT 1", $model_id));
       if (!guifi_validate_types('firmware', $firmware, $model->name)) {
         $gapi->addError(403, "firmware is not supported: $firmware");
         return FALSE;
@@ -851,7 +851,7 @@ function guifi_api_radio_add($gapi, $parameters) {
     return FALSE;
   }
   
-  $maxradios = db_fetch_object(db_query('SELECT radiodev_max FROM {guifi_model} WHERE mid=%d', $device['variable']['model_id']));
+  $maxradios = db_fetch_object(db_query('SELECT radiodev_max FROM {guifi_model_specs} WHERE mid=%d', $device['variable']['model_id']));
   $maxradios = $maxradios->radiodev_max;
   
   if (count($device['radios']) >= $maxradios) {
@@ -1594,7 +1594,7 @@ function _guifi_api_misc_model_check_parameters($gapi, &$parameters) {
  * @return
  */
 function guifi_api_misc_model($gapi, $parameters) {
-  $sql = "SELECT mid, fid, model, type, supported FROM {guifi_model}";
+  $sql = "SELECT mid, fid, model, type, supported FROM {guifi_model_specs}";
 
   
   if (!_guifi_api_misc_model_check_parameters($gapi, $parameters)) {
@@ -1663,7 +1663,7 @@ function guifi_api_misc_manufacturer($gapi, $parameters) {
 function guifi_api_misc_firmware($gapi, $parameters) {
   $relation = '';
   if( !empty( $parameters['model_id'] ) ) {
-    $query = db_query("SELECT model FROM {guifi_model} WHERE mid = %d", $parameters['model_id'] );
+    $query = db_query("SELECT model FROM {guifi_model_specs} WHERE mid = %d", $parameters['model_id'] );
     $model = db_fetch_object($query);
     if($model->model) {
       $relation = $model->model;

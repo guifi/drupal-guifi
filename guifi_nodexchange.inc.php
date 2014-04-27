@@ -161,7 +161,7 @@
 //
 //         // if device is a radio, then get the radio data and traffic graph
 //         if ($d->type == 'radio') {
-//           $qr = db_query("SELECT r.*,m.radiodev_max FROM {guifi_radios} r, {guifi_model} m WHERE r.model_id=m.mid AND r.id=%d",$d->id);
+//           $qr = db_query("SELECT r.*,m.radiodev_max FROM {guifi_radios} r, {guifi_model_specs} m WHERE r.model_id=m.mid AND r.id=%d",$d->id);
 //           while ($r = db_fetch_object($qr)) {
 //             $ident++;
 //             if ($r->radiodev_max == 1)

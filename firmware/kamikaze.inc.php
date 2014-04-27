@@ -197,7 +197,7 @@ quagga:x:51:51:quagga:/tmp/.quagga:/bin/false
   }
     $model = db_fetch_object(db_query("
       SELECT *
-      FROM {guifi_model}
+      FROM {guifi_model_specs}
       WHERE mid=%d", $dev->variable['model_id']));
 
 

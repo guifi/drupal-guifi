@@ -56,7 +56,7 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
   // processing insert triggers to fill new ids etc...
   if ($insert) {
     switch ($table) {
-	  case 'guifi_model':
+	  case 'guifi_model_specs':
 	    $next_id = db_fetch_array(db_query("SELECT max(mid)+1 mid FROM {$table} "));
 	    $data['mid'] = $next_id['mid'];
 	    $data['user_created'] = $user->uid;
@@ -148,7 +148,7 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
       case 'guifi_services':
       case 'guifi_dns_hosts':
       case 'guifi_users':
-      case 'guifi_model':
+      case 'guifi_model_specs':
       case 'guifi_manufacturer':
       case 'guifi_caracteristica':
       case 'guifi_caracteristiquesModel':

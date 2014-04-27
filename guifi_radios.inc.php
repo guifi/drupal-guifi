@@ -15,7 +15,7 @@ function guifi_radio_form($edit, $form_weight) {
 
   $querymid = db_query("
     SELECT mid, model, f.name manufacturer
-    FROM guifi_model m, guifi_manufacturer f
+    FROM guifi_model_specs m, guifi_manufacturer f
     WHERE f.fid = m.fid
     AND supported='Yes'
     ORDER BY manufacturer ASC");
@@ -224,7 +224,7 @@ function guifi_radio_form($edit, $form_weight) {
   if ($rc) {
     $dradios = db_fetch_object(db_query(
        'SELECT radiodev_max max ' .
-       'FROM {guifi_model} ' .
+       'FROM {guifi_model_specs} ' .
        'WHERE mid=%s',
        $edit['variable']['model_id']));
 
@@ -253,7 +253,7 @@ function guifi_radio_add_radio_form($edit) {
 
   // Edit radio form or add new radio
   $cr = 0; $tr = 0; $firewall=FALSE;
-  $maxradios = db_fetch_object(db_query('SELECT radiodev_max FROM {guifi_model} WHERE mid=%d',$edit[variable][model_id]));
+  $maxradios = db_fetch_object(db_query('SELECT radiodev_max FROM {guifi_model_specs} WHERE mid=%d',$edit[variable][model_id]));
 
   if (isset($edit[radios]))
   foreach ($edit[radios] as $k => $radio) {
@@ -308,7 +308,7 @@ function guifi_radio_firmware_field($fid,$mid) {
 /* Consulta anterior al  PFC */
   $model=db_fetch_object(db_query(
         "SELECT model as name, mid as id " .
-        "FROM {guifi_model} " .
+        "FROM {guifi_model_specs} " .
         "WHERE mid=%d",
     $mid));
 
@@ -759,7 +759,7 @@ function guifi_radio_validate($form,$edit) {
     ($edit['variable']['firmware'] != NULL)) {
     $radiof = db_fetch_object(db_query("
       SELECT model
-      FROM {guifi_model}
+      FROM {guifi_model_specs}
       WHERE mid='%d'",
       $edit['variable']['model_id']));
     if (!guifi_type_relation(

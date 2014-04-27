@@ -422,7 +422,7 @@ function guifi_devices_select($filters, $action = '') {
 
 function guifi_get_all_interfaces($id,$type = 'radio', $db = TRUE) {
   if (($db) and ($type == 'radio'))
-    $model = db_fetch_array(db_query('SELECT m.interfaces FROM {guifi_radios} r LEFT JOIN {guifi_model} m ON m.mid=r.model_id WHERE r.id=%d',$id));
+    $model = db_fetch_array(db_query('SELECT m.interfaces FROM {guifi_radios} r LEFT JOIN {guifi_model_specs} m ON m.mid=r.model_id WHERE r.id=%d',$id));
   else
     $model[interfaces] = 'Lan';
   return explode('|',$model[interfaces]);
@@ -433,7 +433,7 @@ function guifi_get_possible_interfaces($edit = array()) {
   if ($edit['type'] == 'radio')
     $model = db_fetch_array(db_query('
       SELECT m.interfaces
-      FROM {guifi_model} m
+      FROM {guifi_model_specs} m
       WHERE mid=%d',
     $edit['variable']['model_id']));
   else

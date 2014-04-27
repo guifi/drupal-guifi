@@ -299,19 +299,23 @@ function guifi_schema() {
     'primary key' => array('fid'),
   );
 
-  $schema['guifi_model'] = array(
+  $schema['guifi_model_specs'] = array(
     'comment' => 'device models',
     'fields' => array(
          'mid' => array('type' => 'int', 'size' => 'small', 'not null' => TRUE),
          'fid' => array('type' => 'int', 'size' => 'small', 'not null' => TRUE, 'default' => 0, 'comment' => 'foreign key to guifi_manufacturer(fid)'),
          'model' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => ''),
+         'model_class' => array('type' => 'varchar', 'length' => '240', 'not null' => FALSE, 'default' => 'wireless|router','comment'=>'device category (radio, router, switch...)'),
          'type' => array('type' => 'varchar', 'length' => '10', 'not null' => FALSE, 'comment' => 'Extern, PCI, PCMCIA'),
          'radiodev_max' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 1),
          'etherdev_max' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 1),
+         'optoports_max' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 1),
+         'rackeable' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0,'comment'=> 'Rackeable (>0 true, # of Us)'),
          'AP' => array('type' => 'varchar', 'length' => '5', 'not null' => FALSE, 'comment' => 'Si, No'),
          'virtualAP' => array('type' => 'varchar', 'length' => '5', 'not null' => TRUE, 'default' => 'No', 'comment' => 'Yes, No'),
          'client' => array('type' => 'varchar', 'length' => '5', 'not null' => FALSE, 'comment' => 'Si, No, Hack'),
          'interfaces' => array('type' => 'varchar', 'length' => '240', 'not null' => FALSE),
+         'opto_interfaces' => array('type' => 'varchar', 'length' => '240', 'not null' => TRUE,'comment'=> 'map to ethernet interafaces'),
          'url' => array('type' => 'varchar', 'length' => '240', 'not null' => FALSE),
          'comments' => array('type' => 'varchar', 'length' => '240', 'not null' => FALSE),
          'supported' => array('type' => 'varchar', 'length' => '25', 'not null' => TRUE, 'default' => 'Yes', 'comment' => 'Yes, No'),
@@ -452,6 +456,10 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('11', 'device', 'OLT', 'xPON OLT Concentrator (Terminal)');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('12', 'device', 'splitter', 'xPON Splitter');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('13', 'device', 'FOMConv', 'FO Media Converter');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('14', 'device', 'Torpedo', 'Torpedo - Joint enclosure');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('15', 'device', 'Switch', 'Switch');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('16', 'device', 'Rack', 'Rack');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('17', 'device', 'Patch panel');");
 
   // --
   // -- service types
@@ -518,8 +526,7 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('5', 'firmware', 'DD-guifi', 'DD-guifi from Miquel Martos', 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|WHR-HP-G54, WHR-G54S');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('6', 'firmware', 'RouterOSv2.9', 'RouterOS 2.9 from Mikrotik', 'Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('7', 'firmware', 'whiterussian', 'OpenWRT-whiterussian', 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Wrap|Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('8', 'firmware', 'kamikaze', 'OpenWRT kamikaze',
-   'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Meraki/Fonera|Wrap|Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|NanoStation2|NanoStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Avila GW2348-4|Asus WL-500xx|Alix1|Alix2|Alix3');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('8', 'firmware', 'kamikaze', 'OpenWRT kamikaze','WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Meraki/Fonera|Wrap|Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|NanoStation2|NanoStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Avila GW2348-4|Asus WL-500xx|Alix1|Alix2|Alix3');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('9', 'firmware', 'Freifunk-BATMAN', 'OpenWRT-Freifunk-v1.6.16 with B.A.T.M.A.N', 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|WHR-HP-G54, WHR-G54S');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('10', 'firmware', 'RouterOSv3.x', 'RouterOS 3.x from Mikrotik', 'Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|Routerboard 600|Routerboard 411|Routerboard 333|Routerboard 433');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('11', 'firmware', 'AirOsv221', 'Ubiquti AirOs 2.2.1', 'NanoStation2|NanoStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5')");
@@ -772,53 +779,56 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_manufacturer} VALUES (13, 'Asus', 'http://asus.com');");
   db_query("INSERT INTO {guifi_manufacturer} VALUES (14, 'Pccengines', 'http://www.pcengines.ch');");
   db_query("INSERT INTO {guifi_manufacturer} VALUES (15, 'Setup Informatica', 'http://www.setup.cat');");
+  db_query("INSERT INTO {guifi_manufacturer} VALUES (100, 'DLink', 'http://www.dlink.com');");
+  db_query("INSERT INTO {guifi_manufacturer} VALUES (101, 'Deliberant', 'http://www.deliberant.com');");
+  db_query("INSERT INTO {guifi_manufacturer} VALUES (102, 'TP-Link', 'http://www.tp-link.com');");
   // --
-  // -- guifi_model
+  // -- guifi_model_specs
   // --
-  update_sql("TRUNCATE guifi_model");
-  db_query("INSERT INTO `guifi_model` (`mid`, `fid`, `model`, `type`, `radiodev_max`, `etherdev_max`, `potencia_max`, `AP`, `virtualAP`, `client`, `interfaces`, `url`, `comments`, `supported`, `notification`, `user_created`, `user_changed`, `timestamp_created`, `timestamp_changed`) VALUES
-(3, 1, 'Other', NULL, 1, 1, NULL, 'Yes', 'No', 'Yes', 'wLan/Lan', 'none', 'To be used for unknown or not listed devices', 'Yes', '', 0, 0, 0, 0),
-(1, 2, 'WRT54Gv1-4', 'Extern', 1, 1, 251, 'Si', 'No', 'Hack', 'wLan/Lan|vlan|vlan2|vlan3|vlan4|Wan', 'http://www.linksys.com/products/product.', 'El canvi de potència, mode client i WDS, via hack.\r\nHacks disponibles: sveasoft (Satori, Alchemy...), OpenWRT...', 'Yes', '', 0, 0, 0, 0),
-(15, 9, 'WHR-HP-G54, WHR-G54S', 'Extern', 1, 1, 251, 'No', '', 'Hack', 'wLan/Lan|vlan|vlan2|vlan3|vlan4|Wan', 'http://www.buffalo-technology.com/products/product-detail.php?productid=124&categoryid=28', 'El canvi de potència, mode client i WDS, via hack.', 'Yes', '', 0, 0, 0, 0),
-(16, 2, 'WRT54GL', 'Extern', 1, 1, 251, 'No', '', 'Hack', 'wLan/Lan|vlan|vlan2|vlan3|vlan4|Wan', 'http://www.linksys.com/products/product.', 'El canvi de potència, mode client i WDS, via hack.\r\nHacks disponibles: sveasoft (Satori, Alchemy...), OpenWRT, DD-WRT, ...', 'Yes', '', 0, 0, 0, 0),
-(17, 2, 'WRT54GSv1-2', 'Extern', 1, 1, 251, 'No', '', 'Hack', 'wLan/Lan|vlan2|vlan3|vlan4|Wan', 'http://www.linksys.com/products/product.', 'El canvi de potència, mode client i WDS, via hack.\r\nHacks disponibles: sveasoft (Satori, Alchemy...), OpenWRT, DD-WRT, ...', 'Yes', '', 0, 0, 0, 0),
-(18, 2, 'WRT54GSv4', 'Extern', 1, 1, 251, 'No', '', 'Hack', 'wLan/Lan|vlan|vlan2|vlan3|vlan4|Wan', 'http://www.linksys.com/products/product.', 'El canvi de potència mode client i WDS, via hack.\r\nHacks disponibles: sveasoft (Satori, Alchemy...), OpenWRT, DD-WRT, ...', 'Yes', '', 0, 0, 0, 0),
-(19, 8, 'Routerboard 532', NULL, 6, 1, 400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3|ether4|ether5|ether6|ether7|ether8|ether9', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(20, 8, 'Routerboard 133C', NULL, 1, 1, 400, 'Si', 'Yes', 'Si', 'wLan/Lan', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(21, 8, 'Routerboard 133', NULL, 3, 1, 400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(22, 8, 'Routerboard 112', NULL, 2, 1, 400, 'Si', 'Yes', 'Si', 'wLan/Lan', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(23, 8, 'Routerboard 153', NULL, 3, 1, 400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3|ether4|ether5', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(24, 8, 'Supertrasto guifiBUS guifi.net', NULL, 24, 1, 400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3|ether4|ether5', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(25, 10, 'NanoStation2', 'Extern', 1, 1, 400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ns2.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(26, 10, 'NanoStation5', 'Extern', 1, 1, 400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ns5.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(27, 8, 'Routerboard 600', 'Extern', 8, 1, 400, 'Si', 'Si', 'Si', 'wLan/Lan|ether2|ether3', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(28, 8, 'Routerboard 333', NULL, 6, 1, 400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(29, 8, 'Routerboard 411', NULL, 6, 1, 400, 'Si', 'Yes', 'Si', 'wLan/Lan', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(30, 11, 'Meraki/Fonera', 'Extern', 1, 1, 60, 'Si', 'Yes', 'Si', 'wLan/Lan', 'http://meraki.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(31, 8, 'Routerboard 433', NULL, 6, 1, 400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(32, 10, 'LiteStation2', 'Extern', 1, 1, 400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ls2.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(33, 10, 'LiteStation5', 'Extern', 1, 1, 400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ls5.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(34, 10, 'NanoStation Loco2', 'Extern', 1, 1, 400, 'No', 'No', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(35, 10, 'NanoStation Loco5', 'Extern', 1, 1, 400, 'No', 'No', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(36, 10, 'Bullet2', 'Extern', 1, 1, 400, 'No', 'No', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(37, 10, 'Bullet5', 'Extern', 1, 1, 400, 'No', 'No', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(38, 10, 'RouterStation', 'Extern', 4, 1, 400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ls5.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(39, 12, 'Avila GW2348-4', 'Extern', 4, 1, 400, 'No', 'No', 'Si', 'Wan', 'http://www.gateworks.com/products/avila/gw2348-4.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(40, 13, 'Asus WL-500xx', 'Extern', 1, 1, 400, 'No', 'No', 'Si', 'Wan', 'http://asus.com/products.aspx?l1=29&l2=172&l3=743&l4=60&model=1277&modelmenu=1', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(41, 14, 'Alix1', 'Extern', 5, 1, 400, 'No', 'No', 'Si', 'wLan/Lan|eth0|eth1|eth2', 'http://www.pcengines.ch/alix1d.htm', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(42, 14, 'Alix2', 'Extern', 2, 1, 400, 'No', 'No', 'Si', 'wLan/Lan|eth0|eth1|eth2', 'http://www.pcengines.ch/alix2d.htm', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(43, 14, 'Alix3', 'Extern', 2, 1, 400, 'No', 'No', 'Si', 'wLan/Lan|eth0|eth1|eth2', 'http://www.pcengines.ch/alix3d.htm', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(44, 8, 'Routerboard 800', NULL, 8, 1, 400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3|ether4|ether5|ether6|ether7|ether8|ether9', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(45, 10, 'AirMaxM2 Rocket/Nano/Loco', 'Extern', 1, 1, 100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(46, 10, 'AirMaxM5 Rocket/Nano/Loco', 'Extern', 1, 1, 100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(47, 10, 'AirMaxM2 Bullet/PwBrg/AirGrd/NanoBr', 'Extern', 1, 1, 100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(48, 10, 'AirMaxM5 Bullet/PwBrg/AirGrd/NanoBr', 'Extern', 1, 1, 100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(49, 15, 'GuifiStation2', 'Extern', 1, 1, 100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://tienda.setupinformatica.com/wac/detalle.php?codigo=CPEGS2', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(50, 15, 'GuifiStation5', 'Extern', 1, 1, 100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://tienda.setupinformatica.com/wac/detalle.php?codigo=CPEGS5', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(51, 10, 'RouterStationPro', 'Extern', 4, 1, 400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/rspro', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(52, 8, 'Routerboard 750/G', 'Extern', 0, 5, 400, 'Yes', 'Yes', 'Yes', 'Lan/Lan|ether1|ether2|ether3|ether4|ether5', 'http://www.routerboard.com/pricelist.php?showProduct=90', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(53, 8, 'Routerboard SXT 5HnD', NULL, 1, 1, NULL, 'Yes', 'Yes', 'Yes', 'wlan1|ether1', 'http://www.routerboard.com/index.php?showProduct=108', NULL, 'Yes', '', 0, 0, 0, 0),
-(54, 8, 'Routerboard 1100', NULL, 0, 13, NULL, 'Yes', 'No', 'Yes', 'Lan/Lan|ether1|ether2|ether3|ether4|ether5|ether6|ether7|ether8|ether9|ether10|ether11|ether12|ether13', 'http://www.routerboard.com/index.php?showProduct=98', NULL, 'Yes', '', 0, 0, 0, 0);");
+  update_sql("TRUNCATE guifi_model_specs");
+  db_query("INSERT INTO `guifi_model_specs` (`mid`, `fid`, `model_class`, `model`,`type`, `radiodev_max`, `etherdev_max`, `optoports_max`,`rackeable`,`opto_interfaces`,`potencia_max`, `AP`, `virtualAP`, `client`, `interfaces`, `url`, `comments`, `supported`, `notification`, `user_created`, `user_changed`, `timestamp_created`, `timestamp_changed`) VALUES
+(3, 1, 'wireless|router','Other', NULL, 1, 1, 0, 0,NULL,NULL, 'Yes', 'No', 'Yes', 'wLan/Lan', 'none', 'To be used for unknown or not listed devices', 'Yes', '', 0, 0, 0, 0),
+(1, 2, 'wireless|router','WRT54Gv1-4', 'Extern', 1, 1, 0, 0,NULL,251, 'Si', 'No', 'Hack', 'wLan/Lan|vlan|vlan2|vlan3|vlan4|Wan', 'http://www.linksys.com/products/product.', 'El canvi de potència, mode client i WDS, via hack.\r\nHacks disponibles: sveasoft (Satori, Alchemy...), OpenWRT...', 'Yes', '', 0, 0, 0, 0),
+(15, 9, 'wireless|router','WHR-HP-G54, WHR-G54S', 'Extern', 1, 1, 0, 0,NULL,251, 'No', '', 'Hack', 'wLan/Lan|vlan|vlan2|vlan3|vlan4|Wan', 'http://www.buffalo-technology.com/products/product-detail.php?productid=124&categoryid=28', 'El canvi de potència, mode client i WDS, via hack.', 'Yes', '', 0, 0, 0, 0),
+(16, 2, 'wireless|router','WRT54GL', 'Extern', 1, 1, 0, 0,NULL, 251, 'No', '', 'Hack', 'wLan/Lan|vlan|vlan2|vlan3|vlan4|Wan', 'http://www.linksys.com/products/product.', 'El canvi de potència, mode client i WDS, via hack.\r\nHacks disponibles: sveasoft (Satori, Alchemy...), OpenWRT, DD-WRT, ...', 'Yes', '', 0, 0, 0, 0),
+(17, 2, 'wireless|router','WRT54GSv1-2', 'Extern', 1, 1, 0, 0,NULL, 251, 'No', '', 'Hack', 'wLan/Lan|vlan2|vlan3|vlan4|Wan', 'http://www.linksys.com/products/product.', 'El canvi de potència, mode client i WDS, via hack.\r\nHacks disponibles: sveasoft (Satori, Alchemy...), OpenWRT, DD-WRT, ...', 'Yes', '', 0, 0, 0, 0),
+(18, 2, 'wireless|router','WRT54GSv4', 'Extern', 1, 1, 0, 0,NULL,251, 'No', '', 'Hack', 'wLan/Lan|vlan|vlan2|vlan3|vlan4|Wan', 'http://www.linksys.com/products/product.', 'El canvi de potència mode client i WDS, via hack.\r\nHacks disponibles: sveasoft (Satori, Alchemy...), OpenWRT, DD-WRT, ...', 'Yes', '', 0, 0, 0, 0),
+(19, 8, 'wireless|router','Routerboard 532', NULL, 6, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3|ether4|ether5|ether6|ether7|ether8|ether9', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(20, 8, 'wireless|router','Routerboard 133C', NULL, 1, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(21, 8, 'wireless|router','Routerboard 133', NULL, 3, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(22, 8, 'wireless|router','Routerboard 112', NULL, 2, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(23, 8, 'wireless|router','Routerboard 153', NULL, 3, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3|ether4|ether5', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(24, 8, 'wireless|router','Supertrasto guifiBUS guifi.net', NULL, 24, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3|ether4|ether5', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(25, 10, 'wireless|router','NanoStation2', 'Extern', 1, 1, 0, 0,NULL, 400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ns2.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(26, 10, 'wireless|router','NanoStation5', 'Extern', 1, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ns5.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(27, 8, 'wireless|router','Routerboard 600', 'Extern', 8, 1, 0, 0,NULL,400, 'Si', 'Si', 'Si', 'wLan/Lan|ether2|ether3', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(28, 8, 'wireless|router','Routerboard 333', NULL, 6, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(29, 8, 'wireless|router','Routerboard 411', NULL, 6, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(30, 11, 'wireless|router','Meraki/Fonera', 'Extern', 1, 1, 0, 0,NULL,60, 'Si', 'Yes', 'Si', 'wLan/Lan', 'http://meraki.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(31, 8, 'wireless|router','Routerboard 433', NULL, 6, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(32, 10, 'wireless|router','LiteStation2', 'Extern', 1, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ls2.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(33, 10, 'wireless|router','LiteStation5', 'Extern', 1, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ls5.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(34, 10, 'wireless|router','NanoStation Loco2', 'Extern', 1, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(35, 10, 'wireless|router','NanoStation Loco5', 'Extern', 1, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(36, 10, 'wireless|router','Bullet2', 'Extern', 1, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(37, 10, 'wireless|router','Bullet5', 'Extern', 1, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(38, 10, 'wireless|router','RouterStation', 'Extern', 4, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ls5.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(39, 12, 'wireless|router','Avila GW2348-4', 'Extern', 4, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://www.gateworks.com/products/avila/gw2348-4.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(40, 13, 'wireless|router','Asus WL-500xx', 'Extern', 1, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://asus.com/products.aspx?l1=29&l2=172&l3=743&l4=60&model=1277&modelmenu=1', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(41, 14, 'wireless|router','Alix1', 'Extern', 5, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'wLan/Lan|eth0|eth1|eth2', 'http://www.pcengines.ch/alix1d.htm', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(42, 14, 'wireless|router','Alix2', 'Extern', 2, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'wLan/Lan|eth0|eth1|eth2', 'http://www.pcengines.ch/alix2d.htm', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(43, 14, 'wireless|router','Alix3', 'Extern', 2, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'wLan/Lan|eth0|eth1|eth2', 'http://www.pcengines.ch/alix3d.htm', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(44, 8, 'wireless|router','Routerboard 800', NULL, 8, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3|ether4|ether5|ether6|ether7|ether8|ether9', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(45, 10, 'wireless|router','AirMaxM2 Rocket/Nano/Loco', 'Extern', 1, 1, 0, 0,NULL,100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(46, 10, 'wireless|router','AirMaxM5 Rocket/Nano/Loco', 'Extern', 1, 1, 0, 0,NULL,100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(47, 10, 'wireless|router','AirMaxM2 Bullet/PwBrg/AirGrd/NanoBr', 'Extern', 1, 1, 0, 0,NULL,100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(48, 10, 'wireless|router','AirMaxM5 Bullet/PwBrg/AirGrd/NanoBr', 'Extern', 1, 1, 0, 0,NULL,100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(49, 15, 'wireless|router','GuifiStation2', 'Extern', 1, 1, 0, 0,NULL,100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://tienda.setupinformatica.com/wac/detalle.php?codigo=CPEGS2', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(50, 15, 'wireless|router','GuifiStation5', 'Extern', 1, 1, 0, 0,NULL,100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://tienda.setupinformatica.com/wac/detalle.php?codigo=CPEGS5', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(51, 10, 'wireless|router','RouterStationPro', 'Extern', 4, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/rspro', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(52, 8, 'wireless|router','Routerboard 750/G', 'Extern', 0, 5, 0, 0,NULL,400, 'Yes', 'Yes', 'Yes', 'Lan/Lan|ether1|ether2|ether3|ether4|ether5', 'http://www.routerboard.com/pricelist.php?showProduct=90', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(53, 8, 'wireless|router','Routerboard SXT 5HnD', NULL, 1, 1, 0, 0,NULL,NULL, 'Yes', 'Yes', 'Yes', 'wlan1|ether1', 'http://www.routerboard.com/index.php?showProduct=108', NULL, 'Yes', '', 0, 0, 0, 0),
+(54, 8, 'router','Routerboard 1100', NULL, 0, 13, 0, 1,NULL,NULL, 'Yes', 'No', 'Yes', 'Lan/Lan|ether1|ether2|ether3|ether4|ether5|ether6|ether7|ether8|ether9|ether10|ether11|ether12|ether13', 'http://www.routerboard.com/index.php?showProduct=98', NULL, 'Yes', '', 0, 0, 0, 0);");
 
   // --
   // -- user status types
@@ -863,6 +873,43 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('4', 'sla', '24x5', '24x5: Labour days/all times');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('5', 'sla', '24x7', '24x7: All days/times');");
 
+  // --
+  // -- Model Class types
+  // --
+  update_sql("DELETE FROM `guifi_types` WHERE `type` = 'model_class'");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES " .
+  		"('1', 'model_class', 'wireless', 'wireless')," .
+  		"('2', 'model_class', 'router', 'router')," .
+  		"('3', 'model_class', 'fiber', 'fiber optics')," .
+  		"('4', 'model_class', 'switch', 'switch or hub')" .
+  		";");
+
+  // --
+  // -- FO port types
+  // --
+  update_sql("DELETE FROM `guifi_types` WHERE `type` = 'fo_port'");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES " .
+  		"('1', 'fo_port', 'LX', '10km 1310nm SM duplex')," .
+  		"('2', 'fo_port', 'EX', '40km 1310nm SM duplex')," .
+  		"('3', 'fo_port', 'XD', '40km 1550nm SM duplex')," .
+  		"('4', 'fo_port', 'ZX', '80km 1550nm SM duplex')," .
+  		"('5', 'fo_port', 'EZX', '120km 1550nm SM duplex')," .
+  		"('6', 'fo_port', 'BX', '10km 1550nm SM single fiber')," .
+  		"('7', 'fo_port', 'CWDM', 'Various wavelengths single fiber')," .
+  		"('8', 'fo_port', 'SFSW', 'CWDM coupled Single wavelength')," .
+  		"('9', 'fo_port', 'SX', '850nm MM duplex')" .
+  		";");
+
+  // --
+  // -- FO connection types
+  // --
+  update_sql("DELETE FROM `guifi_types` WHERE `type` = 'fo_conn'");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES " .
+  		"('1', 'fo_conn', 'fusion', 'fusion')," .
+  		"('2', 'fo_conn', 'SC', 'SC connector')," .
+  		"('3', 'fo_conn', 'LC', 'LC Connector')" .
+  		";");
+
 }
 
 // --
@@ -889,7 +936,7 @@ function guifi_update_1() {
 
 // Update some fields with a new names , types and lengths.
 
-    $items[] = update_sql("ALTER TABLE `guifi_model`
+    $items[] = update_sql("ALTER TABLE `guifi_model_specs`
                            CHANGE `mid` `mid` INT( 11 ) NOT NULL AUTO_INCREMENT ,
                            CHANGE model model VARCHAR( 40 ) NOT NULL DEFAULT '' ,
                            CHANGE `tipus` `tipus` VARCHAR( 10 ) NULL COMMENT 'Extern, PCI, PCMCIA' ,
@@ -1187,7 +1234,7 @@ function guifi_update_700() {
   $items = array();
 
   $items[] = update_sql("INSERT INTO {guifi_manufacturer} (fid ,nom ,url) VALUES ('12', 'Gateworks', 'http://www.gateworks.com'),('13', 'Asus', 'http://www.asus.com');");
-  $items[] = update_sql("INSERT INTO {guifi_model} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES
+  $items[] = update_sql("INSERT INTO {guifi_model_specs} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES
   ('34', '10', 'NanoStation Loco2', 'Extern', '1', '400', '802.11bg', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes'),
   ('35', '10', 'NanoStation Loco5', 'Extern', '1', '400', '802.11a', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes'),
   ('36', '10', 'Bullet2', 'Extern', '1', '400', '802.11bg', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes'),
@@ -1208,7 +1255,7 @@ function guifi_update_736() {
   $items = array();
 
   $items[] = update_sql("INSERT INTO {guifi_manufacturer} (fid ,nom ,url) VALUES ('14', 'Pcengines', 'http://www.pcengines.ch');");
-  $items[] = update_sql("INSERT INTO {guifi_model} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES
+  $items[] = update_sql("INSERT INTO {guifi_model_specs} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES
   (41, 14, 'Alix1', 'Extern', 5, 400, '802.11bg', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'wLan/Lan', 'http://www.pcengines.ch/alix1d.htm', 'Permet Firmwares de tercers', 'Yes'),
   (42, 14, 'Alix2', 'Extern', 2, 400, '802.11bg', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'wLan/Lan|ether2', 'http://www.pcengines.ch/alix2d.htm', 'Permet Firmwares de tercers', 'Yes'),
   (43, 14, 'Alix3', 'Extern', 2, 400, '802.11bg', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'wLan/Lan', 'http://www.pcengines.ch/alix3d.htm', 'Permet Firmwares de tercers', 'Yes'),
@@ -1236,7 +1283,7 @@ function guifi_update_743() {
 function guifi_update_768() {
   $items = array();
 
-  $items[] = update_sql("INSERT INTO {guifi_model} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES
+  $items[] = update_sql("INSERT INTO {guifi_model_specs} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES
    (45, 10, 'AirMaxM2 Rocket/Nano/Loco', 'Extern', 1, 100, '802.11bg', 'Yes', 'No', 'Si', 'Si','Si', NULL, '1', 'Si', 'Si', NULL, 'Si', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers','Yes'),
    (46, 10, 'AirMaxM5 Rocket/Nano/Loco', 'Extern', 1, 100, '802.11a', 'Yes', 'No', 'si', 'Si', 'Si', NULL, '1', 'Si', 'Si', NULL, 'Si', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers','Yes'),
    (47, 10, 'AirMaxM2 Bullet/PwBrg/AirGrd/NanoBr', 'Extern', 1, 100, '802.11bg', 'Yes', 'No', 'Si', 'Si','Si', NULL, '1', 'Si', 'Si', NULL, 'Si', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers','Yes'),
@@ -1263,7 +1310,7 @@ function guifi_update_849() {
 function guifi_update_851() {
   $items = array();
   $items[] = update_sql("INSERT INTO {guifi_manufacturer} VALUES (15, 'Setup Informatica', 'http://www.setup.cat');");
-  $items[] = update_sql("INSERT INTO {guifi_model} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES
+  $items[] = update_sql("INSERT INTO {guifi_model_specs} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES
   (49, 15, 'GuifiStation2', 'Extern', 1, 100, '802.11bg', 'Yes', 'No', 'si', 'Si', 'Si', NULL, '1', 'Si', 'Si', NULL, 'Si', 'Si', 'eth0|ath0', 'http://tienda.setupinformatica.com/wac/detalle.php?codigo=CPEGS2', 'Permet Firmwares de tercers', 'Yes'),
   (50, 15, 'GuifiStation5', 'Extern', 1, 100, '802.11a', 'Yes', 'No', 'si', 'Si', 'Si', NULL, '1', 'Si', 'Si', NULL, 'Si', 'Si', 'eth0|ath0', 'http://tienda.setupinformatica.com/wac/detalle.php?codigo=CPEGS5', 'Permet Firmwares de tercers', 'Yes');");
   $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('17', 'firmware', 'GSOS', 'GuifiStationOS from Setup Informatica', 'GuifiStation2|GuifiStation5');");
@@ -1284,16 +1331,16 @@ function guifi_update_873() {
 
 function guifi_update_874() {
    $items = array();
-   $items[] = update_sql("UPDATE {guifi_model} SET model = 'Routerboard 532' WHERE mid =19");
-   $items[] = update_sql("UPDATE {guifi_model} SET model = 'Routerboard 133C' WHERE mid =20");
-   $items[] = update_sql("UPDATE {guifi_model} SET model = 'Routerboard 133' WHERE mid =21");
-   $items[] = update_sql("UPDATE {guifi_model} SET model = 'Routerboard 112' WHERE mid =22");
-   $items[] = update_sql("UPDATE {guifi_model} SET model = 'Routerboard 153' WHERE mid =23");
-   $items[] = update_sql("UPDATE {guifi_model} SET model = 'Routerboard 600' WHERE mid =27");
-   $items[] = update_sql("UPDATE {guifi_model} SET model = 'Routerboard 333' WHERE mid =28");
-   $items[] = update_sql("UPDATE {guifi_model} SET model = 'Routerboard 411' WHERE mid =29");
-   $items[] = update_sql("UPDATE {guifi_model} SET model = 'Routerboard 433' WHERE mid =31");
-   $items[] = update_sql("UPDATE {guifi_model} SET model = 'Routerboard 800' WHERE mid =44");
+   $items[] = update_sql("UPDATE {guifi_model_specs} SET model = 'Routerboard 532' WHERE mid =19");
+   $items[] = update_sql("UPDATE {guifi_model_specs} SET model = 'Routerboard 133C' WHERE mid =20");
+   $items[] = update_sql("UPDATE {guifi_model_specs} SET model = 'Routerboard 133' WHERE mid =21");
+   $items[] = update_sql("UPDATE {guifi_model_specs} SET model = 'Routerboard 112' WHERE mid =22");
+   $items[] = update_sql("UPDATE {guifi_model_specs} SET model = 'Routerboard 153' WHERE mid =23");
+   $items[] = update_sql("UPDATE {guifi_model_specs} SET model = 'Routerboard 600' WHERE mid =27");
+   $items[] = update_sql("UPDATE {guifi_model_specs} SET model = 'Routerboard 333' WHERE mid =28");
+   $items[] = update_sql("UPDATE {guifi_model_specs} SET model = 'Routerboard 411' WHERE mid =29");
+   $items[] = update_sql("UPDATE {guifi_model_specs} SET model = 'Routerboard 433' WHERE mid =31");
+   $items[] = update_sql("UPDATE {guifi_model_specs} SET model = 'Routerboard 800' WHERE mid =44");
    $items[] = update_sql("UPDATE {guifi_types} SET `relations` = 'Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net' WHERE id = 6 AND type = 'firmware'");
    $items[] = update_sql("UPDATE {guifi_types} SET `relations` = 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Wrap|Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153' WHERE id = 7 AND type = 'firmware'");
    $items[] = update_sql("UPDATE {guifi_types} SET `relations` = 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Meraki/Fonera|Wrap|Routerboard 532|Routerboard 133|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|NanoStation2|NanoStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|Avila GW2348-4|Asus WL-500xx|Alix1|Alix2|Alix3' WHERE id = 8 AND type = 'firmware'");
@@ -1306,7 +1353,7 @@ function guifi_update_874() {
 function guifi_update_891() {
    $items = array();
    $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('18', 'firmware', 'gsffirm', 'Firmware de GràciaSenseFils MANET', 'Alix2|Alix3|WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Asus WL-500xx|WHR-HP-G54, WHR-G54S|NanoStation2|NanoStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Meraki/Fonera');");
-   $items[] = update_sql("INSERT INTO {guifi_model} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES
+   $items[] = update_sql("INSERT INTO {guifi_model_specs} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES
                                         (51, 10, 'RouterStationPro', 'Extern', 4, 400, '802.11abg', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'Wan', 'http://ubnt.com/rspro', 'Permet Firmwares de tercers', 'Yes');");
    $items[] = update_sql("UPDATE {guifi_types} SET relations = 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Asus WL-500xx|WHR-HP-G54, WHR-G54S|NanoStation2|NanoStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Avila GW2348-4' WHERE id = 4 AND type = 'firmware'");
    $items[] = update_sql("UPDATE {guifi_types} SET relations = 'WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Meraki/Fonera|Wrap|Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|NanoStation2|NanoStation5|NanoStation Loco2|NanoStation Loco5|Bullet2|Bullet5|RouterStation|RouterStationPro|Avila GW2348-4|Asus WL-500xx|Alix1|Alix2|Alix3' WHERE id = 8 AND type = 'firmware'");
@@ -1341,10 +1388,10 @@ function guifi_update_896() {
 
 function guifi_update_900() {
  $items = array();
- $items[] = update_sql("ALTER TABLE {guifi_model} ADD etherdev_max tinyint(2) NOT NULL DEFAULT 1 AFTER radiodev_max");
+ $items[] = update_sql("ALTER TABLE {guifi_model_specs} ADD etherdev_max tinyint(2) NOT NULL DEFAULT 1 AFTER radiodev_max");
  $items[] = update_sql("ALTER TABLE {guifi_interfaces} ADD etherdev_counter tinyint(2) AFTER radiodev_counter");
  $items[] = update_sql("ALTER TABLE {guifi_radios} ADD etherdev_counter tinyint(2) AFTER radiodev_counter");
- $items[] = update_sql("INSERT INTO {guifi_model} (mid ,fid ,model ,tipus ,radiodev_max , etherdev_max, potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES
+ $items[] = update_sql("INSERT INTO {guifi_model_specs} (mid ,fid ,model ,tipus ,radiodev_max , etherdev_max, potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES
                                       (52, 8, 'Routerboard 750/750G', 'Extern', '0', '5', '400', '802.11abg', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'None', '0', 'Yes','Yes', 'Yes', 'Yes', 'Yes', 'ether1|ether2|ether3|ether4|ether5', 'http://www.routerboard.com/pricelist.php?showProduct=90', 'Permet Firmwares de tercers', 'Yes');");
  $items[] = update_sql("UPDATE {guifi_types} SET `relations` = 'Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|Routerboard 600|Routerboard 411|Routerboard 333|Routerboard 433|Routerboard 800|Routerboard 750/750G' WHERE id = 16 AND type = 'firmware'");
  $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('19', 'firmware', 'RouterOSv5.x', 'RouterOS 5.x or newer from Mikrotik', 'Routerboard 532|Routerboard 133C|Routerboard 133|Routerboard 112|Routerboard 153|Supertrasto guifiBUS guifi.net|Routerboard 600|Routerboard 411|Routerboard 333|Routerboard 433|Routerboard 800|Routerboard 750/750G');");
@@ -1359,17 +1406,17 @@ function guifi_update_901() {
 
 function guifi_update_902() {
    $items = array();
-   $items[] = update_sql("ALTER TABLE {guifi_model} ADD notification varchar(1024) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL AFTER supported");
-   $items[] = update_sql("ALTER TABLE {guifi_model} ADD user_created mediumint(9) NOT NULL AFTER notification");
-   $items[] = update_sql("ALTER TABLE {guifi_model} ADD user_changed mediumint(9) NOT NULL AFTER user_created");
-   $items[] = update_sql("ALTER TABLE {guifi_model} ADD timestamp_created int(11) NOT NULL AFTER user_changed");
-   $items[] = update_sql("ALTER TABLE {guifi_model} ADD timestamp_changed int(11) NOT NULL AFTER timestamp_created");
+   $items[] = update_sql("ALTER TABLE {guifi_model_specs} ADD notification varchar(1024) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL AFTER supported");
+   $items[] = update_sql("ALTER TABLE {guifi_model_specs} ADD user_created mediumint(9) NOT NULL AFTER notification");
+   $items[] = update_sql("ALTER TABLE {guifi_model_specs} ADD user_changed mediumint(9) NOT NULL AFTER user_created");
+   $items[] = update_sql("ALTER TABLE {guifi_model_specs} ADD timestamp_created int(11) NOT NULL AFTER user_changed");
+   $items[] = update_sql("ALTER TABLE {guifi_model_specs} ADD timestamp_changed int(11) NOT NULL AFTER timestamp_created");
    $items[] = update_sql("ALTER TABLE {guifi_manufacturer} ADD notification varchar(1024) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL AFTER url");
    $items[] = update_sql("ALTER TABLE {guifi_manufacturer} ADD user_created mediumint(9) NOT NULL AFTER notification");
    $items[] = update_sql("ALTER TABLE {guifi_manufacturer} ADD user_changed mediumint(9) NOT NULL AFTER user_created");
    $items[] = update_sql("ALTER TABLE {guifi_manufacturer} ADD timestamp_created int(11) NOT NULL AFTER user_changed");
    $items[] = update_sql("ALTER TABLE {guifi_manufacturer} ADD timestamp_changed int(11) NOT NULL AFTER timestamp_created");
-   $items[] = update_sql("ALTER TABLE {guifi_model}
+   $items[] = update_sql("ALTER TABLE {guifi_model_specs}
   DROP potencia_max,
   DROP modes,
   DROP WDS,
@@ -1388,24 +1435,24 @@ function guifi_update_902() {
    $items[] = update_sql("DELETE FROM {guifi_manufacturer} WHERE fid = 5");
    $items[] = update_sql("DELETE FROM {guifi_manufacturer} WHERE fid = 6");
    $items[] = update_sql("DELETE FROM {guifi_manufacturer} WHERE fid = 7");
-   $items[] = update_sql("DELETE FROM {guifi_model WHERE mid = 2");
-   $items[] = update_sql("DELETE FROM {guifi_model WHERE mid = 3");
-   $items[] = update_sql("DELETE FROM {guifi_model WHERE mid = 4");
-   $items[] = update_sql("DELETE FROM {guifi_model WHERE mid = 5");
-   $items[] = update_sql("DELETE FROM {guifi_model WHERE mid = 6");
-   $items[] = update_sql("DELETE FROM {guifi_model WHERE mid = 7");
-   $items[] = update_sql("DELETE FROM {guifi_model WHERE mid = 8");
-   $items[] = update_sql("DELETE FROM {guifi_model WHERE mid = 10");
-   $items[] = update_sql("DELETE FROM {guifi_model WHERE mid = 11");
-   $items[] = update_sql("DELETE FROM {guifi_model WHERE mid = 12");
-   $items[] = update_sql("DELETE FROM {guifi_model WHERE mid = 13");
-   $items[] = update_sql("DELETE FROM {guifi_model WHERE mid = 14");
+   $items[] = update_sql("DELETE FROM {guifi_model_specs WHERE mid = 2");
+   $items[] = update_sql("DELETE FROM {guifi_model_specs WHERE mid = 3");
+   $items[] = update_sql("DELETE FROM {guifi_model_specs WHERE mid = 4");
+   $items[] = update_sql("DELETE FROM {guifi_model_specs WHERE mid = 5");
+   $items[] = update_sql("DELETE FROM {guifi_model_specs WHERE mid = 6");
+   $items[] = update_sql("DELETE FROM {guifi_model_specs WHERE mid = 7");
+   $items[] = update_sql("DELETE FROM {guifi_model_specs WHERE mid = 8");
+   $items[] = update_sql("DELETE FROM {guifi_model_specs WHERE mid = 10");
+   $items[] = update_sql("DELETE FROM {guifi_model_specs WHERE mid = 11");
+   $items[] = update_sql("DELETE FROM {guifi_model_specs WHERE mid = 12");
+   $items[] = update_sql("DELETE FROM {guifi_model_specs WHERE mid = 13");
+   $items[] = update_sql("DELETE FROM {guifi_model_specs WHERE mid = 14");
 
    $items[] = update_sql("ALTER TABLE {guifi_manufacturer} CHANGE nom name VARCHAR( 40 ) CHARACTER SET utf8 COLLATE utf8_general_ci NOT NULL DEFAULT ''");
-   $items[] = update_sql("ALTER TABLE {guifi_model} CHANGE tipus type VARCHAR( 10 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT 'Extern, PCI, PCMCIA'");
-   $items[] = update_sql("ALTER TABLE {guifi_model} CHANGE comentaris comments VARCHAR( 240 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL");
+   $items[] = update_sql("ALTER TABLE {guifi_model_specs} CHANGE tipus type VARCHAR( 10 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL COMMENT 'Extern, PCI, PCMCIA'");
+   $items[] = update_sql("ALTER TABLE {guifi_model_specs} CHANGE comentaris comments VARCHAR( 240 ) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL");
 
-   $items[] = update_sql("UPDATE {guifi_model} SET mid = '3', fid = '1' WHERE mid =99;");
+   $items[] = update_sql("UPDATE {guifi_model_specs} SET mid = '3', fid = '1' WHERE mid =99;");
    $items[] = update_sql("UPDATE {guifi_manufacturer} SET fid = '99' WHERE fid =1;");
    $items[] = update_sql("UPDATE {guifi_devices} SET extra = REPLACE( extra,'8:\"model_id\";s:1:\"2\"', '8:\"model_id\";s:1:\"3\"')");
    $items[] = update_sql("UPDATE {guifi_devices} SET extra = REPLACE( extra,'8:\"model_id\";s:1:\"4\"', '8:\"model_id\";s:1:\"3\"')");
@@ -2371,6 +2418,75 @@ function guifi_update_1009() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('14', 'device', 'Torpedo', 'Torpedo - Joint enclosure');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('15', 'device', 'Switch', 'Switch');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('16', 'device', 'Rack', 'Rack');");
+
+  return $items;
+
+}
+
+function guifi_update_1013() {
+
+  $items = array();
+
+  $items[] = update_sql("RENAME TABLE {guifi_model} TO {guifi_model_specs};");
+
+  return $items;
+
+}
+
+function guifi_update_1018() {
+
+  $items = array();
+
+  $items[] = update_sql("ALTER TABLE guifi_model_specs " .
+  		"ADD COLUMN model_class VARCHAR(240) DEFAULT 'wireless|router' COMMENT 'device category (radio, router, switch...)' NOT NULL AFTER model, " .
+  		"ADD COLUMN optoports_max TINYINT(2) DEFAULT 0 COMMENT 'device category (radio, router, switch...)' NOT NULL AFTER etherdev_max, " .
+  		"ADD COLUMN rackeable TINYINT(2) DEFAULT 0 COMMENT 'Rackeable (>0 true, # of Us))' NOT NULL AFTER optoports_max, " .
+  		"ADD COLUMN opto_interfaces VARCHAR(240) NULL COMMENT 'map to ethernet interafaces' AFTER interfaces;");
+
+  return $items;
+
+}
+
+function guifi_update_1019() {
+
+  $items = array();
+
+  $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description) VALUES " .
+  		"('1', 'fo_port', 'LX', '10km 1310nm SM duplex')," .
+  		"('2', 'fo_port', 'EX', '40km 1310nm SM duplex')," .
+  		"('3', 'fo_port', 'XD', '40km 1550nm SM duplex')," .
+  		"('4', 'fo_port', 'ZX', '80km 1550nm SM duplex')," .
+  		"('5', 'fo_port', 'EZX', '120km 1550nm SM duplex')," .
+  		"('6', 'fo_port', 'BX', '10km 1550nm SM single fiber')," .
+  		"('7', 'fo_port', 'CWDM', 'Various wavelengths single fiber')," .
+  		"('8', 'fo_port', 'SFSW', 'CWDM coupled Single wavelength')," .
+  		"('9', 'fo_port', 'SX', '850nm MM duplex')" .
+  		";");
+
+  $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description) VALUES " .
+  		"('1', 'fo_conn', 'fusion', 'fusion')," .
+  		"('2', 'fo_conn', 'SC', 'SC connector')," .
+  		"('3', 'fo_conn', 'LC', 'LC Connector')" .
+  		";");
+
+  return $items;
+
+}
+
+function guifi_update_1020() {
+
+  $items = array();
+
+
+  $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description) VALUES " .
+  		"('17', 'device', 'PPanel','Patch panel');");
+
+  $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description) VALUES " .
+  		"('1', 'model_class', 'wireless', 'wireless')," .
+  		"('2', 'model_class', 'router', 'router')," .
+  		"('3', 'model_class', 'fiber', 'fiber optics')," .
+  		"('4', 'model_class', 'switch', 'switch or hub')" .
+  		";");
 
   return $items;
 
