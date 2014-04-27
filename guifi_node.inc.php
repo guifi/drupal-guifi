@@ -472,7 +472,7 @@ function guifi_node_form(&$node, $form_state) {
       '#title' => t("Node status"),
       '#default_value' => ( $node->status_flag ? $node->status_flag : 'Planned') ,
       '#required' => FALSE,
-      '#options' => array('Dropped' => t('Dropped'),'Inactive' => t('Inactive'),'Planned' => t('Planned')),
+      '#options' => array('Reserved' => t('Reserved'),'Inactive' => t('Inactive'),'Planned' => t('Planned')),
     );
   } else {
     $form['status_flag'] = array(
