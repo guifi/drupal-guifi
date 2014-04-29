@@ -1452,6 +1452,7 @@ function theme_guifi_zone_nodes($node,$links = TRUE) {
       array('data' => t('Planned'), NULL, NULL,'style' => 'text-align: right'),
       array('data' => t('Building'), NULL, NULL,'style' => 'text-align: right'),
       array('data' => t('Testing'), NULL, NULL,'style' => 'text-align: right'),
+      array('data' => t('Inactive'), NULL, NULL,'style' => 'text-align: right'),
       array('data' => t('Total'), NULL, NULL,'style' => 'text-align: right'));
   while ($zone = db_fetch_object($result)) {
     $summary = guifi_zone_totals(guifi_zone_childs($zone->id));
@@ -1461,6 +1462,7 @@ function theme_guifi_zone_nodes($node,$links = TRUE) {
       array('data' => number_format($summary['Planned'] ,0, NULL,variable_get('guifi_thousand','.')),'class' => 'Planned','align' => 'right'),
       array('data' => number_format($summary['Building'],0, NULL,variable_get('guifi_thousand','.')),'class' => 'Building','align' => 'right'),
       array('data' => number_format($summary['Testing'] ,0, NULL,variable_get('guifi_thousand','.')),'class' => 'Testing','align' => 'right'),
+      array('data' => number_format($summary['Inactive'] ,0, NULL,variable_get('guifi_thousand','.')),'class' => 'Inactive','align' => 'right'),
       array('data' => number_format($summary['Total']   ,0, NULL,variable_get('guifi_thousand','.')),'class' => 'Total','align' => 'right'));
     if (!empty($summary))
       foreach ($summary as $key => $sum)
@@ -1474,6 +1476,7 @@ function theme_guifi_zone_nodes($node,$links = TRUE) {
     array('data' => number_format($totals['Planned'] ,0, NULL,variable_get('guifi_thousand','.')), 'class' => 'Planned','align' => 'right'),
     array('data' => number_format($totals['Building'],0, NULL,variable_get('guifi_thousand','.')),'class' => 'Building','align' => 'right'),
     array('data' => number_format($totals['Testing'] ,0, NULL,variable_get('guifi_thousand','.')), 'class' => 'Testing','align' => 'right'),
+    array('data' => number_format($totals['Inactive'] ,0, NULL,variable_get('guifi_thousand','.')), 'class' => 'Inactive','align' => 'right'),
     array('data' => number_format($totals['Total']   ,0, NULL,variable_get('guifi_thousand','.')),'class' => 'Total','align' => 'right'));
 
    if (count($rows)>1)
