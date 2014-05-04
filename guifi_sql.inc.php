@@ -289,6 +289,8 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
  }
 
   // execute SQL statement
+  guifi_log(GUIFILOG_TRACE,"function _guifi_sql($sql_str)",$new_data);
+
   $log .= $sql_str . ' (' . implode(', ', $new_data) . ')<br />';
   db_query($sql_str, $new_data);
   return ($data);

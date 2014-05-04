@@ -183,6 +183,11 @@ function guifi_schema() {
          'etherdev_counter' => array('type' => 'int', 'size' => 'tiny', 'not null' => FALSE, 'comment' => 'if not NULL, foreign key to guifi_radios(etherdev_counter)'),
          'interface_type' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE),
          'mac' => array('type' => 'varchar', 'length' => '20', 'not null' => TRUE, 'default' => '00:00:00:00:00:00')),
+  		 'connector_type' => array('type' => 'varchar','length' => '10', 'not null' => FALSE, 'default' => NULL, 'comment' => 'connector type (RJ45,FO LX,SC...)'),
+  		 'vlan' => array('type' => 'varchar','length' => '10', 'not null' => FALSE, 'default' => NULL, 'comment' => 'vlan (if have)'),
+  		 'comments' => array('type' => 'varchar','length' => '64', 'not null' => FALSE, 'default' => NULL, 'Additional info/comments'),
+         'connto_did' => array('type' => 'int', 'size' => 'medium', 'not null' => FALSE, 'comment' => 'connected to (device)'),
+         'connto_iid' => array('type' => 'int', 'size' => 'medium', 'not null' => FALSE, 'comment' => 'connected to (interface)'),
     'primary key' => array('device_id', 'id'),
     'indexes' =>  array('id' => array('id'))
   );
@@ -452,14 +457,14 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('7', 'device', 'cam', 'Network camera. Live view.');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('8', 'device', 'generic', 'Any device that uses a public IP (PC, game console, laptop, pda..)');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('9', 'device', 'confine', 'Node Confine/Clommunity');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('10', 'device', 'ONU', 'xPON ONU User Unit (Final)');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('11', 'device', 'OLT', 'xPON OLT Concentrator (Terminal)');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('10', 'device', 'onu', 'xPON ONU User Unit (Final)');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('11', 'device', 'olt', 'xPON OLT Concentrator (Terminal)');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('12', 'device', 'splitter', 'xPON Splitter');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('13', 'device', 'FOMConv', 'FO Media Converter');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('14', 'device', 'Torpedo', 'Torpedo - Joint enclosure');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('15', 'device', 'Switch', 'Switch');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('16', 'device', 'Rack', 'Rack');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('17', 'device', 'Patch panel');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('13', 'device', 'fomconv', 'FO Media Converter');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('14', 'device', 'torpedo', 'Torpedo - Joint enclosure');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('15', 'device', 'switch', 'Switch');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('16', 'device', 'rack', 'Rack');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('17', 'device', 'ppanel','patch panel');");
 
   // --
   // -- service types
@@ -889,15 +894,15 @@ function guifi_install() {
   // --
   update_sql("DELETE FROM `guifi_types` WHERE `type` = 'fo_port'");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES " .
-  		"('1', 'fo_port', 'LX', '10km 1310nm SM duplex')," .
-  		"('2', 'fo_port', 'EX', '40km 1310nm SM duplex')," .
-  		"('3', 'fo_port', 'XD', '40km 1550nm SM duplex')," .
-  		"('4', 'fo_port', 'ZX', '80km 1550nm SM duplex')," .
-  		"('5', 'fo_port', 'EZX', '120km 1550nm SM duplex')," .
-  		"('6', 'fo_port', 'BX', '10km 1550nm SM single fiber')," .
-  		"('7', 'fo_port', 'CWDM', 'Various wavelengths single fiber')," .
-  		"('8', 'fo_port', 'SFSW', 'CWDM coupled Single wavelength')," .
-  		"('9', 'fo_port', 'SX', '850nm MM duplex')" .
+  		"('1', 'fo_port', 'LX',  'LX 10km 1310nm SM duplex')," .
+  		"('2', 'fo_port', 'EX',  'EX 40km 1310nm SM duplex')," .
+  		"('3', 'fo_port', 'XD',  'XD 40km 1550nm SM duplex')," .
+  		"('4', 'fo_port', 'ZX',  'ZX 80km 1550nm SM duplex')," .
+  		"('5', 'fo_port', 'EZX', 'EZX 120km 1550nm SM duplex')," .
+  		"('6', 'fo_port', 'BX',  'BX 10km 1550nm SM single')," .
+  		"('7', 'fo_port', 'CWDM','CWDM Various Wavelengths')," .
+  		"('8', 'fo_port', 'SFSW','SFSW Single Wlength to CWDM')," .
+  		"('9', 'fo_port', 'SX',  'SX 850nm MM duplex')" .
   		";");
 
   // --
@@ -2288,8 +2293,8 @@ function guifi_update_1000() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('7', 'link', 'DuplexFO', 'Duplex P2P link', '');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('8', 'link', 'SimplexFO', 'Simplex P2P link', '');");
 
-  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('10', 'device', 'ONU', 'xPON ONU User Unit (Final)');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('11', 'device', 'OLT', 'xPON OLT Concentrator (Terminal)');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('10', 'device', 'onu', 'xPON ONU User Unit (Final)');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('11', 'device', 'olt', 'xPON OLT Concentrator (Terminal)');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('12', 'device', 'splitter', 'xPON Splitter');");
 
   return $items;
@@ -2404,7 +2409,7 @@ function guifi_update_1008() {
   $items = array();
 
 
-  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('13', 'device', 'FOMConv', 'FO Media Converter');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('13', 'device', 'fomconv', 'FO Media Converter');");
 
   return $items;
 
@@ -2415,9 +2420,9 @@ function guifi_update_1009() {
   $items = array();
 
 
-  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('14', 'device', 'Torpedo', 'Torpedo - Joint enclosure');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('15', 'device', 'Switch', 'Switch');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('16', 'device', 'Rack', 'Rack');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('14', 'device', 'torpedo', 'Torpedo - Joint enclosure');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('15', 'device', 'switch', 'Switch');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('16', 'device', 'rack', 'Rack');");
 
   return $items;
 
@@ -2488,6 +2493,52 @@ function guifi_update_1020() {
   		"('4', 'model_class', 'switch', 'switch or hub')" .
   		";");
 
+  return $items;
+
+}
+
+function guifi_update_1025() {
+
+  $items = array();
+
+  $items[] = update_sql("UPDATE {guifi_types} SET text=LOWER(text) WHERE text IN ('OLT','ONU','FOMConv','PPanel','Switch','Rack','Torpedo');");
+  $items[] = update_sql("UPDATE {guifi_devices} SET type=LOWER(type) WHERE type IN ('OLT','ONU','FOMConv','PPanel','Switch','Rack','Torpedo');");
+
+  return $items;
+
+}
+
+function guifi_update_1027() {
+
+  $items = array();
+
+  $items[] = update_sql("DELETE FROM {guifi_types} WHERE type = 'fo_port'");
+  $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description) VALUES " .
+  		"('1', 'fo_port', 'LX',  'LX 10km 1310nm SM duplex')," .
+  		"('2', 'fo_port', 'EX',  'EX 40km 1310nm SM duplex')," .
+  		"('3', 'fo_port', 'XD',  'XD 40km 1550nm SM duplex')," .
+  		"('4', 'fo_port', 'ZX',  'ZX 80km 1550nm SM duplex')," .
+  		"('5', 'fo_port', 'EZX', 'EZX 120km 1550nm SM duplex')," .
+  		"('6', 'fo_port', 'BX',  'BX 10km 1550nm SM single')," .
+  		"('7', 'fo_port', 'CWDM','CWDM Various Wavelengths')," .
+  		"('8', 'fo_port', 'SFSW','SFSW Single Wlength to CWDM')," .
+  		"('9', 'fo_port', 'SX',  'SX 850nm MM duplex')" .
+  		";");
+
+  return $items;
+
+}
+
+function guifi_update_1030() {
+
+  $items = array();
+
+  $items[] = update_sql("ALTER TABLE {guifi_interfaces} " .
+  		"ADD COLUMN connector_type VARCHAR(10) DEFAULT NULL COMMENT 'connector type (RJ45,FO LX,SC...)' AFTER mac," .
+  		"ADD COLUMN vlan VARCHAR(10) DEFAULT NULL COMMENT 'vlan (if have)'," .
+  		"ADD COLUMN comments VARCHAR(64) DEFAULT NULL COMMENT 'Additional info/comments'," .
+  		"ADD COLUMN connto_did MEDIUMINT(9) DEFAULT NULL COMMENT 'connected to (device)'," .
+  		"ADD COLUMN connto_iid MEDIUMINT(9) DEFAULT NULL COMMENT 'connected to (interface)'");
   return $items;
 
 }

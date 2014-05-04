@@ -2,23 +2,42 @@
   text-decoration: none;
 }
 
+
+
+.ports .form-item {
+  margin-top: 0em;
+  margin-bottom: 0em;
+}
+
+.ports td {
+  padding: 0em 0.5em;
+}
+
+.ports table {
+  width: 0%;
+}
+
 .maintainer-item, .funder-item {
   margin-top: 0em;
   margin-bottom: 0em;
   border: 0em;
-  float: left;
+  float: left; 
 }
 
 .maintainer-item >  .form-item,
 .funder-item >  .form-item {
-  float: left;
+  float: left; 
   margin-top: 0em;
   margin-bottom: 0em;
 } 
 
 .model-item > div.form-item {
-  float: left;
+  float: left; 
   margin-right: 0em;
+}
+
+.port-item > .fieldset-wrapper {
+  float: none;
 }
 
 #guifi th.Online, td.Online, th.Working, td.Working, td.Up {

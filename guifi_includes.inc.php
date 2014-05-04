@@ -444,8 +444,46 @@ function guifi_get_possible_interfaces($edit = array()) {
   return $possible;
 }
 
+/* guifi_get_device_interfaces(): Populates a select list with the available cable interfaces */
+function guifi_get_device_interfaces($id,$iid = NULL) {
 
-/* guifi_get_free_interfaces(): Populates a select list with the available cable interfaces */
+  $used = array(''=>t('Not defined'));
+
+  if (empty($id))
+    return $used;
+
+  if (empty($iid))
+    $iid = 0;
+
+  guifi_log(GUIFILOG_TRACE,'guifi_get_devicename(id - iid)',$id.' - '.$iid);
+  guifi_log(GUIFILOG_TRACE,'guifi_get_devicename(iid)',$id);
+
+  $did = explode('-',$id);
+
+  if (!is_numeric($did[0]))
+    return $used;
+
+  $sql_i = '
+    SELECT id, interface_type, connto_iid
+    FROM {guifi_interfaces}
+    WHERE device_id = ' .$did[0] .
+//    ' AND ((connto_did IS NULL AND connto_iid IS NULL) OR (id = '.$iid.')) ' .
+    ' AND ((radiodev_counter is NULL) or (upper(interface_type) IN ("WLAN/LAN"))) ';
+  guifi_log(GUIFILOG_TRACE,'guifi_get_devicename(sql)',$sql_i);
+
+  $qi = db_query($sql_i);
+
+  while ($i = db_fetch_object($qi)) {
+    if ( ((empty($i->connto_did)) and (empty($i->connto_iid)) ) or ($i->id == $iid))
+    if (!empty(trim($i->interface_type)))
+      $used[$i->id] = $i->interface_type;
+  }
+
+  return $used;
+}
+
+
+/* guifi_get_free_interfaces(): Populates a select list with the available & free cable interfaces */
 function guifi_get_free_interfaces($id,$edit = array()) {
 
   $possible = guifi_get_possible_interfaces($edit);
@@ -1278,6 +1316,7 @@ define('GUIFILOG_NONE',0);
 define('GUIFILOG_BASIC',1);
 define('GUIFILOG_TRACE',2);
 define('GUIFILOG_FULL',3);
+define('GUIFILOG_FILE',-1);
 
 function guifi_log($level, $var, $var2 = NULL) {
   global $user;
@@ -1299,7 +1338,12 @@ function guifi_log($level, $var, $var2 = NULL) {
   case 3: $m = t('FULL'); break;
   }
 
-  drupal_set_message('guifiLOG: '.$m.' '.$output);
+  if ($level == GUIFILOG_FILE) {
+  	$fp = fopen('/tmp/guifi.log',"a");
+  	fwrite($fp,date(DATE_RFC2822)."\n".$output."\n");
+  	fclose($fp);
+  } else
+    drupal_set_message('guifiLOG: '.$m.' '.$output);
 }
 
 function guifi_to_7bits($str) {
@@ -1746,14 +1790,19 @@ function guifi_nodename_validate($nodestr,&$form_state) {
 }
 
 function guifi_devicename_validate($devicestr,&$form_state) {
+  guifi_log(GUIFILOG_TRACE,'function guifi_devicename_validate()',$form_state['values']['form_id']);
+
+
   if (($form_state['clicked_button']['#value'] == t('Reset')) or
     empty($devicestr['#value']))
     return;
 
   $dev = explode('-',$devicestr['#value']);
-  $qry = db_query('SELECT id FROM {guifi_devices} WHERE id="%s"',$dev[0]);
+  $qry = db_query(
+    'SELECT id FROM {guifi_devices} WHERE id="%s"',$dev[0]);
   while ($device = db_fetch_array($qry)) {
-    $form_state['values']['nid']=$device['id'];
+    if ($form_state['values']['form_id'] != 'guifi_device_form')
+      $form_state['values']['nid']=$device['id'];
     return $devicestr;
   }
   form_error($devicestr,

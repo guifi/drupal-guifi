@@ -8,7 +8,7 @@
  * guifi_device_load(): get a device and all its related information and builds an array
  */
 function guifi_device_load($id,$ret = 'array') {
-  guifi_log(GUIFILOG_FULL,'function guifi_device_load()');
+  guifi_log(GUIFILOG_TRACE,'function guifi_device_load(id)',$id);
 
 /*  $device = db_fetch_array(db_query('
     SELECT d.*,
@@ -262,6 +262,29 @@ function guifi_device_load($id,$ret = 'array') {
     } // foreach ipv4
   }
 
+  guifi_log(GUIFILOG_TRACE,'function guifi_device_load(device '.$id.')',$device['type']);
+
+  // retrieve switch ports
+  if ($device['type']=='switch') {
+    $sql_ports =
+      'SELECT * ' .
+      'FROM {guifi_interfaces} i ' .
+      'WHERE device_id='.$id;
+    $qry_ports = db_query($sql_ports);
+    while ($port = db_fetch_object($qry_ports)) {
+      guifi_log(GUIFILOG_TRACE,'function guifi_device_load(port)',$port);
+      $device['ports'][$port->etherdev_counter] = array(
+         'iid'    =>$port->id,
+         'id'     =>$port->etherdev_counter,
+         'type'   =>$port->connector_type,
+         'vlan'   =>$port->vlan,
+         'comment'=>$port->comments,
+         'if'     =>$port->connto_iid,
+         'did'    =>guifi_get_devicename($port->connto_did,'large'),
+      );
+    }  // switch ports
+  }
+
   if ($ret == 'array')
     return $device;
   else {
@@ -340,14 +363,14 @@ function guifi_device_admin_url($d,$ip) {
 function guifi_device_form_submit($form, &$form_state) {
 
   guifi_log(GUIFILOG_TRACE,'function guifi_device_form_submit()',
-    $form_state);
+    $form_state['values']);
 
   if ($form_state['values']['id'])
-  if (!guifi_device_access('update',$form_state['values']['id']))
-  {
-    drupal_set_message(t('You are not authorized to edit this device','error'));
-    return;
-  }
+    if (!guifi_device_access('update',$form_state['values']['id']))
+    {
+      drupal_set_message(t('You are not authorized to edit this device','error'));
+      return;
+    }
 
   // Take the appropiate actions
   switch ($form_state['clicked_button']['#value']) {
@@ -364,6 +387,8 @@ function guifi_device_form_submit($form, &$form_state) {
 //    print_r($_POST);
 //    print_r($form_state['values']);
 //    exit;
+//    $id = guifi_device_save($form_state['clicked_button']['#post']);
+//    $id = guifi_device_save($form_state['clicked_button']['#post']);
     $id = guifi_device_save($form_state['values']);
 //    exit;
     if ($form_state['clicked_button']['#value'] == t('Save & exit'))
@@ -482,23 +507,26 @@ function guifi_device_form($form_state, $params = array()) {
     }
   }
 
-  $form_weight = -20;
+  $form_weight = 0;
 
   if ($form_state['values']['id'])
     $form['id'] = array(
       '#type' => 'hidden',
       '#name' => 'id',
-      '#value'=> $form_state['values']['id']
+      '#value'=> $form_state['values']['id'],
+      '#weight'=> $form_weight++,
     );
   else
     $form['new'] = array(
       '#type' => 'hidden',
       '#name' => 'new',
+      '#weight'=> $form_weight++,
       '#value'=> TRUE
     );
   $form['type'] = array(
     '#type' => 'hidden',
     '#name' => 'type',
+    '#weight'=> $form_weight++,
     '#value'=> $form_state['values']['type']
   );
 /*  $form['zone_mode'] = array(
@@ -535,6 +563,7 @@ function guifi_device_form($form_state, $params = array()) {
     '#type' => 'textfield',
     '#title' => t('Node'),
     '#maxlength' => 60,
+    '#weight'=> $form_weight++,
     '#default_value' => $form_state['values']['nid'].'-'.
         guifi_get_zone_nick(guifi_get_zone_of_node(
           $form_state['values']['nid'])).', '.
@@ -549,6 +578,7 @@ function guifi_device_form($form_state, $params = array()) {
   );
   $form['main']['nid'] = array(
     '#type' => 'hidden',
+    '#weight'=> $form_weight++,
     '#value'=> $form_state['values']['nid'],
     //'#suffix' => '</div>'
   );
@@ -561,6 +591,7 @@ function guifi_device_form($form_state, $params = array()) {
     '#required' => TRUE,
     '#attributes' => array('class' => 'required'),
     '#default_value' => $form_state['values']['nick'],
+    '#weight'=> $form_weight++,
     '#description' =>  t('The name of the device.<br />Used as a hostname, SSID, etc...')
   );
   $form['main']['flag'] = array(
@@ -569,6 +600,7 @@ function guifi_device_form($form_state, $params = array()) {
       '#required' => TRUE,
       '#default_value' => $form_state['values']['flag'],
       '#options' => guifi_types('status'),
+      '#weight'=> $form_weight++,
       '#description' => t("Current status of this device."),
    );
   $form['main']['notification'] = array(
@@ -579,6 +611,7 @@ function guifi_device_form($form_state, $params = array()) {
     '#required' => TRUE,
     '#element_validate' => array('guifi_emails_validate'),
     '#default_value' => $form_state['values']['notification'],
+    '#weight'=> $form_weight++,
     '#description' =>  t('Mailid where changes on the device will be notified, if many, separated by \',\'<br />used for network administration.')
   );
 
@@ -587,6 +620,7 @@ function guifi_device_form($form_state, $params = array()) {
     '#size' => 60,
     '#maxlength' => 60,
     '#title' => t('Log Server'),
+    '#weight'=> $form_weight++,
     '#description' =>  t('If you have a log server for mikrotik (dude), add your ip.')
   );
 
@@ -610,28 +644,31 @@ function guifi_device_form($form_state, $params = array()) {
       '#required' => FALSE,
       '#default_value' => ($node->graph_server ? $node->graph_server : 0),
       '#options' => array('0' => t('Default'),'-1' => t('None')) + guifi_services_select('SNPgraphs'),
+      '#weight'=> $form_weight++,
       '#description' => t("If not specified, inherits zone properties."),
     );
   }
 
+  guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans type)'),$form_weight);
   // create the device-type depenedent form
   // looking for a "guifi_"<device_type>"_form()" function
   if (function_exists('guifi_'.$form_state['values']['type'].'_form')){
     $form = array_merge($form,
-      call_user_func('guifi_'.$form_state['values']['type'].'_form',
-        $form_state['values'],
-        $form_weight));
+      call_user_func_array('guifi_'.$form_state['values']['type'].'_form',
+        array(
+          $form_state['values'],
+          &$form_weight)
+      ));
   }
 
+  guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans if cables)'),$form_weight);
   // Cable interfaces/links
-//  foreach ($form_state['values']['interfaces'] as $iid => $interface)
-//    $form['if'][$iid] =
-//        guifi_device_interface_form($interface,array('interfaces',$iid));
-  $form['if'] = guifi_interfaces_cable_form($form_state['values']);
+  $form['if'] = guifi_interfaces_cable_form($form_state['values'],$form_weight);
+  $form['if']['#weight'] = $form_weight++;
+
+  guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans comments)'),$form_weight);
 
   // Comments
-  $form_weight = 200;
-
   $form['comment'] = array(
     '#type' => 'textarea',
 //    '#parents' => 'comment',
@@ -643,22 +680,23 @@ function guifi_device_form($form_state, $params = array()) {
     '#weight' => $form_weight++,
   );
 
-  //  save/validate/reset buttons
-  $form['dbuttons'] = guifi_device_buttons(FALSE,'',$form_weight);
+  guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans buttons)'),$form_weight);
 
+  //  save/validate/reset buttons
+  $form['dbuttons'] = guifi_device_buttons(FALSE,'');
+  $form['dbuttons']['#weight'] = $form_weight++;
+
+  guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(form_final)'),$form);
   return $form;
+
 }
 
 /* guifi_device_form_validate(): Confirm that an edited device has fields properly filled. */
 function guifi_device_form_validate($form,&$form_state) {
-//  print "Hola validate!!\n<br />";
-//   print_r($edit);
 
   global $user;
 
-  guifi_log(GUIFILOG_TRACE,'function guifi_device_form_validate()',$form_state);
-
-//   guifi_log(GUIFILOG_NONE,'function guifi_device_form_validate()',$form);
+  guifi_log(GUIFILOG_TRACE,'function guifi_device_form_validate()',$form_state['values']);
 
   // nick
   if (isset($form['main']['nick'])) {
@@ -723,6 +761,8 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
   global $user;
   global $bridge;
 
+  guifi_log(GUIFILOG_TRACE,'function guifi_device_save()',$edit);
+
   $bridge = FALSE;
   $to_mail = array();
   $tomail[] = $user->mail;
@@ -733,8 +773,10 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
 
   // TODO : corretgir que agafi els midi fid de l'estructura qeu toca dins del edit
   // amb lo de sota els repliquem per poder-hi accedir directament
-  $edit['mid'] = $edit['variable']['model_id'];
-  $edit['fid'] = $edit['variable']['firmware_id'];
+  if ($edit['type'] == 'radio'){
+    $edit['mid'] = $edit['variable']['model_id'];
+    $edit['fid'] = $edit['variable']['firmware_id'];
+  }
 
   if ($edit['type'] == 'radio') {
     if (!$edit['variable']['firmware']) {
@@ -748,7 +790,7 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
   }
 
   // TODO REMOVE EXTRA  comprovar que no es serialitzen els camps de mid, fid, etc.
-  if ($edit['variable'])
+  if (!empty($edit['variable']))
     $edit['extra'] = serialize($edit['variable']);
 
   // busquem el id de la configuracioUSC per aquests mid i fid
@@ -760,6 +802,9 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
 
   guifi_maintainers_save($ndevice['id'],'device',$edit['maintainers']);
   guifi_funders_save($ndevice['id'],'device',$edit['funders']);
+
+  if ($edit['type']=='switch')
+    guifi_switch_save($ndevice['id'],$edit['ports']);
 
   guifi_log(GUIFILOG_TRACE,
     sprintf('device saved:'),
@@ -846,10 +891,11 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
     $rc++;
   } // foreach radio
 
-  if (!empty($edit['interfaces'])) foreach ($edit['interfaces'] as $iid => $interface) {
-    $interface['device_id'] = $ndevice['id'];
-
-    $log .= guifi_device_interface_save($interface,$iid,$edit['id'],$ndevice['nid'],$to_mail);
+  // Cable interfaces
+  if (!empty($edit['interfaces']))
+    foreach ($edit['interfaces'] as $iid => $interface) {
+      $interface['device_id'] = $ndevice['id'];
+      $log .= guifi_device_interface_save($interface,$iid,$edit['id'],$ndevice['nid'],$to_mail);
   }
 
   $to_mail = explode(',',$edit['notification']);
@@ -974,7 +1020,8 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
   return $log;
 }
 
-function guifi_device_buttons($continue = FALSE,$action = '', $nopts = 0, &$form_weight = 1000) {
+function guifi_device_buttons($continue = FALSE,$action = '', $nopts = 0, &$form_weight) {
+
   $form['reset'] = array(
     '#type' => 'button',
     '#executes_submit_callback' => TRUE,
@@ -1138,7 +1185,7 @@ function guifi_device_create($nid) {
 }
 
 /* guifi_ADSL_form(): Create form for editiong DSL devices */
-function guifi_ADSL_form($edit) {
+function guifi_ADSL_form($edit, &$form_weight) {
 
   if (!isset($edit['variable']['download']))
     $edit['variable']['download'] = 4000000;
@@ -1152,6 +1199,7 @@ function guifi_ADSL_form($edit) {
     '#title' => t('DSL information & MRTG parameters'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
+    '#weight' => $form_weight++,
     '#tree' => TRUE
   );
   $form['variable']['download'] = array(
@@ -1159,6 +1207,7 @@ function guifi_ADSL_form($edit) {
     '#title' => t('Download'),
     '#default_value' => $edit['variable']['download'],
     '#options' => guifi_bandwidth_types(),
+    '#weight' => $form_weight++,
     '#description' => t('Download bandwidth')
   );
   $form['variable']['upload'] = array(
@@ -1166,26 +1215,28 @@ function guifi_ADSL_form($edit) {
     '#title' => t('Upload'),
     '#default_value' => $edit['variable']['upload'],
     '#options' => guifi_bandwidth_types(),
-    '#description' => t('Upload bandwidth')
+    '#description' => t('Upload bandwidth'),
+    '#weight' => $form_weight++,
   );
   $form['variable']['mrtg_index'] =
     guifi_device_mrtg_form($edit['variable']['mrtg_index']);
   return $form;
 }
 
-function guifi_confine_form($edit) {
-    $form = guifi_generic_form($edit);
+function guifi_confine_form($edit,&$form_weight) {
+    $form = guifi_generic_form($edit,$form_weight);
   return $form;
 }
 
-function guifi_generic_form($edit) {
+function guifi_generic_form($edit, &$form_weight) {
 
   $form['variable'] = array(
     '#type' => 'fieldset',
     '#title' => t('MRTG parameters'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
-    '#tree' => TRUE
+    '#tree' => TRUE,
+    '#weight' => $form_weight++,
   );
   if (!isset($edit['variable']['mrtg_index']))
     $edit['variable']['mrtg_index'] = 4;
@@ -1492,7 +1543,7 @@ function guifi_device_links_print($device,$ltype = '%') {
         $img_url = ' <img src='.$gs->var['url'].'?device='.$link['device_id'].'&type=availability&format=short>';
       else
         $img_url = NULL;
-      $rows_cable[] = array($interface['interface_type'].'/'.$link['interface']['interface_type'],
+      $rows_cable[] = array($interface['interface_type'].' - '.$link['interface']['interface_type'],
                        array('data' => $link_id,'align' => 'right'),
                        '<a href="'.base_path().'guifi/device/'.$link['device_id'].'">'.guifi_get_hostname($link['device_id']).'</a>',
                        array('data' => '-','align' => 'center'),

@@ -253,6 +253,50 @@ function guifi_ahah_select_zone() {
 }
 
 /**
+ * Select interface
+ *
+ * URL: http://guifi.net/guifi/js/select-device-interface/%
+ */
+function guifi_ahah_select_device_interface() {
+  $cid = 'form_'. $_POST['form_build_id'];
+  $cache = cache_get($cid, 'cache_form');
+
+  $port = arg(3);
+
+//  guifi_log(GUIFILOG_FILE,sprintf('guifi_ahah_select_device_interface (port=%d)',$port),$_POST);
+
+  $device    = $_POST['ports'][$port]['did'];
+  $interface = $_POST['ports'][$port]['if'];
+
+  $device_interfaces = guifi_get_device_interfaces($device,$interface);
+
+  guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_select_device_interface (port=%d) FORM:',$port),$_POST['ports'][$port]);
+
+//  if (($cache) and (count($device_interfaces)>0)) {
+  if (($cache)) {
+    $form = $cache->data;
+
+    // did field
+    //if (count($device_interfaces)>1) {
+      $form['ports'][$port]['if']['#options'] = $device_interfaces;
+      $form['ports'][$port]['if']['#default_value'] = $interface;
+
+    cache_set($cid, $form, 'cache_form', $cache->expire);
+    // Build and render the new select element, then return it in JSON format.
+    $form_state = array();
+    $form['#post'] = array();
+    $form = form_builder($form['form_id']['#value'] , $form, $form_state);
+    guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_select_device_interface (port=%d) replaced:',$port),$form);
+    $output = drupal_render($form['ports'][$port]['if']);
+
+    drupal_json(array('status' => TRUE, 'data' => $output));
+  } else {
+    drupal_json(array('status' => FALSE, 'data' => ''));
+  }
+  exit;
+}
+
+/**
  * Select device
  *
  * URL: http://guifi.net/guifi/js/select-device/%

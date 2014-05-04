@@ -41,17 +41,28 @@ function guifi_interfaces_form(&$interface,$ptree) {
      ) {
     $cable = TRUE;
     if ($interface['interface_type']!='wLan/Lan')
-    $f['interface']['interface_type'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Name'),
-      '#parents' => array_merge($ptree,array('interface_type')),
-      '#size' => 10,
-      '#maxlength' => 60,
-      '#default_value' => $interface['interface_type'],
-      '#description' => t('Will rename the current interface name.')
-    );
+      $f['interface']['interface_type'] = array(
+        '#type'          => 'textfield',
+        '#title'         => t('Name'),
+        '#parents'       => array_merge($ptree,array('interface_type')),
+        '#size'          => 10,
+        '#maxlength'     => 60,
+        '#required'      => true,
+        '#default_value' => $interface['interface_type'],
+        '#description'   => t('Will rename the current interface name.'),
+        '#prefix'        => '<div>',
+        '#suffix'        => '</div>',
+      );
 
     if (!$interface['new']) {
+      $f['interface']['AddPublicSubnetMask'] = array(
+        '#type' => 'hidden',
+        '#value' => '255.255.255.224',
+        '#parents'=> array_merge($ptree,array('AddPublicSubnetMask')),
+        '#prefix' => '<div id="editInterface-'.$key.'">',
+        '#suffix' => '</div>'
+      );
+
       $f['interface']['AddCableLink'] = array(
         '#type' => 'image_button',
         '#src' => drupal_get_path('module', 'guifi').'/icons/addprivatecablelink.png',
@@ -76,14 +87,6 @@ function guifi_interfaces_form(&$interface,$ptree) {
           'method' => 'replace',
           'effect' => 'fade',
         )
-      );
-
-      $f['interface']['AddPublicSubnetMask'] = array(
-        '#type' => 'hidden',
-        '#value' => '255.255.255.224',
-        '#parents'=> array_merge($ptree,array('AddPublicSubnetMask')),
-        '#prefix' => '<div id="editInterface-'.$key.'">',
-        '#suffix' => '</div>'
       );
     } else {
       $f['interface']['msg'] = array(
@@ -162,7 +165,17 @@ function guifi_interfaces_form(&$interface,$ptree) {
 }
 
 /* guifi_interfaces_form(): Main cable interface edit form */
-function guifi_interfaces_cable_form(&$edit) {
+function guifi_interfaces_cable_form(&$edit,&$form_weight) {
+
+  guifi_log(GUIFILOG_TRACE,'guifi_interfaces_cable_form',$edit['type']);
+
+  $form = array();
+  // skip device types which have their own forms for cable ports, or don't have to
+  if (in_array($edit['type'],
+       array('switch','rack','ppanel','splitter','torpedo')
+       )
+     )
+    return $form;
 
   global $definedBridgeIpv4;
 
@@ -171,9 +184,7 @@ function guifi_interfaces_cable_form(&$edit) {
   if (empty($edit['interfaces']))
     return;
 
-  guifi_log(GUIFILOG_TRACE,sprintf('function guifi_interfaces_form()'));
-
-  $collapse = TRUE;
+   $collapse = TRUE;
   switch (count($edit['interfaces'])) {
   case 0:
      $msg .= t('No interfaces');
@@ -184,28 +195,34 @@ function guifi_interfaces_cable_form(&$edit) {
   default:
      $msg .= count($edit['interfaces']).' '.t('interfaces');
   }
+
   foreach ($edit['interfaces'] as $value)
     if ($value['unfold'])
       $collapse = FALSE;
 
   $form['interfaces']['#type'] = 'fieldset';
   $form['interfaces']['#title'] = $msg;
+//  $form['interfaces']['#title'] = '<img src="/'.
+//    drupal_get_path('module', 'guifi').
+//    '/icons/interface.png"> '.t('Cable networking section').' - '.$msg;
   $form['interfaces']['#collapsible'] = TRUE;
   $form['interfaces']['#collapsed'] = $collapse;
   $form['interfaces']['#tree'] = TRUE;
-  $form['interfaces']['#prefix'] = '<img src="/'.
+  $form['interfaces']['#weight'] = $form_weight++;
+  $form['interfaces']['#prefix'] = '<div><img src="/'.
     drupal_get_path('module', 'guifi').
-//    '/modules/guifi'.
-    '/icons/interface.png"> '.t('Cable connections section');
+    '/icons/interface.png"> '.t('Cable networking section').'</div>';
 
   $form['interfaces']['ifs'] = array(
     '#prefix' => '<div id="add-interface">',
-    '#suffix' => '</div>'
+    '#suffix' => '</div>',
+    '#weight' => $form_weight++,
   );
 
   foreach ($edit['interfaces'] as $iid => $interface) {
     $form['interfaces']['ifs'][$interface['interface_type']][$iid] =
       guifi_interfaces_form($interface,array('interfaces',$iid));
+      $form_weight+=5;
   } // foreach interface
 
   $form['interfaces']['addInterface'] = array(
@@ -218,7 +235,8 @@ function guifi_interfaces_cable_form(&$edit) {
           'wrapper' => 'add-interface',
           'method' => 'replace',
           'effect' => 'fade',
-         )
+         ),
+         '#weight' => $form_weight++,
   );
 
   return $form;
@@ -270,7 +288,8 @@ function guifi_interfaces_add_cable_p2p_link_submit(&$form,&$form_state) {
   $dlinked = db_fetch_array(db_query(
     "SELECT d.id, d.type " .
     "FROM {guifi_devices} d " .
-    "WHERE d.id=%d",
+    "WHERE d.id=%d AND type not IN ('switch','rack','torpedo','splitter') " .
+    "ORDER BY ",
     $to_did));
 
   $ips_allocated=guifi_ipcalc_get_ips('0.0.0.0','0.0.0.0',$form_state['values'],2);

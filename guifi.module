@@ -11,6 +11,7 @@ include_once("guifi_node.inc.php");      // node (location) management
 include_once("guifi_service.inc.php");   // services management
 include_once("guifi_devices.inc.php");   // device management
 include_once("guifi_radios.inc.php");    // radios management
+include_once("guifi_switch.inc.php");    // switch management
 include_once("guifi_interfaces.inc.php");// interfaces management
 include_once("guifi_links.inc.php");     // links management
 include_once("guifi_users.inc.php");     // user management
@@ -1049,6 +1050,12 @@ function guifi_menu() {
   $items['guifi/js/select-device/%'] = array(
     'title' => 'Javascript Select Device',
     'page callback' => 'guifi_ahah_select_device',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['guifi/js/select-device-interface/%'] = array(
+    'title' => 'Javascript Select Device Interface',
+    'page callback' => 'guifi_ahah_select_device_interface',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );

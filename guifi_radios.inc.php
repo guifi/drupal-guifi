@@ -5,7 +5,7 @@
  */
 
 /* guifi_radio_form(): Main radio form (Common parameters)*/
-function guifi_radio_form($edit, $form_weight) {
+function guifi_radio_form($edit, &$form_weight) {
   global $hotspot;
   global $bridge;
   global $user;
@@ -102,7 +102,7 @@ function guifi_radio_form($edit, $form_weight) {
     '#tree' => FALSE,
     '#prefix' => '<img src="/'.
       drupal_get_path('module', 'guifi').
-     '/icons/wifi.png"> '.t('Wireless radios section'),
+     '/icons/wifi.png"> '.t('Wireless networking section'),
     '#weight' => $form_weight++,
   );
 

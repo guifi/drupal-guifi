@@ -307,6 +307,18 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#collapsible' => TRUE,
     '#collapsed'   => (isset($form['new'])) ? FALSE : TRUE,
  );
+  $form['general']['model'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Model Name'),
+    '#required' => TRUE,
+    '#default_value' => $dev->model,
+    '#size' => 32,
+    '#maxlength' => 50,
+    '#description' => t('Device model name, please,<br>use a clear and short description.'),
+//    '#prefix' => '<div>',
+//   '#suffix' => '</div>',
+    '#weight' => $form_weight++,
+  );
   $form['general']['fid'] = array(
     '#type' => 'select',
     '#title' => t('Manufacturer'),
@@ -324,16 +336,9 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#multiple'=>true,
     '#size'=>8,
     '#default_value'=>explode('|',$dev->model_class),
-    '#weight' => $form_weight++,
-  );
-  $form['general']['model'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Model Name'),
-    '#required' => TRUE,
-    '#default_value' => $dev->model,
-    '#size' => 32,
-    '#maxlength' => 50,
-    '#description' => t('Device model name, please,<br>use a clear and short description.'),
+    '#description' => t('Once saved, available fieldsets will change depending on the class selected.'),
+    '#prefix' => '<div>',
+    '#suffix' => '</div>',
     '#weight' => $form_weight++,
   );
   $form['general']['url'] = array(
@@ -341,7 +346,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#title' => t('URL'),
     '#required' => TRUE,
     '#default_value' => $dev->url,
-    '#size' => 32,
+    '#size' => 80,
     '#maxlength' => 128,
     '#description' => t('Url where we can see a specs from device model.'),
     '#weight' => $form_weight++,
@@ -357,7 +362,7 @@ function guifi_devel_devices_form($form_state, $devid) {
   );
   $form['general']['notification'] = array(
     '#type' => 'textfield',
-    '#size' => 60,
+    '#size' => 80,
     '#maxlength' => 1024,
     '#title' => t('contact'),
     '#required' => FALSE,
@@ -407,7 +412,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#default_value' => $dev->interfaces,
     '#size' => 80,
     '#maxlength' => 240,
-    '#description' => t('Device interface names for this device model.<br>Use | to split de the names, ex: wlan1|wlan2|ether1|ether2'),
+    '#description' => t('Device interface names for this device model.<br>Use | to split de the names, ex: p1|p2|p3.... Default is port# (1|2|3...|max)'),
     '#weight' => $form_weight++,
   );
 
@@ -441,7 +446,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#default_value' => $dev->opto_interfaces,
     '#size' => 80,
     '#maxlength' => 240,
-    '#description' => t('Map to optical ports interface name.<br>Use | to split de the names'),
+    '#description' => t('Port numbers with SFP slot<br>Use | to split de the numbers (i.e. 21|22|23|24)'),
     '#weight' => $form_weight++,
   );
 
