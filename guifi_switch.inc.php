@@ -190,7 +190,8 @@ function guifi_ports_form($edit,&$form_weight) {
       '#maxlength'       => 17,
       '#default_value'   => $interface['mac'],
       '#element_validate' => array('guifi_mac_validate'),
-      '#attributes'   => array('class'=>'interface-item'),
+      '#attributes'   => array('class'=>'interface-eol'),
+      '#suffix'          => '<div>&nbsp</div>', // Force new line on some browsers
       '#weight'          => $form_weight++,
     );
 
