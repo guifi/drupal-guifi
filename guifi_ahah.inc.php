@@ -272,10 +272,10 @@ function guifi_ahah_select_device_interface() {
 
   $device_interfaces = guifi_get_device_interfaces($device,$interface);
 
-  guifi_log(GUIFILOG_FILE,sprintf('guifi_ahah_select_device_interface (port=%d POST) FORM:',$port),$_POST);
-  guifi_log(GUIFILOG_FILE,sprintf('guifi_ahah_select_device_interface (port=%d DEVICE) FORM:',$port),$device);
+  guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_select_device_interface (port=%d POST) FORM:',$port),$_POST);
+  guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_select_device_interface (port=%d DEVICE) FORM:',$port),$device);
   guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_select_device_interface (port=%d) INTERFACE FORM:',$port),$interface);
-  guifi_log(GUIFILOG_FILE,sprintf('guifi_ahah_select_device_interface (port=%d) INTERFACES FORM:',$port),$device_interfaces	);
+  guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_select_device_interface (port=%d) INTERFACES FORM:',$port),$device_interfaces	);
   guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_select_device_interface (port=%d) CACHE FORM:',$port),($cache)?'TRUE':'FALSE');
 
   if ($cache) {
@@ -294,7 +294,7 @@ function guifi_ahah_select_device_interface() {
     $form_state = array();
     $form['#post'] = $_POST;
     $form = form_builder($form['form_id']['#value'] , $form, $form_state);
-    guifi_log(GUIFILOG_FILE,sprintf('guifi_ahah_select_device_interface (port=%d) replaced:',$port),$form['interfaces'][$port]['conn']['if']['#options']);
+    guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_select_device_interface (port=%d) replaced:',$port),$form['interfaces'][$port]['conn']['if']['#options']);
     $output = drupal_render($form['interfaces'][$port]);
 
     drupal_json(array('status' => TRUE, 'data' => $output));

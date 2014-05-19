@@ -42,7 +42,7 @@ function guifi_interfaces_form(&$interface,$ptree) {
        and (!$interface['deleted'])
      ) {
     $cable = TRUE;
-    $f['interface']['itype'] = array(
+    $f['interface']['niid'] = array(
         '#type'          => 'textfield',
         '#title'         => t('Name'),
         '#parents'       => array_merge($ptree,array('interface_type')),

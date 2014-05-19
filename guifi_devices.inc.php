@@ -966,6 +966,7 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
     $interface['connto_iid'] = (string)$new_riid;
   }
 
+  // todo if interface chaged, update ninterface accordingly.
   $ninterface = _guifi_db_sql(
     'guifi_interfaces',
     array('id' => $iid),$interface,$log,$to_mail);
