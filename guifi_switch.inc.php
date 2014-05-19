@@ -11,13 +11,15 @@ function guifi_ports_form($edit,&$form_weight) {
   guifi_log(GUIFILOG_TRACE,'function guifi_ports_form()',$edit);
 
 // Select device model from model_specs
-  $querymid = db_query("
-    SELECT mid, model, etherdev_max, optoports_max, m.opto_interfaces, f.name manufacturer
-    FROM guifi_model_specs m, guifi_manufacturer f
-    WHERE f.fid = m.fid
-    AND m.mid = ".$edit['mid']);
+  if (isset($edit['mid'])) {
+    $querymid = db_query("
+      SELECT mid, model, etherdev_max, optoports_max, m.opto_interfaces, f.name manufacturer
+      FROM guifi_model_specs m, guifi_manufacturer f
+      WHERE f.fid = m.fid
+      AND m.mid = ".$edit['mid']);
 
-  $swmodel = db_fetch_object($querymid);
+    $swmodel = db_fetch_object($querymid);
+  }
 
   switch ($edit['type']) {
     case 'switch':
@@ -67,7 +69,7 @@ function guifi_ports_form($edit,&$form_weight) {
 
   foreach ($edit['interfaces'] as $port => $interface) {
 
-    guifi_log(GUIFILOG_PORTS,'function guifi_ports_form(interface)',$interface);
+    guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(interface)',$interface);
 
     if (empty($interface['interface_type'])) {
       guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(interface)',$interface);
