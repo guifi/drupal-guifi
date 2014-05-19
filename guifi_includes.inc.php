@@ -481,9 +481,11 @@ function guifi_get_device_interfaces($id,$iid = NULL) {
   $qi = db_query($sql_i);
 
   while ($i = db_fetch_object($qi)) {
-    if ( ((empty($i->connto_did)) and (empty($i->connto_iid)) ) or ($i->id == $iid))
-    if (!empty(trim($i->interface_type)))
-      $used[$i->id] = $i->interface_type;
+    if ( ((empty($i->connto_did)) and (empty($i->connto_iid)) ) or ($i->id == $iid)) {
+      $trimmed_itype = trim($i->interface_type);
+      if (!empty($trimmed_itype))
+        $used[$i->id] = $i->interface_type;
+    }
   }
 
   return $used;
