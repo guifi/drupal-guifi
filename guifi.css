@@ -2,18 +2,77 @@
   text-decoration: none;
 }
 
-
-
-.ports .form-item {
-  margin-top: 0em;
-  margin-bottom: 0em;
+table.list-links, table.device-data {
+  width: 0%;
 }
 
-.ports td {
+td.available {
+  background-color: lightgreen;
+  border-width: 1px;
+  border-color: black;
+  border-top-color: black;
+  border-top-style: solid;
+}
+
+.float-item, .interface-item,
+.interface-item.form-button {
+  float: left;
+}
+
+.interface-item-available {
+  float: left;
+  background-color: lightgreen;
+}
+
+.interface-item-edited {
+  float: left;
+  background-color: lightcyan;
+}
+
+.interface-item-disabled {
+  float: left;
+  background-color: lightgoldenrodyellow;
+}
+
+
+.form-submit > .operations-button {
+  margin-top: 1em;
+}
+
+.fieldset-interface-connection {
+  margin-left: 5em;
+  padding: 0em;
+}
+
+.fieldset-interface-port {
+  margin: 0em;
+  padding: 0em;
+}
+
+.fieldset-interface-port > .form-item,
+.fieldset-interface-port > .fieldset-wrapper > .form-item,
+.fieldset-interface-port > .form-button {
+  margin: 0em;
+  float:  left;
+}
+
+/*.fieldset-wrapper > div.form-item {
+  float: left;
+  margin-right: 1em;
+  margin-top: 1em;
+}*/
+
+.ports .form-item, .interfaces .form-item {
+  margin-top: 0em;
+  margin-bottom: 0em;
+  float: left;
+}
+
+.ports td, .interfaces td {
   padding: 0em 0.5em;
 }
 
-.ports table {
+.ports table, .interfaces table {
   width: 0%;
 }
 

@@ -364,7 +364,7 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
       $log .= '<br />'._guifi_db_delete('guifi_radios',$radio,$to_mail,$depth);
 
     // cascade to device interfaces
-    $qc = db_query('SELECT id, radiodev_counter FROM {guifi_interfaces} WHERE device_id=%d',$key['id']);
+    $qc = db_query('SELECT id FROM {guifi_interfaces} WHERE device_id=%d',$key['id']);
     while ($interface = db_fetch_array($qc))
       $log .= '<br />'._guifi_db_delete('guifi_interfaces',$interface,$to_mail,$depth);
 
@@ -398,20 +398,39 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
   // delete Interfaces
   case 'guifi_interfaces':
     $item=db_fetch_object(db_query(
-       'SELECT i.interface_type, i.radiodev_counter,
+       'SELECT i.interface_type, i.radiodev_counter, i.connto_did, i.connto_iid,
                d.nick dname,
                d.notification, d.nid, l.nick nname
         FROM {guifi_interfaces} i LEFT JOIN {guifi_devices} d ON i.device_id=d.id
              LEFT JOIN {guifi_location} l ON d.nid=l.id
         WHERE i.id = %d',
         $key['id']));
-    $log .= t('interface (%type) %id - %rc at device %dname deleted.',array('%type' => $item->interface_type,'%id' => $key['id'],'%rc' => $item->radiodev_counter,'%dname' => $item->dname));
+
+    $log .= t('interface (%type) %id - %rc at device %dname deleted.',
+              array('%type' => $item->interface_type,
+                    '%id' => $key['id'],
+                    '%rc' => $item->radiodev_counter,
+                    '%dname' => $item->dname));
 
 
     // cascade ipv4
     $qc = db_query('SELECT id, interface_id FROM {guifi_ipv4} WHERE interface_id=%d',$key['id']);
     while ($ipv4 = db_fetch_array($qc))
       $log .= '<br />'._guifi_db_delete('guifi_ipv4',$ipv4,$to_mail,$depth);
+
+    // cascade remote interface plug
+    if (($item->connto_did) and ($item->connto_iid)) {
+      $if_remote = array(
+        'device_id'      =>$item->connto_did,
+        'id'             =>$item->connto_iid,
+        'connto_did'     => '',
+        'connto_iid'     => '',
+      );
+      _guifi_db_sql('guifi_interfaces',
+        array('device_id'=>$item->connto_did,'id'=>$item->connto_iid),
+            $if_remote,$log,$to_mail);
+
+    }
     break;
 
   // delete ipv4

@@ -1016,6 +1016,12 @@ function guifi_menu() {
     'type' => MENU_LOCAL_TASK
   );
   // AHAH Calls
+  $items['guifi/js/edit_cableconn'] = array(
+    'title' => 'Javascript Add WDS',
+    'page callback' => 'guifi_ahah_edit_cableconn',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
   $items['guifi/js/add_wds'] = array(
     'title' => 'Javascript Add WDS',
     'page callback' => 'guifi_ahah_add_wds',

@@ -27,6 +27,13 @@ function _guifi_validate_mac($mac) {
   return strtoupper(substr(chunk_split($mac,2,':'),0,17));
 }
 
+function _guifi_mac_sum($mac,$sum) {
+  $mac = str_replace(":","",$mac);
+  $dec = hexdec($mac) + $sum;
+  $smac = str_pad(dechex($dec),12,'0',STR_PAD_LEFT);
+  return strtoupper(substr(chunk_split($smac,2,':'),0,17));
+}
+
 function guifi_img_icon($i) {
   global $base_url;
   return '<img src="'.$base_url.'/'.drupal_get_path('module', 'guifi').'/icons/'.$i.'" >';
@@ -784,6 +791,13 @@ function guifi_get_ap_channel($id,$radiodev_counter) {
 }
 
 function guifi_get_devicename($id, $format = 'nick') {
+
+  if (!is_numeric($id)) {
+    $v = explode('-',$id);
+    if (!is_numeric($v[0]))
+      $id = $v[0];
+  }
+
   switch ($format) {
   case 'large':
     $device = db_fetch_object(db_query(

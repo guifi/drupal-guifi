@@ -263,31 +263,39 @@ function guifi_ahah_select_device_interface() {
 
   $port = arg(3);
 
-//  guifi_log(GUIFILOG_FILE,sprintf('guifi_ahah_select_device_interface (port=%d)',$port),$_POST);
+  guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_select_device_interface (port=%d)',$port),$_POST);
 
-  $device    = $_POST['ports'][$port]['did'];
-  $interface = $_POST['ports'][$port]['if'];
+  $device    = $_POST['interfaces'][$port]['did'];
+  $dnamel    = guifi_get_devicename($device,'large');
+  $dnames    = guifi_get_devicename($device);
+  $interface = $_POST['interfaces'][$port]['if'];
 
   $device_interfaces = guifi_get_device_interfaces($device,$interface);
 
-  guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_select_device_interface (port=%d) FORM:',$port),$_POST['ports'][$port]);
+  guifi_log(GUIFILOG_FILE,sprintf('guifi_ahah_select_device_interface (port=%d POST) FORM:',$port),$_POST);
+  guifi_log(GUIFILOG_FILE,sprintf('guifi_ahah_select_device_interface (port=%d DEVICE) FORM:',$port),$device);
+  guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_select_device_interface (port=%d) INTERFACE FORM:',$port),$interface);
+  guifi_log(GUIFILOG_FILE,sprintf('guifi_ahah_select_device_interface (port=%d) INTERFACES FORM:',$port),$device_interfaces	);
+  guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_select_device_interface (port=%d) CACHE FORM:',$port),($cache)?'TRUE':'FALSE');
 
-//  if (($cache) and (count($device_interfaces)>0)) {
-  if (($cache)) {
+  if ($cache) {
     $form = $cache->data;
 
-    // did field
-    //if (count($device_interfaces)>1) {
-      $form['ports'][$port]['if']['#options'] = $device_interfaces;
-      $form['ports'][$port]['if']['#default_value'] = $interface;
+    $form['interfaces'][$port]['conn']['if']['#options'] = $device_interfaces;
+    $form['interfaces'][$port]['conn']['if']['#value'] = $interface;
+    $form['interfaces'][$port]['conn']['did']['#value'] = $dnamel;
+    $form['interfaces'][$port]['dname']['#value'] = (empty($dnames)) ? '' :
+      $dnames.' / '.$device_interfaces[$interface];
+    $form['interfaces'][$port]['dname']['#attributes'] = (empty($dnames)) ? array('class'=>'interface-item-available') :
+      array('class'=>'interface-item-edited');
 
     cache_set($cid, $form, 'cache_form', $cache->expire);
     // Build and render the new select element, then return it in JSON format.
     $form_state = array();
-    $form['#post'] = array();
+    $form['#post'] = $_POST;
     $form = form_builder($form['form_id']['#value'] , $form, $form_state);
-    guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_select_device_interface (port=%d) replaced:',$port),$form);
-    $output = drupal_render($form['ports'][$port]['if']);
+    guifi_log(GUIFILOG_FILE,sprintf('guifi_ahah_select_device_interface (port=%d) replaced:',$port),$form['interfaces'][$port]['conn']['if']['#options']);
+    $output = drupal_render($form['interfaces'][$port]);
 
     drupal_json(array('status' => TRUE, 'data' => $output));
   } else {
@@ -359,6 +367,59 @@ function guifi_ahah_add_radio() {
 }
 
 /**
+ * Edit cable connection
+ *
+ * URL: http://guifi.net/guifi/js/edit-cableconn/%
+ */
+function guifi_ahah_edit_cableconn() {
+  $cid = 'form_'. $_POST['form_build_id'];
+  $cache = cache_get($cid, 'cache_form');
+
+  $port = arg(3);
+  $interface = $_POST['interfaces'][$port];
+  $tree = array('interfaces',$port);
+  $dname = guifi_get_devicename($interface['connto_did'],'large');
+  guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_edit_cableconn (port=%d did) interface:',$port),$interface);
+  $device_interfaces = guifi_get_device_interfaces($interface['connto_did'],$interface['connto_iid']);
+//  guifi_log(GUIFILOG_FILE,sprintf('guifi_ahah_edit_cableconn (port=%d did) device interfaces:',$port),$device_interfaces);
+
+  $form_weight = -10000;
+
+  if ($cache) {
+    $form = $cache->data;
+
+    $form['interfaces'][$port]['conn']['#type']          = 'fieldset';
+    $form['interfaces'][$port]['conn']['#attributes']    =  array('class'=>'fieldset-interface-connection');
+    $form['interfaces'][$port]['conn']['#description']   =  t('Links to device & interface');
+    $form['interfaces'][$port]['conn']['#collapsible']   =  FALSE;
+    $form['interfaces'][$port]['conn']['#tree']          =  FALSE;
+    $form['interfaces'][$port]['conn']['#collapsed']     =  FALSE;
+
+    unset($form['interfaces'][$port]['conn']['did']['#value']);
+    $form['interfaces'][$port]['conn']['did']['#value']  = ($interface['deleted']) ? '' : $dname;
+    $form['interfaces'][$port]['conn']['did']['#type']   = 'textfield';
+
+    $form['interfaces'][$port]['conn']['if']['#options'] = $device_interfaces;
+    $form['interfaces'][$port]['conn']['if']['#value'] = $interface['connto_iid'];
+
+    guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_edit_cableconn (port=%d did) FORM:',$conn),$form['interfaces'][$port]['conn']);
+
+    cache_set($cid, $form, 'cache_form', $cache->expire);
+    // Build and render the new select element, then return it in JSON format.
+    $form_state = array();
+//    $form['#post'] = array();
+    $form['#post'] = $_POST;
+    $form = form_builder($form['form_id']['#value'] , $form, $form_state);
+    $output = drupal_render($form['interfaces'][$port]['conn']);
+    drupal_json(array('status' => TRUE, 'data' => $output));
+  } else {
+    drupal_json(array('status' => FALSE, 'data' => ''));
+  }
+  exit;
+}
+
+
+/**
  * Add cable link
  *
  * URL: http://guifi.net/guifi/js/add-cable-link/%
@@ -422,7 +483,7 @@ function guifi_ahah_add_cable_link() {
         '#title' => t('Link to device'),
         '#description' => t('Select the device which you want to link with'),
         '#options' => $list,
-        '#prefix' => '<table style="width: 0"><td align="left">',
+        '#prefix' => '<div>&nbsp</div><table style="width: 0"><td align="left">',
         '#suffix' => '</td>'
       );
       $tree = $parents;
@@ -481,7 +542,7 @@ function guifi_ahah_add_subnet_mask() {
         '#description' => t('Size of the next available set of addresses to be allocated'),
         '#default_value' => '255.255.255.224',
         '#options' => guifi_types('netmask',30,23),
-        '#prefix'=> '<table style="width: 0"><td style="width: 0" align="LEFT">',
+        '#prefix'=> '<div>&nbsp</div><table style="width: 0"><td style="width: 0" align="LEFT">',
         '#suffix'=> '</td>',
       );
     $form['if']['interface'][$interface_id]['ifs']['interface']['createNetmask'] = array(
