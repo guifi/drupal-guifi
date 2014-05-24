@@ -534,6 +534,7 @@ function guifi_device_form($form_state, $params = array()) {
       $form_state['values']['nick'].') - '.$form_state['values']['flag'],
     '#weight'      => $form_weight++,
     '#collapsible' => TRUE,
+    '#attributes'  => array('class'=>'fieldset-device-main'),
     '#collapsed'   => (is_null($params['edit'])),
   );
 
@@ -553,8 +554,8 @@ function guifi_device_form($form_state, $params = array()) {
         'zone name or node name. A list with all matching values ' .
         'with a maximum of 50 values will be created.<br />' .
         'You can refine the text to find your choice.'),
-    '#prefix'           => '<div class="float-item">',
-    '#suffix'           => '</div>',
+    '#prefix'        => '<div class"form-newline">',
+    '#suffix'        => '</div>',
   );
   $form['main']['nid'] = array(
     '#type'  => 'hidden',
@@ -572,8 +573,6 @@ function guifi_device_form($form_state, $params = array()) {
     '#default_value' => $form_state['values']['nick'],
     '#weight'        => $form_weight++,
     '#description'   =>  t('The name of the device.<br />Used as a hostname, SSID, etc...'),
-    '#prefix'        => '<div class="float-item">',
-    '#suffix'        => '</div>',
   );
   $form['main']['flag'] = array(
       '#type'          => 'select',
@@ -583,8 +582,6 @@ function guifi_device_form($form_state, $params = array()) {
       '#options'       => guifi_types('status'),
       '#weight'        => $form_weight++,
       '#description'   => t("Current status of this device."),
-      '#prefix'        => '<div class="float-item">',
-      '#suffix'        => '</div>',
    );
   $form['main']['notification'] = array(
     '#type'             => 'textfield',
@@ -598,8 +595,6 @@ function guifi_device_form($form_state, $params = array()) {
     '#description'      =>  t('Mailid where changes on the device will be notified, ' .
     		'if many, separated by \',\'<br />' .
     		'used for network administration.'),
-    '#prefix'           => '<div class="float-item">',
-    '#suffix'           => '</div>',
   );
 
   $form['main']['logserver'] = array(
@@ -609,9 +604,22 @@ function guifi_device_form($form_state, $params = array()) {
     '#title'       => t('Log Server'),
     '#weight'      => $form_weight++,
     '#description' =>  t('If you have a log server for mikrotik (dude), add your ip.'),
-    '#prefix'      => '<div class="float-item">',
-    '#suffix'      => '</div>',
   );
+  $form['main']['graph_server'] = array(
+    '#type' => 'select',
+    '#title' => t("Server which collects traffic and availability data"),
+    '#required' => FALSE,
+    '#default_value' => ($node->graph_server ? $node->graph_server : 0),
+    '#options' => array('0' => t('Default'),'-1' => t('None')) + guifi_services_select('SNPgraphs'),
+    '#weight'=> $form_weight++,
+    '#description' => t("If not specified, inherits zone properties."),
+  );
+
+  if (!(user_access('administer guifi zones')
+       and $form_state['values']['type'] == 'radio')) {
+    $form['main']['graph_server']['#disabled'] = true;
+    $form['main']['graph_server']['#description'] .= '<br>'.t('To change the value, you are required for maintainer privilege.');
+  }
 
   /*
    * maintainers fieldset
@@ -625,18 +633,6 @@ function guifi_device_form($form_state, $params = array()) {
   guifi_log(GUIFILOG_TRACE,'function guifi_device_form(funders)',$form_state['values']['funders']);
 
 
-  if (user_access('administer guifi zones')
-       and $form_state['values']['type'] == 'radio') {
-    $form['main']['graph_server'] = array(
-      '#type' => 'select',
-      '#title' => t("Server which collects traffic and availability data"),
-      '#required' => FALSE,
-      '#default_value' => ($node->graph_server ? $node->graph_server : 0),
-      '#options' => array('0' => t('Default'),'-1' => t('None')) + guifi_services_select('SNPgraphs'),
-      '#weight'=> $form_weight++,
-      '#description' => t("If not specified, inherits zone properties."),
-    );
-  }
 
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans type)'),$form_weight);
   // create the device-type depenedent form
@@ -941,8 +937,8 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
 function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
   $log = '';
 
-  if ($iid == 'ifs')
-    return;
+//  if ($iid == 'ifs')
+//    return;
 
 //  if (isset($interface['connto_did']))
 //    guifi_log(GUIFILOG_BASIC,sprintf('guifi_device_interface_save (id=%d)',$iid),$interface['interface_type'].'-'.$interface['connto_did']);

@@ -42,11 +42,21 @@ td.available {
 .fieldset-interface-connection {
   margin-left: 5em;
   padding: 0em;
+  width: 85%;
+  clear: both;
 }
 
 .fieldset-interface-port {
   margin: 0em;
   padding: 0em;
+}
+
+.fieldset-device-main > .fieldset-wrapper> .form-item {
+  float: left;
+}
+
+.form-newline {
+  clear: both;
 }
 
 .fieldset-interface-port > .form-item,
@@ -56,11 +66,12 @@ td.available {
   float:  left;
 }
 
-/*.fieldset-wrapper > div.form-item {
+.interface-eol, div.field-eol {
   float: left;
   margin-right: 1em;
-  margin-top: 1em;
-}*/
+  float: none;
+  width: 95%;
+}
 
 .ports .form-item, .interfaces .form-item {
   margin-top: 0em;
