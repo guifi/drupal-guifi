@@ -794,27 +794,25 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
   guifi_maintainers_save($ndevice['id'],'device',$edit['maintainers']);
   guifi_funders_save($ndevice['id'],'device',$edit['funders']);
 
-  // if switch, ensure we have all ports filled
-  if ($edit['type']=='switch') {
-  	$m = db_fetch_object(db_query('select * from {guifi_model_specs} where mid=%d',$edit['mid']));
-    guifi_log(GUIFILOG_TRACE,sprintf('switch %d saved, %d ports:',$ndevice['id'],$m->etherdev_max),$edit);
-    $interfaces = array_values($edit['interfaces']);
-  	if ($m->etherdev_max)
-  	  for ($port=1; $port <= $m->etherdev_max; $port++) {
-  	  	if (!isset($interfaces[$port-1])) {
-  	      $ninterface = array(
-  	        'new'=>true,
-  	        'interface_type'=>$port,
-  	        'etherdev_counter' =>$port,
-  	        'device_id'=>$ndevice['id'],
-  	        'mac'=>_guifi_mac_sum($edit['mac'],$port-1)
-  	      );
-          guifi_log(GUIFILOG_TRACE,sprintf('inserting interface at %d:',$ndevice['id']),$ninterface);
-  	      _guifi_db_sql('guifi_interfaces',null,$ninterface,$log,$to_mail);
-  	  	}
+  // Ensure we have all ports filled - ALL device types up to etherdev_max at model_specs
+  $m = db_fetch_object(db_query('select * from {guifi_model_specs} where mid=%d',$edit['mid']));
+  guifi_log(GUIFILOG_TRACE,sprintf('switch %d saved, %d ports:',$ndevice['id'],$m->etherdev_max),$edit);
+  $interface_name = explode('|',$m->interfaces);
+  $interfaces = array_values($edit['interfaces']);
+  if ($m->etherdev_max)
+  	for ($port=1; $port <= $m->etherdev_max; $port++) {
+  	  if (!isset($interfaces[$port-1])) {
+  	    $ninterface = array(
+  	      'new'=>true,
+  	      'interface_type'=>(isset($interface_name[$port-1])) ? $interface_name[$port-1] : $port,
+  	      'etherdev_counter' =>$port,
+  	      'device_id'=>$ndevice['id'],
+  	      'mac'=>_guifi_mac_sum($edit['mac'],$port-1)
+  	    );
+        guifi_log(GUIFILOG_TRACE,sprintf('inserting interface at %d:',$ndevice['id']),$ninterface);
+  	    _guifi_db_sql('guifi_interfaces',null,$ninterface,$log,$to_mail);
   	  }
-    guifi_ports_create($ndevice['id'],$edit);
-  }
+  	}
 
   guifi_log(GUIFILOG_TRACE,
     sprintf('device saved:'),

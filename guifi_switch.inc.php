@@ -269,10 +269,6 @@ function guifi_ports_form($edit,&$form_weight) {
   return $form;
 }
 
-function guifi_ports_create($did,$ports) {
-  null;
-}
-
 function guifi_ports_save($did,$ports) {
   guifi_log(GUIFILOG_BASIC,"function _guifi_ports_save()",$ports);
 
