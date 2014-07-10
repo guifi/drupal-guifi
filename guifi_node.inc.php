@@ -1360,7 +1360,8 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
 
      // Device main attributes
      $uCreated = db_fetch_object(db_query('SELECT u.name FROM {users} u WHERE u.uid = %d', $device[user_created]));
-     $deviceAttr = $device[model].' '.t('created by').': '.$uCreated->name
+     $deviceAttr = $device[id].' '.$device[manufacturer].'-'.$device[model].' '
+       .t('created by').': '.$uCreated->name
        .' '. t('at') .' '. format_date($device[timestamp_created], 'small');
      if (!empty($device[timestamp_changed])) {
        $uChanged = db_fetch_object(db_query('SELECT u.name FROM {users} u WHERE u.uid = %d', $device[user_changed]));

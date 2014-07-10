@@ -18,10 +18,12 @@ function guifi_device_load($id,$ret = 'array') {
   $device = db_fetch_array(db_query('
     SELECT d.*,
            m.model,
+           mf.name manufacturer,
            f.nom firmware,
            l.nick as node_nick
     FROM {guifi_devices} d
            left join {guifi_model_specs} m on m.mid = d.mid
+           left join {guifi_manufacturer} mf on m.fid = mf.fid
            left join {guifi_firmware} f on f.id = d.fid,
           {guifi_location} l,
           {guifi_zone} z
@@ -1378,12 +1380,7 @@ function guifi_device_print_data($device) {
 
   // If radio, print model & firmware
   if ($device['type'] == 'radio') {
-    $model = db_fetch_object(db_query("
-      SELECT model, name
-      FROM {guifi_model_specs} m LEFT JOIN {guifi_manufacturer} f ON m.fid=f.fid
-      WHERE m.mid=%d",
-      $device['variable']['model_id']));
-    $rows[] = array($model->model,$device['variable']['firmware']);
+    $rows[] = array($device[manufacturer].'-'.$device[model],$device[variable][firmware]);
     // going to list all device radios
     if (count($device['radios'])) {
       foreach ($device['radios'] as $radio_id => $radio) {
