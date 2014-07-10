@@ -1358,9 +1358,20 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
      $status_url = guifi_cnml_availability(
        array('device' => $device['id'],'format' => 'short'));
 
+     // Device main attributes
+     $uCreated = db_fetch_object(db_query('SELECT u.name FROM {users} u WHERE u.uid = %d', $device[user_created]));
+     $deviceAttr = $device[model].' '.t('created by').': '.$uCreated->name
+       .' '. t('at') .' '. format_date($device[timestamp_created], 'small');
+     if (!empty($device[timestamp_changed])) {
+       $uChanged = db_fetch_object(db_query('SELECT u.name FROM {users} u WHERE u.uid = %d', $device[user_changed]));
+       $deviceAttr .= ' '.t('updated by').': '.$uChanged->name
+       .' '. t('at') .' '. format_date($device[timestamp_changed], 'small');
+     }
+
      // Groups all this data in an array for the theme() function
      $rows[] = array(
-                 '<a href="'.url('guifi/device/'.$device[id]).'">'.$device[nick].'</a>',
+                 l($device[nick],'guifi/device/'.$device[id],
+                   array('attributes'=>array('title'=>$deviceAttr))),
                  $device[type],
                  array('data' => $ip[ipv4].'/'.$ip[maskbits], 'align' => 'left'),
                  array('data' => t($device[flag]),'class' => $device['flag']),
