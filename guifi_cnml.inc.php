@@ -830,7 +830,7 @@ function ospf_net($cnmlid){
    for($n=0;$n<$nreg;$n++){
       $result=db_query(sprintf("SELECT t1.nick as nnick, t1.zone_id as zid, t2.nick as znick
                FROM guifi_location as t1
-               join guifi_zone as t2 on t1.zone_id = t2.id 
+               join guifi_zone as t2 on t1.zone_id = t2.id
                where t1.id = (%s)",$nodes[$n]));
       if ($record=db_fetch_object($result)){
          $nodesid["$nodes[$n]"]=Array("nnick" => $record->nnick,"zid" => $record->zid);
@@ -924,7 +924,7 @@ function ospf_net($cnmlid){
       $reg->addAttribute('nick',$nodesid[$network["nid"]]["nnick"]);
    }
    $classXML->addAttribute('total_networks',$nreg);
-  
+
    $classXML2 = $CNML->addChild('area_nodes');
    $nreg=0;
    if (count($nodesid)) foreach ($nodesid as $key => $nodeid){
@@ -1282,7 +1282,7 @@ function guifi_cnml_home($cnmlid){
     $result=db_query("select COUNT(*) as num from {guifi_location} where status_flag='Working'");
     $classXML = $CNML->addChild('total_working_nodes');
     if ($record=db_fetch_object($result)){
-        $classXML->addAttribute('nodes',$record->num);
+        $classXML->addAttribute('nodes',number_format($record->num,0,',','.'));
     };
 
     // link statistics
@@ -1321,8 +1321,8 @@ function guifi_cnml_home($cnmlid){
           $d));
     }
     $classXML = $CNML->addChild('total_links');
-    $classXML->addAttribute('num',$dTotals['count']);
-    $classXML->addAttribute('kms',$dTotals['dTotal']);
+    $classXML->addAttribute('num',number_format($dTotals['count'],0,',','.'));
+    $classXML->addAttribute('kms',number_format($dTotals['dTotal'],1,',','.'));
 
     //add nodes last week
     $afecha=getdate();
@@ -1334,14 +1334,14 @@ function guifi_cnml_home($cnmlid){
     $result=db_query($qnodes);
     $classXML = $CNML->addChild('nodes_last_week');
     if ($record=db_fetch_object($result)){
-      $classXML->addAttribute('total_nodes',$record->num);
+      $classXML->addAttribute('total_nodes',number_format($record->num,0,',','.'));
     }
     $qnodes="select COUNT(*) as num from {guifi_location}
       where status_flag='Working'
       and timestamp_created>".$tiempomin." and timestamp_created<=".$tiempomax;
     $result=db_query($qnodes);
     if ($record=db_fetch_object($result)){
-      $classXML->addAttribute('working_nodes',$record->num);
+      $classXML->addAttribute('working_nodes',number_format($record->num,0,',','.'));
     }
     $etime = microtime(TRUE);
     $classXML = $CNML->addChild('control');
