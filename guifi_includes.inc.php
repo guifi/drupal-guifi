@@ -245,7 +245,7 @@ function _set_value($device,$node,&$var,$id,$rid,$search) {
   $zone = db_fetch_object(db_query('SELECT title FROM {guifi_zone} WHERE id=%d',$device->zone_id));
   if ($device->distance) {
     $value= $zone->title.', '.$device->ssid.$backhaul.
-    '<a href="http://www.heywhatsthat.com/bin/profile.cgi?axes=1&curvature=0&metric=1' .
+      '<a href="http://www.heywhatsthat.com/bin/profile.cgi?axes=1&curvature=0&metric=1' .
       '&pt0='.$node->lat.','.$node->lon.',ff0000' .
       '&pt1='.$device->lat.','.$device->lon.',00c000" ' .
       'title="Click to check for line of sight" '.
