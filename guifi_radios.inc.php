@@ -392,6 +392,7 @@ function guifi_radio_radio_form($radio, $key, &$form_weight = -200) {
       '#collapsible' => TRUE,
       '#collapsed' => !(isset($radio['unfold_main'])),
       '#tree' => FALSE,
+      '#attributes' => array('class' => 'fieldset-device-main'),
 //      '#weight' => $fw2++,
     );
     $f['s']['mac'] = array(
@@ -419,6 +420,8 @@ function guifi_radio_radio_form($radio, $key, &$form_weight = -200) {
 					'#maxlength' => 30,
 					'#default_value' => $radio["ssid"],
 					'#description' => t("SSID to identify this radio signal."),
+//                    '#prefix' => '<div class="form-newline">',
+//                    '#suffix' => '</div>',
 		    );
 		    $f['s']['protocol'] = array(
 			    '#type' => 'select',
@@ -443,11 +446,12 @@ function guifi_radio_radio_form($radio, $key, &$form_weight = -200) {
               $f['ap'] = array(
                 '#type' => 'fieldset',
                 '#title' => t('Connection acceptance policy'),
-                '#description' => t('Please specify if this radio do accepts simple client connections and if a funding is required to contribute for the coverage infrastructure'),
+                '#description' => t('Please specify if this radio do accept simple client connections and if a funding is required to contribute for the coverage infrastructure'),
                 '#collapsible' => TRUE,
                 '#collapsed' => ($radio["clients_accepted"]=='Yes')?false:true,
                 '#tree'=> TRUE,
-//                '#weight' => $form_weight++,
+                '#attributes' => array('class' => 'fieldset-radio'),
+                //                '#weight' => $form_weight++,
               );
 			  $f['ap']['clients_accepted'] = array(
 			    '#type' => 'select',
@@ -547,6 +551,7 @@ function guifi_radio_radio_form($radio, $key, &$form_weight = -200) {
       '#collapsible' => TRUE,
       '#collapsed' => !(isset($radio['unfold_antenna'])),
       '#tree' => FALSE,
+      '#attributes' => array('class' => 'fieldset-radio'),
 //      '#weight' => $fw2++,
     );
     $fw2 = 0;
@@ -556,7 +561,7 @@ function guifi_radio_radio_form($radio, $key, &$form_weight = -200) {
       '#parents' => array('radios',$key,'antenna_angle'),
       '#default_value' =>  $radio["antenna_angle"],
       '#options' => guifi_types('antenna'),
-      '#description' => t('Angle (depends on the type of antena you will use)'),
+      '#description' => t('Beam width angle'),
 //      '#weight' => $fw2++,
     );
     $f['antenna']['antenna_gain'] = array(
@@ -575,7 +580,7 @@ function guifi_radio_radio_form($radio, $key, &$form_weight = -200) {
       '#size' => 3,
       '#maxlength' => 3,
       '#default_value' => $radio["antenna_azimuth"],
-      '#description' => t('Azimuth (0-360º)'),
+      '#description' => t('Azimuth<br>(0-360º)'),
 //      '#weight' => $fw2++,
     );
     $f['antenna']['antenna_mode'] = array(

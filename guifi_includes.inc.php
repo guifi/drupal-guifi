@@ -245,12 +245,17 @@ function _set_value($device,$node,&$var,$id,$rid,$search) {
   $zone = db_fetch_object(db_query('SELECT title FROM {guifi_zone} WHERE id=%d',$device->zone_id));
   if ($device->distance) {
     $value= $zone->title.', '.$device->ssid.$backhaul.
-    '<a href="http://www.heywhatsthat.com/bin/profile.cgi?axes=1&curvature=1&metric=1' .
+    '<a href="http://www.heywhatsthat.com/bin/profile.cgi?axes=1&curvature=0&metric=1' .
       '&pt0='.$node->lat.','.$node->lon.',ff0000' .
       '&pt1='.$device->lat.','.$device->lon.',00c000" ' .
+      'title="Click to check for line of sight" '.
       'target="_blank">' .
-      ' ('.$device->distance.' '.t('kms').')'.
+      ' ('.$device->distance.' '.t('kms').') '.
     '</a>';
+    if ($device->fund_required) {
+      $value .= t('Contribution for coverage').': '.number_format($device->fund_amount,2,',','.').
+                ' '.$device->fund_currency;
+    }
   } else
     $value= $zone->title.', '.$device->ssid;
 
@@ -291,7 +296,8 @@ function guifi_devices_select($filters, $action = '') {
     } else {
       $query = sprintf("
         SELECT
-          l.lat, l.lon, r.nick ssid, r.id r.nid, z.id zone_id, r.type
+          l.lat, l.lon, r.nick ssid, r.id r.nid, z.id zone_id, r.type,
+          r.fund_required, r.fund_amount, r.fund_currency
         FROM {guifi_devices} r,{guifi_location} l, {guifi_zone} z
         WHERE r.type IN ('radio','nat')
           AND l.id=%d AND r.nid=l.id
@@ -302,7 +308,8 @@ function guifi_devices_select($filters, $action = '') {
     $query = sprintf("
       SELECT
         l.lat, l.lon, r.id, r.clients_accepted, r.nid, z.id zone_id,
-        r.radiodev_counter, r.ssid, r.mode, r.antenna_mode
+        r.radiodev_counter, r.ssid, r.mode, r.antenna_mode,
+        r.fund_required, r.fund_amount, r.fund_currency
       FROM {guifi_radios} r,{guifi_location} l, {guifi_zone} z
       WHERE l.id<>%d
         AND r.nid=l.id

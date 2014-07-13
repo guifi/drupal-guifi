@@ -52,8 +52,10 @@ td.available {
   padding: 0em;
 }
 
-.fieldset-device-main > .fieldset-wrapper> .form-item {
+.fieldset-device-main > .fieldset-wrapper > .form-item, 
+.fieldset-radio > .fieldset-wrapper > .form-item {
   float: left;
+  margin: 1em;
 }
 
 .form-newline {
