@@ -676,7 +676,7 @@ function guifi_device_form($form_state, $params = array()) {
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans buttons)'),$form_weight);
 
   //  save/validate/reset buttons
-  $form['dbuttons'] = guifi_device_buttons(FALSE,'',$form_weight);
+  $form['dbuttons'] = guifi_device_buttons(FALSE,'',0,$form_weight);
   $form['dbuttons']['#weight'] = $form_weight++;
 
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(form_final)'),$form);
