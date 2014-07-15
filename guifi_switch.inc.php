@@ -11,7 +11,7 @@ function guifi_ports_form($edit,&$form_weight) {
   guifi_log(GUIFILOG_TRACE,'function guifi_ports_form()',$edit);
 
 // Select device model from model_specs
-  if (isset($edit['mid'])) {
+  if (!empty($edit['mid'])) {
     $querymid = db_query("
       SELECT mid, model, etherdev_max, optoports_max, m.opto_interfaces, f.name manufacturer
       FROM guifi_model_specs m, guifi_manufacturer f
@@ -50,7 +50,7 @@ function guifi_ports_form($edit,&$form_weight) {
   guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(opto_interfaces)',$opto_interfaces);
 
   // if no switch model selected / unkown number of ports, ask for save
-  if (empty($swmodel->etherdev_max)) {
+  if (empty($swmodel->etherdev_max) and (empty($edit['mid']))) {
     $form['msg'] = array(
       '#type' =>'item',
       '#value'=>t('Number of ports is still unknown. Select a model above and save & continue edit to populate ports.'),

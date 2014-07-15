@@ -1359,13 +1359,19 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
        array('device' => $device['id'],'format' => 'short'));
 
      // Device main attributes
+     if (!empty($device['manufacturer']))
+       $mDescr = $device['manufacturer'].'-'.$device['model'];
+     else
+       $mDescr = '';
      $uCreated = db_fetch_object(db_query('SELECT u.name FROM {users} u WHERE u.uid = %d', $device[user_created]));
-     $deviceAttr = $device[id].' '.$device[manufacturer].'-'.$device[model].' '
+     $deviceAttr = $device[id].' '.$mDescr.'
+         '
        .t('created by').': '.$uCreated->name
        .' '. t('at') .' '. format_date($device[timestamp_created], 'small');
      if (!empty($device[timestamp_changed])) {
        $uChanged = db_fetch_object(db_query('SELECT u.name FROM {users} u WHERE u.uid = %d', $device[user_changed]));
-       $deviceAttr .= ' '.t('updated by').': '.$uChanged->name
+       $deviceAttr .= '
+           '.t('updated by').': '.$uChanged->name
        .' '. t('at') .' '. format_date($device[timestamp_changed], 'small');
      }
 

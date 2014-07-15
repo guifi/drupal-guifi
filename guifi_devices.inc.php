@@ -604,6 +604,7 @@ function guifi_device_form($form_state, $params = array()) {
     '#size'        => 60,
     '#maxlength'   => 60,
     '#title'       => t('Log Server'),
+    '#default_value'    => $form_state['values']['logserver'],
     '#weight'      => $form_weight++,
     '#description' =>  t('If you have a log server for mikrotik (dude), add your ip.'),
   );
@@ -656,8 +657,10 @@ function guifi_device_form($form_state, $params = array()) {
 
   // Cable interfaces/ports
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans if ports)'),$form_weight);
-  $form['interfaces'] = guifi_ports_form($form_state['values'],$form_weight);
-  $form['interfaces']['#weight'] = $form_weight++;
+  if (isset($form_state['values']['interfaces'])) {
+    $form['interfaces'] = guifi_ports_form($form_state['values'],$form_weight);
+    $form['interfaces']['#weight'] = $form_weight++;
+  }
 
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans comments)'),$form_weight);
 
@@ -1336,6 +1339,309 @@ function guifi_device_mrtg_form($mrtg) {
   );
 }
 
+function guifi_ups_form($edit, &$form_weight) {
+
+  $form['variable'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('UPS Model & Specs'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#weight' => $form_weight++,
+    '#attributes'  => array('class'=>'fieldset-device-main'),
+    '#tree' => TRUE
+  );
+  $form['variable']['modelDescr'] = array(
+    '#type' => 'textfield',
+    '#size' => 40,
+    '#maxlength' => 120,
+    '#title' => t('Model'),
+    '#required' => TRUE,
+    '#default_value' => $edit['variable']['modelDescr'],
+//    '#default_value' => 'model',
+    '#weight' => $form_weight++,
+    '#description' => t('Manufacturer & Model')
+  );
+  $form['variable']['specs'] = array(
+    '#type' => 'select',
+    '#title' => t('Power'),
+    '#required' => TRUE,
+    '#default_value' => $edit['variable']['specs'],
+    '#options' => array(
+       '<500VA'=> t('< 400W'),
+  	   '500VA'=>'500VA / 400W',
+  	   '1000VA'=>'1000VA / 800W',
+  	   '1500VA'=>'1500VA / 1000W',
+  	   '2000VA'=>'2000VA / 1600W',
+  	   '3000VA'=>'3000VA / 2100W',
+  	   '>3000VA'=>'> 3000VA / > 2100W',
+    ),
+    '#description' => t('Output Power Capacity.<br>Use the nearest value.'),
+    '#weight' => $form_weight++,
+  );
+  return $form;
+}
+
+function guifi_generator_form($edit, &$form_weight) {
+
+  $form['variable'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Power Generator & Specs'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#weight' => $form_weight++,
+    '#attributes'  => array('class'=>'fieldset-device-main'),
+    '#tree' => TRUE
+  );
+  $form['variable']['modelDescr'] = array(
+    '#type' => 'textfield',
+    '#size' => 40,
+    '#maxlength' => 120,
+    '#required' => TRUE,
+    '#title' => t('Model'),
+    '#default_value' => $edit['variable']['modelDescr'],
+    '#weight' => $form_weight++,
+    '#description' => t('Manufacturer & Model')
+  );
+  $form['variable']['specs'] = array(
+    '#type' => 'textfield',
+    '#size' => 5,
+    '#maxlength' => 5,
+    '#required' => TRUE,
+    '#title' => t('Watts'),
+    '#default_value' => $edit['variable']['specs'],
+    '#element_validate' => array('guifi_quantity_validate'),
+    '#weight' => $form_weight++,
+    '#description' => t('Max Power Capacity')
+  );
+  return $form;
+}
+
+function guifi_battery_form($edit, &$form_weight) {
+
+  $form['variable'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Power Batteries & Specs'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#weight' => $form_weight++,
+    '#attributes'  => array('class'=>'fieldset-device-main'),
+    '#tree' => TRUE
+  );
+  $form['variable']['modelDescr'] = array(
+    '#type' => 'textfield',
+    '#size' => 40,
+    '#maxlength' => 120,
+    '#required' => TRUE,
+    '#title' => t('Model'),
+    '#default_value' => $edit['variable']['modelDescr'],
+    '#weight' => $form_weight++,
+    '#description' => t('Manufacturer & Model')
+  );
+  $form['variable']['specs'] = array(
+    '#type' => 'textfield',
+    '#size' => 3,
+    '#maxlength' => 3,
+    '#required' => TRUE,
+    '#title' => t('A/h'),
+    '#default_value' => $edit['variable']['specs'],
+    '#element_validate' => array('guifi_quantity_validate'),
+    '#weight' => $form_weight++,
+    '#description' => t('Ampers per hour')
+        );
+  $form['variable']['units'] = array(
+    '#type' => 'textfield',
+    '#size' => 3,
+    '#maxlength' => 3,
+    '#required' => TRUE,
+    '#title' => t('Units'),
+    '#default_value' => $edit['variable']['units'],
+    '#element_validate' => array('guifi_quantity_validate'),
+    '#weight' => $form_weight++,
+    '#description' => t('Number of units')
+  );
+  return $form;
+}
+
+
+function guifi_solar_form($edit, &$form_weight) {
+
+  $form['variable'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Solar Panel Model & Specs'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#weight' => $form_weight++,
+    '#attributes'  => array('class'=>'fieldset-device-main'),
+    '#tree' => TRUE
+  );
+  $form['variable']['modelDescr'] = array(
+    '#type' => 'textfield',
+    '#size' => 40,
+    '#maxlength' => 120,
+    '#required' => TRUE,
+    '#title' => t('Model'),
+    '#default_value' => $edit['variable']['modelDescr'],
+    '#weight' => $form_weight++,
+    '#description' => t('Manufacturer & Model')
+  );
+  $form['variable']['specs'] = array(
+    '#type' => 'select',
+    '#title' => t('Power'),
+    '#required' => TRUE,
+    '#default_value' => $edit['variable']['specs'],
+    '#options' => array(
+       '<100W'=> t('< 100W'),
+  	   '100W'=>'100 Watts',
+  	   '150W'=>'150 Watts',
+  	   '200W'=>'100 Watts',
+  	   '250W'=>'250 Watts',
+  	   '300W'=>'300 Watts',
+  	   '400W'=>'400 Watts',
+  	   '>400W'=>'> 400 Watts',
+    ),
+    '#description' => t('Power otput (Wattage).<br>Use the nearest value.'),
+    '#weight' => $form_weight++,
+  );
+  $form['variable']['units'] = array(
+    '#type' => 'textfield',
+    '#size' => 3,
+    '#maxlength' => 3,
+    '#required' => TRUE,
+    '#title' => t('Units'),
+    '#default_value' => $edit['variable']['units'],
+    '#element_validate' => array('guifi_quantity_validate'),
+    '#weight' => $form_weight++,
+    '#description' => t('Number of units')
+  );
+  return $form;
+}
+
+function guifi_rack_form($edit, &$form_weight) {
+
+  // default values
+  if (!isset($edit['variable']['width']))
+     $edit['variable']['width'] = 19;
+  if (!isset($edit['variable']['height']))
+     $edit['variable']['height'] = 42;
+  if (!isset($edit['variable']['sides']))
+     $edit['variable']['sides'] = 2;
+  if (!isset($edit['variable']['depth']))
+     $edit['variable']['depth'] = 800;
+
+  $form['variable'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Rack Specs'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#weight' => $form_weight++,
+    '#attributes'  => array('class'=>'fieldset-device-main'),
+    '#tree' => TRUE
+  );
+  $form['variable']['modelDescr'] = array(
+    '#type' => 'textfield',
+    '#size' => 40,
+    '#maxlength' => 120,
+    '#required' => TRUE,
+    '#title' => t('Model'),
+    '#default_value' => $edit['variable']['modelDescr'],
+    '#weight' => $form_weight++,
+    '#description' => t('Manufacturer & Model')
+  );
+  $form['variable']['width'] = array(
+    '#type' => 'select',
+    '#title' => t('Width'),
+    '#required' => TRUE,
+    '#default_value' => $edit['variable']['width'],
+    '#options' => array(
+       '10'=> t('10 inches'),
+  	   '19'=> t('19 inches'),
+    ),
+    '#description' => t('in inches'),
+    '#weight' => $form_weight++,
+  );
+  $hOpts = array();
+  for ($i=50; $i >=4; $i--) $hOpts[$i] = $i;
+  $form['variable']['height'] = array(
+    '#type' => 'select',
+    '#title' => t('Height'),
+    '#required' => TRUE,
+    '#default_value' => $edit['variable']['height'],
+    '#options' => $hOpts,
+    '#description' => t('in Us units'),
+    '#weight' => $form_weight++,
+  );
+  $form['variable']['sides'] = array(
+    '#type' => 'select',
+    '#title' => t('Sides'),
+    '#required' => TRUE,
+    '#default_value' => $edit['variable']['sides'],
+    '#options' => array(
+       '1'=> t('only frontal'),
+  	   '2'=> t('both sides'),
+    ),
+    '#description' => t('sides available'),
+    '#weight' => $form_weight++,
+  );
+  $form['variable']['depth'] = array(
+    '#type' => 'textfield',
+    '#size' => 3,
+    '#maxlength' => 3,
+    '#required' => TRUE,
+    '#title' => t('Depth'),
+    '#default_value' => $edit['variable']['depth'],
+    '#element_validate' => array('guifi_quantity_validate'),
+    '#weight' => $form_weight++,
+    '#description' => t('milimeters (mm)')
+  );
+  return $form;
+}
+
+function guifi_breaker_form($edit, &$form_weight) {
+
+  $form['variable'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Circuit Breakers / Surge Protectors'),
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#weight' => $form_weight++,
+    '#attributes'  => array('class'=>'fieldset-device-main'),
+    '#tree' => TRUE
+  );
+  $form['variable']['modelDescr'] = array(
+    '#type' => 'textfield',
+    '#size' => 40,
+    '#maxlength' => 120,
+    '#required' => TRUE,
+    '#title' => t('Model'),
+    '#default_value' => $edit['variable']['modelDescr'],
+    '#weight' => $form_weight++,
+    '#description' => t('Manufacturer & Model')
+  );
+  $form['variable']['cbtype'] = array(
+    '#type' => 'select',
+    '#title' => t('Protection type'),
+    '#required' => TRUE,
+    '#default_value' => $edit['variable']['cbtype'],
+    '#options' => array(
+       'RCD'=> t('Residual Current Device'),
+       'CB' => t('Circuit Breaker (Magnetic/Thermic)'),
+       'CB&RCD' => t('Both (RCB & CB)'),
+       'SP' => t('Surge Protector'),
+    ),
+    '#description' => t('Breaker type'),
+    '#weight' => $form_weight++,
+  );
+  $form['variable']['recloser'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Recloser'),
+    '#default_value' => $edit['variable']['recloser'],
+    '#options' => $hOpts,
+    '#description' => t('Automatic recloser'),
+    '#weight' => $form_weight++,
+  );
+  return $form;
+}
+
 function guifi_bandwidth_types() {
   return    array(  '64000' => '64k',
                                '128000' => '128k',
@@ -1414,7 +1720,40 @@ function guifi_device_print_data($device) {
             '/'.$bandwidth[$device['variable']['upload']]);
     $rows[] = array(t('SNMP index to graph'),$device['variable']['mrtg_index']);
   }
-  if (($device['type'] == 'generic' || 'confine') and ($device['variable'] != '')) {
+
+  // Others with modelDescr set
+  if (isset($device['variable']['modelDescr'])) {
+    switch ($device['type']) {
+    	case 'ups':
+    	  $vDescr = t('Power: %power',array('%power'=>$device['variable']['specs']));
+    	  break;
+    	case 'generator':
+    	  $vDescr = t('Max Power: %power Watts',array('%power'=>$device['variable']['specs']));
+    	  break;
+    	case 'battery':
+    	  $vDescr = t('Power: %power/Ah, Quantity: %quantity' ,
+    	    array('%power'=>$device['variable']['specs'],
+    	      '%quantity'=>$device['variable']['units']));
+    	  break;
+    	case 'rack':
+    	  $vDescr = t('Height: %height Us, Width: %width inches, Depth: %depth mm' ,
+    	    array('%height'=>$device['variable']['height'],
+    	      '%width'=>$device['variable']['width'],
+    	      '%depth'=>$device['variable']['depth']));
+    	  break;
+    	case 'breaker':
+    	  $vDescr = t('Protection: %cbtype, Auto-reclose: %recloser' ,
+    	    array('%cbtype'=>$device['variable']['cbtype'],
+    	      '%recloser'=> $device['variable']['recloser'] ? t('Yes') : t('No'),
+    	      ));
+    	  break;
+    }
+    $rows[] = array($device['variable']['modelDescr'],$vDescr);
+  }
+
+
+  // generic
+  if (($device['type'] == 'generic' || 'confine') and (!empty($device['variable']['mrtg_index']))) {
     $rows[] = array(t('SNMP index to graph'),$device['variable']['mrtg_index']);
   }
 

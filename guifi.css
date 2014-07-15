@@ -58,7 +58,8 @@ td.available {
   margin: 1em;
 }
 
-.form-newline {
+.form-newline,
+ {
   clear: both;
 }
 

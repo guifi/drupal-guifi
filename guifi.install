@@ -181,14 +181,16 @@ function guifi_schema() {
          'device_id' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, 'comment' => 'foreign key to guifi_devices(id)'),
          'radiodev_counter' => array('type' => 'int', 'size' => 'tiny', 'not null' => FALSE, 'comment' => 'if not NULL, foreign key to guifi_radios(radiodev_counter)'),
          'etherdev_counter' => array('type' => 'int', 'size' => 'tiny', 'not null' => FALSE, 'comment' => 'if not NULL, foreign key to guifi_radios(etherdev_counter)'),
+         'interface_class' => array('type' => 'varchar', 'length' => 40, 'NOT NULL' => FALSE, 'comment' => 'radio, ethernet, bridge, bonding, vlan, wds/p2p, virtualAP, tunnels ...'),
          'interface_type' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE),
+         'related_interfaces' => array('type' => 'varchar', 'length' => 120, 'NOT NULL' => FALSE, 'comment' => 'FK to parent interfaces (vlans, bondings, bridges...'),
          'mac' => array('type' => 'varchar', 'length' => '20', 'not null' => TRUE, 'default' => '00:00:00:00:00:00')),
   		 'connector_type' => array('type' => 'varchar','length' => '10', 'not null' => FALSE, 'default' => NULL, 'comment' => 'connector type (RJ45,FO LX,SC...)'),
   		 'vlan' => array('type' => 'varchar','length' => '10', 'not null' => FALSE, 'default' => NULL, 'comment' => 'vlan (if have)'),
   		 'comments' => array('type' => 'varchar','length' => '64', 'not null' => FALSE, 'default' => NULL, 'Additional info/comments'),
          'connto_did' => array('type' => 'int', 'size' => 'medium', 'not null' => FALSE, 'comment' => 'connected to (device)'),
          'connto_iid' => array('type' => 'int', 'size' => 'medium', 'not null' => FALSE, 'comment' => 'connected to (interface)'),
-    'primary key' => array('device_id', 'id'),
+      'primary key' => array('device_id', 'id'),
     'indexes' =>  array('id' => array('id'))
   );
 
@@ -465,6 +467,11 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('15', 'device', 'switch', 'Switch');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('16', 'device', 'rack', 'Rack');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('17', 'device', 'ppanel','patch panel');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('18', 'device', 'ups', 'Uninterruptible Power Supply (UPS)');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('19', 'device', 'generator', 'Power generator source');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('20', 'device', 'solar', 'Solar Panel');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('21', 'device', 'battery', 'Battery');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('22', 'device', 'breaker','Cicuit breakers / Surge protectors');");
 
   // --
   // -- service types
@@ -2539,6 +2546,33 @@ function guifi_update_1030() {
   		"ADD COLUMN comments VARCHAR(64) DEFAULT NULL COMMENT 'Additional info/comments'," .
   		"ADD COLUMN connto_did MEDIUMINT(9) DEFAULT NULL COMMENT 'connected to (device)'," .
   		"ADD COLUMN connto_iid MEDIUMINT(9) DEFAULT NULL COMMENT 'connected to (interface)'");
+  return $items;
+
+}
+
+function guifi_update_1031() {
+
+  $items = array();
+
+  $items[] = update_sql("ALTER TABLE {guifi_interfaces} " .
+  		"ADD COLUMN interface_class VARCHAR(40) DEFAULT NULL COMMENT 'radio, ethernet, bridge, bonding, vlan, wds/p2p, virtualAP, tunnels ...' AFTER etherdev_counter," .
+  		"ADD COLUMN related_interfaces VARCHAR(120) DEFAULT NULL COMMENT 'FK to parent interfaces (vlans, bondings, bridges...)' AFTER interface_type");
+
+  return $items;
+
+}
+
+function guifi_update_1032() {
+
+  $items = array();
+
+  $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description) VALUES " .
+  		"('18', 'device', 'ups', 'Uninterruptible Power Supply (UPS)')," .
+  		"('19', 'device', 'generator', 'Power generator source')," .
+  		"('20', 'device', 'solar', 'Solar Panel')," .
+  		"('21', 'device', 'battery', 'Battery')," .
+  		"('22', 'device', 'breaker','Cicuit breakers / Surge protectors')");
+
   return $items;
 
 }

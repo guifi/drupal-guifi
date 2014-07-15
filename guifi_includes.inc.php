@@ -1750,6 +1750,19 @@ function guifi_notification_validate($to) {
   return implode(', ',$trimmed);
 }
 
+function guifi_quantity_validate($quantity,&$form_state) {
+  if ($form_state['clicked_button']['#value'] == t('Reset'))
+    return;
+
+  $quantity['#value'];
+  if ((empty($quantity['#value'])) or (!is_numeric($quantity['#value']))) {
+    form_error($quantity,
+      t('Units (%quantity) must be a number greater than 0.',
+        array('%quantity' => $quantity['#value'])),'error');
+  }
+  return $quantity;
+}
+
 function guifi_mac_validate($mac,&$form_state) {
   if ($form_state['clicked_button']['#value'] == t('Reset'))
     return;
@@ -1763,7 +1776,6 @@ function guifi_mac_validate($mac,&$form_state) {
     form_set_value($mac,$pmac,$form_state);
     $mac['#value'] = $pmac;
   }
-
   return $mac;
 }
 
