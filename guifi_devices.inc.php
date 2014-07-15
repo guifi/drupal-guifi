@@ -1797,6 +1797,10 @@ function guifi_device_links_print_data($id) {
 
 /* guifi_device_interfaces_print_data(): outputs the device interfaces data */
 function guifi_device_interfaces_print_data($device) {
+
+  if (empty($device['interfaces']))
+    return NULL;
+
   $rows = array();
   $inamestr = '';
   $fo_connectors = guifi_types('fo_port');
@@ -1876,6 +1880,8 @@ function guifi_device_print($device = NULL) {
     $output .= theme('box', $title, $table);
     if (arg(4) == 'data') break;
   case 'graphs':
+    if (empty($device['interfaces']))
+      break;
     // device graphs
     $table = theme('table', array(t('traffic overview')), guifi_device_graph_overview($device));
     $output .= theme('box', t('device graphs'), $table);
@@ -1885,6 +1891,8 @@ function guifi_device_print($device = NULL) {
     $output .= theme('box', NULL, guifi_device_links_print($device));
     if (arg(4) == 'links') break;
   case 'interfaces':
+    if (empty($device['interfaces']))
+      break;
     $header = array(t('id'),t('connects with'),t('connector'),t('vlan'),t('comments'),t('mac'),t('ip address'),t('netmask'));
     $tables = theme_table($header, guifi_device_interfaces_print_data($device),array('class'=>'device-data'));
     $output .= theme('box', t('port connectors information'), $tables);
