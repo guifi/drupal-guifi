@@ -15,16 +15,16 @@ function array_flatten(array $array, array $return = array(), $prefix=null, $par
         $name = $counter;
       } else
         $name = $k;
-      
+
       if ($prefix) $name = $prefix.'_'.$name;
-      
+
       $return = array_flatten($item, $return, $name, $k, $nivell++);
     }elseif ($item) {
       if ((strcmp($parentName, 'interfaces')==0)||(strcmp($parentName, 'links')==0)||(strcmp($parentName, 'radios')==0)) {
         $name = $counter;
       } else
         $name = $k;
-      
+
       if ($prefix)$name = $prefix.'_'.$name;
       $return[$name] = $item;
     }
@@ -59,20 +59,20 @@ function guifi_unsolclic($dev, $format = 'html') {
   global $rc_startup;
   global $ospf_zone;
   global $otype;
-  
+
   $paramPrefixes = array("zone", "node", "user", "device", "firmware", "radio", "interface", "ipv4", "link", "linkedto_");
 
   $otype = $format;
 
   $dev = (object)$dev;
-  
+
   $flattenDev = array_flatten((array)$dev,array());
-  
+
   if (isValidConfiguracioUSC($dev->usc_id)) {
 
     // carreguem el Twig , versió utilitzada 1.91
     include_once('contrib/Twig/Autoloader.php');
-    
+
     // FINAL. Treure el fitxer unsolclic resultant com a mime text/plain
     //drupal_set_header('Content-Type: text/plain; charset=utf-8');
 
@@ -118,18 +118,18 @@ function guifi_unsolclic($dev, $format = 'html') {
 
     // 6. recuperar els parametres de la plantilla
     $paramsconfiguracioUSC = guifi_get_paramsconfiguracioUSC($uscId);
-    
+
     // 6.B. recuperar els la informacio de la configuracio de fabricant-model-firmware
     $paramsMMF = guifi_get_paramsMMF($dev->id);
-    
+
     // 4.b Comprovacions sobre el Device
     $clientModeNoAPError = clientModeError($dev);
     if ($clientModeNoAPError) {
       $plantilla = $clientModeNoAPError;
     }
-    
+
     $totalParameters = array_merge($indexedParamsDevice, $paramsMMF, $flattenDev);
-    
+
     // altres parametres fixes; TODO posar-lo com a parametre fixe de la plantilla
       $totalParameters['ospf_name'] ='backbone';
       // proves de twig
@@ -138,11 +138,11 @@ function guifi_unsolclic($dev, $format = 'html') {
       $totalParameters['zone_primary_dns'] = $primary_dns;
       $totalParameters['zone_secondary_dns'] = $secondary_dns;
       $totalParameters['zone_ternary_dns'] = $ternary_dns;
-      
+
       list($primary_ntp,$secondary_ntp) = explode(' ',guifi_get_ntp($zone));
       $totalParameters['zone_primary_ntp'] = $primary_ntp;
       $totalParameters['zone_secondary_ntp'] = $secondary_ntp;
-    
+
     if ($paramsconfiguracioUSC) {
 
       // 7. substituir els parametres a la plantilla
@@ -161,11 +161,11 @@ function guifi_unsolclic($dev, $format = 'html') {
       }
 
       Twig_Autoloader::register();
-      
+
       $loader = new Twig_Loader_String();
       //$loader = new Twig_Loader_Filesystem('/home/albert/workspace/guifinet/drupal-6.22/sites/all/modules/guifi/firmware');
       $twig = new Twig_Environment($loader);
-      
+
       $totalParameters['dev'] = $dev;
 
       $twig->addFunction('ip2long', new Twig_Function_Function('ip2long'));
@@ -175,10 +175,10 @@ function guifi_unsolclic($dev, $format = 'html') {
       $twig->addFunction('guifi_get_alchemy_ifs', new Twig_Function_Function('guifi_get_alchemy_ifs'));
       $twig->addFunction('guifi_main_ip', new Twig_Function_Function('guifi_main_ip'));
       $twig->addFunction('explode', new Twig_Function_Function('explode'));
-      
+
       $escaper = new Twig_Extension_Escaper(true);
       $twig->addExtension($escaper);
-      
+
        //$plantilla  = $twig->render($configuracioUSC['template_file'], $twigVars);
        $plantilla  = $twig->render($plantilla, $totalParameters);
 //
@@ -188,7 +188,7 @@ function guifi_unsolclic($dev, $format = 'html') {
     echo $plantilla;
     die;
   }
-  
+
   if ($dev->variable['firmware'] == 'n/a') {
 	_outln_comment(t("ERROR: I do need a firmware selected at the radio web interface: ").'<a href="'.base_path().'/guifi/device/'.$dev->id.'/edit">http://guifi.net/guifi/device/'.$dev->id.'/edit');
         return;
@@ -261,7 +261,7 @@ function guifi_unsolclic($dev, $format = 'html') {
 
 
   $unsolclic='unsolclic_'.$dev->variable['firmware'];
-   
+
   if(function_exists(${unsolclic})){
 
      ${unsolclic}($dev);
@@ -307,7 +307,7 @@ function _outln_nvram($parameter, $value) {
   global $otype;
 
   print "nvram set ".$parameter.'="';
- 
+
   if (strlen($value) <= 80) {
     print $value;
   } else {
@@ -410,15 +410,6 @@ function guifi_get_caractmodel($mid) {
   return $caractModelInfo;
 }
 
-function guifi_get_firmware($nom) {
-
-  $firmwareInfo = db_fetch_array(db_query("select * from {guifi_firmware} where nom='%s'",$nom));
-  if (!empty($firmwareInfo)){
-    //var_dump($firmwareInfo);
-  }
-  return $firmwareInfo;
-}
-
 function guifi_get_paramsFirmware($fid) {
 
   $paramsFirmwareInfo = db_fetch_array(db_query("select * from {guifi_parametresFirmware} where fid='%d'",$fid));
@@ -467,7 +458,7 @@ function guifi_get_paramsMMF($devId) {
                         JOIN guifi_model_specs m on m.mid = usc.mid
                         JOIN guifi_manufacturer mf on mf.fid = m.fid
                         JOIN guifi_firmware f on f.id = usc.fid
-                    
+
                     where d.id = %d",$devId);
   $param = db_fetch_array($qry);
   return $param;
@@ -528,7 +519,7 @@ function guifi_get_paramsClientDevice($device_id) {
               ip2.ipv4 as linkedto_gateway, ip2.netmask linkedto_netmask
           FROM
               node n
-          
+
           JOIN guifi_devices d ON d.nid = n.nid
           JOIN guifi_location loc ON loc.id = n.nid
           JOIN guifi_zone z ON z.id = loc.zone_id
@@ -541,7 +532,7 @@ function guifi_get_paramsClientDevice($device_id) {
           JOIN guifi_interfaces i2 on i2.id = l2.interface_id
           LEFT JOIN guifi_radios r2 on r2.id = i2.device_id and r2.radiodev_counter = i2.radiodev_counter
           JOIN guifi_ipv4 ip2 ON ip2.interface_id = i2.id
-          
+
           WHERE
             d.id = %d
           order by radio_order asc, interface_type asc",$device_id);
@@ -555,12 +546,12 @@ function guifi_get_paramsClientDevice($device_id) {
 
 
 function guifi_indexa_paramsDevice($arrayParametres, $paramPrefixes) {
-  
+
   $index = 1;
   foreach ($arrayParametres as $registre) {
     //var_dump($registre);
     //echo "<hr>";
-    
+
     foreach ($registre as $clau=>$valor) {
       // comprovar existencia del prefix a la clau
       if (guifi_usc_comprova_clau_prefix($clau, $paramPrefixes)){
@@ -584,21 +575,21 @@ function guifi_indexa_paramsDevice($arrayParametres, $paramPrefixes) {
         }
         //if ($inserir) {
           //echo "<br>afegim resultat[$clau$index]";
-          
+
         // indexant
         //$resultat[$clau.".".$index] = $valor;
-        
+
         // sense indexar
         $resultat[$clau] = $valor;
-        
-        
-        
+
+
+
         //}
       }
     }
     $index++;
   }
-  
+
   return $resultat;
 }
 
@@ -613,9 +604,9 @@ function guifi_usc_comprova_clau_prefix($clau, $paramPrefixes) {
 function isValidConfiguracioUSC($uscid){
   $result = db_fetch_object(db_query("SELECT id, enabled FROM {guifi_configuracioUnSolclic} WHERE  id = %d AND enabled = 1 LIMIT 1",$uscid));
   if (!empty($result->enabled)) return true;
-  
+
   return false;
 }
-    
+
 
 ?>

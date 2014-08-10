@@ -72,6 +72,19 @@ function _guifi_tostrunits($num) {
   }
 }
 
+function guifi_main_ethernet($device_id) {
+  $Qi= db_query(
+     'SELECT i.id
+      FROM {guifi_interfaces} i
+      WHERE i.device_id=%d
+      ORDER BY radiodev_counter,etherdev_counter,id',
+      $device_id);
+  $i = db_fetch_object($Qi);
+  if (empty($i->id))
+    return false;
+  return $i->id;
+}
+
 function guifi_main_interface($mode = NULL) {
   switch ($mode) {
     case 'ap': return 'wLan/Lan';
@@ -82,7 +95,9 @@ function guifi_main_interface($mode = NULL) {
 }
 
 function guifi_main_ip($device_id) {
-  $qips = db_query('SELECT a.ipv4,a.netmask,a.id, i.interface_type FROM {guifi_interfaces} i LEFT JOIN {guifi_ipv4} a ON a.interface_id=i.id WHERE i.device_id=%d ORDER BY a.id',$device_id);
+  $qips = db_query('SELECT a.ipv4,a.netmask,a.id, i.interface_type
+      FROM {guifi_interfaces} i LEFT JOIN {guifi_ipv4} a ON a.interface_id=i.id
+      WHERE i.device_id=%d ORDER BY a.id',$device_id);
   $ip_array=array();
   while ($ip = db_fetch_object($qips)) {
     if ($ip->ipv4 != NULL) {
@@ -170,6 +185,32 @@ function guifi_get_mac($id,$itype) {
     return _guifi_mac_sum($dev->mac,$mac->relations);
   else
     return NULL;
+}
+
+function guifi_get_model_specs($mid) {
+  $m = db_fetch_object(db_query('select * from {guifi_model_specs} where mid=%d',$mid));
+
+  $m->ethernames = explode('|',$m->interfaces);
+  for ($i=0; $i < $m->etherdev_max; $i++)
+    if (empty($m->ethernames[$i]))
+      $m->ethernames[$i]=$i+1;
+
+  $m->ethermax =count($m->ethernames);
+
+  if ((empty($m->optodev_max) or !(strpos($m->model_class,'fiber'))))
+    return $m;
+
+  $m->optonames = explode('|',$m->opto_interfaces);
+
+  // if opto interfaces present, check if overlaps the ethernet interfaces
+  if (count($m->optonames)) {
+    $m->ethernames = array_diff($m->ethernames, $m->optonames);
+    $m->ethernames = array_merge($m->ethernames, $m->optonames);
+    if ($m->ethermax < count($m->ethernames))
+      // There are NO ports overlapped between cooper & optics, so total is the aggregation of both
+      $m->ethermax = count($m->ethernames);
+  }
+  return $m;
 }
 
 /*
@@ -498,6 +539,24 @@ function guifi_get_device_interfaces($id,$iid = NULL) {
   return $used;
 }
 
+function guifi_get_firmware($id) {
+  $sql= db_query('
+      SELECT *
+      FROM {guifi_firmware}
+      WHERE id = %d
+       OR nom="%s"', $id, $id);
+  $firmware = db_fetch_object($sql);
+  guifi_log(GUIFILOG_TRACE,'function guifi_get_firmware(firmware)',$firmware);
+  if (!empty($firmware->managed)) {
+    $m = explode('|',$firmware->managed);
+    foreach($m as $v)
+      $managed[$v] = $v;
+    $firmware->managed = $managed;
+  }
+  guifi_log(GUIFILOG_TARCE,'function guifi_get_firmware(managed)',$firmware->managed);
+
+  return $firmware;
+}
 
 /* guifi_get_free_interfaces(): Populates a select list with the available & free cable interfaces */
 function guifi_get_free_interfaces($id,$edit = array()) {

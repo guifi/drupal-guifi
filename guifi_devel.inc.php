@@ -43,7 +43,7 @@ function guifi_devel_services($service_id=null, $op=null) {
               )));
   }
 
-  $output .= theme('table',$headers,$rows);
+  $output .= theme('table',$headers,$rows,array('class'=>'device-data-med'));
   print theme('page',$output, FALSE);
   return;
 }
@@ -243,7 +243,7 @@ function guifi_devel_devices($devid=null, $op=null) {
   foreach ($manufacturers as $k => $v)
     $output .= '<a href="#M'.($k + 1).'">'.$v.'</a> - ';
 
-  $output .= '<hr>'.theme('table',$headers,$rows,array('style' => 'width: 0%;'));
+  $output .= '<hr>'.theme('table',$headers,$rows,array('class' => 'device-data'));
   print theme('page',$output, FALSE);
   return;
 }
@@ -446,7 +446,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#default_value' => $dev->opto_interfaces,
     '#size' => 80,
     '#maxlength' => 240,
-    '#description' => t('Port numbers with SFP slot<br>Use | to split de the numbers (i.e. 21|22|23|24)'),
+    '#description' => t('Port numbers with SFP slot<br>Use | to split de the numbers (i.e. 21|22|23|24)<br>Use same names as ethernet for shared ports'),
     '#weight' => $form_weight++,
   );
 
@@ -536,9 +536,9 @@ function guifi_devel_devices_form($form_state, $devid) {
     //echo "<hr>firmwares[fid]=". $firmwares["fid"] ."firmwares[mid]=". $firmwares["mid"]. " firmwares[nom]=". $firmwares["nom"];
     //echo "<br>firmwares[fid]=". firmwares["fid"];
     if ($firmwares["mid"]==$devid)
-    $firms_compatibles[$firmwares["firmware_id"]] = $firmwares["nom"];
+      $firms_compatibles[$firmwares["firmware_id"]] = $firmwares["nom"];
     else
-    $firms_tots[$firmwares["firmware_id"]] = $firmwares["nom"];
+      $firms_tots[$firmwares["firmware_id"]] = $firmwares["nom"];
   }
 
   $form['firmware']['firmwaresCompatibles'] = array(
@@ -806,10 +806,11 @@ function guifi_devel_firmware($firmid=null, $op=null) {
   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/firmware/add\'"/>';
   $output .= '</form>';
 
-  $headers = array(t('ID'), t('Name'), t('Description'), t('Enabled'), t('used on #USC'),  t('Edit'), t('Delete'));
+  $headers = array(t('Id'), t('Name'), t('Description'), t('Enabled'), t('Manages'), t('#USC'),
+    array('data'=>t('Operations'),'colspan'=>'2')); //,  t('Edit'), t('Delete'));
 
   $sql= db_query('select
-                      f.id, f.nom, f.descripcio, f.relations, f.enabled,
+                      f.id, f.nom, f.descripcio, f.relations, f.enabled, f.managed,
                       count(usc.fid) as enabledUSC
                   from
                       {guifi_firmware{ f
@@ -818,24 +819,26 @@ function guifi_devel_firmware($firmid=null, $op=null) {
                   order by enabled desc ,nom asc');
 
   while ($firmware = db_fetch_object($sql)) {
+    ($firmware->enabled) ? $enabled='Enabled' : $enabled='Disabled';
     $rows[] = array($firmware->id,
                     $firmware->nom,
                     $firmware->descripcio,
-                    $firmware->enabled,
+                    array('data'=>t($enabled),'class'=>$enabled),
+                    str_replace('|',', ',$firmware->managed),
                     $firmware->enabledUSC,
                     l(guifi_img_icon('edit.png'),'guifi/menu/devel/firmware/'.$firmware->id.'/edit',
-            array(
-              'html' => TRUE,
-              'title' => t('edit firmware'),
-              )).'</td><td>'.
-                 l(guifi_img_icon('drop.png'),'guifi/menu/devel/firmware/'.$firmware->id.'/delete',
-            array(
-              'html' => TRUE,
-              'title' => t('delete firmware'),
-              )));
+                      array(
+                       'html' => TRUE,
+                       'attributes'=>array('title' => t('edit firmware')),
+                      )),
+                    l(guifi_img_icon('drop.png'),'guifi/menu/devel/firmware/'.$firmware->id.'/delete',
+                      array(
+                        'html' => TRUE,
+                        'attributes'=>array('title' => t('delete firmware')),
+                    )));
   }
 
-  $output .= theme('table',$headers,$rows);
+  $output .= theme('table',$headers,$rows,array('class'=>'device-data'));
   print theme('page',$output, FALSE);
   return;
 }
@@ -843,8 +846,9 @@ function guifi_devel_firmware($firmid=null, $op=null) {
 // Firmwares Form
 function guifi_devel_firmware_form($form_state, $firmid) {
 
-  $sql= db_query('SELECT id, nom, descripcio, relations, notification FROM {guifi_firmware} WHERE id = %d', $firmid);
-  $firmware = db_fetch_object($sql);
+  global $user;
+
+  $firmware = guifi_get_firmware($firmid);
 
   if ($firmid == 'New' ) {
    $form['new'] = array('#type' => 'hidden', '#value' => TRUE);
@@ -860,9 +864,18 @@ function guifi_devel_firmware_form($form_state, $firmid) {
     '#size' => 32,
     '#maxlength' => 32,
     '#description' => t('The firmware name, please, use a clear and short name. ex: "FirmwarevXX" where XX = version'),
-    '#prefix' => '<table><tr><td>',
-    '#suffix' => '</td>',
-    '#weight' => $form_weight++,
+  );
+
+  $form['managed'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Manageability'),
+      '#default_value' => $firmware->managed,
+      '#description' => t('Capabilities'),
+      '#options'=> array(
+          'vlans' => t('vlans'),
+          'aggregations'=>t('aggregations'),
+          'tunnels'=>t('tunnels')
+        ),
   );
 
   $form['enabled'] = array(
@@ -870,9 +883,18 @@ function guifi_devel_firmware_form($form_state, $firmid) {
       '#title' => t('Enabled'),
       '#default_value' => $firmware->enabled,
       '#description' => t('Check if firmware is avialable for use'),
-      '#prefix' => '<td>',
-      '#suffix' => '</td></tr>',
-      '#weight' => $form_weight++,
+  );
+
+  $form['notification'] = array(
+        '#type' => 'textfield',
+        '#size' => 60,
+        '#maxlength' => 1024,
+        '#title' => t('contact'),
+        '#required' => TRUE,
+        '#element_validate' => array('guifi_emails_validate'),
+        '#default_value' => (empty($firmware->notification)) ?
+           $user->mail : $firmware->notification,
+        '#description' =>  t('Mailid where changes on the device will be notified, if many, separated by \',\'<br />used for network administration.'),
   );
 
   $form['descripcio'] = array(
@@ -883,9 +905,6 @@ function guifi_devel_firmware_form($form_state, $firmid) {
     '#size' => 64,
     '#maxlength' => 64,
     '#description' => t('The firmware description, please, use a clear and short description. ex: "FirmwarevXX from creator"'),
-    '#prefix' => '<tr><td colspan="2">',
-    '#suffix' => '</td></tr>',
-    '#weight' => $form_weight++,
   );
 
   $query = db_query(" select
@@ -913,7 +932,7 @@ function guifi_devel_firmware_form($form_state, $firmid) {
     '#multiple' => true,
     '#required' => false,
     '#validated' => true,
-    '#prefix' => '<tr><td class="mselects" align="left" colspan="2"><table style="width:575px"><tr><td style="width:250px">',
+    '#prefix' => '<table style="width:575px"><tr><td style="width:250px">',
     '#suffix' => '</td><td  style="width:50px">',
     '#weight' => $form_weight++,
     '#attributes'=>array('style'=>'width:250px;height:350px')
@@ -939,32 +958,15 @@ function guifi_devel_firmware_form($form_state, $firmid) {
     '#required' => false,
     '#validated' => true,
     '#prefix' => $botons. '</td><td>',
-    '#suffix' => '</td></tr></table></td></tr>',
+    '#suffix' => '</td></tr></table>',
     '#weight' => $form_weight++,
     '#attributes'=>array('style'=>'width:250px;height:350px')
   );
 
-
-  $form['notification'] = array(
-        '#type' => 'textfield',
-        '#size' => 60,
-        '#maxlength' => 1024,
-        '#title' => t('contact'),
-        '#required' => TRUE,
-        '#element_validate' => array('guifi_emails_validate'),
-        '#default_value' => $firmware->notification,
-        '#weight' => $form_weight++,
-        '#description' =>  t('Mailid where changes on the device will be notified, if many, separated by \',\'<br />used for network administration.'),
-        '#prefix' => '<tr><td colspan="2">',
-        '#suffix' => '</td></tr>',
-
-  );
-
   $form['submit'] = array(
     '#type' => 'submit',
-    '#prefix' => '<tr><td>',
-          '#suffix' => '</td></tr></table>',
-    '#weight' => 99, '#value' => t('Save'));
+    '#weight' => 99, '#value' => t('Save')
+  );
 
   //$form['submit'] = array('#type' => 'submit',    '#weight' => $form_weight, '#value' => t('Save'));
 
@@ -977,7 +979,8 @@ function guifi_devel_firmware_form_submit($form, &$form_state) {
 
   guifi_devel_firmware_save($form_state['values']);
   drupal_goto('guifi/menu/devel/firmware');
-   return;
+
+  return;
 }
 
 function guifi_devel_firmware_save($edit) {
@@ -986,6 +989,12 @@ function guifi_devel_firmware_save($edit) {
   $to_mail = $user->mail;
   $log ='';
   $query = db_query(" SELECT id, nom, descripcio, relations, enabled FROM {guifi_firmware} " );
+
+  // Serialize managed field
+  foreach($edit['managed'] as $m)
+    if (!empty($m))
+      $newManaged[] = $m;
+  $edit[managed] = implode('|',$newManaged);
 
   // recollida de parametresFirmware actuals
   $sql= db_query("SELECT distinct(pid) FROM {guifi_parametresFirmware} WHERE fid = %d order by pid asc", $edit['id']);
@@ -1140,7 +1149,7 @@ function guifi_devel_manufacturer($mid=null, $op=null) {
               )));
   }
 
-  $output .= theme('table',$headers,$rows);
+  $output .= theme('table',$headers,$rows,array('class'=>'device-data-med'));
   print theme('page',$output, FALSE);
   return;
 }
@@ -1301,7 +1310,7 @@ function guifi_devel_parameter($id=null, $op=null) {
     )));
   }
 
-  $output .= theme('table',$headers,$rows);
+  $output .= theme('table',$headers,$rows,array('class'=>'device-data'));
   print theme('page',$output, FALSE);
   return;
 }
@@ -1471,7 +1480,7 @@ function guifi_devel_modelfeature($id=null, $op=null) {
     )));
   }
 
-  $output .= theme('table',$headers,$rows);
+  $output .= theme('table',$headers,$rows,array('class'=>'device-data-med'));
   print theme('page',$output, FALSE);
   return;
 }
@@ -1636,7 +1645,7 @@ function guifi_devel_configuracio_usc($id=null, $op=null) {
     )));
   }
 
-  $output .= theme('table',$headers,$rows);
+  $output .= theme('table',$headers,$rows,array('class'=>'device-data'));
   print theme('page',$output, FALSE);
   return;
 }

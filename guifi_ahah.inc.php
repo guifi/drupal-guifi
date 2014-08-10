@@ -681,7 +681,7 @@ function guifi_ahah_add_interface() {
 //  guifi_log(GUIFILOG_TRACE,sprintf('add_interface %d',$delta),$newI);
 
   $form_element =
-    guifi_interfaces_form($newI,array('interfaces',$delta));
+    guifi_interface_form($newI,array('interfaces',$delta));
 //  drupal_alter('form', $form_element, array(), 'guifi_ahah_add_interface');
 
   // Build the new form.
@@ -706,6 +706,68 @@ function guifi_ahah_add_interface() {
   $choice_form = $form['if']['interfaces']['ifs'];
   unset($choice_form['#prefix'], $choice_form['#suffix']); // Prevent duplicate wrappers.
   unset($choice_form[$newI['interface_type']][$delta]);
+  // build new form
+  $fs = array();
+  $form_element['#post'] = array();
+  $form_element = form_builder($form_element['form_id']['#value'] , $form_element, $fs);
+  $newfield = drupal_render($form_element);
+//  guifi_log(GUIFILOG_BASIC,sprintf('choice_form %d',$delta),htmlspecialchars($newfield));
+  $output = theme('status_messages') . drupal_render($choice_form) .
+    $newfield;
+
+  drupal_json(array('status' => TRUE, 'data' => $output));
+  exit;
+}
+
+
+/**
+ * Add virtual interface
+ *
+ * URL: http://guifi.net/guifi/js/add-vinterface
+ */
+function guifi_ahah_add_vinterface($iClass) {
+  $iClass = arg(3);
+  $vinterfaces = &$_POST[arg(3)];
+  guifi_log(GUIFILOG_TRACE,'guifi_ahah_add_vinterface(iClass)',arg(3));
+  guifi_log(GUIFILOG_TRACE,'guifi_ahah_add_vinterface(vinterfaces)',$vinterfaces);
+
+  // Build our new form element.
+  $newI['new'] = TRUE;
+  // $newI['interface_type'] = $iClass.$delta;
+
+  $delta = count($vinterfaces);
+  $newI['id'] = $delta;
+  $newI['interface_id'] = $delta;
+  $vinterfaces[] = $newI;
+
+  guifi_log(GUIFILOG_TRACE,'guifi_ahah_add_vinterface(newI)',$newI);
+
+  $form_element =
+    guifi_vinterface_form($iClass,$newI,!$delta,guifi_get_currentInterfaces($_POST));
+//  drupal_alter('form', $form_element, array(), 'guifi_ahah_add_interface');
+
+  // Build the new form.
+  $form_state = array('submitted' => FALSE);
+  $form_build_id = $_POST['form_build_id'];
+  // Add the new element to the stored form. Without adding the element to the
+  // form, Drupal is not aware of this new elements existence and will not
+  // process it. We retreive the cached form, add the element, and resave.
+  $form = form_get_cache($form_build_id, $form_state);
+  $choice_form = $form[$iClass][vifs];
+  $form[$iClass][vifs][$delta] = $form_element;
+  form_set_cache($form_build_id, $form, $form_state);
+  $form += array(
+    '#post' => $_POST,
+    '#programmed' => FALSE,
+  );
+
+  // Rebuild the old form.
+  $form = form_builder('guifi_device_form', $form, $form_state);
+
+  // Render the new output.
+  $choice_form = $form[$iClass]['vifs'];
+  unset($choice_form['#prefix'], $choice_form['#suffix']); // Prevent duplicate wrappers.
+  unset($choice_form[$delta]);
   // build new form
   $fs = array();
   $form_element['#post'] = array();

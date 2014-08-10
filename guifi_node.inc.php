@@ -1381,12 +1381,15 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
                    array('attributes'=>array('title'=>$deviceAttr))),
                  $device[type],
                  array('data' => $ip[ipv4].'/'.$ip[maskbits], 'align' => 'left'),
-                 array('data' => t($device[flag]),'class' => $device['flag']),
-                 array('data' => $status_url,'class' => $device['flag']),
+                 (empty($ip[ipv4])) ? '&nbsp;' :
+                   array('data' => t($device[flag]),'class' => $device['flag']),
+                 (empty($ip[ipv4])) ? '&nbsp;' :
+                   array('data' => $status_url,'class' => $device['flag']),
                  $unsolclic,
                  $edit_radio,
                  $delete_radio,
-                 $traceroute
+                 (empty($ip[ipv4])) ? '&nbsp;' :
+                   $traceroute
                     );
   }
 
@@ -1394,7 +1397,7 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
   if (count($rows))
     $output = '<h4>'.t('devices').'</h4>'.
       theme('table', $header, $rows,
-        array('style' => 'width: 0%;')).
+        array('class' => 'device-data')).
       $form;
   else
     $output = theme('box',t('This node does not have any device'),$form);
@@ -1527,7 +1530,7 @@ function theme_guifi_node_links_by_type($id = 0, $ltype = '%') {
   } // while loc1
 
   if (count($rows)) {
-    $output .= theme('table', $header, $rows);
+    $output .= theme('table', $header, $rows,array('class' => 'device-data'));
     if ($total)
       $output .= t('Total:').'&nbsp;'.$total.'&nbsp;'.t('kms.');
   } else

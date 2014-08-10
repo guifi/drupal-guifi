@@ -1105,6 +1105,13 @@ function guifi_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
+  $items['guifi/js/add-vinterface/%'] = array(
+    'title' => 'Javascript Add Virtual Interface',
+    'page callback' => 'guifi_ahah_add_vinterface',
+    'page_arguments' => array(3),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
   $items['guifi/js/add-subnet-mask/%'] = array(
     'title' => 'Javascript Add Public Subnetwork Mask',
     'page callback' => 'guifi_ahah_add_subnet_mask',

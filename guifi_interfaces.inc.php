@@ -231,6 +231,7 @@ function guifi_interfaces_cable_form(&$edit,&$form_weight) {
 
   // placeholder for the add interface form
   $form['interfaces']['ifs'] = array(
+ //   '#type'   => 'hidden',
     '#prefix' => '<div id="add-interface">',
     '#suffix' => '</div>',
     '#weight' => $form_weight++,
@@ -438,6 +439,12 @@ function guifi_interfaces_delete_submit(&$form,&$form_state) {
   $form_state['rebuild'] = TRUE;
 //  $form_state['action'] = 'guifi_interface_delete';
   return TRUE;
+}
+
+function guifi_interfaces_cmp($a, $b) {
+  if ($a[etherdev_counter] == $b[etherdev_counter])
+    return ($a[iid] < $b[iid]) ? -1 : 1;
+  return ($a[etherdev_counter] < $b[etherdev_counter]) ? -1 : 1;
 }
 
 ?>

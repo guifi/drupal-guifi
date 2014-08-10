@@ -4,7 +4,13 @@
 
 
 table.list-links, table.device-data {
-  width: 0%;
+  width: 90%;
+  margin-left: 5%
+}
+
+table.device-data-med {
+  width: 60%;
+  margin-left: 5%
 }
 
 td.available {
@@ -112,6 +118,18 @@ td.available {
 
 .port-item > .fieldset-wrapper {
   float: none;
+}
+
+#guifi th.Enabled, td.Enabled {
+  background-color: #33FF00; color: black;
+  text-decoration: none;
+  text-align: center;
+}
+
+#guifi th.Disabled, td.Disabled {
+  background-color: #66ffff; color: black;
+  text-decoration: none;
+  text-align: center;
 }
 
 #guifi th.Online, td.Online, th.Working, td.Working, td.Up {
