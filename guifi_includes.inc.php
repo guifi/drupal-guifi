@@ -552,7 +552,8 @@ function guifi_get_firmware($id) {
     foreach($m as $v)
       $managed[$v] = $v;
     $firmware->managed = $managed;
-  }
+  } else
+    $firmware->managed = array();
   guifi_log(GUIFILOG_TARCE,'function guifi_get_firmware(managed)',$firmware->managed);
 
   return $firmware;
