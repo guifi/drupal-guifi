@@ -587,6 +587,7 @@ function guifi_get_currentInterfaces($device) {
     $interfaces[$device[id].','.$k] = 'wlan'.$k.' - '.$radio[ssid];
   }
   foreach (array('ports','interfaces','vlans','aggregations','tunnels') as $iClass)
+    if (!empty($device[$iClass]))
     foreach ($device[$iClass] as $k => $interface) {
       if (empty($interface[interface_type]))
         continue;
@@ -727,7 +728,6 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
     '#type' => 'image_button',
     '#title' => ($first_port) ? t('delete') : false,
     '#src' => drupal_get_path('module', 'guifi').'/icons/drop.png',
-    '#parents' => array_merge($ptree,array('deleteInterface')),
     '#attributes' => array('title' => t('Delete interface')),
     '#submit' => array('guifi_vinterfaces_delete_submit'),
     '#prefix' => ($first_port) ?
