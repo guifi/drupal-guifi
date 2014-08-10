@@ -383,6 +383,142 @@ function guifi_ipv4_save($edit) {
 }
 
 
+function guifi_ipv4i_form($ipv4, $k, $first_port = true, $eInterfaces) {
+
+  guifi_log(GUIFILOG_TRACE,'function guifi_ipv4i_form (ipv4)',$ipv4);
+  $prefix = ''; $suffix = '';
+  $form = array(
+    '#type'         => 'fieldset',
+    '#parents'      => array('ipv4',$k),
+    '#attributes'   => array('class'=>'fieldset-interface-port'),
+    '#prefix'       => '<div id="fieldset-ipv4-'.$k.'">',
+    '#suffix'       => '</div>',
+    '#tree'         => TRUE,
+  );
+
+  $form['ipv4'] = array(
+    '#type' => 'textfield',
+    '#title' => ($first_port) ? t('Network IPv4 address') : false,
+    '#disabled' => TRUE,
+    '#default_value' => $ipv4[ipv4],
+    '#size' => 20,
+    '#maxlength' => 16,
+  );
+  $form['netmask'] = array(
+    '#type' => 'select',
+    '#title' => ($first_port) ? t("Mask") : false,
+//    '#disabled' => TRUE,
+    '#default_value' => $ipv4['netmask'],
+    '#options' => guifi_types('netmask',30,0),
+  );
+  $form['interface_id'] = array(
+    '#type' => 'select',
+    '#title'        => ($first_port) ? t('interface') : false,
+    '#options'      => $eInterfaces,
+    '#default_value'=> $ipv4['interface_id'],
+  );
+
+/*  if (!$ipv4[deleted])
+  $form['delete'] = array(
+    '#type' => 'image_button',
+    '#title' => ($first_port) ? t('delete') : false,
+    '#src' => drupal_get_path('module', 'guifi').'/icons/drop.png',
+    '#attributes' => array('title' => t('Delete ipv4')),
+    '#submit' => array('guifi_ipv4i_delete_submit'),
+    '#prefix' => ($first_port) ?
+      '<div class="form-item"><label>&nbsp</label>' : false,
+    '#suffix' => ($first_port) ?
+      '</div>' : false,
+  );
+*/
+  // Hidden fields
+    $form['id'] = array(
+      '#type'         => 'hidden',
+      '#value'        => $ipv4['id'],
+    );
+    $form['ipv4_type'] = array(
+      '#type'         => 'hidden',
+      '#value'        => $ipv4['ipv4_type'],
+    );
+    $form['zone_id'] = array(
+      '#type'         => 'hidden',
+      '#value'        => $ipv4['zone_id'],
+    );
+    if ($ipv4['deleted'])
+      $form['deleted'] = array(
+        '#value'      => $ipv4['deleted'],
+      );
+    if ($ipv4['new'])
+      $form['new'] = array(
+        '#type'       => 'hidden',
+        '#value'      => $ipv4['new'],
+      );
+  return $form;
+}
+
+function guifi_ipv4s_form($edit, &$form_weight) {
+  global $user;
+
+  if (empty($edit[ipv4]))
+    return;
+
+  guifi_log(GUIFILOG_TRACE,'function guifi_ipv4s_form(ipv4)',$edit['ipv4']);
+
+  // Build ipv4 fieldset
+  $form = array(
+    '#type'        => 'fieldset',
+    '#title'       => t('ipv4 addresses').' - '.count($edit[ipv4]),
+    '#collapsible' => TRUE,
+    '#tree'        => TRUE,
+    '#collapsed'   => TRUE,
+    '#description' => 'Under development. Changes at this form take no effect.',
+    '#weight'      => $form_weight++,
+    '#prefix'      =>
+      '<br><img src="/'.drupal_get_path('module', 'guifi').
+      '/icons/ipv4.png"> '.t('ipv4 section'),
+  );
+
+  // Loop across all existing addresses
+  $ipv4_count = 0;
+  $total_ipv4 = count($edit[ipv4]);
+  $first = true;
+
+  // placeholder for the add interface form
+  $form['ipv4'] = array(
+    '#parents'   => array('ipv4'),
+    '#type'      => 'fieldset',
+    '#prefix'    => '<div id="add-ipv4">',
+    '#suffix'    => '</div>',
+    '#weight'    => $form_weight++,
+  );
+
+  foreach ($edit[ipv4] as $k => $ipv4) {
+    guifi_log(GUIFILOG_TRACE,'function guifi_ipv4s_form(vint LOOP)',$ipv4);
+    $form[ipv4][$k] =
+      guifi_ipv4i_form($ipv4, $k, $first,guifi_get_currentInterfaces($edit));
+    $first = false;
+  }
+  guifi_log(GUIFILOG_TRACE,'function guifi_ipv4s_form(vint LOOP AFTER)',$form);
+
+  // TODO: Add ipv4 addresses
+/*  $form['addipv4'] = array(
+        '#type' => 'image_button',
+        '#src'=> drupal_get_path('module', 'guifi').'/icons/ipv4-new.png',
+        '#parents' => array('addipv4'),
+        '#attributes' => array('title' => t('Add ipv4')),
+        '#ahah' => array(
+          'path' => 'guifi/js/add-ipv4i/'.$iClass,
+          'wrapper' => 'add-'.$iClass,
+          'method' => 'replace',
+          'effect' => 'fade',
+         ),
+         '#weight' => $form_weight++,
+  );
+*/
+  return $form;
+}
+
+
 function guifi_device_ipv4_link_form($ipv4,$tree, $cable = TRUE) {
 
   $ki = $tree[count($tree)-3];

@@ -325,9 +325,22 @@ function guifi_device_load($id,$ret = 'array') {
       $device['tunnels'][$i['id']] = $i;
   }
 
+  // geting ipv4s
+  $qi = db_query('
+    SELECT ipv4.*
+    FROM {guifi_interfaces} i, {guifi_ipv4} ipv4
+    WHERE i.device_id=%d
+    AND i.id = ipv4.interface_id
+    ORDER BY i.interface_type,i.id',
+    $id);
+
+  while ($i = db_fetch_array($qi)) {
+    $device['ipv4'][] = $i;
+  }
 
   guifi_log(GUIFILOG_TRACE,'function guifi_device_load(vlans)',$device['vlans']);
   guifi_log(GUIFILOG_TRACE,'function guifi_device_load(aggregations)',$device['aggregations']);
+  guifi_log(GUIFILOG_TRACE,'function guifi_device_load(ipv4)',$device['ipv4']);
 
   if ($ret == 'array')
     return $device;
@@ -509,39 +522,6 @@ function guifi_device_form($form_state, $params = array()) {
     $form_state['values']['nick'] = guifi_device_get_default_nick($node, $form_state['values']['type'], $form_state['values']['nid'] );
   }
 
-// DEPRECATED IN FAVOR OF MESH (mesh)
-/*
-  // if device zone_mode was NULL, get the zone mode (ad-hoc or infrastructure)
-  if (is_null($form_state['values']['zone_mode'])) {
-    $form_state['values']['zone_mode'] = $zone->zone_mode;
-
-    // That's a new device, because zone_mode was NULL, otherwise would have a value
-    // If ad-hoc, add a radio & a public IP (/27)
-    if ($zone->zone_mode == 'ad-hoc') {
-      if ($form_state['values']['type'] == 'radio') {
-        $form_state['values']['newradio_mode'] = $zone->zone_mode;
-        guifi_radio_add_radio_submit($form,$form_state);
-      } else {
-      	$intf=array();
-        $intf['new']=TRUE;
-        $intf['interface_type']='wLan/Lan';
-        $ips_allocated=guifi_ipcalc_get_ips('0.0.0.0','0.0.0.0',$edit,1);
-        $net = guifi_ipcalc_get_subnet_by_nid($form_state['values']['nid'],'255.255.255.224','public',$ips_allocated,'Yes', TRUE);
-        $i = _ipcalc($net,'255.255.255.224');
-        guifi_log(GUIFILOG_TRACE,"IPS allocated: ".count($ips_allocated)." got net: ".$net.'/27',$i);
-        $intf['ipv4'][0]=array();
-        $intf['ipv4'][0]['new']=TRUE;
-        $intf['ipv4'][0]['ipv4_type']=1;
-        $intf['ipv4'][0]['ipv4']=$net;
-        guifi_log(GUIFILOG_TRACE,"Assigned IP: ".$intf['ipv4'][0]['ipv4']);
-        $intf['ipv4'][0]['netmask']='255.255.255.224';
-        $form_state['values']['interfaces'][0] = $intf;
-
-      }
-    }
-
-  }
-*/
   if (isset($form_state['action'])) {
     guifi_log(GUIFILOG_TRACE,'action',$form_state['action']);
     if (function_exists($form_state['action'])) {
@@ -573,15 +553,6 @@ function guifi_device_form($form_state, $params = array()) {
     '#weight'=> $form_weight++,
     '#value'=> $form_state['values']['type']
   );
-/*  $form['zone_mode'] = array(
-    '#type' => 'hidden',
-    '#name' => 'zone_mode',
-    '#value'=> $form_state['values']['zone_mode']
-  );*/
-
-
-
-//  guifi_form_hidden($form,$form_state['values']);
 
   if ($params['add'] != NULL){
     drupal_set_title(t('adding a new %device at %node',
@@ -593,7 +564,6 @@ function guifi_device_form($form_state, $params = array()) {
   }
 
   // All preprocess is complete, now going to create the form
-
   $form['main'] = array(
     '#type'        => 'fieldset',
     '#title'       => t('Device name, status and main settings').' ('.
@@ -728,17 +698,20 @@ function guifi_device_form($form_state, $params = array()) {
 
   // VLANs (VLans, VRRPs, WDS...)
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans if vLANs)'),$form_weight);
-//  if (isset($form_state['values']['vlans'])) {
-    $form['vlans'] = guifi_vinterfaces_form('vlans',$form_state['values'],$form_weight);
-    $form['vlans']['#weight'] = $form_weight++;
-//  }
+  $form['vlans'] = guifi_vinterfaces_form('vlans',$form_state['values'],$form_weight);
+  $form['vlans']['#weight'] = $form_weight++;
 
   // Aggregations (Bridges & Bondings)
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans if Aggregations)'),$form_weight);
-//  if (isset($form_state['values']['vlans'])) {
-    $form['aggregations'] = guifi_vinterfaces_form('aggregations',$form_state['values'],$form_weight);
-    $form['aggregations']['#weight'] = $form_weight++;
-//  }
+  $form['aggregations'] = guifi_vinterfaces_form('aggregations',$form_state['values'],$form_weight);
+  $form['aggregations']['#weight'] = $form_weight++;
+
+  // ipv4
+  guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans if ipv4)'),$form_weight);
+  $form['ipv4'] = guifi_ipv4s_form($form_state['values'],$form_weight);
+  $form['ipv4']['#weight'] = $form_weight++;
+
+
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans comments)'),$form_weight);
 
   // Comments
@@ -795,9 +768,9 @@ function guifi_device_form_validate($form,&$form_state) {
     $form_state['values']['ssid'] = $form_state['values']['nick'];
   }
 
-  // duplicated ip address
-  if (!empty($form_state['values']['ipv4'])) {
-    if (db_num_rows(db_query("
+  // TODO chexck duplicated ip address
+/*  if (!empty($form_state['values']['ipv4'])) {
+    if (db_affected_rows(db_query("
       SELECT i.id
       FROM {guifi_interfaces} i,{guifi_ipv4} a
       WHERE i.id=a.interface_id AND a.ipv4='%s'
@@ -809,7 +782,7 @@ function guifi_device_form_validate($form,&$form_state) {
       form_set_error('ipv4',$message);
     }
   }
-
+*/
   // no duplicate names on interface names
   $ifs = guifi_get_currentInterfaces($form_state['values']);
   $iChecked = array();
@@ -1021,6 +994,17 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
       $log .= guifi_device_interface_save($interface,$iid,$edit['id'],$ndevice['nid'],$to_mail);
     }
   }
+
+  // ipv4s
+ /*  if (!empty($edit[ipv4])) {
+    guifi_log(GUIFILOG_BASIC,'guifi_device_save (ipv4s)',$edit['ipv4']);
+    foreach ($edit[ipv4] as $k => $ipv4) {
+      guifi_log(GUIFILOG_BASIC,'guifi_device_save (ipv4)',$ipv4);
+      _guifi_db_sql('guifi_ipv4',
+        array('id' => $ipv4[id],'interface_id' => $ipv4['interface_id']),
+        $ipv4,$log,$to_mail);
+    }
+  } */
 
   $to_mail = explode(',',$edit['notification']);
 
@@ -2327,6 +2311,10 @@ function guifi_device_item_delete_msg($msg) {
     t('Press "<b>Save</b>" to confirm deletion or ' .
       '"<b>Reset</b>" to discard changes and ' .
       'recover the values from the database.');
+}
+
+function guifi_device_ipv4s($device) {
+
 }
 
 function guifi_device_edit($device) {
