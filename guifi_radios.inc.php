@@ -395,6 +395,11 @@ function guifi_radio_radio_form($radio, $key, &$form_weight = -200) {
       '#attributes' => array('class' => 'fieldset-device-main'),
 //      '#weight' => $fw2++,
     );
+
+    // DUMMY Radio MAC
+    if (empty($radio['mac']))
+      $radio['mac'] = "00:00:00:00:00:00";
+
     $f['s']['mac'] = array(
       '#type' => 'textfield',
 //      '#parents' => array('radios',$key,'mac'),
@@ -937,7 +942,8 @@ function _guifi_radio_prepare_add_radio($edit) {
       $radio['antenna_angle'] = 120;
       $radio['clients_accepted'] = "Yes";
       $radio['ssid'] = $ssid.'AP'.$rc;
-      $radio['interfaces'][0]['interface_type'] = 'wds/p2p';
+      // We don't need default interface.
+      // $radio['interfaces'][0]['interface_type'] = 'wds/p2p';
       // first radio, force wlan/Lan bridge and get an IP
       if ($tc == 0) {
         $radio['interfaces'][1] = array();
