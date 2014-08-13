@@ -153,6 +153,13 @@ function guifi_radio_form($edit, &$form_weight) {
             '#attributes' => array('title' => t('Add a public network range to the wLan for clients')),
             '#weight' => $bw++);
         }
+          $form['r']['radios'][$key]['AddWDSiface'] = array(
+            '#type' => 'image_button',
+            '#src' => drupal_get_path('module', 'guifi').'/icons/wdsp2p.png',
+            '#parents' => array('radios',$key,'AddWDSiface'),
+            '#submit' => array('guifi_radio_add_wdsiface_submit'),
+            '#attributes' => array('title' => t('Add wds interface')),
+            '#weight' => $bw++);
         if (!$hotspot) {
           $form['r']['radios'][$key]['AddHotspot'] = array(
             '#type' => 'image_button',
@@ -852,6 +859,15 @@ function _guifi_radio_add_wlan($radio, $nid, $edit = NULL) {
   return $interface;
 }
 
+function _guifi_radio_add_wdsiface($radio, $nid, $edit = NULL) {
+  $interface = array();
+  $interface['new'] = TRUE;
+  $interface['unfold'] = TRUE;
+  $interface['interface_type'] = 'wds/p2p';
+
+  return $interface;
+}
+
 /* _guifi_add_wlan_submit(): Action */
 function guifi_radio_add_wlan_submit($form, &$form_state) {
   $radio = $form_state['clicked_button']['#parents'][1];
@@ -864,6 +880,20 @@ function guifi_radio_add_wlan_submit($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
   drupal_set_message(t('wLan with %net/%mask added at radio#%radio',
     array('%net' => $net,'%mask' => '255.255.255.224','%radio' => $radio)));
+
+  return TRUE;
+}
+
+/* _guifi_add_wds_submit(): Action */
+function guifi_radio_add_wdsiface_submit($form, &$form_state) {
+  $radio = $form_state['clicked_button']['#parents'][1];
+  guifi_log(GUIFILOG_TRACE,sprintf('function guifi_radio_add_wds(%d)',$radio));
+
+  $interface = _guifi_radio_add_wdsiface($radio, $form_state['values']['nid'], $form_state['values']);
+
+  $form_state['values']['radios'][$radio]['unfold'] = TRUE;
+  $form_state['values']['radios'][$radio]['interfaces'][]=$interface;
+  $form_state['rebuild'] = TRUE;
 
   return TRUE;
 }

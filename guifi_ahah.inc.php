@@ -681,7 +681,7 @@ function guifi_ahah_add_interface() {
 //  guifi_log(GUIFILOG_TRACE,sprintf('add_interface %d',$delta),$newI);
 
   $form_element =
-    guifi_interface_form($newI,array('interfaces',$delta));
+    guifi_interfaces_form($newI,array('interfaces',$delta));
 //  drupal_alter('form', $form_element, array(), 'guifi_ahah_add_interface');
 
   // Build the new form.

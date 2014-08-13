@@ -332,7 +332,7 @@ function unsolclic_routeros($dev) {
            $ospf_zone = guifi_get_ospf_zone($zone);
            _outln('/ routing bgp network');
            _outln(sprintf(':foreach i in [/routing bgp network find network=%s/%d] do={/routing bgp network remove $i;}',$item['netid'],$item['maskbits']));
-           _outln(sprintf('add network=%s/%d disabled=no',$item['netid'],$item['maskbits']));
+           _outln(sprintf('add network=%s/%d synchronize=no disabled=no',$item['netid'],$item['maskbits']));
            if ($radio['mode'] != 'client') {
              ospf_interface($iname, $item['netid'], $item['maskbits'], $ospf_name, $ospf_zone, $ospf_id, 'no');
            } else {
