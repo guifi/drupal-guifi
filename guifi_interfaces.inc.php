@@ -113,7 +113,7 @@ function guifi_interfaces_form(&$interface,$ptree) {
   }
 
   // wds/p2p link, allow to create new links
-  if ($it == 'wds/p2p')
+  if ($it == 'wds/p2p' || $interface['interface_class'] == 'wds/p2p')
     $f['interface']['AddWDS'] = array(
       '#type' => 'image_button',
       '#src' => drupal_get_path('module', 'guifi').'/icons/wdsp2p.png',
@@ -131,7 +131,7 @@ function guifi_interfaces_form(&$interface,$ptree) {
          'related addresses and links will be also deleted'),
     );
   } else {
-    if (($it != 'wds/p2p') and ($it != 'wLan/Lan') and ($it != 'Wan'))
+    if (($it != 'wds/p2p') and ($interface['interface_class'] != 'wds/p2p') and ($it != 'wLan/Lan') and ($it != 'Wan'))
       $f['interface']['deleteInterface'] = array(
         '#type' => 'image_button',
         '#src' => drupal_get_path('module', 'guifi').'/icons/drop.png',

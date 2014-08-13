@@ -221,29 +221,29 @@ function guifi_ports_form($edit,&$form_weight) {
     }
 
     if (!($interface[deleted]))
-    $form[$port]['mac'] = array(
-      '#type'            => 'textfield',
-      '#title'           => ($first_port) ? t('mac') : false,
-      '#required'        => FALSE,
-      '#size'            => 20,
-      '#maxlength'       => 17,
-      '#default_value'   => $interface['mac'],
-      '#element_validate' => array('guifi_mac_validate'),
-      '#weight'          => $form_weight++,
-    );
-    if ((!$interface[deleted]) and !($port_count <= $m->ethermax))
-    $form[$port]['delete'] = array(
-      '#type'       => 'image_button',
-      '#title'      => ($first_port) ? t('delete') : false,
-      '#src'        => drupal_get_path('module', 'guifi').'/icons/drop.png',
-      '#attributes' => array('title' => t('Delete interface'.$m->ethermax.'-'.$port_count)),
-      '#submit'     => array('guifi_vinterfaces_delete_submit'),
-      '#prefix'     => ($first_port) ?
-        '<div class="form-item"><label>&nbsp</label>' : false,
-      '#suffix'     => ($first_port) ?
-        '</div>' : false,
-    );
+      $form[$port]['mac'] = array(
+        '#type'            => 'textfield',
+        '#title'           => ($first_port) ? t('mac') : false,
+        '#required'        => FALSE,
+        '#size'            => 20,
+        '#maxlength'       => 17,
+        '#default_value'   => $interface['mac'],
+        '#element_validate' => array('guifi_mac_validate'),
+        '#weight'          => $form_weight++,
+      );
 
+    if ((!$interface[deleted]) and !($port_count <= $m->ethermax))
+      $form[$port]['delete'] = array(
+        '#type'       => 'image_button',
+        '#title'      => ($first_port) ? t('delete') : false,
+        '#src'        => drupal_get_path('module', 'guifi').'/icons/drop.png',
+        '#attributes' => array('title' => t('Delete interface'.$m->ethermax.'-'.$port_count)),
+        '#submit'     => array('guifi_vinterfaces_delete_submit'),
+        '#prefix'     => ($first_port) ?
+          '<div class="form-item"><label>&nbsp</label>' : false,
+        '#suffix'     => ($first_port) ?
+          '</div>' : false,
+      );
 
       $form[$port]['conn'] = array(
         '#type'         => 'hidden',
@@ -713,16 +713,19 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
   if ($vinterface[deleted])
     $form['comments']['#value'] = t('will be deleted. press "reset" to cancel');
 
-  if (!$vinterface[deleted])
-  $form['mac'] = array(
-    '#type'            => 'textfield',
-    '#title'           => ($first_port) ? t('mac') : false,
-    '#required'        => FALSE,
-    '#size'            => 20,
-    '#maxlength'       => 17,
-    '#default_value'   => $vinterface['mac'],
-    '#element_validate' => array('guifi_mac_validate'),
-  );
+  if (!$vinterface[deleted]) {
+    if ($vinterface['mac'] === '00:00:00:00:00:00')
+      $vinterface['mac'] = '';
+    $form['mac'] = array(
+      '#type'            => 'textfield',
+      '#title'           => ($first_port) ? t('mac') : false,
+      '#required'        => FALSE,
+      '#size'            => 20,
+      '#maxlength'       => 17,
+      '#default_value'   => $vinterface['mac'],
+      '#element_validate' => array('guifi_mac_validate'),
+    );
+  }
   if (!$vinterface[deleted])
   $form['delete'] = array(
     '#type' => 'image_button',
