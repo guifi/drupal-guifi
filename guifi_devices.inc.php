@@ -217,13 +217,16 @@ function guifi_device_load($id,$ret = 'array') {
 
     // TODO: for schema v1, can be removed when no longer v1 interfaces do exists on the database
     // can't have 2 wLan/Lan bridges
+// that's not ready!
+/*
     if (in_array($i['interface_type'],$listi))
       if (($i['interface_type']) == 'wLan/Lan') {
         // delete row, doesn't have to be there
         _guifi_db_delete('guifi_interfaces',array('id'=>$i['id']));
         continue;
       }
-    $listi[] = $i['interface_type'];
+*/  
+  $listi[] = $i['interface_type'];
 
 
 
