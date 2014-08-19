@@ -223,19 +223,29 @@ function guifi_device_load($id,$ret = 'array') {
         WHERE interface_id=%d', $i['id']);
 
       if (db_result($qip) == 0) {
-        // print "iface wLanLan without any ip: ".$i['id']." ";
+        print "iface wLanLan without any ip: ".$i['id']." ";
         // safe delete interface
         _guifi_db_delete('guifi_interfaces',array('id'=>$i['id']));
       }
       else {
-        $qwlan = db_query('
-          SELECT COUNT (*)
-          FROM {guifi_radios}
-          WHERE id=%d', $id);
-        if (db_result($qwlan) == 0) {
-          //print "false wLanLan: ".$i['id']." ";
+        $qlink = db_query('
+          SELECT COUNT(*)
+          FROM {guifi_links}
+          WHERE interface_id=%d', $i['id']);
+
+        if (db_result($qlink) == 0) {
+        print "Aquesta wlan/lan no te links ".$i['id']." ";
+
+          $qwlan = db_query('
+            SELECT COUNT (*)
+            FROM {guifi_radios}
+            WHERE id=%d', $id);
+
+          if (db_result($qwlan) == 0) {
+            print "false wLanLan: ".$i['id']." ";
           // Device does not have any radios, don't need this bridge. convert to ethernet interface class.
-          db_query("UPDATE {guifi_interfaces} SET interface_class = 'ethernet', interface_type = 'Lan' WHERE id =%d",$i['id']);
+            db_query("UPDATE {guifi_interfaces} SET  radiodev_counter = NULL, etherdev_counter = '0', interface_class = 'ethernet', interface_type = 'Lan', related_interfaces = NULL WHERE id =%d",$i['id']);
+          }
         }
       }
       continue;
