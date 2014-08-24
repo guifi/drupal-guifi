@@ -587,7 +587,6 @@ function guifi_get_free_interfaces($id,$edit = array()) {
   return array_combine($free, $free);
 }
 
-
 /* guifi_devices_select_filter($form,$filters): Construct a list of devices to link with */
 function guifi_devices_select_filter($form_state,$action='',&$fweight = -100) {
 

@@ -1017,8 +1017,14 @@ function guifi_menu() {
   );
   // AHAH Calls
   $items['guifi/js/edit_cableconn'] = array(
-    'title' => 'Javascript Add WDS',
+    'title' => 'Javascript Edit Cable Connection',
     'page callback' => 'guifi_ahah_edit_cableconn',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['guifi/js/edit_subnet'] = array(
+    'title' => 'Javascript Edit Subnetwork',
+    'page callback' => 'guifi_ahah_edit_subnet',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
@@ -1059,11 +1065,29 @@ function guifi_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
+  $items['guifi/js/select-device-interfacename/%'] = array(
+    'title' => 'Javascript Select Device Interface name',
+    'page callback' => 'guifi_ahah_select_device_interfacename',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
   $items['guifi/js/select-device-interface/%'] = array(
     'title' => 'Javascript Select Device Interface',
     'page callback' => 'guifi_ahah_select_device_interface',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
+  );
+  $items['guifi/js/add-remoteipv4/%'] = array(
+    'title' => 'Javascript Add Remote IPv4 for a given Subnet',
+    'page callback' => 'guifi_ahah_add_remoteipv4',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['guifi/js/ahah_helper_demo'] = array(
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('ahah_helper_demo_form'),
+    'access callback'  => TRUE,
+    'type'             => MENU_CALLBACK,
   );
   $items['guifi/js/select-node/%'] = array(
     'title' => 'Javascript Select Node',
@@ -1130,7 +1154,18 @@ function guifi_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
-
+  $items['guifi/js/add-ipv4s/%'] = array(
+    'title' => 'Javascript Add IPv4 subnet (public/private or existing)',
+    'page callback' => 'guifi_ahah_add_ipv4s',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['guifi/js/select-device-subnets'] = array(
+    'title' => 'Javascript select device subnets',
+    'page callback' => 'guifi_ahah_select_device_subnets',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
   $items['guifi/js/add-cable-link/%'] = array(
     'title' => 'Javascript Add Cable Link',
     'page callback' => 'guifi_ahah_add_cable_link',
@@ -2764,6 +2799,8 @@ function theme_guifi_menu_page($blocks) {
   $dest = drupal_get_destination();
   if ($dest == 'destination=guifi')
     $suffix = '/full';
+  else
+    $suffix = '';
   if (guifi_menu_compact_mode()) {
     $link = 'guifi/menu/compact/off';
     $output .= l(t('Show descriptions'), $link . $suffix, array('title' => t('Expand layout to include descriptions.')));

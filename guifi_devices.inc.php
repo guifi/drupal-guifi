@@ -10,7 +10,6 @@
 function guifi_device_load($id,$ret = 'array') {
   guifi_log(GUIFILOG_TRACE,'function guifi_device_load(id)',$id);
 
-
   $device = db_fetch_array(db_query('
     SELECT d.*,
            m.model,
@@ -52,147 +51,14 @@ function guifi_device_load($id,$ret = 'array') {
   // getting device radios
   if ($device['type'] == 'radio') {
     // Get radio
-    $qr = db_query('
-      SELECT *
-      FROM {guifi_radios}
-      WHERE id = %d
-      ORDER BY id, radiodev_counter',
-      $id);
-
-    $device['firewall'] = FALSE; // Default: No firewall
-
-    $rc = 0;
-
-    while ($radio = db_fetch_array($qr)) {
-
-      $rc++;
-      if (!$device['firewall'])
-        if ($radio['mode'] == 'client')
-           $device['firewall'] = TRUE;
-
-      $device['radios'][$radio['radiodev_counter']] = $radio;
-
-      // get interface
-      $listi = array();
-      $qi = db_query('
-        SELECT *
-        FROM {guifi_interfaces}
-        WHERE device_id=%d AND radiodev_counter=%d
-        ORDER BY FIND_IN_SET(interface_type,"wLan/Lan,wLan,wds/p2p"),id',
-        $id,
-        $radio['radiodev_counter']);
-      while ($i = db_fetch_array($qi)) {
-
-        // force first interface to wLan/Lan
-        if ((!count($listi)) and ($i['interface_type'] == 'wLan') and ($rc==1)) {
-          $i['interface_type'] = 'wLan/Lan';
-        }
-
-        // can't have 2 wLan/Lan bridges
-        if (in_array($i['interface_type'],$listi))
-          if (($i['interface_type']) == 'wLan/Lan')
-            $i['interface_type']='wLan';
-        $listi[] = $i['interface_type'];
-
-        if ($device['radios'][$radio['radiodev_counter']]['mac'] == '')
-          $device['radios'][$radio['radiodev_counter']]['mac'] = $i['mac'];
-        $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']] = $i;
-
-        // For schema v1: wds/p2p are vlans over radios, and wLan/Lan are bridges
-        // so need to check if interface_class is informed, if it isn't, populate
-        // the new interface to convert to schema v2.
-        if (empty($i[interface_class])) {
-          switch($i[interface_type]){
-          case 'wds/p2p':
-            $i[interface_class] = 'wds/p2p';
-            $i[related_interfaces] = $radio[id].','.$radio[radiodev_counter];
-            $i[interface_type] = 'wds'.$radio['ssid'];
-            $device[vlans][$i[id]]=$i;
-            break;
-          case 'wLan/Lan':
-            $i[interface_class] = 'bridge';
-            $i[related_interfaces] = array(
-              $radio[id].','.$radio[radiodev_counter],
-              guifi_main_ethernet($device[id]),
-            );
-            $device[aggregations][$i[id]]=$i;
-            break;
-          }
-        }
-
-        // get ipv4
-        $ipdec = array();
-        $iparr = array();
-        $qa = db_query('
-          SELECT *
-          FROM {guifi_ipv4}
-          WHERE interface_id=%d',
-          $i['id']);
-
-        while ($a = db_fetch_array($qa)) {
-          $ipdec[$a['id']] = ip2long($a['ipv4']);
-          $iparr[$a['id']] = $a;
-        }
-        asort($ipdec);
-        $zone = node_load(array('nid' => $iparr[0]['zone_id']));
-        $iparr[0]['ospf_zone'] = guifi_get_ospf_zone($zone);
-
-        foreach($ipdec as $ka => $foo) {
-          $a = $iparr[$ka];
-          $item = _ipcalc($a['ipv4'],$a['netmask']);
-          $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']] = $a;
-          // barrejem el qeu em ve de ipcalc aixi tinc totes les propietats de les ips definides a dins de (dev)
-          $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']] = array_merge($device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']],$item);
-          // get linked devices
-          $qlsql = sprintf('
-            SELECT l2.*
-            FROM {guifi_links} l1
-              LEFT JOIN {guifi_links} l2 ON l1.id=l2.id
-            WHERE l2.device_id != %d
-              AND l1.device_id=%d
-              AND l1.interface_id=%d
-              AND l1.ipv4_id=%d',
-            $id,
-            $id,
-            $i['id'],
-            $a['id']);
-          $ql = db_query($qlsql);
-
-          $ipdec2 = array();
-          $iparr2 = array();
-          while ($l = db_fetch_array($ql)) {
-            $qrasql = sprintf('
-              SELECT *
-              FROM {guifi_ipv4}
-              WHERE id=%d
-                AND interface_id=%d',
-              $l['ipv4_id'],
-              $l['interface_id']);
-            $qra = db_query($qrasql);
-
-            while ($ri = db_fetch_array($qra)) {
-              $rinterface = db_fetch_array(db_query('
-                SELECT *
-                FROM {guifi_interfaces}
-                WHERE id=%d',
-                $l['interface_id']));
-              $ipdec2[$l['id']] = ip2long($ri['ipv4']);
-              $rinterface['ipv4']=$ri;
-              $l['interface']=$rinterface;
-              $iparr2[$l['id']] = $l;
-            }
-          } // each link
-
-          asort($ipdec2);
-          foreach ($ipdec2 as $ka2 => $foo) {
-            $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']] = $iparr2[$ka2];
-            $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']]['interface']['ipv4'] = array_merge($device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']]['interface']['ipv4'],array('host_name' => guifi_get_hostname($device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']]['interface']['device_id'])));
-
-          }
-        }
-      }
-    }
+    guifi_device_load_radios($id,$device);
   }
+
+  // PROVISIONAL: Ensure that at least there is one interface for each radio
+  // Definitive fix will have create a mac database field for the radios
+  foreach ($device['radios'] as $rid => $radio)
+    if (empty($radio[mac]))
+      $device[radios][$rid][mac] = '00:00:00:00:00:00';
 
   // getting ethernet interfaces
   $qi = db_query('
@@ -355,12 +221,13 @@ function guifi_device_load($id,$ret = 'array') {
     FROM {guifi_interfaces} i, {guifi_ipv4} ipv4
     WHERE i.device_id=%d
     AND i.id = ipv4.interface_id
-    ORDER BY i.interface_type,i.id',
+    ORDER BY inet_aton(ipv4.ipv4), i.interface_type,i.id',
     $id);
 
   while ($i = db_fetch_array($qi)) {
     $device['ipv4'][] = $i;
   }
+  guifi_device_load_ipv4subnets($id, $device);
 
   guifi_log(GUIFILOG_TRACE,'function guifi_device_load(vlans)',$device['vlans']);
   guifi_log(GUIFILOG_TRACE,'function guifi_device_load(aggregations)',$device['aggregations']);
@@ -373,6 +240,192 @@ function guifi_device_load($id,$ret = 'array') {
       $var->$k = $field;
     return array2object($device);
   }
+}
+
+function guifi_device_load_radios($id,&$device) {
+    $qr = db_query('
+      SELECT *
+      FROM {guifi_radios}
+      WHERE id = %d
+      ORDER BY id, radiodev_counter',
+      $id);
+
+    $device['firewall'] = FALSE; // Default: No firewall
+
+    $rc = 0;
+
+    while ($radio = db_fetch_array($qr)) {
+
+      $rc++;
+      if (!$device['firewall'])
+        if ($radio['mode'] == 'client')
+           $device['firewall'] = TRUE;
+
+      $device['radios'][$radio['radiodev_counter']] = $radio;
+
+      // get interface
+      $listi = array();
+      $qi = db_query('
+        SELECT *
+        FROM {guifi_interfaces}
+        WHERE device_id=%d AND radiodev_counter=%d
+        ORDER BY FIND_IN_SET(interface_type,"wLan/Lan,wLan,wds/p2p"),id',
+        $id,
+        $radio['radiodev_counter']);
+      while ($i = db_fetch_array($qi)) {
+
+        // force first interface to wLan/Lan
+        if ((!count($listi)) and ($i['interface_type'] == 'wLan') and ($rc==1)) {
+          $i['interface_type'] = 'wLan/Lan';
+        }
+
+        // can't have 2 wLan/Lan bridges
+        if (in_array($i['interface_type'],$listi))
+          if (($i['interface_type']) == 'wLan/Lan')
+            $i['interface_type']='wLan';
+        $listi[] = $i['interface_type'];
+
+        if ($device['radios'][$radio['radiodev_counter']]['mac'] == '')
+          $device['radios'][$radio['radiodev_counter']]['mac'] = $i['mac'];
+        $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']] = $i;
+
+        // For schema v1: wds/p2p are vlans over radios, and wLan/Lan are bridges
+        // so need to check if interface_class is informed, if it isn't, populate
+        // the new interface to convert to schema v2.
+        if (empty($i[interface_class])) {
+          switch($i[interface_type]){
+          case 'wds/p2p':
+            $i[interface_class] = 'wds/p2p';
+            $i[related_interfaces] = $radio[id].','.$radio[radiodev_counter];
+            $i[interface_type] = 'wds'.$radio['ssid'];
+            $device[vlans][$i[id]]=$i;
+            break;
+          case 'wLan/Lan':
+            $i[interface_class] = 'bridge';
+            $i[related_interfaces] = array(
+              $radio[id].','.$radio[radiodev_counter],
+              guifi_main_ethernet($device[id]),
+            );
+            $device[aggregations][$i[id]]=$i;
+            break;
+          }
+        }
+
+        // get ipv4
+        $ipdec = array();
+        $iparr = array();
+        $qa = db_query('
+          SELECT *
+          FROM {guifi_ipv4}
+          WHERE interface_id=%d',
+          $i['id']);
+
+        while ($a = db_fetch_array($qa)) {
+          $ipdec[$a['id']] = ip2long($a['ipv4']);
+          $iparr[$a['id']] = $a;
+        }
+        asort($ipdec);
+        $zone = node_load(array('nid' => $iparr[0]['zone_id']));
+        $iparr[0]['ospf_zone'] = guifi_get_ospf_zone($zone);
+
+        foreach($ipdec as $ka => $foo) {
+          $a = $iparr[$ka];
+          $item = _ipcalc($a['ipv4'],$a['netmask']);
+          $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']] = $a;
+          // barrejem el qeu em ve de ipcalc aixi tinc totes les propietats de les ips definides a dins de (dev)
+          $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']] = array_merge($device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']],$item);
+          // get linked devices
+          $qlsql = sprintf('
+            SELECT l2.*
+            FROM {guifi_links} l1
+              LEFT JOIN {guifi_links} l2 ON l1.id=l2.id
+            WHERE l2.device_id != %d
+              AND l1.device_id=%d
+              AND l1.interface_id=%d
+              AND l1.ipv4_id=%d',
+            $id,
+            $id,
+            $i['id'],
+            $a['id']);
+          $ql = db_query($qlsql);
+
+          $ipdec2 = array();
+          $iparr2 = array();
+          while ($l = db_fetch_array($ql)) {
+            $qrasql = sprintf('
+              SELECT *
+              FROM {guifi_ipv4}
+              WHERE id=%d
+                AND interface_id=%d',
+              $l['ipv4_id'],
+              $l['interface_id']);
+            $qra = db_query($qrasql);
+
+            while ($ri = db_fetch_array($qra)) {
+              $rinterface = db_fetch_array(db_query('
+                SELECT *
+                FROM {guifi_interfaces}
+                WHERE id=%d',
+                $l['interface_id']));
+              $ipdec2[$l['id']] = ip2long($ri['ipv4']);
+              $rinterface['ipv4']=$ri;
+              $l['interface']=$rinterface;
+              $iparr2[$l['id']] = $l;
+            }
+          } // each link
+
+          asort($ipdec2);
+          foreach ($ipdec2 as $ka2 => $foo) {
+            $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']] = $iparr2[$ka2];
+            $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']]['interface']['ipv4'] = array_merge($device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']]['interface']['ipv4'],array('host_name' => guifi_get_hostname($device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']]['ipv4'][$a['id']]['links'][$iparr2[$ka2]['id']]['interface']['device_id'])));
+
+          }
+        }
+      }
+    }
+
+}
+
+function guifi_device_load_ipv4subnets($id,&$device) {
+
+  if (empty($device[ipv4]))
+    return;
+
+  $w =array();;
+  $ips=array();
+  foreach ($device['ipv4'] as $k => $ipv4) {
+    $i = _ipcalc($ipv4[ipv4],$ipv4[netmask]);
+    $w[] = " inet_aton(ip.ipv4) BETWEEN inet_aton('$i[netstart]') and inet_aton('$i[netend]') ";
+    $i['k'] = $k;
+    $ips[$ipv4[ipv4]]=$i;
+  }
+
+  $sql = sprintf(
+  		"SELECT ip.ipv4 ipv4, d.id did, i.id iid, i.comments " .
+  		"FROM {guifi_ipv4} ip, {guifi_interfaces} i, {guifi_devices} d " .
+  		"WHERE ( " .implode(" OR ",$w). ") ".
+//  		"AND i.device_id = %d " .
+        "AND ip.interface_id = i.id " .
+        "AND i.device_id = d.id " .
+  		"ORDER by inet_aton(ip.ipv4)", $id);
+
+  guifi_log(GUIFILOG_TRACE,'function guifi_device_load_ipv4subnets (sql)',$sql);
+
+  $qs = db_query($sql);
+  while ($snet = db_fetch_array($qs)) {
+    if (in_array($snet[ipv4],array_keys($ips)))
+      continue;
+    guifi_log(GUIFILOG_TRACE,'function guifi_device_load_ipv4subnets (ipv4)',$ips);
+    foreach ($ips as $kip => $i) {
+      $ir = _ipcalc($snet['ipv4'],$ips[$kip][netmask]);
+      if ($ir['netid'] == $i['netid']) {
+        $device[ipv4][$i['k']]['subnet'][] = $snet;
+        break;
+      }
+    }
+  }
+  guifi_log(GUIFILOG_TRACE,'function guifi_device_load_ipv4subnets (ipv4)',$device[ipv4]);
+
 }
 
 function guifi_device_access($op, $id) {
@@ -489,6 +542,10 @@ function guifi_device_form_submit($form, &$form_state) {
 /* guifi_device_form(): Present the guifi device main editing form. */
 function guifi_device_form($form_state, $params = array()) {
   global $user;
+
+  $form=array();
+
+  ahah_helper_register($form, $form_state);
 
   guifi_log(GUIFILOG_TRACE,'function guifi_device_form()',$params);
 
@@ -769,6 +826,7 @@ function guifi_device_form_validate($form,&$form_state) {
   guifi_log(GUIFILOG_TRACE,'function guifi_device_form_validate()',$form_state['values']);
   guifi_log(GUIFILOG_TRACE,'function guifi_device_form_validate(vlans)',$form_state['values'][vlans]);
   guifi_log(GUIFILOG_TRACE,'function guifi_device_form_validate(aggregations)',$form_state['values'][aggregations]);
+  guifi_log(GUIFILOG_TRACE,'function guifi_device_form_validate(ipv4)',$form_state['values'][ipv4]);
 
   // nick
   if (isset($form['main']['nick'])) {

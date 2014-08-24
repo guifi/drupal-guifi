@@ -2,6 +2,10 @@
   text-decoration: none;
 }
 
+.ipv4-subnet {
+	margin-left: 5%;
+	clear: both;
+}
 
 table.list-links, table.device-data {
   width: 90%;
@@ -21,7 +25,7 @@ td.available {
   border-top-style: solid;
 }
 
-.float-item, .interface-item,
+.float-item, .interface-item, .subnet-item,
 .interface-item.form-button {
   float: left;
 }

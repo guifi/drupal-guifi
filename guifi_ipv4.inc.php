@@ -382,6 +382,125 @@ function guifi_ipv4_save($edit) {
     $log);
 }
 
+function guifi_ipv4subnet_form($ipv4,$k,$view = false) {
+
+  guifi_log(GUIFILOG_TRACE,sprintf('guifi_ipv4subnet_form (id=%d)',$subnet),$k);
+
+  $ipc = _ipcalc($ipv4[ipv4],$ipv4[netmask]);
+  if (!empty($ipv4[subnet]))
+    $subnet = $ipv4[subnet];
+  else
+    $subnet = $ipv4[snet];
+
+  $ips = array(ip2long($ipv4[ipv4]));
+  foreach ($subnet as $ip)
+    if (!empty($ip[ipv4]))
+      $ips[] = ip2long($ip[ipv4]);
+  sort($ips);
+
+  $form = array(
+    '#type'         => (!$view) ? 'hidden' : 'fieldset',
+    '#title'        => t('Subnet'). ' '.$ipc['netid'].'/'.$ipc['maskbits'].' - '.
+       (count($ips)).' address(es)',
+    '#attributes'   => array('class'=>'fieldset-interface-port'),
+    '#prefix'       => '<div class="ipv4-subnet" id="fieldset-ipv4subnet-'.$k.'">',
+    '#suffix'       => '</div>',
+    '#collapsible'  => true,
+    '#collapsed'    => false,
+    '#parents'      => array('ipv4',$k,'subnet'),
+  );
+
+//  foreach ($subnet as $ks => $snet) {
+  for ($ks=0; $ks < $ipc['hosts']; $ks++) {
+    $snet = $subnet[$ks];
+
+    $form[$ks] = array(
+      '#type' => (!empty($snet[ipv4])) ? 'fieldset' : 'hidden',
+      '#attributes' => array('class'=>'fieldset-interface-port'),
+      '#parents'    => array('ipv4',$k,'subnet',$ks),
+      '#prefix'     => '<div id="fieldset-ipv4subnet-'.$k.'-'.$ks.'">',
+      '#suffix'     => '</div>',
+    );
+    if (!empty($snet[ipv4])) $form[$ks][ipv4] = array(
+      '#type' => (!$view) ? 'hidden' : 'textfield',
+      '#type' => 'textfield',
+      '#value' => $snet[ipv4],
+      '#size' => 24,
+      '#maxlength' => 16,
+      '#parents' => array('ipv4',$k,'subnet',$ks,'ipv4'),
+    );
+    $form[$ks][did] = array(
+      '#type'              => (($view) and (!empty($snet[ipv4]))) ? 'textfield' : 'hidden',
+      '#parents'           => array('ipv4',$k,'subnet',$ks,'did'),
+      '#value'             => guifi_get_devicename($snet['did'],'large'),
+      '#autocomplete_path' => 'guifi/js/select-node-device',
+      '#size'              => 60,
+      '#maxlength'         => 128,
+      '#element_validate'  => array('guifi_devicename_validate'),
+      '#ahah'              => array(
+        'event'            => 'blur',
+        'path'             => 'guifi/js/select-device-interfacename/'.$k.'-'.$ks,
+        'wrapper'          => 'fieldset-ipv4subnet-'.$k.'-'.$ks,
+        'method'           => 'replace',
+        'effect'           => 'fade',
+      ),
+
+//      '#ahah'              => array(
+//        'event'            => 'change',
+//        'path'             => ahah_helper_path(array('ipv4',$k,'subnet')),
+//        'wrapper'          => 'fieldset-ipv4subnet-'.$k,
+//        'method'           => 'replace',
+//        'effect'           => 'fade',
+//      ),
+    );
+    if (!empty($snet['ipv4'])) {
+      $dinterfaces = guifi_get_device_interfaces($snet['did']);
+      $form[$ks]['iid'] = array(
+        '#parents' => array('ipv4',$k,'subnet',$ks,'iid'),
+        '#type'    => 'select',
+        '#value'   => $snet['iid'],
+        '#options' => $dinterfaces,
+      );
+    }
+    $form[$ks]['deleted'] = array(
+        '#type'       => 'image_button',
+        '#src'        => drupal_get_path('module', 'guifi').'/icons/drop.png',
+        '#attributes' => array('title' => t('Delete address')),
+        '#value'      => false,
+        '#ahah'       => array(
+          'path'      => 'guifi/js/select-device-interfacename/'.$k.'-'.$ks,
+          'wrapper'   => 'fieldset-ipv4subnet-'.$k.'-'.$ks,
+          'method'    => 'replace',
+          'effect'    => 'fade',
+        ),
+      );
+    /*else {
+      drupal_set_message('Click on "Edit subnetwork members" above to refresh the subnetwork form and get interfaces');
+      $form[$ks]['refresh'] = array(
+      	'#type' => item,
+        '#prefix' => '<input type="image" name="ipv4['.$k.'][esubnet]" id="edit-ipv4-'.$k.'-esubnet" title="Edit subnetwork members" class="form-submit ahah-processed" src="/sites/all/modules/guifi/icons/Cable-Network-16-edit.png">',
+      );
+    }*/
+  }
+
+  if (count($ips) < $ipc['hosts'])
+    $form['add-ipv4'] = array(
+      '#type'       => 'image_button',
+      '#title'      => ($first_port) ? t('Add') : false,
+      '#src'        => drupal_get_path('module', 'guifi').'/icons/ipv4-new.png',
+      '#attributes' => array('title' => t('Add new ipv4 address to the subnetwork')),
+      '#weight'     => 100,
+      '#ahah'       => array(
+        'path'      => 'guifi/js/add-remoteipv4/'.$k,
+        'wrapper'   => 'fieldset-ipv4subnet-'.$k,
+          'method'  => 'replace',
+        'effect'    => 'fade',
+      ),
+  );
+
+  return $form;
+}
+
 
 function guifi_ipv4i_form($ipv4, $k, $first_port = true, $eInterfaces) {
 
@@ -398,10 +517,10 @@ function guifi_ipv4i_form($ipv4, $k, $first_port = true, $eInterfaces) {
 
   $form['ipv4'] = array(
     '#type' => 'textfield',
-    '#title' => ($first_port) ? t('Network IPv4 address') : false,
-    '#disabled' => TRUE,
+    '#title' => ($first_port) ? t('IPv4 address') : false,
+ //   '#disabled' => TRUE,
     '#default_value' => $ipv4[ipv4],
-    '#size' => 20,
+    '#size' => 24,
     '#maxlength' => 16,
   );
   $form['netmask'] = array(
@@ -417,6 +536,41 @@ function guifi_ipv4i_form($ipv4, $k, $first_port = true, $eInterfaces) {
     '#options'      => $eInterfaces,
     '#default_value'=> $ipv4['interface_id'],
   );
+  $form['esubnet'] = array(
+       '#type' => 'image_button',
+       '#src'  => drupal_get_path('module', 'guifi').'/icons/Cable-Network-16-edit.png',
+       '#attributes' => array(
+          'title' => t('Edit subnetwork members'),
+        ),
+       '#ahah' => array(
+         'path' => 'guifi/js/edit_subnet/'.$k,
+         'wrapper' => 'fieldset-ipv4subnet-'.$k,
+         'method' => 'replace',
+         'effect' => 'fade',
+        ),
+        '#prefix' => ($first_port) ? '<div class="form-item"><div>&nbsp</div>':'<div class="form-item">',
+        '#suffix' => '</div>',
+        '#weight' => $form_weight++,
+     );
+  if (!$ipv4[deleted])
+  $form['delete'] = array(
+    '#type' => 'image_button',
+    '#title' => ($first_port) ? t('delete') : false,
+    '#src' => drupal_get_path('module', 'guifi').'/icons/drop.png',
+    '#attributes' => array('title' => t('Delete address')),
+    '#submit' => array('guifi_ipv4i_delete_submit'),
+    '#prefix' => ($first_port) ?
+      '<div class="form-item"><label>&nbsp</label>' : false,
+    '#suffix' => ($first_port) ?
+      '</div>' : false,
+  );
+
+  //return $form;
+
+ // Subnet members
+  $form['subnet'] = guifi_ipv4subnet_form($ipv4,$k,false);
+  guifi_form_hidden($form['snet'],$ipv4[subnet]);
+
 
 /*  if (!$ipv4[deleted])
   $form['delete'] = array(
@@ -475,7 +629,8 @@ function guifi_ipv4s_form($edit, &$form_weight) {
     '#weight'      => $form_weight++,
     '#prefix'      =>
       '<br><img src="/'.drupal_get_path('module', 'guifi').
-      '/icons/ipv4.png"> '.t('ipv4 section'),
+      '/icons/ipv4.png"> '.t('ipv4 section')/*.
+      '<div id="add-ipv4s-dialog">'*/,
   );
 
   // Loop across all existing addresses
@@ -483,38 +638,110 @@ function guifi_ipv4s_form($edit, &$form_weight) {
   $total_ipv4 = count($edit[ipv4]);
   $first = true;
 
-  // placeholder for the add interface form
-  $form['ipv4'] = array(
-    '#parents'   => array('ipv4'),
-    '#type'      => 'fieldset',
-    '#prefix'    => '<div id="add-ipv4">',
-    '#suffix'    => '</div>',
-    '#weight'    => $form_weight++,
-  );
-
   foreach ($edit[ipv4] as $k => $ipv4) {
     guifi_log(GUIFILOG_TRACE,'function guifi_ipv4s_form(vint LOOP)',$ipv4);
-    $form[ipv4][$k] =
+    $form[$k] =
       guifi_ipv4i_form($ipv4, $k, $first,guifi_get_currentInterfaces($edit));
     $first = false;
   }
   guifi_log(GUIFILOG_TRACE,'function guifi_ipv4s_form(vint LOOP AFTER)',$form);
 
-  // TODO: Add ipv4 addresses
-/*  $form['addipv4'] = array(
+  // placeholder for the add interface form
+  $form['ipv4sdialog'] = array(
+    '#parents'    => array('ipv4','ipv4sdialog'),
+    '#type'       => 'hidden',
+    '#title'      => t('New address properties dialog'),
+    '#description'=> t('Get the address from'),
+    '#prefix'     => /*'<div>&nbsp;<hr><img src="/'.drupal_get_path('module', 'guifi').'/icons/ipv4-new.png'.'"> '.
+                    t('Get a new IPv4 address').*/
+                    '<div id="add-ipv4s-dialog">',
+    '#suffix'     => '</div>',
+    '#collapsible'=>true,
+    '#collapsed'  => true,
+    '#attributes' => array('class'=>'fieldset-interface-port'),
+    '#weight'     => $form_weight++,
+    '#tree'       => true,
+  );
+  $form['ipv4sdialog']['adddid'] = array(
+//    '#parents' => array('ipv4','ipv4sdialog','adddid'),
+    '#type'              => 'textfield',
+    '#title'             => t('Device'),
+    '#description'       => t('Device which already has the subnetwork defined'),
+//    '#value'             => '',
+    '#autocomplete_path' => 'guifi/js/select-node-device',
+    '#size'              => 60,
+    '#maxlength'         => 128,
+    '#element_validate'  => array('guifi_devicename_validate'),
+    '#ahah'              => array(
+      'event'            => 'blur',
+      'path'             => 'guifi/js/select-device-subnets',
+      'wrapper'          => 'edit-ipv4-ipv4sdialog-snet-wrapper',
+      'method'           => 'replace',
+      'effect'           => 'fade',
+    ),
+    //'#prefix'    => '<div>',
+    //'#suffix'    => '</div>',
+    '#weight'    => $form_weight++,
+  );
+  $form['ipv4sdialog']['snet'] = array(
+    // '#parents' => array('ipv4','ipv4sdialog','adddid'),
+    '#type'        => 'select',
+    '#options'     => array('none'=>t('select subnetwork')),
+    '#title'       => t('Subnetwork & interface'),
+    '#description' => t('Available subnetwork ranges at the selected device<br>Click on the select list to refresh values'),
+    '#weight'      => $form_weight++,
+  );
+  $form['ipv4sdialog']['addipv4'] = array(
+    '#type'      => 'submit',
+    '#value'     => 'create',
+    '#prefix'    => '<div style="clear: both">',
+    '#suffix'    => '</div>',
+    '#weight'    => $form_weight++,
+  );
+
+
+  $form['addpubipv4'] = array(
         '#type' => 'image_button',
-        '#src'=> drupal_get_path('module', 'guifi').'/icons/ipv4-new.png',
-        '#parents' => array('addipv4'),
-        '#attributes' => array('title' => t('Add ipv4')),
+        '#src'=> drupal_get_path('module', 'guifi').'/icons/ipv4-public-new.png',
+//        '#parents' => array('addipv4'),
+        '#attributes' => array('title' => t('Get a new IPv4 subnetwork range (10.x.x.x) publicly available')),
         '#ahah' => array(
-          'path' => 'guifi/js/add-ipv4i/'.$iClass,
-          'wrapper' => 'add-'.$iClass,
+          'path' => 'guifi/js/add-ipv4s/public',
+          'wrapper' => 'add-ipv4s-dialog',
+          'method' => 'replace',
+          'effect' => 'fade',
+         ),
+         '#prefix' => '<div style="clear: both">&nbsp;<hr>&nbsp;</div>',
+         '#weight' => $form_weight++,
+  );
+
+  $form['addprivipv4'] = array(
+        '#type' => 'image_button',
+        '#src'=> drupal_get_path('module', 'guifi').'/icons/ipv4-private-new.png',
+//        '#parents' => array('ipv4','addipv4'),
+        '#attributes' => array('title' => t('Get a new IPv4 private subnetwork range (172.x.x.x) for internal links/puropses only')),
+        '#ahah' => array(
+          'path' => 'guifi/js/add-ipv4s/private',
+          'wrapper' => 'add-ipv4s-dialog',
           'method' => 'replace',
           'effect' => 'fade',
          ),
          '#weight' => $form_weight++,
   );
-*/
+  $form['addexistentipv4'] = array(
+        '#type' => 'image_button',
+        '#src'=> drupal_get_path('module', 'guifi').'/icons/ipv4-new.png',
+//        '#parents' => array('addipv4'),
+        '#attributes' => array('title' => t('Get a new IPv4 address from an subnetwork already defined')),
+        '#ahah' => array(
+          'path' => 'guifi/js/add-ipv4s/defined',
+          'wrapper' => 'add-ipv4s-dialog',
+          'method' => 'replace',
+          'effect' => 'fade',
+         ),
+         '#weight' => $form_weight++,
+  );
+
   return $form;
 }
 
