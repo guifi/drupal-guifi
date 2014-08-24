@@ -545,8 +545,6 @@ function guifi_device_form($form_state, $params = array()) {
 
   $form=array();
 
-  ahah_helper_register($form, $form_state);
-
   guifi_log(GUIFILOG_TRACE,'function guifi_device_form()',$params);
 
   // Local javascript validations not actve because of bug in Firefox
