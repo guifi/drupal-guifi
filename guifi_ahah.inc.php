@@ -618,7 +618,7 @@ function guifi_ahah_add_remoteipv4() {
   // find the next free ip address
   $ips = array(ip2long($ipv4[ipv4]));
   foreach ($ipv4[subnet] as $i)
-    if (isset($i[ipv4]))
+    if (ip2long($i[ipv4]))
       $ips[] = ip2long($i[ipv4]);
   sort($ips);
   $ipc = _ipcalc($ipv4[ipv4],$ipv4[netmask]);
