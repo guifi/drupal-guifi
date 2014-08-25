@@ -972,26 +972,8 @@ function _guifi_radio_prepare_add_radio($edit) {
       $radio['antenna_angle'] = 120;
       $radio['clients_accepted'] = "Yes";
       $radio['ssid'] = $ssid.'AP'.$rc;
-      // We don't need default interface.
-      // $radio['interfaces'][0]['interface_type'] = 'wds/p2p';
-      // first radio, force wlan/Lan bridge and get an IP
-      if ($tc == 0) {
-        $radio['interfaces'][1] = array();
-        $radio['interfaces'][1]['new'] = TRUE;
-        $radio['interfaces'][1]['interface_type']='wLan/Lan';
-        $ips_allocated = guifi_ipcalc_get_ips('0.0.0.0', '0.0.0.0', $edit, 1);
-        $net = guifi_ipcalc_get_subnet_by_nid($edit['nid'], '255.255.255.224', 'public', $ips_allocated, 'Yes', TRUE);
-
-        guifi_log(GUIFILOG_BASIC,"IPS allocated: ".count($ips_allocated)." got net: ".$net.'/27');
-        $radio['interfaces'][1]['ipv4'][$rc] = array();
-        $radio['interfaces'][1]['ipv4'][$rc]['new'] = TRUE;
-        $radio['interfaces'][1]['ipv4'][$rc]['ipv4_type'] = 1;
-        $radio['interfaces'][1]['ipv4'][$rc]['ipv4'] = long2ip(ip2long($net)+1);
-        guifi_log(GUIFILOG_BASIC, "Assigned IP: " . $radio['interfaces'][1]['ipv4'][$rc]['ipv4']);
-        $radio['interfaces'][1]['ipv4'][$rc]['netmask'] = '255.255.255.224';
-	  }
-        $radio['mac'] = '';
-	  break;
+      $radio['mac'] = '';
+      break;
     case 'client':
     case 'client-routed':
       $radio['antenna_angle'] = 30;

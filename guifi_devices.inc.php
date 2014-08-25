@@ -100,7 +100,7 @@ function guifi_device_load($id,$ret = 'array') {
           WHERE interface_id=%d', $i['id']);
 
         if (db_result($qlink) == 0) {
-        print "Aquesta wlan/lan no te links ".$i['id']." ";
+     // print "Aquesta wlan/lan no te links ".$i['id']." ";
 
           $qwlan = db_query('
             SELECT COUNT (*)
@@ -274,10 +274,6 @@ function guifi_device_load_radios($id,&$device) {
         $radio['radiodev_counter']);
       while ($i = db_fetch_array($qi)) {
 
-        // force first interface to wLan/Lan
-        if ((!count($listi)) and ($i['interface_type'] == 'wLan') and ($rc==1)) {
-          $i['interface_type'] = 'wLan/Lan';
-        }
 
         // can't have 2 wLan/Lan bridges
         if (in_array($i['interface_type'],$listi))
