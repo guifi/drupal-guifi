@@ -393,7 +393,7 @@ function guifi_ipv4subnet_form($ipv4,$k,$view = false) {
     $subnet = $ipv4[snet];
 
   $ips = array(ip2long($ipv4[ipv4]));
-  foreach ($subnet as $ip) {
+  foreach ($subnet as $ip)
     if (ip2long($ip[ipv4]))
       $ips[] = ip2long($ip[ipv4]);
   sort($ips);
