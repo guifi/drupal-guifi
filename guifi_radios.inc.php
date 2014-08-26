@@ -18,7 +18,7 @@ function guifi_radio_form($edit, &$form_weight) {
     FROM guifi_model_specs m, guifi_manufacturer f
     WHERE f.fid = m.fid
     AND supported='Yes'
-    ORDER BY manufacturer ASC");
+    ORDER BY manufacturer, model ASC");
   while ($model = db_fetch_array($querymid)) {
      $models_array[$model["mid"]] = $model["manufacturer"] .", " .$model["model"];
   }
@@ -1377,6 +1377,12 @@ function guifi_radio_add_wds_confirm_submit(&$form,&$form_state) {
         "   AND interface_type = 'wds/p2p' " .
         "   AND radiodev_counter = %d",
         $newLink['device_id'],$newLink['interface']['radiodev_counter']));
+
+  if ( $remote_interface['id'] == NULL ) {
+    drupal_set_message(
+      t('Error! The remote radio has no WDS/p2p interface. You must create it before performing the link.'),'error');
+    return -1;
+  }
 
   $newLink['interface']['id'] = $remote_interface['id'];
   $newLink['interface']['device_id'] = $newLink['device_id'];
