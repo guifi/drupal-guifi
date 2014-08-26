@@ -643,10 +643,12 @@ function guifi_ipv4s_form($edit, &$form_weight) {
   $first = true;
 
   foreach ($edit[ipv4] as $k => $ipv4) {
-    guifi_log(GUIFILOG_TRACE,'function guifi_ipv4s_form(vint LOOP)',$ipv4);
-    $form[$k] =
-      guifi_ipv4i_form($ipv4, $k, $first,guifi_get_currentInterfaces($edit));
-    $first = false;
+    if (is_numeric($k)) {
+      guifi_log(GUIFILOG_TRACE,'function guifi_ipv4s_form(vint LOOP)',$ipv4);
+      $form[$k] =
+        guifi_ipv4i_form($ipv4, $k, $first,guifi_get_currentInterfaces($edit));
+      $first = false;
+    }
   }
   guifi_log(GUIFILOG_TRACE,'function guifi_ipv4s_form(vint LOOP AFTER)',$form);
 
