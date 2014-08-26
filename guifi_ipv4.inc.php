@@ -462,6 +462,9 @@ function guifi_ipv4subnet_form($ipv4,$k,$view = false) {
         '#options' => $dinterfaces,
       );
     }
+// TODO
+
+/*
     $form[$ks]['deleted'] = array(
         '#type'       => 'image_button',
         '#src'        => drupal_get_path('module', 'guifi').'/icons/drop.png',
@@ -474,6 +477,7 @@ function guifi_ipv4subnet_form($ipv4,$k,$view = false) {
           'effect'    => 'fade',
         ),
       );
+*/
     /*else {
       drupal_set_message('Click on "Edit subnetwork members" above to refresh the subnetwork form and get interfaces');
       $form[$ks]['refresh'] = array(
