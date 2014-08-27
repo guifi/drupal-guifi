@@ -1320,17 +1320,17 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
 
      // Edit and delete buttons
      if (guifi_device_access('update',$device['id'])) {
-        $edit_radio =  l(guifi_img_icon('edit.png'),'guifi/device/'.$device['id'].'/edit',
+        $edit_device =  l(guifi_img_icon('edit.png'),'guifi/device/'.$device['id'].'/edit',
             array(
               'html' => TRUE,
               'attributes' => array('target' => '_blank','title' => t('edit device'))));
-        $delete_radio = l(guifi_img_icon('drop.png'),'guifi/device/'.$device['id'].'/delete',
+        $delete_device = l(guifi_img_icon('drop.png'),'guifi/device/'.$device['id'].'/delete',
             array(
               'html' => TRUE,
               'attributes' => array('target' => '_blank','title' => t('delete device'))));
      } else {
-       $edit_radio = '';
-       $delete_radio = '';
+       $edit_device = '';
+       $delete_device = '';
      }
 
      // Traceroute button
@@ -1386,8 +1386,8 @@ function theme_guifi_node_devices_list($node,$links = FALSE) {
                  (empty($ip[ipv4])) ? '&nbsp;' :
                    array('data' => $status_url,'class' => $device['flag']),
                  $unsolclic,
-                 $edit_radio,
-                 $delete_radio,
+                 $edit_device,
+                 $delete_device,
                  (empty($ip[ipv4])) ? '&nbsp;' :
                    $traceroute
                     );

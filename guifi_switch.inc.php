@@ -497,11 +497,13 @@ function guifi_vinterfaces_form($iClass, $edit, &$form_weight) {
   	  $icon = '/icons/aggr-16.png';
   	  $iconNew = '/icons/aggr-new.png';
   	  $msg  = t('Aggregations (bridges, bondings...) section');
+	  $ititle = t('Aggregations');
   	  break;
   	case 'vlans':
   	  $icon = '/icons/vlans-16.png';
   	  $iconNew = '/icons/vlans-new.png';
-  	  $msg  = t('vLans (vlans, wds, virtual APs, vrrp...) section');
+  	  $msg  = t('Virtual Interfaces (vlans, wds, virtual APs, vrrp...) section');
+	  $ititle = t('Virtual Interfaces');
   	  break;
   	default:
   	  $icon = '/icons/ports-16.png';
@@ -512,7 +514,7 @@ function guifi_vinterfaces_form($iClass, $edit, &$form_weight) {
   // Build vinterface fieldset
   $form = array(
     '#type'        => 'fieldset',
-    '#title'       => t($iClass).' - '.count($edit[$iClass]),
+    '#title'       => t($ititle).' - '.count($edit[$iClass]),
     '#collapsible' => TRUE,
     '#tree'        => TRUE,
     '#collapsed'   => TRUE,
@@ -719,13 +721,14 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
     $form['mac'] = array(
       '#type'            => 'textfield',
       '#title'           => ($first_port) ? t('mac') : false,
-      '#required'        => FALSE,
+      '#required'        => TRUE,
       '#size'            => 20,
       '#maxlength'       => 17,
       '#default_value'   => $vinterface['mac'],
       '#element_validate' => array('guifi_mac_validate'),
     );
   }
+
   if (!$vinterface[deleted])
   $form['delete'] = array(
     '#type' => 'image_button',
