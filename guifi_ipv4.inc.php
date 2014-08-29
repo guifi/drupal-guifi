@@ -475,6 +475,7 @@ function guifi_ipv4subnet_form($ipv4,$k,$view = false) {
           'effect'    => 'fade',
         ),
       );
+  }
 
   if (count($ips) < $ipc['hosts'])
     $form['add-ipv4'] = array(
