@@ -463,18 +463,18 @@ function guifi_ipv4subnet_form($ipv4,$k,$view = false) {
       );
     }
     $form[$ks]['deleted'] = array(
+        '#parents'    => array('ipv4',$ks,'subnet',$ks,'deleted'),
         '#type'       => 'image_button',
         '#src'        => drupal_get_path('module', 'guifi').'/icons/drop.png',
         '#attributes' => array('title' => t('Delete address')),
-        '#value'      => false,
         '#ahah'       => array(
-          'path'      => 'guifi/js/select-device-interfacename/'.$k.'-'.$ks,
+          'path'      => 'guifi/js/delete-ipv4/'.$k.'-'.$ks,
           'wrapper'   => 'fieldset-ipv4subnet-'.$k.'-'.$ks,
           'method'    => 'replace',
           'effect'    => 'fade',
         ),
       );
-    /*else {
+   /* else {
       drupal_set_message('Click on "Edit subnetwork members" above to refresh the subnetwork form and get interfaces');
       $form[$ks]['refresh'] = array(
       	'#type' => item,
@@ -621,7 +621,7 @@ function guifi_ipv4s_form($edit, &$form_weight) {
   // Build ipv4 fieldset
   $form = array(
     '#type'        => 'fieldset',
-    '#title'       => t('ipv4 addresses').' - '.count($edit[ipv4]),
+    '#title'       => t('IPv4 addresses networking section').' - '.count($edit[ipv4]),
     '#collapsible' => TRUE,
     '#tree'        => TRUE,
     '#collapsed'   => TRUE,
@@ -662,10 +662,20 @@ function guifi_ipv4s_form($edit, &$form_weight) {
     '#weight'     => $form_weight++,
     '#tree'       => true,
   );
+  
+  $form['ipv4sdialog']['iid'] = array (
+    '#type' => 'select',
+    '#options' => guifi_get_currentInterfaces($edit), // to be refreshed on the fly 
+                         // on ahah event using existing interfaces at the form
+    '#title' => t('interface'),
+    '#description' => t('where the new ip addres should be given to'),
+  );
+  guifi_log(GUIFILOG_TRACE,'function guifi_ipv4s_form(current interfaces)',$form['ipv4sdialog']['iid']['#options']);
+    
   $form['ipv4sdialog']['adddid'] = array(
 //    '#parents' => array('ipv4','ipv4sdialog','adddid'),
     '#type'              => 'textfield',
-    '#title'             => t('Device'),
+    '#title'             => t('device'),
     '#description'       => t('Device which already has the subnetwork defined'),
 //    '#value'             => '',
     '#autocomplete_path' => 'guifi/js/select-node-device',
@@ -691,6 +701,7 @@ function guifi_ipv4s_form($edit, &$form_weight) {
     '#description' => t('Available subnetwork ranges at the selected device<br>Click on the select list to refresh values'),
     '#weight'      => $form_weight++,
   );
+  
   $form['ipv4sdialog']['addipv4'] = array(
     '#type'      => 'submit',
     '#value'     => 'create',
@@ -698,7 +709,11 @@ function guifi_ipv4s_form($edit, &$form_weight) {
     '#suffix'    => '</div>',
     '#weight'    => $form_weight++,
   );
-
+  
+  $form['ipv4sdialog']['mask'] = array(
+    '#type' => 'select',
+    '#title' => 'mask',
+  );
 
   $form['addpubipv4'] = array(
         '#type' => 'image_button',

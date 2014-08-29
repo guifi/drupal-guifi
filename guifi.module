@@ -1071,6 +1071,12 @@ function guifi_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
+  $items['guifi/js/delete-ipv4/%'] = array(
+    'title' => 'Javascript Delete IPv4',
+    'page callback' => 'guifi_ahah_delete_ipv4',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
   $items['guifi/js/select-device-interface/%'] = array(
     'title' => 'Javascript Select Device Interface',
     'page callback' => 'guifi_ahah_select_device_interface',

@@ -510,8 +510,8 @@ function guifi_get_device_interfaces($id,$iid = NULL) {
   if (empty($iid))
     $iid = 0;
 
-  guifi_log(GUIFILOG_TRACE,'guifi_get_devicename(id - iid)',$id.' - '.$iid);
-  guifi_log(GUIFILOG_TRACE,'guifi_get_devicename(iid)',$id);
+  guifi_log(GUIFILOG_TRACE,'guifi_get_device_interfaces(id - iid)',$id.' - '.$iid);
+  guifi_log(GUIFILOG_TRACE,'guifi_get_device_interfaces(iid)',$id);
 
   $did = explode('-',$id);
 
@@ -522,8 +522,8 @@ function guifi_get_device_interfaces($id,$iid = NULL) {
     SELECT id, interface_type, connto_iid
     FROM {guifi_interfaces}
     WHERE device_id = ' .$did[0] .
-//    ' AND ((connto_did IS NULL AND connto_iid IS NULL) OR (id = '.$iid.')) ' .
-    ' AND ((radiodev_counter is NULL) or (upper(interface_type) IN ("WLAN/LAN"))) ';
+    ' AND ((radiodev_counter is NULL) or (upper(interface_type) IN ("WLAN/LAN"))) 
+      AND (interface_class is NULL or interface_class = "ethernet" )';
   guifi_log(GUIFILOG_TRACE,'guifi_get_devicename(sql)',$sql_i);
 
   $qi = db_query($sql_i);
