@@ -462,6 +462,7 @@ function guifi_ipv4subnet_form($ipv4,$k,$view = false) {
         '#options' => $dinterfaces,
       );
     }
+
     $form[$ks]['deleted'] = array(
         '#parents'    => array('ipv4',$ks,'subnet',$ks,'deleted'),
         '#type'       => 'image_button',
@@ -474,14 +475,6 @@ function guifi_ipv4subnet_form($ipv4,$k,$view = false) {
           'effect'    => 'fade',
         ),
       );
-   /* else {
-      drupal_set_message('Click on "Edit subnetwork members" above to refresh the subnetwork form and get interfaces');
-      $form[$ks]['refresh'] = array(
-      	'#type' => item,
-        '#prefix' => '<input type="image" name="ipv4['.$k.'][esubnet]" id="edit-ipv4-'.$k.'-esubnet" title="Edit subnetwork members" class="form-submit ahah-processed" src="/sites/all/modules/guifi/icons/Cable-Network-16-edit.png">',
-      );
-    }*/
-  }
 
   if (count($ips) < $ipc['hosts'])
     $form['add-ipv4'] = array(
@@ -639,10 +632,12 @@ function guifi_ipv4s_form($edit, &$form_weight) {
   $first = true;
 
   foreach ($edit[ipv4] as $k => $ipv4) {
-    guifi_log(GUIFILOG_TRACE,'function guifi_ipv4s_form(vint LOOP)',$ipv4);
-    $form[$k] =
-      guifi_ipv4i_form($ipv4, $k, $first,guifi_get_currentInterfaces($edit));
-    $first = false;
+    if (is_numeric($k)) {
+      guifi_log(GUIFILOG_TRACE,'function guifi_ipv4s_form(vint LOOP)',$ipv4);
+      $form[$k] =
+        guifi_ipv4i_form($ipv4, $k, $first,guifi_get_currentInterfaces($edit));
+      $first = false;
+    }
   }
   guifi_log(GUIFILOG_TRACE,'function guifi_ipv4s_form(vint LOOP AFTER)',$form);
 

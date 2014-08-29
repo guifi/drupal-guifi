@@ -18,7 +18,7 @@ function guifi_radio_form($edit, &$form_weight) {
     FROM guifi_model_specs m, guifi_manufacturer f
     WHERE f.fid = m.fid
     AND supported='Yes'
-    ORDER BY manufacturer ASC");
+    ORDER BY manufacturer, model ASC");
   while ($model = db_fetch_array($querymid)) {
      $models_array[$model["mid"]] = $model["manufacturer"] .", " .$model["model"];
   }
@@ -142,6 +142,7 @@ function guifi_radio_form($edit, &$form_weight) {
 
     // For AP Mode, clients_accepted
     if (!isset($radio['deleted'])) {
+      $prefix = "<table><tr><td>";
       if ($radio['mode'] == 'ap')  {
         // If no wLan interface, allow to create one
         if ((count($radio['interfaces']) < 2) or (user_access('administer guifi networks'))) {
@@ -151,37 +152,46 @@ function guifi_radio_form($edit, &$form_weight) {
             '#parents' => array('radios',$key,'AddwLan'),
             '#submit' => array('guifi_radio_add_wlan_submit'),
             '#attributes' => array('title' => t('Add a public network range to the wLan for clients')),
+            '#prefix' => $prefix,
+            '#suffix'  => '&nbsp;',
             '#weight' => $bw++);
         }
           $form['r']['radios'][$key]['AddWDSiface'] = array(
             '#type' => 'image_button',
-            '#src' => drupal_get_path('module', 'guifi').'/icons/wdsp2p.png',
+            '#src' => drupal_get_path('module', 'guifi').'/icons/wdsiface.png',
             '#parents' => array('radios',$key,'AddWDSiface'),
             '#submit' => array('guifi_radio_add_wdsiface_submit'),
             '#attributes' => array('title' => t('Add wds interface')),
+            '#prefix'  => '&nbsp;',
+            '#suffix'  => '&nbsp;',
             '#weight' => $bw++);
         if (!$hotspot) {
+
           $form['r']['radios'][$key]['AddHotspot'] = array(
             '#type' => 'image_button',
             '#src' => drupal_get_path('module', 'guifi').'/icons/inserthotspot.png',
             '#attributes' => array('title' => t('Add a Hotspot for guests')),
             '#submit' => array('guifi_radio_add_hotspot_submit'),
+            '#prefix'  => '&nbsp;',
+            '#suffix'  => '&nbsp;',
             '#weight' => $bw++);
         }
+        $prefix = "&nbsp;";
       }
 
       // Only allow delete and move functions if the radio has been saved
       if ($radio['new']==FALSE)  {
-        // Only allow delete radio if several when is not the first
-        if ((count($edit['radios'])==1) or ($key))
           $form['r']['radios'][$key]['delete'] = array(
             '#type' => 'image_button',
             '#src' => drupal_get_path('module', 'guifi').'/icons/drop.png',
             '#parents' => array('radios',$key,'delete'),
             '#attributes' => array('title' => t('Delete radio')),
             '#submit' => array('guifi_radio_delete_submit'),
+            '#prefix'  => $prefix,
+            '#suffix'  => '&nbsp;',
             '#weight' => $bw++);
         // TODO: Fix ticket about moving radios
+
               $form['r']['radios'][$key]['change'] = array(
                 '#type' => 'image_button',
                 '#src' => drupal_get_path('module', 'guifi').'/icons/move.png',
@@ -193,6 +203,8 @@ function guifi_radio_form($edit, &$form_weight) {
                   'method' => 'replace',
                   'effect' => 'fade',
                 ),
+                '#prefix'  => '&nbsp;',
+                '#suffix'  => '&nbsp;',
                 '#weight' => $bw++);
       }
 
@@ -204,6 +216,8 @@ function guifi_radio_form($edit, &$form_weight) {
           '#attributes' => array('title' => t('Move radio up')),
           '#submit' => array('guifi_radio_swap_submit'),
           '#parents' => array('radios',$key,'up'),
+          '#prefix'  => '&nbsp;',
+          '#suffix'  => '&nbsp;',
           '#weight' => $bw++);
       // if not last, allow to move down
       if (($rc+1) < count($edit['radios']))
@@ -213,12 +227,15 @@ function guifi_radio_form($edit, &$form_weight) {
           '#attributes' => array('title' => t('Move radio down')),
           '#submit' => array('guifi_radio_swap_submit'),
           '#parents' => array('radios',$key,'down'),
+          '#prefix'  => '&nbsp;',
+          '#suffix'  => '&nbsp;',
           '#weight' => $bw++);
+
       $form['r']['radios'][$key]['to_did'] = array(
         '#type' => 'hidden',
         '#value' => $radio['id'],
         '#prefix' => '<div id="move-device-'.$key.'"',
-        '#suffix' => '</div>',
+        '#suffix' => '</div></td></tr></table>',
         '#weight' => $bw++
       );
       $rc++;
@@ -1379,6 +1396,12 @@ function guifi_radio_add_wds_confirm_submit(&$form,&$form_state) {
         "   AND interface_type = 'wds/p2p' " .
         "   AND radiodev_counter = %d",
         $newLink['device_id'],$newLink['interface']['radiodev_counter']));
+
+  if ( $remote_interface['id'] == NULL ) {
+    drupal_set_message(
+      t('Error! The remote radio has no WDS/p2p interface. You must create it before performing the link.'),'error');
+    return -1;
+  }
 
   $newLink['interface']['id'] = $remote_interface['id'];
   $newLink['interface']['device_id'] = $newLink['device_id'];
