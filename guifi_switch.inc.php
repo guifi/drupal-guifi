@@ -392,7 +392,7 @@ function guifi_switch_form($edit, &$form_weight) {
  * @param ethernet ports $ports
  */
 function guifi_vinterface_save($iid,$did,$nid,&$to_mail) {
-  guifi_log(GUIFILOG_BASIC,"function guifi_vinterface_save()",$ports);
+  guifi_log(GUIFILOG_TRACE,"function guifi_vinterface_save()",$ports);
 
   foreach ($ports as $kport => $vport) {
 
