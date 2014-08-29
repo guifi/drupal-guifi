@@ -860,6 +860,8 @@ function _guifi_radio_add_wlan($radio, $nid, $edit = NULL) {
 }
 
 function _guifi_radio_add_wdsiface($radio, $nid, $edit = NULL) {
+  guifi_log(GUIFILOG_TRACE,sprintf('function guifi_radio_add_wdsiface(%d)',$radio));
+  
   $interface = array();
   $interface['new'] = TRUE;
   $interface['unfold'] = TRUE;
@@ -887,7 +889,7 @@ function guifi_radio_add_wlan_submit($form, &$form_state) {
 /* _guifi_add_wds_submit(): Action */
 function guifi_radio_add_wdsiface_submit($form, &$form_state) {
   $radio = $form_state['clicked_button']['#parents'][1];
-  guifi_log(GUIFILOG_TRACE,sprintf('function guifi_radio_add_wds(%d)',$radio));
+  guifi_log(GUIFILOG_TRACE,sprintf('function guifi_radio_add_wds(%d)',$radio),$form_state['clicked_button']);
 
   $interface = _guifi_radio_add_wdsiface($radio, $form_state['values']['nid'], $form_state['values']);
 
