@@ -636,7 +636,7 @@ function guifi_ahah_add_remoteipv4() {
       if (!in_array($ip,$ips))
        $ips[] = $ip;
   sort($ips);
-  guifi_log(GUIFILOG_BASIC,sprintf('guifi_ahah_add_remoteipv4 (id=%d):',$SNet),$ips);
+  guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_add_remoteipv4 (id=%d):',$SNet),$ips);
     $ipc = _ipcalc($ipv4[ipv4],$ipv4[netmask]);
   $lstart = ip2long($ipc[netstart]);
   $c = 0;
@@ -649,7 +649,11 @@ function guifi_ahah_add_remoteipv4() {
     'ipv4'    => $free,
     'netmask' => $ipv4['netmask'],
   );
-  guifi_log(GUIFILOG_BASIC,sprintf('guifi_ahah_add_remoteipv4 (start=%s) new',long2ip($lstart)),$newI);
+  drupal_set_message(t('Next available address at %base/%maskbits is %addr',
+    array('%addr'=>$free,
+      '%base'    =>$ipc[netid],
+      '%maskbits'=>$ipc[maskbits])));
+  guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_add_remoteipv4 (start=%s) new',long2ip($lstart)),$newI);
   guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_add_remoteipv4 ipcalc'),$ipc);
 
   $k = 0;
@@ -670,7 +674,7 @@ function guifi_ahah_add_remoteipv4() {
   // form, Drupal is not aware of this new elements existence and will not
   // process it. We retreive the cached form, add the element, and resave.
   $form = form_get_cache($form_build_id, $form_state);
-  guifi_log(GUIFILOG_BASIC,sprintf('guifi_ahah_add_remoteipv4 (id=%d) state:',$SNet),$form_state);
+  guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_add_remoteipv4 (id=%d) state:',$SNet),$form_state);
   $choice_form = $form[ipv4][$SNet]['subnet'];
   $form['ipv4'][$SNet]['subnet'] = $form_element;
   $choice_form = $form[ipv4][$SNet]['subnet'];
