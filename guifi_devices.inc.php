@@ -53,8 +53,8 @@ function guifi_device_load($id,$ret = 'array') {
     // Get radio
     guifi_device_load_radios($id,$device);
   }
-
-  // PROVISIONAL: Ensure that at least there is one interface for each radio
+    
+    // PROVISIONAL: Ensure that at least there is one interface for each radio
   // Definitive fix will have create a mac database field for the radios
   foreach ($device['radios'] as $rid => $radio)
     if (empty($radio[mac]))
@@ -68,8 +68,8 @@ function guifi_device_load($id,$ret = 'array') {
 
       /* schema v1 */
       AND (
-        (interface_class is NULL AND (radiodev_counter is NULL
-        OR interface_type NOT IN ("wLan","wds/p2p","Wan","Hotspot")))
+        (interface_class is NULL AND (/* radiodev_counter is NULL
+        OR */ interface_type NOT IN ("wLan","wds/p2p","Wan","Hotspot")))
 
       /* schema v2 */
       OR (interface_class = "ethernet"
@@ -116,6 +116,7 @@ function guifi_device_load($id,$ret = 'array') {
       }
       continue;
     }
+  
 
     $device['interfaces'][$i['id']] = $i;
 
@@ -186,8 +187,43 @@ function guifi_device_load($id,$ret = 'array') {
             $iparr2[$ka2];
       } // foreach link
     } // foreach ipv4
-  }
+  } // while interfaces
+  
 
+  // Ensure there are ethernet devices
+  // if less interfaces than expected by the model specs, create the new ones
+  if (!empty($device['variable']['model_id'])) {
+    $m = guifi_get_model_specs($device['variable']['model_id']);
+    if ($m->ethermax)
+      if ( count($device[interfaces]) < $m->ethermax ) {
+        
+        // Cleaning interface names already used
+        foreach ($device[interfaces] as $key => $value) {
+          $s = array_search($value[interface_type],$m->ethernames);
+          if (!is_null($s))
+            unset($m->ethernames[$s]);  
+        }
+        
+        // Creating the new interface and assigning a name not used
+        $port = count($device[interfaces]) + 1;
+        reset($m->ethernames);
+        while ($port <= $m->ethermax ) {
+            $ethername = array_shift($m->ethernames);
+            $device[interfaces][$port] = array(
+              'new'=>true,
+              'interface_type'=>(is_null($ethername)) ? $port : $ethername,
+              'etherdev_counter' =>$port,
+              'interface_class' => 'ethernet',
+              'device_id'=>$device['id'],
+              'mac'=>_guifi_mac_sum($device['mac'],$port),
+          );
+          $port++;
+        }
+      }        
+  } 
+  
+  guifi_log(GUIFILOG_TRACE,'function guifi_device_load(interfaces)',$device[interfaces]);
+      
   // getting vlan, aggregation and tunnel interfaces
   $aVlan = array_keys(guifi_types('vlan'));
   $aAggr = array_keys(guifi_types('aggregation'));
@@ -273,8 +309,7 @@ function guifi_device_load_radios($id,&$device) {
         $id,
         $radio['radiodev_counter']);
       while ($i = db_fetch_array($qi)) {
-
-
+          
         // can't have 2 wLan/Lan bridges
         if (in_array($i['interface_type'],$listi))
           if (($i['interface_type']) == 'wLan/Lan')
@@ -844,9 +879,52 @@ function guifi_device_form_validate($form,&$form_state) {
     $form_state['values']['ssid'] = $form_state['values']['nick'];
   }
 
-  // TODO chexck duplicated ip address
-/*  if (!empty($form_state['values']['ipv4'])) {
-    if (db_affected_rows(db_query("
+  // TODO Validate ip address(es)
+  // Finding duplicates
+  $ips = array();
+  if (!empty($form_state['values']['ipv4'])) {
+    // first checking local IPs
+    foreach ($form_state['values']['ipv4'] as $keyS => $valueS) {
+      if (empty($valueS[ipv4]))
+        continue;
+      // duplicate ip?
+      if (in_array($valueS[ipv4],$ips))
+        form_set_error(
+          "ipv4][$keyS][ipv4",
+          t('address %addr is duplicated',
+          array('%addr'=>$valueS[ipv4])));
+      $ips[] = $valueS[ipv4];
+      $valueSIPCalc = _ipcalc($valueS[ipv4],$valueS[netmask]);
+          
+      // Now looking into remote IPs
+      foreach ($valueS[subnet] as $keyI => $valueI) {
+        if (empty($valueI[ipv4]))
+          continue;
+        guifi_log(GUIFILOG_TRACE,
+          'function guifi_device_form_validate(ipv4s)',$valueS[ipv4].' / '.$valueI[ipv4].' '.$valueI[did]);
+        // duplicate ip?
+        if (in_array($valueI[ipv4],$ips))
+          form_set_error(
+            "ipv4][$keyS][subnet][$keyI][ipv4",
+            t('address %addr is duplicated',
+            array('%addr'=>$valueI[ipv4])));                    
+        $ips[] = $valueI[ipv4];
+        // same subnet as related IP?
+        $valueIIPCalc = _ipcalc($valueI[ipv4],$valueS[netmask]);
+        if (($valueSIPCalc[netid] != $valueIIPCalc[netid]) or 
+            ($valueSIPCalc[maskbits] != $valueIIPCalc[maskbits]))
+          form_set_error(
+            "ipv4][$keyS][subnet][$keyI][ipv4",
+            t('address %addr1 not at same subnet as %addr2',
+            array('%addr1'=>$valueI[ipv4],
+              '%addr2'=>$valueS[ipv4])));                    
+                        
+            
+      } // for remote IPs
+          
+    } // for local IPs
+    
+ /*   if (db_affected_rows(db_query("
       SELECT i.id
       FROM {guifi_interfaces} i,{guifi_ipv4} a
       WHERE i.id=a.interface_id AND a.ipv4='%s'
@@ -855,10 +933,10 @@ function guifi_device_form_validate($form,&$form_state) {
       $form_state['values']['id']))) {
       $message = t('IP %ipv4 already taken in the database. Choose another or leave the address blank.',
         array('%ipv4' => $form_state['values']['ipv4']));
-      form_set_error('ipv4',$message);
-    }
+      form_set_error('ipv4',$message); 
+    } */
   }
-*/
+
   // no duplicate names on interface names
   $ifs = guifi_get_currentInterfaces($form_state['values']);
   $iChecked = array();
@@ -883,6 +961,7 @@ function guifi_device_form_validate($form,&$form_state) {
   guifi_maintainers_validate(array2object($form_state['values']));
   guifi_funders_validate(array2object($form_state['values']));
 }
+
 
 /* guifi_device_edit_save(): Save changes/insert devices */
 function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {

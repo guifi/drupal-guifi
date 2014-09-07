@@ -199,10 +199,10 @@ function guifi_ahah_select_node_device(){
   $string = strtoupper(arg(3));
 
   $qry = db_query('SELECT
-                     CONCAT(d.id,"-",d.nick," '.t('at').' ",z.title,", ",l.nick) str
+                     CONCAT(d.id,"-",d.nick,", ",l.nick,", ",z.title) str
                   FROM {guifi_location} l, {guifi_zone} z, {guifi_devices} d
                   WHERE l.zone_id=z.id AND l.id=d.nid
-                    AND (UPPER(CONCAT(d.id,"-",d.nick," '.t('at').' ",z.title,", ",l.nick) LIKE "%'.
+                    AND (UPPER(CONCAT(d.id,"-",d.nick,", ",l.nick,", ",z.title) LIKE "%'.
                        $string.'%")'.
                   '  OR (d.id like "%'.$string.'%"'.
                   '  OR l.nick like "%'.$string.'%"'.
@@ -315,36 +315,53 @@ function guifi_ahah_select_device_interfacename($delete = false) {
 function guifi_ahah_select_device_subnets() {
   $cid = 'form_'. $_POST['form_build_id'];
   $cache = cache_get($cid, 'cache_form');
-  $device = explode('-',$_POST[ipv4][ipv4sdialog][adddid]);
+  $dname = $_POST[ipv4][ipv4sdialog][adddid];
+  $device = explode('-',$dname);
 
   $sql = sprintf(
-      "SELECT ip.ipv4, ip.netmask, i.id, i.device_id, i.interface_type
+      "SELECT ip.ipv4, ip.netmask, ip.ipv4_type, i.id, i.device_id, i.interface_type
        FROM {guifi_ipv4} ip, {guifi_interfaces} i
        WHERE ip.interface_id=i.id
         AND i.device_id=%d",$device[0]);
   guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_select_device_subnets (device=%d',$device[0]),$sql);
 
-  $device_snets = array();
+  $device_snets = array('none'=>t('select address'));
   $qifs = db_query($sql);
+  $ips_allocated = guifi_ipcalc_get_ips();
+  drupal_set_message(t('obtaining a select list with free address(es) from subnets allocated at %device',
+    array('%device'=>$dname)
+  ));
   while ($difs = db_fetch_object($qifs)) {
     $ips = _ipcalc($difs->ipv4,$difs->netmask);
-    $device_snets[$ips[netid].'/'.$ips[maskbits]] =
-      $ips[netid].'/'.$ips[maskbits].' - '.$difs->interface_type;
+    $newip = guifi_ipcalc_find_ip($ips[netid],$difs->netmask,$ips_allocated,false);
+    if ($newip)
+      $device_snets[$newip] = $newip.' '. t('from').' '.
+        $ips[netid].'/'.$ips[maskbits].' - '.$difs->interface_type;
+    else {
+      if ($difs->ipv4_type == 'public')
+        drupal_set_message(t('Network %net/%mask at %int is full',
+          array('%net'  => $ips[netid], 
+                '%mask' => $ips[maskbits],
+                '%int'  => $difs->interface_type,
+               )),
+            'warning');
+    }
   }
 
   if ($cache) {
     $form = $cache->data;
 
     $form[ipv4][ipv4sdialog][snet]['#options'] = $device_snets;
-    // $form[ipv4][ipv4sdialog][snet]['#description'] = t('Select from available networks');
-
+    $form[ipv4][ipv4sdialog][snet]['#type'] = 'select';
+    $form[ipv4][ipv4sdialog][snet]['#description'] = 
+      t('choose an address obtained from').':<br>'.
+      $dname;
     cache_set($cid, $form, 'cache_form', $cache->expire);
     // Build and render the new select element, then return it in JSON format.
     $form_state = array();
     $form['#post'] = $_POST;
     $form = form_builder($form['form_id']['#value'] , $form, $form_state);
-//    $output = drupal_render($form['ipv4'][$ids[0]]['subnet'][$ids[1]]['iid']);
-    $output = theme('status_messages') . drupal_render($form[ipv4][ipv4sdialog][snet]);
+    $output = theme('status_messages') . drupal_render($form[ipv4][ipv4sdialog]);
 
     drupal_json(array('status' => TRUE, 'data' => $output));
   } else {
@@ -521,10 +538,41 @@ function guifi_ahah_edit_cableconn() {
 }
 
 function guifi_ahah_edit_subnet() {
+  $cid = 'form_'. $_POST['form_build_id'];
+  $cache = cache_get($cid, 'cache_form');
+  
   $SNet = arg(3);
   $ipv4 = $_POST['ipv4'][$SNet];
-//  $tree = array('ipv4',$SNetId);
+/*  
+  // $tree = array('ipv4',$SNetId);
   guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_edit_subnet (id=%d):',$SNet),$ipv4);
+  
+  if ($cache) {
+    $form = $cache->data;
+  
+    // Render the new output.
+    unset($form[ipv4][$SNet][subnet]['#prefix'], 
+      $form[ipv4][$SNet][subnet]['#suffix'], // Prevent duplicate wrappers.
+      $form[ipv4][$SNet][subnet][$delta]);
+    cache_set($cid, $form, 'cache_form', $cache->expire);
+    $form[ipv4][$SNet][subnet]['#type'] = 'fieldset';
+    guifi_log(GUIFILOG_TRACE,
+      sprintf('guifi_ahah_edit_subnet (id=%d):',$SNet),$form[ipv4][$SNet][subnet]);
+    // build new form
+    $form_state = array();
+    $form['#post'] = $_POST;
+    $form = form_builder($form['form_id']['#value'] , $form, $form_state);
+    $output = theme('status_messages') . drupal_render($form[ipv4][$SNet][subnet]);
+
+    drupal_json(array('status' => TRUE, 'data' => $output));
+  } else {
+    drupal_json(array('status' => FALSE, 'data' => ''));
+
+  drupal_json(array('status' => TRUE, 'data' => $output));
+  }
+  exit;
+*/  
+  
 
   // Build our new form element.
   $form_element =
@@ -546,12 +594,19 @@ function guifi_ahah_edit_subnet() {
   );
 
   // Rebuild the old form.
+  
   $form = form_builder('guifi_device_form', $form, $form_state);
-
+  //if ($cache) {
+  //  $form = $cache->data;
+  
   // Render the new output.
   $choice_form = $form[ipv4][$SNet][subnet];
+  unset($choice_form['#post']);
+  // guifi_log(GUIFILOG_BASIC,sprintf('guifi_ahah_edit_subnet (id=%d):',$SNet),$choice_form);
   unset($choice_form['#prefix'], $choice_form['#suffix']); // Prevent duplicate wrappers.
   unset($choice_form[$delta]);
+  cache_set($cid, $form, 'cache_form', $cache->expire);
+  $choice_form['#type'] == 'fieldset';
   // build new form
   $fs = array();
   $form_element['#post'] = array();
@@ -562,7 +617,7 @@ function guifi_ahah_edit_subnet() {
     $newfield;
 
   drupal_json(array('status' => TRUE, 'data' => $output));
-
+  
   exit;
 
 }
@@ -577,10 +632,12 @@ function guifi_ahah_add_remoteipv4() {
   // find the next free ip address
   $ips = array(ip2long($ipv4[ipv4]));
   foreach ($ipv4[subnet] as $i)
-    if (ip2long($i[ipv4]))
-      $ips[] = ip2long($i[ipv4]);
+    if ($ip = ip2long($i[ipv4]))
+      if (!in_array($ip,$ips))
+       $ips[] = $ip;
   sort($ips);
-  $ipc = _ipcalc($ipv4[ipv4],$ipv4[netmask]);
+  guifi_log(GUIFILOG_BASIC,sprintf('guifi_ahah_add_remoteipv4 (id=%d):',$SNet),$ips);
+    $ipc = _ipcalc($ipv4[ipv4],$ipv4[netmask]);
   $lstart = ip2long($ipc[netstart]);
   $c = 0;
   while ($ips[$c] == ($lstart + $c)) $c++;
@@ -592,7 +649,7 @@ function guifi_ahah_add_remoteipv4() {
     'ipv4'    => $free,
     'netmask' => $ipv4['netmask'],
   );
-  guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_add_remoteipv4 (start=%s) new',long2ip($lstart)),$newI);
+  guifi_log(GUIFILOG_BASIC,sprintf('guifi_ahah_add_remoteipv4 (start=%s) new',long2ip($lstart)),$newI);
   guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_add_remoteipv4 ipcalc'),$ipc);
 
   $k = 0;
@@ -600,7 +657,7 @@ function guifi_ahah_add_remoteipv4() {
     $k++;
 
   $ipv4[subnet][$k] = $newI;
-  guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_add_remoteipv4 (id=%d):',$SNet),$ipv4[subnet]);
+  guifi_log(GUIFILOG_FULL,sprintf('guifi_ahah_add_remoteipv4 (id=%d):',$SNet),$ipv4[subnet]);
 
   // Build our new form element.
   $form_element =
@@ -613,8 +670,10 @@ function guifi_ahah_add_remoteipv4() {
   // form, Drupal is not aware of this new elements existence and will not
   // process it. We retreive the cached form, add the element, and resave.
   $form = form_get_cache($form_build_id, $form_state);
+  guifi_log(GUIFILOG_BASIC,sprintf('guifi_ahah_add_remoteipv4 (id=%d) state:',$SNet),$form_state);
   $choice_form = $form[ipv4][$SNet]['subnet'];
   $form['ipv4'][$SNet]['subnet'] = $form_element;
+  $choice_form = $form[ipv4][$SNet]['subnet'];
   form_set_cache($form_build_id, $form, $form_state);
   $form += array(
     '#post' => $_POST,
@@ -629,13 +688,12 @@ function guifi_ahah_add_remoteipv4() {
   unset($choice_form['#prefix'], $choice_form['#suffix']); // Prevent duplicate wrappers.
   unset($choice_form[$delta]);
   // build new form
-  $fs = array();
-  $form_element['#post'] = array();
-  $form_element = form_builder($form_element['form_id']['#value'] , $form_element, $fs);
-  $newfields = drupal_render($form_element);
+//  $fs = array();
+//  $form_element['#post'] = array();
+//  $form_element = form_builder($form_element['form_id']['#value'] , $form_element, $fs);
+//  $newfields = drupal_render($form_element);
 //  guifi_log(GUIFILOG_BASIC,sprintf('choice_form %d',$delta),htmlspecialchars($newfield));
-  $output = theme('status_messages') . drupal_render($choice_form) .
-    $newfield;
+  $output = theme('status_messages') . drupal_render($choice_form);
 
   drupal_json(array('status' => TRUE, 'data' => $output));
 
@@ -947,6 +1005,9 @@ function guifi_ahah_add_interface() {
 
 /**
  * Add ipv4s dialog
+ * Used at device/radio edit form, at IPv4 Networking section for adding
+ *  Public, Private subnetworks, or get an IP from an already defined subnetwork
+ *  at another device 
  *
  * URL: http://guifi.net/guifi/js/add-ipv4s
  */
@@ -955,7 +1016,13 @@ function guifi_ahah_add_ipv4s() {
   $cache = cache_get($cid, 'cache_form');
 
   $iClass = arg(3);
-  guifi_log(GUIFILOG_TRACE,'guifi_ahah_add_ipv4s(iClass)',$iClass);
+  guifi_log(GUIFILOG_TRACE,'guifi_ahah_add_ipv4s('.$iClass.')',$_POST[ipv4][ipv4sdialog][netmask]);
+  
+  //if (!$net) {
+  //  drupal_set_message(t(
+  //    'Unable to allocate new range, no networks available'),'warning');
+  //  return FALSE;
+  //}  
 
   if ($cache) {
     $form = $cache->data;
@@ -963,7 +1030,7 @@ function guifi_ahah_add_ipv4s() {
 
     guifi_log(GUIFILOG_TRACE,'guifi_ahah_add_ipv4s(dialog)',$form_dialog);
 
-    // Dialog
+    // Dialog fields
     $form['ipv4']['ipv4sdialog']['#type'] = 'fieldset';
     $form['ipv4']['ipv4sdialog']['#collapsed'] = false;
     $form['ipv4']['ipv4sdialog']['#collapsible'] = true;
@@ -971,52 +1038,61 @@ function guifi_ahah_add_ipv4s() {
       case 'private':
         $form['ipv4']['ipv4sdialog']['adddid']['#type'] = 'hidden';
         $form['ipv4']['ipv4sdialog']['snet']['#type'] = 'hidden';
-        $form['ipv4']['ipv4sdialog']['mask']['#type'] = 'select';
-        $form['ipv4']['ipv4sdialog']['mask']['#value'] = '255.255.255.252';
-        $form['ipv4']['ipv4sdialog']['mask']['#options'] = guifi_types('netmask',30,26);
-        $form['ipv4']['ipv4sdialog']['mask']['#description'] = t('%class subnetwork size (mask)',
-                   array('%class'=>$iClass));
-        $form['ipv4']['ipv4sdialog']['#description'] = t('Obtain a new %class subnetwork range and get an IPv4 address from it',
+        $form['ipv4']['ipv4sdialog']['netmask']['#type'] = 'select';
+        $form['ipv4']['ipv4sdialog']['netmask']['#value'] = '255.255.255.252';
+        $form['ipv4']['ipv4sdialog']['ipv4_type']['#value'] = 2;
+        $form['ipv4']['ipv4sdialog']['netmask']['#options'] = 
+          guifi_types('netmask',30,26);
+        $form['ipv4']['ipv4sdialog']['netmask']['#description'] = 
+          t('%class subnetwork size (mask)', array('%class'=>$iClass));
+        $form['ipv4']['ipv4sdialog']['#description'] = 
+          t('Obtain a new %class subnetwork range and get an IPv4 address from it',
                    array('%class'=>$iClass));
         break;
       case 'public':
         $form['ipv4']['ipv4sdialog']['adddid']['#type'] = 'hidden';
         $form['ipv4']['ipv4sdialog']['snet']['#type'] = 'hidden';
-        $form['ipv4']['ipv4sdialog']['mask']['#type'] = 'select';
-        $form['ipv4']['ipv4sdialog']['mask']['#value'] = '255.255.255.224';
-        $form['ipv4']['ipv4sdialog']['mask']['#options'] = guifi_types('netmask',30,22);
-        $form['ipv4']['ipv4sdialog']['mask']['#description'] = t('%class subnetwork size (mask)',
+        $form['ipv4']['ipv4sdialog']['netmask']['#type'] = 'select';
+        $form['ipv4']['ipv4sdialog']['netmask']['#value'] = '255.255.255.224';
+        $form['ipv4']['ipv4sdialog']['ipv4_type']['#value'] = 1;
+        $form['ipv4']['ipv4sdialog']['ipv4']['#type'] = 'textfield';
+        $form['ipv4']['ipv4sdialog']['netmask']['#options'] = 
+          guifi_types('netmask',30,22);
+        $form['ipv4']['ipv4sdialog']['netmask']['#description'] = 
+          t('%class subnetwork size (mask)',
            array('%class'=>$iClass));
-        $form['ipv4']['ipv4sdialog']['#description'] = t('Obtain a new %class subnetwork range and get an IPv4 address from it',
+        $form['ipv4']['ipv4sdialog']['#description'] = 
+          t('Obtain a new %class subnetwork range and get an IPv4 address from it',
                    array('%class'=>$iClass));
-                   break;
+        break;
+      case 'netmask':
+        $form['ipv4']['ipv4sdialog']['netmask']['#value'] = 
+          $_POST[ipv4][ipv4sdialog][netmask];
+        break;
       case 'defined':
-        $form['ipv4']['ipv4sdialog']['mask']['#type'] = 'hidden';
+        $form['ipv4']['ipv4sdialog']['netmask']['#type'] = 'hidden';
         $form['ipv4']['ipv4sdialog']['adddid']['#type'] = 'textfield';
         $form['ipv4']['ipv4sdialog']['snet']['#type'] = 'select';
-        $form['ipv4']['ipv4sdialog']['#description'] = t('Get a new ip from an already defined subnetwork range at any existing device');
-        // $form_dialog['#collapsible'] = true;
-        //$form_dialog['adddid']['#type'] = 'textfield';
-        //$form_dialog['adddid']['#autocomplete_path'] = 'guifi/js/select-node-device';
-
-       // $form_dialog['#description'] = t('Device to get the address from');
-/*          $form['ipv4sdialog']['adddid'] = array(
-    // '#parents' => array('ipv4','ipv4sdialog','adddid'),
-    '#type' => 'textfield',
-    '#value'             => 'Select device',
-    '#autocomplete_path' => 'guifi/js/select-node-device',
-    '#size'              => 60,
-    '#maxlength'         => 128,
-    '#element_validate'  => array('guifi_devicename_validate'),
-    '#ahah'              => array(
-      'event'            => 'blur',
-      'path'             => 'guifi/js/select-device-interfacename/'.$k.'-'.$ks,
-      'wrapper'          => 'fieldset-ipv4subnet-'.$k.'-'.$ks,
-      'method'           => 'replace',
-      'effect'           => 'fade',
-    ),
-  );*/
+        $form['ipv4']['ipv4sdialog']['ipv4']['#type'] = 'hidden';
+        $form['ipv4']['ipv4sdialog']['#description'] = 
+          t('Get a new ip from an already defined subnetwork range at any existing device');
     }
+    // Obtaining ipv4
+    if ($iClass != 'defined') {
+      $ntype = $form['ipv4']['ipv4sdialog']['ipv4_type']['#value']; 
+      drupal_set_message(t('Obtaining a new %type range',
+        array('%type'  => ($ntype==1) ? t('public') : t('private'))),
+        'warning');
+      $ips_allocated = guifi_ipcalc_get_ips('0.0.0.0','0.0.0.0', $_POST, $ntype);
+      $net = guifi_ipcalc_get_subnet_by_nid(
+        $_POST[nid],
+        $form['ipv4']['ipv4sdialog']['netmask']['#value'],
+        ($ntype == 1) ? 'public' : 'backbone',
+        $ips_allocated, 'Yes', TRUE); 
+      $form['ipv4']['ipv4sdialog']['ipv4']['#value'] = 
+        long2ip(ip2long($net) + 1);
+    }
+                    
 
     unset($form['ipv4']['ipv4sdialog']['#prefix']);
     unset($form['ipv4']['ipv4sdialog']['#suffix']);

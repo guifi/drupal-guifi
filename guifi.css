@@ -2,6 +2,10 @@
   text-decoration: none;
 }
 
+.form-item input.error, .form-item textarea.error {
+    background-color: #FCC;
+}
+
 .ipv4-subnet {
 	margin-left: 5%;
 	clear: both;

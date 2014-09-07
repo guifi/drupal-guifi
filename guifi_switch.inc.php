@@ -671,7 +671,7 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
      $form['interface_type']['#attributes'] = array('class'=>'interface-item-disabled');
    }
 
-   guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(type)',$interface);
+   guifi_log(GUIFILOG_TRACE,'function guifi_vinterface_form(type)',$vinterface);
 
   $form['related_interfaces'] = array(
     '#type' => 'select',
@@ -716,8 +716,8 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
     $form['comments']['#value'] = t('will be deleted. press "reset" to cancel');
 
   if (!$vinterface[deleted]) {
-    if ($vinterface['mac'] === '00:00:00:00:00:00')
-      $vinterface['mac'] = '';
+ //   if ($vinterface['mac'] === '00:00:00:00:00:00')
+ //     $vinterface['mac'] = '';
     $form['mac'] = array(
       '#type'            => 'textfield',
       '#title'           => ($first_port) ? t('mac') : false,

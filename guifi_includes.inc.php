@@ -870,7 +870,7 @@ function guifi_get_devicename($id, $format = 'nick') {
   case 'large':
     $device = db_fetch_object(db_query(
       'SELECT
-        CONCAT(d.id,"-",d.nick," '.t('at').' ",z.title,", ",l.nick) str
+        CONCAT(d.id,"-",d.nick,", ",l.nick,", ",z.title) str
       FROM {guifi_location} l, {guifi_zone} z, {guifi_devices} d
       WHERE d.id=%d AND l.id=d.nid AND l.zone_id=z.id',$id));
     break;
@@ -1299,7 +1299,7 @@ function guifi_ipcalc_find_subnet(
 }
 
 function guifi_ipcalc_find_ip($base_ip = '0.0.0.0',
-  $mask_range = '0.0.0.0', $ips_allocated = NULL) {
+  $mask_range = '0.0.0.0', $ips_allocated = NULL, $verbose = true) {
 
   if ($ips_allocated == NULL) {
     $ips_allocated = guifi_ipcalc_get_ips($base_ip,$mask_range);
@@ -1317,9 +1317,12 @@ function guifi_ipcalc_find_ip($base_ip = '0.0.0.0',
   if ($key < $end_dec)
     return long2ip($key);
 
-  drupal_set_message(t('Network %net/%mask is full',
-    array('%net' => $base_ip, '%mask' => $mask_range)),
-    'warning');
+  $ipc = _ipcalc($base_ip,$mask_range);
+  if ($verbose) 
+    drupal_set_message(t('Network %net/%mask is full',
+      array('%net' => $base_ip, '%mask' => $ipc[maskbits])),
+        'warning');
+    
   return FALSE;
 }
 

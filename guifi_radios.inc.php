@@ -906,7 +906,7 @@ function guifi_radio_add_wlan_submit($form, &$form_state) {
 /* _guifi_add_wds_submit(): Action */
 function guifi_radio_add_wdsiface_submit($form, &$form_state) {
   $radio = $form_state['clicked_button']['#parents'][1];
-  guifi_log(GUIFILOG_TRACE,sprintf('function guifi_radio_add_wds(%d)',$radio),$form_state['clicked_button']);
+  guifi_log(GUIFILOG_TRACE,sprintf('function guifi_radio_add_wds(%d)',$radio),$form['ipv4']);
 
   $interface = _guifi_radio_add_wdsiface($radio, $form_state['values']['nid'], $form_state['values']);
 
