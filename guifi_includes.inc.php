@@ -499,7 +499,13 @@ function guifi_get_possible_interfaces($edit = array()) {
   return $possible;
 }
 
-/* guifi_get_device_interfaces(): Populates a select list with the available cable interfaces */
+/** guifi_get_device_interfaces(): Populates a select list with the available cable interfaces 
+ *
+ * prameters:
+ *   id: device_id
+ *   iid: current interface
+ * @return list of device free cable interfaces in an array
+ */
 function guifi_get_device_interfaces($id,$iid = NULL) {
 
   $used = array(''=>t('Not defined'));
@@ -517,13 +523,16 @@ function guifi_get_device_interfaces($id,$iid = NULL) {
 
   if (!is_numeric($did[0]))
     return $used;
-
+    
   $sql_i = '
     SELECT id, interface_type, connto_iid
     FROM {guifi_interfaces}
-    WHERE device_id = ' .$did[0] .
-    ' AND ((radiodev_counter is NULL) or (upper(interface_type) IN ("WLAN/LAN"))) 
+    WHERE device_id = ' .$did[0];
+
+  $sql_i .= 
+    ' AND ((radiodev_counter is NULL or radiodev_counter = 0) or (upper(interface_type) IN ("WLAN/LAN"))) 
       AND (interface_class is NULL or interface_class = "ethernet" )';
+      
   guifi_log(GUIFILOG_TRACE,'guifi_get_devicename(sql)',$sql_i);
 
   $qi = db_query($sql_i);
@@ -538,6 +547,41 @@ function guifi_get_device_interfaces($id,$iid = NULL) {
 
   return $used;
 }
+
+/** guifi_get_device_allinterfaces(): Populates a select list with all the available interfaces 
+ *
+ * prameters:
+ *   id: device_id
+ * @return list of device interfaces in an array
+ */
+function guifi_get_device_allinterfaces($id) {
+  
+  $allinterfaces = array();
+  
+  if (empty($id))
+    return $allinterfaces;
+
+  if (empty($iid))
+    $iid = 0;
+
+  $did = explode('-',$id);
+
+  if (!is_numeric($did[0]))
+    return $allinterfaces;
+    
+  $sql_i = '
+    SELECT id, interface_type
+    FROM {guifi_interfaces}
+    WHERE device_id = ' .$did[0];
+      
+  $qi = db_query($sql_i);
+
+  while ($i = db_fetch_object($qi)) 
+    $allinterfaces[$i->id] = $i->interface_type;
+
+  return $allinterfaces;
+}
+
 
 function guifi_get_firmware($id) {
   $sql= db_query('
@@ -856,6 +900,72 @@ function guifi_get_ap_protocol($id,$radiodev_counter) {
 function guifi_get_ap_channel($id,$radiodev_counter) {
   $radio = db_fetch_object(db_query("SELECT r.channel, d.id FROM {guifi_radios} r LEFT JOIN {guifi_devices} d ON r.id=d.id WHERE r.id=%d AND r.radiodev_counter=%d",$id,$radiodev_counter));
   return $radio->channel;
+}
+
+/* returns an array with id=>ipv4/mask from a device array */
+function guifi_get_currentDeviceIpv4s($device) {
+  $ips = array();
+  
+  if (empty($device['ipv4']))
+    return $ips;
+    
+  foreach ($device['ipv4'] as $k=>$ip) {
+    $ipc = _ipcalc($ip ['ipv4'],$ip['netmask']);
+    $interfaces = guifi_get_currentInterfaces($device);
+    if (array_key_exists($ip['interface_id'],$interfaces))
+      $ki = $ip['interface_id'];
+    else {
+      $ki = $device['id'].','.$ip['id'];
+    }
+    $ips[$ip['interface_id'].','.$ip['id']] = $ip['ipv4'].'/'.$ipc['maskbits'].' '.
+      $interfaces[$ki];
+  }
+  return $ips;
+}
+
+/* returns an array with id=>mac from a device array */
+function guifi_get_currentDeviceMacs($device) {
+  $macs = array();
+  
+  foreach(array('radios','interfaces','vlans','aggregations') as $iClass)
+    foreach ($device[$iClass] as $id => $interface) {
+      if (!(empty($interface[mac])))
+        if ($iClass != 'radios') {  
+          if (isset($interface['id']))
+            $macs[$interface['id']] = $interface[mac];
+        } else 
+          $macs[$device[id].','.$id] = $interface[mac]; 
+    }
+ 
+  return $macs;  
+}
+
+function guifi_get_currentInterfaces($device) {
+  guifi_log(GUIFILOG_TRACE,'function guifi_get_currentInterfaces(device)',$device);
+  $interfaces = array();
+
+  foreach ($device[radios] as $k => $radio) {
+    $interfaces[$device[id].','.$k] = 'wlan'.$k.' - '.$radio[ssid];
+  }
+  foreach (array('ports','interfaces','vlans','aggregations','tunnels') as $iClass){
+    guifi_log(GUIFILOG_TRACE,
+      sprintf('function guifi_get_currentInterfaces(%s)',$iClass),
+      count($device[$iClass]));
+//    if (!empty($device[$iClass]))
+    foreach ($device[$iClass] as $k => $interface) {
+      guifi_log(GUIFILOG_TRACE,"function guifi_get_currentInterfaces($k)",$interface);
+      
+      if (empty($interface[interface_type]))
+        if (empty($interface[iname]))
+          continue;
+        else
+         $interfaces[$k] = $interface[iname];                    
+      else
+        $interfaces[$k] = $interface[interface_type];
+    }
+  }
+
+  return $interfaces;
 }
 
 function guifi_get_devicename($id, $format = 'nick') {
@@ -1828,15 +1938,43 @@ function guifi_quantity_validate($quantity,&$form_state) {
 function guifi_mac_validate($mac,&$form_state) {
   if ($form_state['clicked_button']['#value'] == t('Reset'))
     return;
+    
+  $m2 = $mac;
+  unset($m2['#post']);
+  guifi_log(GUIFILOG_TRACE,'guifi_mac_validate',$m2['#parents']);  
+  guifi_log(GUIFILOG_TRACE,'guifi_mac_validate',$form_state);  
+      
+  // if empty, and have parents, take parent mac
+  if (empty($mac['#value']))
+    if (in_array($mac['#parents'][0],array('vlans','aggregations'))) {
+      $macs = guifi_get_currentDeviceMacs($mac['#post']);
+      $related = $mac['#post'][$mac['#parents'][0]][$mac['#parents'][1]]['related_interfaces'];
+      guifi_log(GUIFILOG_TRACE,'guifi_mac_validate MACS',$macs);  
+      guifi_log(GUIFILOG_TRACE,'guifi_mac_validate RELATED',$related);  
+      
+      if (is_array($related))
+        $pmac = $macs[$related[0]];
+      else
+        $pmac = $macs[$related];
+      $mac['#value'] = $pmac;  
+
+      form_set_value(array('#parents'=>$mac['#parents']),$pmac,$form_state);
+      $form_state['rebuild'] = TRUE;
+      guifi_log(GUIFILOG_TRACE,'guifi_mac_validate (null NEW MAC)',$pmac);       
+    } else 
+      return;
 
   $pmac = _guifi_validate_mac($mac['#value']);
+  
   if ($pmac == FALSE) {
     form_error($mac,
       t('Error in MAC address (%mac), use 99:99:99:99:99:99 format.',
         array('%mac' => $mac['#value'])),'error');
   } else {
-    form_set_value($mac,$pmac,$form_state);
-    $mac['#value'] = $pmac;
+    if ($pmac != $mac['#value']) {
+      form_set_value(array('#parents'=>$mac['#parents']),$pmac,$form_state);
+      $form_state['rebuild'] = TRUE;
+    }
   }
   return $mac;
 }

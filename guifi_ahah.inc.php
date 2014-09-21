@@ -272,7 +272,7 @@ function guifi_ahah_select_device_interfacename($delete = false) {
 
   guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_select_device_interfacename (ids=%s did=%d)',arg(3),$device[0]));
   
-  $device_interfaces = guifi_get_device_interfaces($device[0]);
+  $device_interfaces = guifi_get_device_allinterfaces($device[0]);
 
   $rIpv4 = $_POST['ipv4'][$ids[0]]['subnet'][$ids[1]];
 
@@ -283,13 +283,19 @@ function guifi_ahah_select_device_interfacename($delete = false) {
       $form['ipv4'][$ids[0]]['subnet'][$ids[1]]['iid']['#options'] = $device_interfaces;
       $form['ipv4'][$ids[0]]['subnet'][$ids[1]]['did']['#value'] = guifi_get_devicename($device[0],'large');
       $form['ipv4'][$ids[0]]['subnet'][$ids[1]]['ipv4']['#value'] = $_POST['ipv4'][$ids[0]]['subnet'][$ids[1]]['ipv4'];
-    } else {
+    } else if ($form['ipv4'][$ids[0]]['subnet'][$ids[1]]['new']['#value']){
+        unset($form['ipv4'][$ids[0]]['subnet'][$ids[1]]);
+      } else {
       $form['ipv4'][$ids[0]]['subnet'][$ids[1]]['deleted']['#type'] = 'hidden';
       $form['ipv4'][$ids[0]]['subnet'][$ids[1]]['deleted']['#value'] = true;
-      $form['ipv4'][$ids[0]]['subnet'][$ids[1]]['iid']['#disabled'] = true;
-      $form['ipv4'][$ids[0]]['subnet'][$ids[1]]['did']['#disabled'] = true;
-      $form['ipv4'][$ids[0]]['subnet'][$ids[1]]['ipv4']['#disabled'] = true;
-      drupal_set_message(t('The address below will be DELETED when the device is saved. Press "Reset" to discard changes.'));
+      $form['ipv4'][$ids[0]]['subnet'][$ids[1]]['ipv4']['#type'] = 'hidden';
+      $form['ipv4'][$ids[0]]['subnet'][$ids[1]]['iid']['#type'] = 'hidden';
+      $form['ipv4'][$ids[0]]['subnet'][$ids[1]]['did']['#type'] = 'hidden';
+      $form['ipv4'][$ids[0]]['subnet'][$ids[1]]['deletedmsg']= array(
+        '#type'=>'item',
+        '#value'=>t('Address %addr will be DELETED',array('%addr'=>$_POST['ipv4'][$ids[0]]['subnet'][$ids[1]]['ipv4']))
+      );      
+      drupal_set_message(t('Press "Reset" to discard changes.'),'warning');
     }
 
     cache_set($cid, $form, 'cache_form', $cache->expire);
@@ -630,13 +636,23 @@ function guifi_ahah_add_remoteipv4() {
   guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_add_remoteipv4 (id=%d):',$SNet),$ipv4[subnet]);
 
   // find the next free ip address
+  $deletedPresent = false;
   $ips = array(ip2long($ipv4[ipv4]));
-  foreach ($ipv4[subnet] as $i)
+  foreach ($ipv4[subnet] as $ki=>$i) {
+    if ($ki != 'add-ipv4') 
+      if ($i['deleted']==true) 
+        $deletedPresent = true;
+        
+    if (empty($i[ipv4]) and !(empty($i[ipv4value]))) 
+      $ipv4[subnet][$ki][ipv4]=$i[ipv4]=$i[ipv4value];
     if ($ip = ip2long($i[ipv4]))
       if (!in_array($ip,$ips))
        $ips[] = $ip;
+  }
+       
   sort($ips);
-  guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_add_remoteipv4 (id=%d):',$SNet),$ips);
+  
+  guifi_log(GUIFILOG_BASIC,sprintf('guifi_ahah_add_remoteipv4 (id=%d):',$SNet),$ips);
     $ipc = _ipcalc($ipv4[ipv4],$ipv4[netmask]);
   $lstart = ip2long($ipc[netstart]);
   $c = 0;
@@ -649,6 +665,8 @@ function guifi_ahah_add_remoteipv4() {
     'ipv4'    => $free,
     'netmask' => $ipv4['netmask'],
   );
+  if ($deletedPresent == true)
+    drupal_set_message(t('Deleted addresses found. To reuse them you must save first to confirm changes.'),'warning');
   drupal_set_message(t('Next available address at %base/%maskbits is %addr',
     array('%addr'=>$free,
       '%base'    =>$ipc[netid],
@@ -690,7 +708,7 @@ function guifi_ahah_add_remoteipv4() {
   // Render the new output.
   $choice_form = $form[ipv4][$SNet][subnet];
   unset($choice_form['#prefix'], $choice_form['#suffix']); // Prevent duplicate wrappers.
-  unset($choice_form[$delta]);
+  //unset($choice_form[$delta]);
   // build new form
 //  $fs = array();
 //  $form_element['#post'] = array();
@@ -1042,6 +1060,7 @@ function guifi_ahah_add_ipv4s() {
       case 'private':
         $form['ipv4']['ipv4sdialog']['adddid']['#type'] = 'hidden';
         $form['ipv4']['ipv4sdialog']['snet']['#type'] = 'hidden';
+        $form['ipv4']['ipv4sdialog']['snet']['#value'] = false;
         $form['ipv4']['ipv4sdialog']['netmask']['#type'] = 'select';
         $form['ipv4']['ipv4sdialog']['netmask']['#value'] = '255.255.255.252';
         $form['ipv4']['ipv4sdialog']['ipv4_type']['#value'] = 2;
@@ -1056,6 +1075,7 @@ function guifi_ahah_add_ipv4s() {
       case 'public':
         $form['ipv4']['ipv4sdialog']['adddid']['#type'] = 'hidden';
         $form['ipv4']['ipv4sdialog']['snet']['#type'] = 'hidden';
+        $form['ipv4']['ipv4sdialog']['snet']['#value'] = false;
         $form['ipv4']['ipv4sdialog']['netmask']['#type'] = 'select';
         $form['ipv4']['ipv4sdialog']['netmask']['#value'] = '255.255.255.224';
         $form['ipv4']['ipv4sdialog']['ipv4_type']['#value'] = 1;
@@ -1064,7 +1084,7 @@ function guifi_ahah_add_ipv4s() {
           guifi_types('netmask',30,22);
         $form['ipv4']['ipv4sdialog']['netmask']['#description'] = 
           t('%class subnetwork size (mask)',
-           array('%class'=>$iClass));
+           array('%class'=>$iClass)); 
         $form['ipv4']['ipv4sdialog']['#description'] = 
           t('Obtain a new %class subnetwork range and get an IPv4 address from it',
                    array('%class'=>$iClass));
@@ -1157,6 +1177,7 @@ function guifi_ahah_add_ipv4s() {
  */
 function guifi_ahah_add_vinterface($iClass) {
   $iClass = arg(3);
+  $edit = $_POST;
   $vinterfaces = &$_POST[arg(3)];
   guifi_log(GUIFILOG_TRACE,'guifi_ahah_add_vinterface(iClass)',arg(3));
   guifi_log(GUIFILOG_TRACE,'guifi_ahah_add_vinterface(vinterfaces)',$vinterfaces);
@@ -1168,12 +1189,19 @@ function guifi_ahah_add_vinterface($iClass) {
   $delta = count($vinterfaces);
   $newI['id'] = $delta;
   $newI['interface_id'] = $delta;
-  $vinterfaces[] = $newI;
+  $edit[$iClass][] = $newI;
+  
 
+  foreach ($edit[$iClass] as $k => $value) {
+    guifi_log(GUIFILOG_TRACE,'guifi_ahah_add_vinterface(iname)',$value);
+    if (!empty($value[iname]))
+      $edit[$iClass][$k][interface_type] = $value[iname];
+  }
   guifi_log(GUIFILOG_TRACE,'guifi_ahah_add_vinterface(newI)',$newI);
 
   $form_element =
-    guifi_vinterface_form($iClass,$newI,!$delta,guifi_get_currentInterfaces($_POST));
+    guifi_vinterfaces_form($iClass,$edit);  
+//    guifi_vinterface_form($iClass,$newI,!$delta,guifi_get_currentInterfaces($_POST));
 //  drupal_alter('form', $form_element, array(), 'guifi_ahah_add_interface');
 
   // Build the new form.
@@ -1183,8 +1211,10 @@ function guifi_ahah_add_vinterface($iClass) {
   // form, Drupal is not aware of this new elements existence and will not
   // process it. We retreive the cached form, add the element, and resave.
   $form = form_get_cache($form_build_id, $form_state);
-  $choice_form = $form[$iClass][vifs];
-  $form[$iClass][vifs][$delta] = $form_element;
+  $choice_form = $form[$iClass];
+  $form_element['#weight'] = $choice_form['#weight'];
+  $form_element['#collapsed'] = false;
+  $form[$iClass] = $form_element;
   form_set_cache($form_build_id, $form, $form_state);
   $form += array(
     '#post' => $_POST,
@@ -1195,15 +1225,16 @@ function guifi_ahah_add_vinterface($iClass) {
   $form = form_builder('guifi_device_form', $form, $form_state);
 
   // Render the new output.
-  $choice_form = $form[$iClass]['vifs'];
+  $choice_form = $form[$iClass];
   unset($choice_form['#prefix'], $choice_form['#suffix']); // Prevent duplicate wrappers.
-  unset($choice_form[$delta]);
+  // unset($choice_form[$delta]);
   // build new form
-  $fs = array();
-  $form_element['#post'] = array();
-  $form_element = form_builder($form_element['form_id']['#value'] , $form_element, $fs);
-  $newfield = drupal_render($form_element);
+//  $fs = array();
+//  $form_element['#post'] = array();
+//  $form_element = form_builder($form_element['form_id']['#value'] , $form_element, $fs);
+//  $newfield = drupal_render($form_element);
 //  guifi_log(GUIFILOG_BASIC,sprintf('choice_form %d',$delta),htmlspecialchars($newfield));
+//  guifi_log(GUIFILOG_BASIC,'guifi_ahah_add_vinterface(choice_form)',$choice_form);
   $output = theme('status_messages') . drupal_render($choice_form) .
     $newfield;
 

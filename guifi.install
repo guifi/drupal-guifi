@@ -129,6 +129,7 @@ function guifi_schema() {
          'type' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE),
          'notification' => array('type' => 'varchar', 'length' => '1024', 'not null' => TRUE),
          'mac' => array('type' => 'varchar', 'length' => '20', 'not null' => TRUE, 'default' => '00:00:00:00:00:00'),
+         'mainipv4' => array('type' => 'varchar', 'length' => '20'),
          'comment' => array('type' => 'text', 'size' => 'big', 'not null' => FALSE),
          'flag' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => 'Planned'),
          'extra' => array('type' => 'text', 'size' => 'big', 'not null' => FALSE, 'comment' => 'store variable data depending on guifi_devices(type)'),
@@ -210,6 +211,7 @@ function guifi_schema() {
          'antenna_gain' => array('type' => 'int', 'size' => 'tiny', 'not null' => FALSE),
          'antenna_azimuth' => array('type' => 'int', 'size' => 'small', 'not null' => FALSE, 'default' => 360),
          'antenna_mode' => array('type' => 'varchar', 'length' => '5', 'not null' => TRUE),
+         'mac' => array('type' => 'varchar', 'length' => '20'),
          'ly_mb_in' => array('type' => 'numeric', 'precision' => '10', 'scale' => '6', 'not null' => FALSE, 'default' => NULL),
          'ly_mb_out' => array('type' => 'numeric', 'precision' => '10', 'scale' => '6', 'not null' => FALSE, 'default' => NULL),
          'clients_accepted' => array('comment' => 'Yes, No', 'type' => 'varchar', 'length' => '5', 'not null' => TRUE, 'default' => 'Yes'),
@@ -2663,5 +2665,18 @@ function guifi_update_1036() {
 
   return $items;
 }
+
+
+function guifi_update_1037() {
+  $items = array();
+
+  db_add_field($items,'guifi_devices','mainipv4',
+    array('type' => 'varchar', 'length' => '20'));
+  db_add_field($items,'guifi_radios','mac',
+    array('type' => 'varchar', 'length' => '20'));
+
+  return $items;
+}
+
 
 ?>

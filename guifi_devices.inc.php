@@ -316,8 +316,11 @@ function guifi_device_load_radios($id,&$device) {
             $i['interface_type']='wLan';
         $listi[] = $i['interface_type'];
 
-        if ($device['radios'][$radio['radiodev_counter']]['mac'] == '')
-          $device['radios'][$radio['radiodev_counter']]['mac'] = $i['mac'];
+        // if radio does not have a mac, set the mac of the first interface found
+        if (empty($device['radios'][$radio['radiodev_counter']]['mac']) or 
+           $device['radios'][$radio['radiodev_counter']]['mac'] == '00:00:00:00:00:00')
+           $device['radios'][$radio['radiodev_counter']]['mac'] = $i['mac'];
+          
         $device['radios'][$radio['radiodev_counter']]['interfaces'][$i['id']] = $i;
 
         // For schema v1: wds/p2p are vlans over radios, and wLan/Lan are bridges
@@ -432,7 +435,7 @@ function guifi_device_load_ipv4subnets($id,&$device) {
   }
 
   $sql = sprintf(
-  		"SELECT ip.ipv4 ipv4, d.id did, i.id iid, i.comments " .
+  		"SELECT ip.id, ip.interface_id, ip.ipv4 ipv4, d.id did, i.id iid, i.comments " .
   		"FROM {guifi_ipv4} ip, {guifi_interfaces} i, {guifi_devices} d " .
   		"WHERE ( " .implode(" OR ",$w). ") ".
 //  		"AND i.device_id = %d " .
@@ -743,6 +746,16 @@ function guifi_device_form($form_state, $params = array()) {
     		'used for network administration.'),
   );
 
+  if (!(empty($form_state['values']['ipv4'])))
+  $form['main']['mainipv4'] = array(
+    '#type'            => 'select',
+    '#title'           => t('Main IPv4'),
+    '#options'         => guifi_get_currentDeviceIpv4s($form_state['values']),
+    '#default_value'   => $form_state['values']['mainipv4'],
+    '#weight'          => $form_weight++,
+    '#description'     => t('Used for monitoring.<br>Save and continue to refresh available addresses'),
+  );
+  
   $form['main']['logserver'] = array(
     '#type'        => 'textfield',
     '#size'        => 60,
@@ -879,7 +892,7 @@ function guifi_device_form_validate($form,&$form_state) {
     $form_state['values']['ssid'] = $form_state['values']['nick'];
   }
 
-  // TODO Validate ip address(es)
+  // Validate ip address(es)
   // Finding duplicates
   $ips = array();
   if (!empty($form_state['values']['ipv4'])) {
@@ -903,11 +916,16 @@ function guifi_device_form_validate($form,&$form_state) {
         guifi_log(GUIFILOG_TRACE,
           'function guifi_device_form_validate(ipv4s)',$valueS[ipv4].' / '.$valueI[ipv4].' '.$valueI[did]);
         // duplicate ip?
-        if (in_array($valueI[ipv4],$ips))
+        if (in_array($valueI[ipv4],$ips)) {
+          if ($valueI['new'])
+            $field = "ipv4][$keyS][subnet][$keyI][ipv4txt";
+          else
+            $field = "ipv4][$keyS][subnet][$keyI][ipv4";                    
           form_set_error(
-            "ipv4][$keyS][subnet][$keyI][ipv4",
+            $field,
             t('address %addr is duplicated',
-            array('%addr'=>$valueI[ipv4])));                    
+            array('%addr'=>$valueI[ipv4])));
+        }                    
         $ips[] = $valueI[ipv4];
         // same subnet as related IP?
         $valueIIPCalc = _ipcalc($valueI[ipv4],$valueS[netmask]);
@@ -918,8 +936,16 @@ function guifi_device_form_validate($form,&$form_state) {
             t('address %addr1 not at same subnet as %addr2',
             array('%addr1'=>$valueI[ipv4],
               '%addr2'=>$valueS[ipv4])));                    
-                        
-            
+         
+         // remote id should be populated
+         if (empty($valueI[did]))               
+            form_set_error(
+              "ipv4][$keyS][subnet][$keyI][did",
+              t('Remote device for address %addr1 not specified',
+                array('%addr1'=>$valueI[ipv4])
+              )
+             );                    
+                     
       } // for remote IPs
           
     } // for local IPs
@@ -936,8 +962,35 @@ function guifi_device_form_validate($form,&$form_state) {
       form_set_error('ipv4',$message); 
     } */
   }
+  
+  // Validating vlans & aggregations
+  foreach (array('vlans','aggregations') as $vtype)
+    foreach ($form_state['values'][$vtype] as $kvlan=>$vlan) {
+ 
+      // interface_type (name) should have a value
+      if (empty($vlan['interface_type'])) {
+        $vlan['interface_type'] = substr($vtype,0,4).$kvlan;
+        form_set_value(array('#parents'=>array($vtype,$kvlan,'interface_type')),
+          $vlan['interface_type'],
+          $form_state);
+        $form_state['rebuild'] = TRUE;
+        drupal_set_message(t('Setting interface name to %name',
+          array('%name'=>$vlan['interface_type'])),'warning');
+      }
+            
+       
+      // parent should exists
+      if (empty($vlan['related_interfaces']))
+            form_set_error(
+              "$vtype][$kvlan][related_interfaces",
+              t('%name should have related interface(s)',
+                array('%name'=>$vlan[interface_type])
+              )
+             );                    
+      
+  } // foreach vlans, aggregations
 
-  // no duplicate names on interface names
+  // No duplicate names on interface names
   $ifs = guifi_get_currentInterfaces($form_state['values']);
   $iChecked = array();
   foreach($ifs as $k => $iname) {

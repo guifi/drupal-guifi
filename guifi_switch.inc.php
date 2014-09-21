@@ -103,8 +103,6 @@ function guifi_ports_form($edit,&$form_weight) {
       '#prefix'       => '<div id="fieldset-port-'.$port.'">',
       '#suffix'       => '</div>',
       '#tree'         => TRUE,
-//     '#collapsed'      => ($interface['deleted'])?true:false,
-//     '#collapsible'    => ($interface['deleted'])?true:false,
     );
 
     $form[$port]['etherdev_counter'] = array(
@@ -133,9 +131,11 @@ function guifi_ports_form($edit,&$form_weight) {
       '#attributes'   => array('class'=>'interface-item'),
       '#weight'       => $form_weight++,
      );
-     if ($form[$port]['interface_type']['#disabled']) {
+     if ($form[$port]['interface_type']['#disabled'] == true) {
        $form[$port]['interface_type']['#value'] = $interface['interface_type'];
        $form[$port]['interface_type']['#attributes'] = array('class'=>'interface-item-disabled');
+       if (empty($interface['deleted'])) 
+         $form[$port]['iname'] = array('#tree'=>true,'#type'=>'hidden','#value'=>$interface['interface_type']);
      }
 
      guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(type)',$interface);
@@ -474,7 +474,7 @@ function guifi_vinterface_save($iid,$did,$nid,&$to_mail) {
 function guifi_vinterfaces_form($iClass, $edit, &$form_weight) {
   global $user;
 
-  guifi_log(GUIFILOG_TRACE,'function guifi_vinterfaces_form(iClass)',$iClass);
+  guifi_log(GUIFILOG_TRACE,'function guifi_vinterfaces_form(iClass)',$edit[$iClass]);
 
   switch($edit[type]) {
   	case 'switch':
@@ -497,13 +497,13 @@ function guifi_vinterfaces_form($iClass, $edit, &$form_weight) {
   	  $icon = '/icons/aggr-16.png';
   	  $iconNew = '/icons/aggr-new.png';
   	  $msg  = t('Aggregations (bridges, bondings...) section');
-	  $ititle = t('Aggregations');
+	    $ititle = t('Aggregations');
   	  break;
   	case 'vlans':
   	  $icon = '/icons/vlans-16.png';
   	  $iconNew = '/icons/vlans-new.png';
   	  $msg  = t('Virtual Interfaces (vlans, wds, virtual APs, vrrp...) section');
-	  $ititle = t('Virtual Interfaces');
+	    $ititle = t('Virtual Interfaces');
   	  break;
   	default:
   	  $icon = '/icons/ports-16.png';
@@ -520,7 +520,9 @@ function guifi_vinterfaces_form($iClass, $edit, &$form_weight) {
     '#collapsed'   => TRUE,
     '#weight'      => $form_weight++,
     '#prefix'      =>
-      '<br><img src="/'.drupal_get_path('module', 'guifi').$icon.'"> '.$msg,
+      '<br><img src="/'.drupal_get_path('module', 'guifi').$icon.'"> '.$msg.
+      '<div id="add-'.$iClass.'">',
+    '#suffix'      => '</div>',
   );
 
   if (empty($edit[$iClass])) {
@@ -539,19 +541,19 @@ function guifi_vinterfaces_form($iClass, $edit, &$form_weight) {
   $first_vif = true;
 
   // placeholder for the add interface form
-  $form['vifs'] = array(
+  /* $form['vifs'] = array(
     '#parents'   => array('vifs'),
     '#type'      => 'fieldset',
     '#prefix'    => '<div id="add-'.$iClass.'">',
     '#suffix'    => '</div>',
     '#weight'    => $form_weight++,
-  );
+  ); */
 
   guifi_log(GUIFILOG_TRACE,'function guifi_vinterfaces_form(edit)',$edit[$iClass]);
 
   foreach ($edit[$iClass] as $vifId => $vif) {
-    guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(vint LOOP)',$vifId);
-    $form[vifs][$vifId] =
+    guifi_log(GUIFILOG_TRACE,'function guifi_vinterfaces_form(vint LOOP)',$vifId);
+    $form[$vifId] =
       guifi_vinterface_form($iClass, $vif, $first_vif,guifi_get_currentInterfaces($edit));
     $first_vif = false;
   }
@@ -581,24 +583,6 @@ function guifi_vinterfaces_form($iClass, $edit, &$form_weight) {
   return $form;
 }
 
-function guifi_get_currentInterfaces($device) {
-  guifi_log(GUIFILOG_TRACE,'function guifi_vinterface_form (iClass)',$iClass);
-  $interfaces = array();
-
-  foreach ($device[radios] as $k => $radio) {
-    $interfaces[$device[id].','.$k] = 'wlan'.$k.' - '.$radio[ssid];
-  }
-  foreach (array('ports','interfaces','vlans','aggregations','tunnels') as $iClass)
-    if (!empty($device[$iClass]))
-    foreach ($device[$iClass] as $k => $interface) {
-      if (empty($interface[interface_type]))
-        continue;
-      $interfaces[$k] = $interface[interface_type];
-    }
-
-  return $interfaces;
-}
-
 function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInterfaces) {
   global $user;
 
@@ -615,13 +599,16 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
 
   guifi_log(GUIFILOG_TRACE,'function guifi_vinterface_form (iClass)',$iClass);
 
-  guifi_log(GUIFILOG_TRACE,'function guifi_vinterface_form (vinterface)',$vinterface);
-
   if (empty($vinterface[interface_type]))
-    $vinterface[interface_type] = substr($iType,0,4).($vinterface[id]);
+    if (isset($vinterface[iname]))
+      $vinterface[interface_type] = $vinterface[iname];
+    else 
+      $vinterface[interface_type] = substr($iType,0,4).($vinterface[id]);
 
   $prefix = ''; $suffix = '';
+  guifi_log(GUIFILOG_TRACE,'function guifi_vinterface_form (vinterface)',$vinterface);
 
+ 
 /*  if ($vinterface['deleted']) {
     $form['deleted'] = array(
       '#type'         => 'hidden',
@@ -669,25 +656,29 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
    if ($form['interface_type']['#disabled']) {
      $form['interface_type']['#value'] = $vinterface[interface_type];
      $form['interface_type']['#attributes'] = array('class'=>'interface-item-disabled');
+     if (empty($vinterface['deleted'])) 
+       $form['iname'] = 
+         array('#type'=>'hidden','#value'=>$vinterface['interface_type']);
    }
 
    guifi_log(GUIFILOG_TRACE,'function guifi_vinterface_form(type)',$vinterface);
 
+ // $eInterfaces = array_merge(array(''=>t('not defined')),$eInterfaces);
   $form['related_interfaces'] = array(
     '#type' => 'select',
-    '#title'        => ($first_port) ? t('parent interface') : false,
+    '#title'        => ($first_port) ? t('parent') : false,
     '#options'      => array_diff($eInterfaces,array($vinterface[interface_type])),
     '#default_value'=> $vinterface['related_interfaces'],
     '#disabled'     => ($vinterface['deleted']) ? TRUE : FALSE,
     '#attributes'   => array('class'=>'interface-item'),
-  );
+  );  
   if ($iType == 'aggregation') {
   // if ($iClass == 'vlans') {
     $form['related_interfaces']['#size'] = 4;
     $form['related_interfaces']['#multiple'] = true;
     $form['related_interfaces']['#title'] = ($first_port) ?
-      t('parent interfaces') : false;
-  }
+      t('parents') : false;
+  } 
 
   if (!$vinterface[deleted])
   $form['vlan'] = array(
@@ -721,7 +712,7 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
     $form['mac'] = array(
       '#type'            => 'textfield',
       '#title'           => ($first_port) ? t('mac') : false,
-      '#required'        => TRUE,
+     // '#required'        => TRUE,
       '#size'            => 20,
       '#maxlength'       => 17,
       '#default_value'   => $vinterface['mac'],
@@ -769,6 +760,7 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
         '#type'       => 'hidden',
         '#value'      => $vinterface['new'],
       );
+//      $form['interface_type']['#value'] = $vinterface['interface_type'];
   return $form;
 }
 
