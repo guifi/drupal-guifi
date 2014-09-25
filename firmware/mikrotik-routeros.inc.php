@@ -7,6 +7,9 @@ function unsolclic_routeros($dev) {
   $ospf_name = 'backbone';
   //
 
+  $ipd = guifi_main_ip($dev->id);
+  $ospf_routerid = $ipd['ipv4'];
+
   $defined_ips = array();
 
   function bgp_peer($id, $ipv4, $disabled) {
@@ -281,7 +284,7 @@ function unsolclic_routeros($dev) {
     if (isset($radio['interfaces'])) foreach ($radio['interfaces'] as $interface_id => $interface) {
        _outln(':delay 1');
        _outln_comment('Type: '.$interface['interface_type']);
-       if ($interface['interface_type'] == 'wds/p2p') {
+       if (($interface['interface_class'] == 'wds/p2p') || ($interface['interface_type'] == 'wds/p2p')) {
          _outln_comment(t('Remove all existing wds interfaces'));
          _outln(sprintf(':foreach i in [/interface wireless wds find master-interface=wlan%s] \ ',$radio_id+1));
          _outln('do={:foreach n in [/interface wireless wds get $i name] \ ');
