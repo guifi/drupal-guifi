@@ -968,7 +968,7 @@ function guifi_device_form_validate($form,&$form_state) {
     foreach ($form_state['values'][$vtype] as $kvlan=>$vlan) {
  
       // interface_type (name) should have a value
-      if (empty($vlan['interface_type'])) {
+      if (empty($vlan['interface_type']) and !form_get_errors()) {
         $vlan['interface_type'] = substr($vtype,0,4).$kvlan;
         form_set_value(array('#parents'=>array($vtype,$kvlan,'interface_type')),
           $vlan['interface_type'],

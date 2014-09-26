@@ -910,6 +910,8 @@ function guifi_get_currentDeviceIpv4s($device) {
     return $ips;
     
   foreach ($device['ipv4'] as $k=>$ip) {
+    if (empty($ip[netmask]))
+      continue;
     $ipc = _ipcalc($ip ['ipv4'],$ip['netmask']);
     $interfaces = guifi_get_currentInterfaces($device);
     if (array_key_exists($ip['interface_id'],$interfaces))
