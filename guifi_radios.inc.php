@@ -1393,7 +1393,7 @@ function guifi_radio_add_wds_confirm_submit(&$form,&$form_state) {
         "SELECT id " .
         "FROM {guifi_interfaces} " .
         "WHERE device_id = %d " .
-        "   AND interface_type = 'wds/p2p' OR interface_class = 'wds/p2p' " .
+        "   AND (interface_type = 'wds/p2p' OR interface_class = 'wds/p2p') " .
         "   AND radiodev_counter = %d",
         $newLink['device_id'],$newLink['interface']['radiodev_counter']));
 
