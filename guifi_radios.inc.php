@@ -878,10 +878,11 @@ function _guifi_radio_add_wlan($radio, $nid, $edit = NULL) {
 
 function _guifi_radio_add_wdsiface($radio, $nid, $edit = NULL) {
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_radio_add_wdsiface(%d)',$radio));
+  
   $interface = array();
   $interface['new'] = TRUE;
   $interface['unfold'] = TRUE;
-  $interface['interface_class'] = 'wds/p2p';
+  $interface['interface_type'] = 'wds/p2p';
 
   return $interface;
 }
@@ -906,9 +907,9 @@ function guifi_radio_add_wlan_submit($form, &$form_state) {
 function guifi_radio_add_wdsiface_submit($form, &$form_state) {
   $radio = $form_state['clicked_button']['#parents'][1];
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_radio_add_wds(%d)',$radio),$form['ipv4']);
+
   $interface = _guifi_radio_add_wdsiface($radio, $form_state['values']['nid'], $form_state['values']);
-  $interface['interface_type'] = 'wds'.$form_state['values']['radios'][$radio]['ssid'].'-'.rand(1, 9);
-  $interface['related_interfaces'] = $form_state['values']['radios'][$radio]['id'].','.$form_state['values']['radios'][$radio]['radiodev_counter'];
+
   $form_state['values']['radios'][$radio]['unfold'] = TRUE;
   $form_state['values']['radios'][$radio]['interfaces'][]=$interface;
   $form_state['rebuild'] = TRUE;
@@ -1512,6 +1513,8 @@ function _guifi_radio_add_wds_get_new_interface($nid, $ips_allocated = array()) 
   $dnet = ip2long($net);
   $ip1 = long2ip($dnet + 1);
   $ip2 = long2ip($dnet + 2);
+
+  $newlk['interface']['interface_type'] = 'wds/p2p';
 
   // remote ipv4
   $newlk['interface']['ipv4'] = array();

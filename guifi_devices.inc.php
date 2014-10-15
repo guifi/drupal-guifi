@@ -149,7 +149,7 @@ function guifi_device_load($id,$ret = 'array') {
         SELECT l2.*
         FROM {guifi_links} l1
         LEFT JOIN {guifi_links} l2 ON l1.id=l2.id
-        WHERE l1.link_type NOT IN ("ap/client","wds")
+        WHERE l1.link_type NOT IN ("ap/client","wds/p2p")
         AND l1.device_id=%d
         AND l1.interface_id=%d
         AND l1.ipv4_id=%d
@@ -331,7 +331,7 @@ function guifi_device_load_radios($id,&$device) {
           case 'wds/p2p':
             $i[interface_class] = 'wds/p2p';
             $i[related_interfaces] = $radio[id].','.$radio[radiodev_counter];
-            $i[interface_type] = 'wds'.$radio['ssid'].'-'.rand(1, 0);
+            $i[interface_type] = 'wds'.$radio['ssid'];
             $device[vlans][$i[id]]=$i;
             break;
           case 'wLan/Lan':
