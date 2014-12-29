@@ -2243,9 +2243,8 @@ function guifi_device_print($device = NULL) {
     $output .= theme('box', $title, $table);
     if (arg(4) == 'data') break;
   case 'comment':
-    if (empty($device['comment']))
-      break;
-    $output .= theme('box', t('Comments'), $device['comment']);
+    if (!empty($device['comment']))
+      $output .= theme('box', t('Comments'), $device['comment']);
     if (arg(4) == 'comment') break;
   case 'graphs':
     if (empty($device['interfaces']))
