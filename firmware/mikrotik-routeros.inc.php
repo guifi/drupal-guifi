@@ -429,10 +429,6 @@ function unsolclic_routeros($dev) {
     // Setting gateway
      _outln(sprintf('/ip route add gateway=%s',$link['interface']['ipv4']['ipv4']));
 
-    // Setting proxy-arp
-    _outln('/interface ethernet set ether1 arp=proxy-arp');
-    _outln('/ip address');
-
     // Setting private network and DHCP
     _outln(':foreach i in [find address="192.168.1.1/24"] do={remove $i}');
     _outln('/ip address add address=192.168.1.1/24 network=192.168.1.0 broadcast=192.168.1.255 interface=ether1 comment="" disabled=no');
