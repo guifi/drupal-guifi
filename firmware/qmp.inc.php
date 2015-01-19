@@ -1,7 +1,7 @@
 <?php
 
 function unsolclic_qmp($dev) {
-  $version = "v1.0.2";
+  $version = "v1.0.3";
 
 //  sed 's/<br \/>//g'
 
@@ -55,6 +55,8 @@ function unsolclic_qmp($dev) {
 
   if ($mesh == 'yes') {
     _outln("nodename='".$node->nick."'"); // This is the node name
+    _outln("latitude='".$node->lat."'");
+    _outln("longitude='".$node->lon."'");
     _outln("devname='".$dev->nick."'");   // This is the device name with mesh radio
     _outln("devmodel='".$dev->model."'");
     _outln("ipv4='".$ipv4."'");
