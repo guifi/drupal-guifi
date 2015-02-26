@@ -775,8 +775,7 @@ function guifi_device_form($form_state, $params = array()) {
     '#description' => t("If not specified, inherits zone properties."),
   );
 
-  if (!(user_access('administer guifi zones')
-       and $form_state['values']['type'] == 'radio')) {
+  if ((!user_access('administer guifi zones') || $device['user_created'] == $user->uid) and $form_state['values']['type'] == 'radio') {
     $form['main']['graph_server']['#disabled'] = true;
     $form['main']['graph_server']['#description'] .= '<br>'.t('To change the value, you are required for maintainer privilege.');
   }
