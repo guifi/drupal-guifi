@@ -530,8 +530,9 @@ function guifi_device_admin_url($d,$ip) {
  */
 function guifi_device_form_submit($form, &$form_state) {
 
-  guifi_log(GUIFILOG_TRACE,'function guifi_device_form_submit()',
-    $form_state['values']);
+  guifi_log(GUIFILOG_BASIC,'function guifi_device_form_submit()',
+    // $form_state['values']);
+    $form_state['clicked_button']['#value']);
 
   if ($form_state['values']['id'])
     if (!guifi_device_access('update',$form_state['values']['id']))
@@ -550,6 +551,7 @@ function guifi_device_form_submit($form, &$form_state) {
     drupal_goto('guifi/device/'.$form_state['values']['id'].'/edit');
     break;
   case t('Save & continue edit'):
+  case t('Add IPv4, Save & continue edit'):
   case t('Save & exit'):
     // save
 //    print_r($_POST);
@@ -579,6 +581,10 @@ function guifi_device_form($form_state, $params = array()) {
 
   $form=array();
 
+  //$form['#suffix'] = '<script type="text/javascript">'
+  //               . 'jQuery(\'input#edit-funders-0-user\').focus();'
+  //               . '</script>';
+
   guifi_log(GUIFILOG_TRACE,'function guifi_device_form()',$params);
 
   // Local javascript validations not actve because of bug in Firefox
@@ -590,6 +596,8 @@ function guifi_device_form($form_state, $params = array()) {
     $form_state['values'] = $params;
 
   $form_state['#redirect'] = FALSE;
+
+
 
   // if new device, initializing variables
   if (($form_state['values']['nid'] == NULL) && ($params['add'] != NULL)) {
@@ -764,6 +772,8 @@ function guifi_device_form($form_state, $params = array()) {
     '#default_value'    => $form_state['values']['logserver'],
     '#weight'      => $form_weight++,
     '#description' =>  t('If you have a log server for mikrotik (dude), add your ip.'),
+    //'#default_value' => 'Status Message',
+    //'#attributes' => array( 'onblur' => "if (this.value == '') {this.value = 'Status Message'}", 'onfocus' => "if (this.value == 'Status Message') {this.value = ''}", )  
   );
   $form['main']['graph_server'] = array(
     '#type' => 'select',
@@ -815,6 +825,9 @@ function guifi_device_form($form_state, $params = array()) {
   // Cable interfaces/ports
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans if ports)'),$form_weight);
   if (isset($form_state['values']['interfaces'])) {
+    foreach ($form_state['values']['interfaces'] as $k => $v)
+      unset($form_state['values']['interfaces'][$k]['ipv4']);
+    guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans if ports)'),$form_state['values']['interfaces']);     
     $form['interfaces'] = guifi_ports_form($form_state['values'],$form_weight);
     $form['interfaces']['#weight'] = $form_weight++;
   }
@@ -1016,7 +1029,7 @@ function guifi_device_form_validate($form,&$form_state) {
 }
 
 
-/* guifi_device_edit_save(): Save changes/insert devices */
+/* guifi_device_save(): Save changes/insert devices */
 function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
   global $user;
   global $bridge;
@@ -1165,7 +1178,7 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
       if ($interface['interface_type'] == 'wLan/Lan')
         $interface['radiodev_counter'] = 0;
 
-      $log .= guifi_device_interface_save($interface,$interface_id,$edit['id'],$ndevice['nid'],$to_mail);
+     $log .= guifi_device_interface_save($interface,$interface_id,$edit['id'],$ndevice['nid'],$to_mail);
 
     } // foreach interface
     $rc++;
@@ -1176,6 +1189,7 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
 
     // Set etherdev_counter (sort the interfaces by it)
     uasort($edit['interfaces'],'guifi_interfaces_cmp');
+    guifi_log(GUIFILOG_TRACE,'Saving interfaces, interface:',$edit['interfaces']);
     $m = guifi_get_model_specs($edit['variable']['model_id']);
     $iCount = 0;
 
@@ -1187,7 +1201,9 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
         $interface[interface_type] = $m->ethernames[$iCount];
       $interface[interface_class] = 'ethernet';
       $iCount++;
-      $log .= guifi_device_interface_save($interface,$iid,$edit['id'],$ndevice['nid'],$to_mail);
+      guifi_log(GUIFILOG_TRACE,sprintf('iid: %d, edit[nid]: %d, ndevice[id]: %d, interface:',$iid,$edit['nid'],$ndevice['nid'],$ndevice['nid']),$interface);
+      if ($iid!='ifs')
+        $log .= guifi_device_interface_save($interface,$iid,$edit['id'],$ndevice['nid'],$to_mail);
     }
   }
 
@@ -1204,15 +1220,15 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
   }
 
   // ipv4s
- /*  if (!empty($edit[ipv4])) {
-    guifi_log(GUIFILOG_BASIC,'guifi_device_save (ipv4s)',$edit['ipv4']);
+  if (!empty($edit[ipv4])) {
+    guifi_log(GUIFILOG_TRACE,'guifi_device_save (ipv4s)',$edit['ipv4']);
     foreach ($edit[ipv4] as $k => $ipv4) {
-      guifi_log(GUIFILOG_BASIC,'guifi_device_save (ipv4)',$ipv4);
-      _guifi_db_sql('guifi_ipv4',
-        array('id' => $ipv4[id],'interface_id' => $ipv4['interface_id']),
-        $ipv4,$log,$to_mail);
+      guifi_log(GUIFILOG_TRACE,'guifi_device_save (ipv4)',$ipv4);
+      //_guifi_db_sql('guifi_ipv4',
+      //  array('id' => $ipv4[id],'interface_id' => $ipv4['interface_id']),
+      //  $ipv4,$log,$to_mail);
     }
-  } */
+  } 
 
   $to_mail = explode(',',$edit['notification']);
 
@@ -1250,10 +1266,10 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
   $old_rdid = $interface['connto_did'];
   $old_riid = $interface['connto_iid'];
 
-  guifi_log(GUIFILOG_TRACE,sprintf('guifi_device_edit_interface_save ID=%s (ids=%d-%d)',$iid,$old_rdid,$old_riid),$interface);
+  guifi_log(GUIFILOG_TRACE,sprintf('guifi_device_interface_save ID=%s (ids=%d-%d)',$iid,$old_rdid,$old_riid),$interface);
 
   if ((($new_rdid != $old_rdid) or ($new_riid != $old_riid)) and ($iid != 'ifs')) {
-    // guifi_log(GUIFILOG_BASIC,sprintf('guifi_device_edit_interface_save (id=%d)',$iid),$interface);
+    guifi_log(GUIFILOG_TRACE,sprintf('guifi_device_interface_save (id=%d)',$iid),$interface);
     $connection_changed = true;
     $interface['connto_did'] = (string)$new_rdid;
     $interface['connto_iid'] = (string)$new_riid;
@@ -1272,7 +1288,7 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
   guifi_log(GUIFILOG_TRACE,'SQL interface',$ninterface);
 
   if ($connection_changed) {
-    guifi_log(GUIFILOG_TRACE,'connection_changed',$ninterface);
+    guifi_log(GUIFILOG_TRACE  ,'connection_changed',$ninterface);
 
       // if was not new, clear remote interface
       if (($old_rdid) and ($old_riid)) {
@@ -1334,6 +1350,8 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
       if (empty($nllink) or ($llink['deleted']))
         continue;
 
+      /**
+       * **/
       // links (remote)
       if ($link['interface']) {
         if (!isset($link['interface']['device_id']))
@@ -1380,6 +1398,7 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
           $link,$log,$to_mail);
         guifi_log(GUIFILOG_TRACE,'going to SQL for remote link',$nllink);
       }
+      
     }
   } // foreach ipv4
 
@@ -1503,6 +1522,37 @@ function guifi_device_add() {
                                                     'type' => arg(4)));
   // To gain space, save bandwith and CPU, omit blocks
   print theme('page', $output, FALSE);
+}
+
+function guifi_device_add_ipv4s_submit($form, &$form_state) {
+  global $user;
+  
+  $ipv4sdialog = $form_state['values']['ipv4']['ipv4sdialog'];
+  guifi_log(GUIFILOG_BASIC,'function guifi_device_add_ipv4s_submit:',$form_state['values']['ipv4']['ipv4sdialog']);
+  
+  if (($ipv4sdialog['ipv4'] == 'false') and ($ipv4sdialog['snet'] != 'false')) {
+    $snet = explode('|',$ipv4sdialog['snet']);
+    $ipv4sdialog['ipv4']      = $snet[0];
+    $ipv4sdialog['netmask']   = $snet[1];
+    $ipv4sdialog['ipv4_type'] = $snet[2];
+    guifi_log(GUIFILOG_BASIC,'function guifi_device_add_ipv4s_submit SNET:',$snet);
+    
+  }
+    
+  $ipv4 = array(
+    'new'          => true,
+    'id'           =>null,
+    'interface_id' =>$ipv4sdialog['iid'],
+    'ipv4'         =>$ipv4sdialog['ipv4'],
+    'netmask'      =>$ipv4sdialog['netmask'],
+    'ipv4_type'    =>$ipv4sdialog['ipv4_type'],
+  );
+  guifi_log(GUIFILOG_BASIC,'function guifi_device_add_ipv4s_submit SAVE:',$ipv4);
+    
+  _guifi_db_sql('guifi_ipv4',
+    array('id'=>$ipv4['id'],'interface_id'=>$ipv4['interface_id']),$ipv4);
+  
+  // $form_state['rebuild'] = TRUE;
 }
 
 /* guifi_device_create_form(): generates html output form with a listbox,

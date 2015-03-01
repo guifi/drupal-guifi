@@ -1937,6 +1937,9 @@ function guifi_quantity_validate($quantity,&$form_state) {
   return $quantity;
 }
 
+/** function guifi_mac_validate($mac,&$form_state)
+ * 
+ * */
 function guifi_mac_validate($mac,&$form_state) {
   if ($form_state['clicked_button']['#value'] == t('Reset'))
     return;
@@ -1946,8 +1949,11 @@ function guifi_mac_validate($mac,&$form_state) {
   guifi_log(GUIFILOG_TRACE,'guifi_mac_validate',$m2['#parents']);  
   guifi_log(GUIFILOG_TRACE,'guifi_mac_validate',$form_state);  
       
-  // if empty, and have parents, take parent mac
-  if (empty($mac['#value']))
+  // if empty, 
+  if (empty($mac['#value'])) {
+    $pmac = null;
+
+    // ...and have parents, take parent mac
     if (in_array($mac['#parents'][0],array('vlans','aggregations'))) {
       $macs = guifi_get_currentDeviceMacs($mac['#post']);
       $related = $mac['#post'][$mac['#parents'][0]][$mac['#parents'][1]]['related_interfaces'];
@@ -1958,13 +1964,27 @@ function guifi_mac_validate($mac,&$form_state) {
         $pmac = $macs[$related[0]];
       else
         $pmac = $macs[$related];
+    }
+
+    // ... or ineterface mac, calculate from base device mac
+    if ($mac['#parents'][0]=='interfaces') {
+      $iId = $mac['#post']['interfaces'][$mac['#parents'][1]]; 
+      guifi_log(GUIFILOG_TRACE,'guifi_mac_validate interface MAC',$iId);  
+      $pmac = _guifi_mac_sum($mac['#post']['mac'],$iId['etherdev_counter']);
+    }
+
+    // if mac set, set value in form
+    if (!is_null($pmac)) {
       $mac['#value'] = $pmac;  
 
       form_set_value(array('#parents'=>$mac['#parents']),$pmac,$form_state);
       $form_state['rebuild'] = TRUE;
-      guifi_log(GUIFILOG_TRACE,'guifi_mac_validate (null NEW MAC)',$pmac);       
-    } else 
-      return;
+      guifi_log(GUIFILOG_TRACE,'guifi_mac_validate (null NEW MAC)',$pmac);             
+    }
+
+    //  if still empty, nothing to validate
+    return;
+  }
 
   $pmac = _guifi_validate_mac($mac['#value']);
   

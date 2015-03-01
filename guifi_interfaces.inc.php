@@ -372,7 +372,7 @@ function guifi_interfaces_add_cable_public_link_submit(&$form,&$form_state) {
   $to_did = $form_state['values']['interfaces'][$iid]['ipv4'][$ipv4_id]['to_did'];
   $rdevice = guifi_device_load($to_did);
 
-  guifi_log(GUIFILOG_BASIC,
+  guifi_log(GUIFILOG_TRACE,
     sprintf('function guifi_interfaces_add_cable_public_link_submit(%d)',$iid),
 //      $form_state['values']);
       $form_state['clicked_button']['#parents']);

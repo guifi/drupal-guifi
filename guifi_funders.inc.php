@@ -146,6 +146,14 @@ function guifi_funders_links($funders) {
 
 function guifi_funders_form($node,&$form_weight) {
 
+  guifi_log(GUIFILOG_TRACE, 'function guifi_funders_form(funders 1)', $node->funders);
+  foreach ($node->funders as $km => $vm)
+    if (($vm['new'] and (empty($vm['user']) and empty($vm['supplier']) and empty($vm['comment'])))) {
+      unset($node->funders[$km]);
+      guifi_log(GUIFILOG_TRACE, 'function guifi_funders_form(funders -)', $km);
+    }
+  guifi_log(GUIFILOG_TRACE, 'function guifi_funders_form(funders 2)', $node->funders);
+
   $form['funders'] = array(
     '#type'        => 'fieldset',
     '#title'       => t('Funder(s)'),
@@ -225,6 +233,10 @@ function guifi_funders_form($node,&$form_weight) {
         '#weight' => $form_weight++,
       );
     }
+
+    if ($funder_id == $nfunders)
+      $form['funders'][$funder_id]['new'] = array('#type'=>'hidden','#value'=>true);
+
     $funder_id++;
   } while ($funder_id < ($nfunders + 1));
 

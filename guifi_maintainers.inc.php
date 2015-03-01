@@ -66,7 +66,7 @@ function guifi_maintainers_validate($node) {
    */
    foreach ($node->maintainers as $k => $m) {
    	 guifi_log(GUIFILOG_TRACE,
-     'function guifi_zone_validate(m)',
+     'function guifi_maintainer_validate(m)',
      $m);
    	 if (!empty($m['maintainer'])) {
    	   $mtemp = explode('-',$m['maintainer']);
@@ -132,6 +132,11 @@ function guifi_maintainers_links($maintainers) {
 
 function guifi_maintainers_form($node,&$form_weight) {
 
+  guifi_log(GUIFILOG_TRACE, 'function guifi_maintainers_form(mantainers 1)', $node->maintainers);
+  foreach ($node->maintainers as $km => $vm)
+    if (($vm['new'] and ($vm['maintainer'])=='')) 
+      unset($node->maintainers[$km]);
+
   $form['maintainers'] = array(
     '#type'        => 'fieldset',
     '#title'       => t('Maintainer(s)'),
@@ -144,11 +149,12 @@ function guifi_maintainers_form($node,&$form_weight) {
     '#attributes'  => array('class'=>'maintainers'),
     '#weight'      => $form_weight++,
     '#tree'        => TRUE,
-  );
+  );    
+
   $maintainer_id=0;
   $nmaintainers = count($node->maintainers);
 //  guifi_log(GUIFILOG_BASIC, 'function guifi_zone_form(mantainers)', $node->maintainers[$maintainer_id]);
-  guifi_log(GUIFILOG_TRACE, 'function guifi_maintainers_form(mantainers)', $nmaintainers);
+  guifi_log(GUIFILOG_TRACE, 'function guifi_maintainers_form(mantainers 2)', $node->maintainers);
   do {
     $form['maintainers'][$maintainer_id]['maintainer'] = array (
       '#title'=>t('maintainer'),
@@ -205,6 +211,10 @@ function guifi_maintainers_form($node,&$form_weight) {
       '#suffix'     => '</div>',
       '#weight' => $form_weight++,
     );
+
+    if ($maintainer_id == $nmaintainers)
+      $form['maintainers'][$maintainer_id]['new'] = array('#type'=>'hidden','#value'=>true);
+
     $maintainer_id++;
   } while ($maintainer_id < ($nmaintainers + 1));
 

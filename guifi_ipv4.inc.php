@@ -795,9 +795,10 @@ function guifi_ipv4s_form($edit, &$form_weight) {
     
   $form['ipv4sdialog']['addipv4'] = array(
     '#type'      => 'submit',
-    '#value'     => 'create',
+    '#value'     => 'Add IPv4, Save & continue edit',
     '#prefix'    => '<div style="clear: both">',
     '#suffix'    => '</div>',
+    '#submit'    => array('guifi_device_add_ipv4s_submit','guifi_device_form_submit'),
     '#weight'    => $form_weight++,
   );
   

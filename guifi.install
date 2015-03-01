@@ -4,7 +4,6 @@
  * Install, update and uninstall functions for the guifi module.
  */
 
-
 function guifi_uninstall() {
 
   drupal_uninstall_schema('guifi');
@@ -1240,7 +1239,6 @@ function guifi_update_661() {
   return $items;
 }
 
-
 function guifi_update_664() {
   $items = array();
 
@@ -2438,7 +2436,6 @@ function guifi_update_1006() {
 
 }
 
-
 function guifi_update_1007() {
 
   $items = array();
@@ -2665,7 +2662,6 @@ function guifi_update_1036() {
 
   return $items;
 }
-
 
 function guifi_update_1037() {
   $items = array();

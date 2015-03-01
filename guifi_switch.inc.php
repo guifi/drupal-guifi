@@ -160,6 +160,7 @@ function guifi_ports_form($edit,&$form_weight) {
 
      $form[$port]['dname'] = array(
        '#type'         => 'textfield',
+       '#tree'         => TRUE,
        '#title'        => ($first_port) ? t('connects to') : false,
        '#disabled'     => true,
        '#size'         => 30,
@@ -171,26 +172,37 @@ function guifi_ports_form($edit,&$form_weight) {
           array('class'=>'interface-item-disabled'),
        '#weight'       => $form_weight++,
      );
-     if (!($interface[deleted]))
-     $form[$port]['addLink'] = array(
-       '#type' => 'image_button',
-       '#src'=> ($interface['deleted']) ?
-         drupal_get_path('module', 'guifi').'/icons/drop.png' :
-         drupal_get_path('module', 'guifi').'/icons/edit.png',
-       '#attributes' => array(
-          'title' => t('Edit dialog for connecting to another device'),
-          'class' => 'interface-item.form-button',
-        ),
-       '#ahah' => array(
-         'path' => 'guifi/js/edit_cableconn/'.$port,
-         'wrapper' => 'interface-cableconn-'.$port,
-         'method' => 'replace',
-         'effect' => 'fade',
-        ),
-        '#prefix' => ($first_port) ? '<div class="form-item"><div>&nbsp</div>':'<div class="form-item">',
-        '#suffix' => '</div>',
-        '#weight' => $form_weight++,
-     );
+     if (!($interface[deleted])) {
+       $form[$port]['addLink'] = array(
+         '#type' => 'image_button',
+         '#src'=> ($interface['deleted']) ?
+           drupal_get_path('module', 'guifi').'/icons/drop.png' :
+           drupal_get_path('module', 'guifi').'/icons/edit.png',
+         '#attributes' => array(
+            'title' => t('Edit dialog for connecting to another device'),
+            'class' => 'interface-item.form-button',
+          ),
+         '#ahah' => array(
+           'path' => 'guifi/js/edit_cableconn/'.$port,
+           'wrapper' => 'interface-cableconn-'.$port,
+           'method' => 'replace',
+           'effect' => 'fade',
+          ),
+          '#prefix' => ($first_port) ? '<div class="form-item"><div>&nbsp</div>':'<div class="form-item">',
+          '#suffix' => '</div>',
+          '#weight' => $form_weight++,
+       );
+       /* If onclick is wanted to edit, uncomment this
+       $form[$port]['dname']['#disabled'] = false;
+       $form[$port]['dname']['#ahah'] = array(
+           'event' => 'mousedown',
+           'path' => 'guifi/js/edit_cableconn/'.$port,
+           'wrapper' => 'interface-cableconn-'.$port,
+           'method' => 'replace',
+           'effect' => 'fade',
+       );
+       */
+     }
 
     $form[$port]['vlan'] = array(
       '#tree'         => TRUE,
