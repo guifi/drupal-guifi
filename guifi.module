@@ -927,6 +927,14 @@ function guifi_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_LOCAL_TASK
   );
+  $items['guifi/device/%guifi_device/view/comment'] = array(
+    'title' => 'comment',
+    'page callback' => 'guifi_device_print',
+    'page arguments' => array(2),
+    'access callback' => 'user_access',
+    'access arguments' => array('access content'),
+    'type' => MENU_LOCAL_TASK
+  );
   $items['guifi/device/%guifi_device/view/graphs'] = array(
     'title' => 'graphs',
     'page callback' => 'guifi_device_print',

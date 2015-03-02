@@ -445,8 +445,9 @@ function guifi_radio_radio_form($radio, $key, &$form_weight = -200) {
 					'#title' => t('SSID'),
 					'#parents' => array('radios',$key,'ssid'),
 					'#required' => TRUE,
-					'#size' => 30,
-					'#maxlength' => 30,
+					// ssid: gufi.net-XXXXXXXX suffix is always guifi.net-,10 characters, 32 maximum.
+					'#size' => 22,
+					'#maxlength' => 22,
 					'#default_value' => $radio["ssid"],
 					'#description' => t("SSID to identify this radio signal."),
 //                    '#prefix' => '<div class="form-newline">',

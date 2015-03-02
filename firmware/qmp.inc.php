@@ -33,19 +33,13 @@ function unsolclic_qmp($dev) {
   foreach ($dev->radios as $radio) {
     if ($radio['mode'] == 'mesh') {
       $mesh="yes";
-
-      $i=0;
-      foreach ($radio['interfaces'] as $interface) {
-        // If interface has any IP addresses we get the first one
-        if (isset($interface['ipv4'])) {
-          $ipv4 = $interface['ipv4'][0]['ipv4'];
-          $netmask = $interface['ipv4'][0]['netmask'];
-          $maskbits = $interface['ipv4'][0]['maskbits'];
-        }
-        else { $ipv4="-"; $netmask="-"; $maskbits="-"; }
-
-       }
-      break;
+      $ipd = guifi_main_ip($dev->id);
+      if ($ipd != '') {
+        $ipv4 = $ipd['ipv4'];
+        $netmask = $ipd['netmask'];
+        $maskbits = $ipd['maskbits'];
+      }
+      else { $ipv4="-"; $netmask="-"; $maskbits="-"; }
     }
   }
 

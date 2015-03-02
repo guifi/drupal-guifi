@@ -785,8 +785,7 @@ function guifi_device_form($form_state, $params = array()) {
     '#description' => t("If not specified, inherits zone properties."),
   );
 
-  if (!(user_access('administer guifi zones')
-       and $form_state['values']['type'] == 'radio')) {
+  if ((!user_access('administer guifi zones') || $device['user_created'] == $user->uid) and $form_state['values']['type'] == 'radio') {
     $form['main']['graph_server']['#disabled'] = true;
     $form['main']['graph_server']['#description'] .= '<br>'.t('To change the value, you are required for maintainer privilege.');
   }
@@ -2292,6 +2291,10 @@ function guifi_device_print($device = NULL) {
     $table = theme_table(null, guifi_device_print_data($device),array('class'=>'device-data'));
     $output .= theme('box', $title, $table);
     if (arg(4) == 'data') break;
+  case 'comment':
+    if (!empty($device['comment']))
+      $output .= theme('box', t('Comments'), $device['comment']);
+    if (arg(4) == 'comment') break;
   case 'graphs':
     if (empty($device['interfaces']))
       break;
