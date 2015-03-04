@@ -505,7 +505,7 @@ function guifi_devel_devices_form($form_state, $devid) {
 
   $form['firmware'] = array(
     '#type'        => 'fieldset',
-    '#access'      => in_array('wireless' OR 'router',$dev->arr_model_class),
+    '#access'      => in_array('wireless' ,$dev->arr_model_class) || in_array('router',$dev->arr_model_class),
     '#title'       => t('Firmware'),
     '#attributes'  => array('class'=>"model-item"),
     '#collapsible' => TRUE,
@@ -514,7 +514,7 @@ function guifi_devel_devices_form($form_state, $devid) {
   );
   $form['firmware']['supported'] = array(
     '#type' => 'select',
-    '#access'      => in_array('wireless' OR 'router',$dev->arr_model_class),
+    '#access'      => in_array('wireless' ,$dev->arr_model_class) || in_array('router',$dev->arr_model_class),
     '#title' => t('Supported'),
     '#required' => TRUE,
     '#options' => array('Yes' => t('Yes'), 'Deprecated' => t("Deprecated")),
@@ -543,7 +543,7 @@ function guifi_devel_devices_form($form_state, $devid) {
 
   $form['firmware']['firmwaresCompatibles'] = array(
       '#type' => 'select',
-      '#access'      => in_array('wireless' OR 'router',$dev->arr_model_class),
+      '#access'      => in_array('wireless' ,$dev->arr_model_class) || in_array('router',$dev->arr_model_class),
       '#title' => t('firmwares compatibles'),
       '#default_value' => 0,
       '#options' => $firms_compatibles,
@@ -569,7 +569,7 @@ function guifi_devel_devices_form($form_state, $devid) {
 
   $form['firmware']['firmwaresTots'] = array(
         '#type' => 'select',
-        '#access'      => in_array('wireless' OR 'router',$dev->arr_model_class),
+        '#access'      => in_array('wireless' ,$dev->arr_model_class) || in_array('router',$dev->arr_model_class),
         '#title' => t('Tots els firmwares'),
         '#default_value' => 0,
         '#options' => $firms_tots,

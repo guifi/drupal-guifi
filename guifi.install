@@ -231,7 +231,7 @@ function guifi_schema() {
          'text' => array('type' => 'varchar', 'length' => '24', 'not null' => TRUE),
          'description' => array('type' => 'text', 'size' => 'big', 'not null' => TRUE),
          'relations' => array('type' => 'text', 'size' => 'big', 'not null' => FALSE)),
-    'primary key' => array('type', 'id'),
+    'primary key' => array('id'),
     'indexes' => array(
          'text' => array('text')),
   );
@@ -402,7 +402,7 @@ function guifi_schema() {
       'user_changed' => array('type' => 'int', 'not null' => TRUE),
       'timestamp_created' => array('type' => 'int', 'not null' => TRUE),
       'timestamp_changed' => array('type' => 'int', 'not null' => TRUE)),
-    'primary key' => array(`id`),
+    'primary key' => array('id'),
    );
 
   return $schema;
@@ -2674,5 +2674,13 @@ function guifi_update_1037() {
   return $items;
 }
 
+function guifi_update_1038() {
+  $items = array();
+
+  $items[] = update_sql("DELETE FROM {guifi_types} WHERE 'id' = 3 AND 'type' = 'vlan'");
+  $items[] = update_sql("UPDATE {guifi_types} SET 'id' = '3' WHERE 'id' =4 AND 'type' = 'vlan'");
+
+  return $items;
+}
 
 ?>

@@ -332,7 +332,7 @@ function guifi_device_load_radios($id,&$device) {
             $i[interface_class] = 'wds/p2p';
             $i[related_interfaces] = $radio[id].','.$radio[radiodev_counter];
             $i[interface_type] = 'wds'.$radio['ssid'];
-            $device[vlans][$i[id]]=$i;
+//            $device[vlans][$i[id]]=$i;
             break;
           case 'wLan/Lan':
             $i[interface_class] = 'bridge';
