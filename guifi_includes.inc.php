@@ -95,32 +95,41 @@ function guifi_main_interface($mode = NULL) {
 }
 
 function guifi_main_ip($device_id) {
-  $qips = db_query('SELECT a.ipv4,a.netmask,a.id, i.interface_type
-      FROM {guifi_interfaces} i LEFT JOIN {guifi_ipv4} a ON a.interface_id=i.id
-      WHERE i.device_id=%d ORDER BY a.id',$device_id);
-  $ip_array=array();
-  while ($ip = db_fetch_object($qips)) {
-    if ($ip->ipv4 != NULL) {
-      $item = _ipcalc($ip->ipv4,$ip->netmask);
-      $ipv4arr = array('ipv4' => $ip->ipv4,'maskbits' => $item['maskbits'], 'netmask' => $ip->netmask);
-      switch ($ip->interface_type) {
-      case 'wLan/Lan':
-        $ip_array[0+$ip->id]=$ipv4arr; break;
-      case 'Lan':
-        $ip_array[100]=$ipv4arr; break;
-      case 'Wan':
-        $ip_array[200]=$ipv4arr; break;
-      case 'wLan':
-        if (!isset($ip_array[3])) $ip_array[300]=$ipv4arr; break;
-      case 'wds/p2p':
-        if (!isset($ip_array[4])) $ip_array[400]=$ipv4arr; break;
-
+  $qryipv4 = db_fetch_object(db_query('SELECT mainipv4 from {guifi_devices} where id = %d',$device_id));
+  if ($qryipv4->mainipv4) {
+   $devmainipv4 = explode(',',$qryipv4->mainipv4);
+   $ipv4 = db_fetch_object(db_query('SELECT ipv4, netmask from {guifi_ipv4} where id = %d AND interface_id = %d',$devmainipv4['1'], $devmainipv4['0']));
+   $item = _ipcalc($ipv4->ipv4,$ipv4->netmask);
+   $ipv4arr = array('ipv4' => $ipv4->ipv4,'maskbits' => $item['maskbits'], 'netmask' => $ip->netmask);
+   return $ipv4arr;
+  }
+  else {
+    $qips = db_query('SELECT a.ipv4,a.netmask,a.id, i.interface_type
+        FROM {guifi_interfaces} i LEFT JOIN {guifi_ipv4} a ON a.interface_id=i.id
+        WHERE i.device_id=%d ORDER BY a.id',$device_id);
+    $ip_array=array();
+    while ($ip = db_fetch_object($qips)) {
+      if ($ip->ipv4 != NULL) {
+        $item = _ipcalc($ip->ipv4,$ip->netmask);
+        $ipv4arr = array('ipv4' => $ip->ipv4,'maskbits' => $item['maskbits'], 'netmask' => $ip->netmask);
+        switch ($ip->interface_type) {
+        case 'wLan/Lan':
+          $ip_array[0+$ip->id]=$ipv4arr; break;
+        case 'Lan':
+          $ip_array[100]=$ipv4arr; break;
+        case 'Wan':
+          $ip_array[200]=$ipv4arr; break;
+        case 'wLan':
+          if (!isset($ip_array[3])) $ip_array[300]=$ipv4arr; break;
+        case 'wds/p2p':
+          if (!isset($ip_array[4])) $ip_array[400]=$ipv4arr; break;
+        }
       }
     }
+    ksort($ip_array);
+    reset($ip_array);
+    return current($ip_array);
   }
-  ksort($ip_array);
-  reset($ip_array);
-  return current($ip_array);
 }
 
 function guifi_types($type,$start = 24,$end = 0,$relations = NULL) {
