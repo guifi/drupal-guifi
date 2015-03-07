@@ -573,11 +573,26 @@ function guifi_ipv4i_form($ipv4, $k, $first_port = true, $eInterfaces) {
     '#default_value' => $ipv4['netmask'],
     '#options' => guifi_types('netmask',30,0),
   );
+
+  $iid_eInterfaces = array();
+  foreach ($eInterfaces as $key => $iface) {
+    if (strpos($key,',')) {
+      $value = explode(",", $key);
+      $radio_iid = db_fetch_array(db_query("SELECT * FROM {guifi_interfaces} WHERE device_id = %d AND radiodev_counter = %d",$value['0'],$value['1']));
+      $iid = $radio_iid['id'];
+      if ( $radio_iid['interface_type'] === 'wds/p2p')
+        $iface = 'WDS-'.$iface;
+      $iid_eInterfaces[$iid] = $iface;
+    } else {
+      $iid_eInterfaces[$key] = $iface;
+    }
+  }
+
   $form['id'] = array('#type'=>'hidden','#value'=>$ipv4['id']);
   $form['interface_id'] = array(
     '#type' => 'select',
     '#title'        => ($first_port) ? t('interface') : false,
-    '#options'      => $eInterfaces,
+    '#options'      => $iid_eInterfaces,
     '#default_value'=> $ipv4['interface_id'],
   );
   

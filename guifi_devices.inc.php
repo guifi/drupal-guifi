@@ -65,15 +65,16 @@ function guifi_device_load($id,$ret = 'array') {
     SELECT *
     FROM {guifi_interfaces}
     WHERE device_id=%d
-
-      /* schema v1 */
-      AND (
-        (interface_class is NULL AND (/* radiodev_counter is NULL
-        OR */ interface_type NOT IN ("wLan","wds/p2p","Wan","Hotspot")))
-
-      /* schema v2 */
-      OR (interface_class = "ethernet"
-        ))
+    AND ( /* schema v1 */
+        (interface_class is NULL AND ( interface_type NOT IN ("wLan","wds/p2p","Wan","Hotspot")))
+        /* schema v2 */
+        OR (interface_class = "ethernet")
+        /* TODO HACK!!
+            Permetem temporalment fer enllaços per cable a interficies bridge 
+            OJO! afecta al comptador de ports quan es crea el switch dins un trasto, s\'ha de corregir.
+        */
+        OR (interface_class = "bridge")
+      )
     ORDER BY etherdev_counter, id',
     $id);
 
@@ -114,7 +115,6 @@ function guifi_device_load($id,$ret = 'array') {
           }
         }
       }
-      continue;
     }
   
 
@@ -846,7 +846,6 @@ function guifi_device_form($form_state, $params = array()) {
   $form['ipv4'] = guifi_ipv4s_form($form_state['values'],$form_weight);
   $form['ipv4']['#weight'] = $form_weight++;
 
-
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans comments)'),$form_weight);
 
   // Comments
@@ -1217,15 +1216,20 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
       $log .= guifi_device_interface_save($interface,$iid,$edit['id'],$ndevice['nid'],$to_mail);
     }
   }
-
   // ipv4s
   if (!empty($edit[ipv4])) {
     guifi_log(GUIFILOG_TRACE,'guifi_device_save (ipv4s)',$edit['ipv4']);
-    foreach ($edit[ipv4] as $k => $ipv4) {
-      guifi_log(GUIFILOG_TRACE,'guifi_device_save (ipv4)',$ipv4);
-      //_guifi_db_sql('guifi_ipv4',
-      //  array('id' => $ipv4[id],'interface_id' => $ipv4['interface_id']),
-      //  $ipv4,$log,$to_mail);
+    foreach ($edit['ipv4'] as $k => $ipv4) {
+      if (is_numeric($k)) {
+        guifi_log(GUIFILOG_TRACE,'guifi_device_save (ipv4)',$ipv4);
+          $iipv4 = db_fetch_array(db_query("SELECT * FROM {guifi_ipv4} WHERE ipv4 = '%s' ",$ipv4['ipv4']));
+          $countqry = db_query("SELECT COUNT(*) FROM {guifi_ipv4} WHERE interface_id = %d",$iipv4['interface_id']);
+          $count = db_result($countqry, 0);
+          $ipv4_id = $count+1;
+       // TODO abans del save cal comprovar un id ipv4 disponbile, modificar-lo als links si en te, si es un link sense fils no ha de permtre triar uan interficie etherX,etc..
+       //   db_query("UPDATE {guifi_ipv4} SET id = %d, interface_id = %d WHERE ipv4 = '%s' AND interface_id = %d",$ipv4_id, $ipv4['interface_id'],$iipv4['ipv4'],$iipv4['interface_id']);
+
+      }
     }
   } 
 

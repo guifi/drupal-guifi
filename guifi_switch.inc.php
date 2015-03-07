@@ -514,7 +514,7 @@ function guifi_vinterfaces_form($iClass, $edit, &$form_weight) {
   	case 'vlans':
   	  $icon = '/icons/vlans-16.png';
   	  $iconNew = '/icons/vlans-new.png';
-  	  $msg  = t('Virtual Interfaces (vlans, wds, virtual APs, vrrp...) section');
+  	  $msg  = t('Virtual Interfaces (vlans,vrrp...) section');
 	    $ititle = t('Virtual Interfaces');
   	  break;
   	default:
