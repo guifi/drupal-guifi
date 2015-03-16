@@ -100,7 +100,7 @@ function guifi_main_ip($device_id) {
    $devmainipv4 = explode(',',$qryipv4->mainipv4);
    $ipv4 = db_fetch_object(db_query('SELECT ipv4, netmask from {guifi_ipv4} where id = %d AND interface_id = %d',$devmainipv4['1'], $devmainipv4['0']));
    $item = _ipcalc($ipv4->ipv4,$ipv4->netmask);
-   $ipv4arr = array('ipv4' => $ipv4->ipv4,'maskbits' => $item['maskbits'], 'netmask' => $ip->netmask);
+   $ipv4arr = array('ipv4' => $ipv4->ipv4,'maskbits' => $item['maskbits'], 'netmask' => $ipv4->netmask);
    return $ipv4arr;
   }
   else {
