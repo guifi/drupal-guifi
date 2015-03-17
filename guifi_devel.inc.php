@@ -471,7 +471,18 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#maxlength' => 2,
     '#description' => t('Maximum number of radios<br>that can handle this device.'),
     '#weight' => $form_weight++,
-  );  $form['wireless']['AP'] = array(
+  );
+  $form['wireless']['winterfaces'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Wireless Interfaces'),
+    '#required' => FALSE,
+    '#default_value' => $dev->winterfaces,
+    '#size' => 80,
+    '#maxlength' => 240,
+    '#description' => t('Device Wireless interface names for this device model.<br>Use | to split de the names, ex: wlan1|wlan2|wlan3.... Default is port# (1|2|3...|max)'),
+    '#weight' => $form_weight++,
+  );
+  $form['wireless']['AP'] = array(
     '#type' => 'select',
     '#access'      => in_array('wireless',$dev->arr_model_class),
     '#title' => t('Acces Point'),
