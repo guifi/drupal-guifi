@@ -196,16 +196,18 @@ function guifi_device_load($id,$ret = 'array') {
     $m = guifi_get_model_specs($device['variable']['model_id']);
     if ($m->ethermax)
       if ( count($device[interfaces]) < $m->ethermax ) {
-        
         // Cleaning interface names already used
         foreach ($device[interfaces] as $key => $value) {
+          if ($value[interface_type] == 'wLan/Lan' OR $value[interface_class] == 'bridge') {
+            $skip_interface = 1;
+            continue;
+          }
           $s = array_search($value[interface_type],$m->ethernames);
           if (!is_null($s))
             unset($m->ethernames[$s]);  
         }
-        
         // Creating the new interface and assigning a name not used
-        $port = count($device[interfaces]) + 1;
+        $port = count($device[interfaces][interface_type] == 'ethernet') + 1 - $skip_interface ? $skip_interface : 0;
         reset($m->ethernames);
         while ($port <= $m->ethermax ) {
             $ethername = array_shift($m->ethernames);
@@ -332,7 +334,7 @@ function guifi_device_load_radios($id,&$device) {
             $i[interface_class] = 'wds/p2p';
             $i[related_interfaces] = $radio[id].','.$radio[radiodev_counter];
             $i[interface_type] = 'wds'.$radio['ssid'];
-//            $device[vlans][$i[id]]=$i;
+            $device[vlans][$i[id]]=$i;
             break;
           case 'wLan/Lan':
             $i[interface_class] = 'bridge';
@@ -1130,14 +1132,17 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
     //   -convert to wlan
     //   -don't save it again at cable interfaces section'
     if ($radio['to_did'] != $radio['id']) {
-
+      $radiomoved = TRUE;
       // -obtain the radiodev_counter of that device
       $radio['id'] = $radio['to_did'];
-      $qry = db_query('SELECT  max(radiodev_counter) + 1 rc ' .
+      $qry = db_query('SELECT max(radiodev_counter) + 1 rc ' .
                       'FROM {guifi_radios} ' .
                       'WHERE id=%d',
                       $radio['to_did']);
       $nrc = db_fetch_array($qry);
+      if (empty($nrc['rc']))
+        $nrc['rc'] = '0';
+
       $radio['radiodev_counter'] = $nrc['rc'];
 
       drupal_set_message(t('Radio# %id has been moved to radio# %id2 at device %dname',
@@ -1159,6 +1164,7 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
             if ($nrc['rc'])
               $radio['interfaces'][$iid]['interface_type'] = 'wLan';
         }
+              $radio['interfaces'][$iid]['related_interfaces'] = $radio['to_did'].','.$nrc['rc'];
     }
 
     // save the radio
@@ -1171,13 +1177,7 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
       $interface['device_id'] = $radio['id'];
       $interface['mac'] = $radio['mac'];
       $interface['radiodev_counter'] = $nradio['radiodev_counter'];
-
-      // force wLan/Lan on radio#0
-      if ($interface['interface_type'] == 'wLan/Lan')
-        $interface['radiodev_counter'] = 0;
-
-     $log .= guifi_device_interface_save($interface,$interface_id,$edit['id'],$ndevice['nid'],$to_mail);
-
+      $log .= guifi_device_interface_save($interface,$interface_id,$edit['id'],$ndevice['nid'],$to_mail);
     } // foreach interface
     $rc++;
   } // foreach radio
@@ -1210,8 +1210,12 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
   if (!empty($edit[$iClass])) {
     // Save the interface
     foreach ($edit[$iClass] as $iid => $interface) {
-      if (is_array($interface[related_interfaces]))
+        if ($radiomoved == TRUE)
+          if ($interface['interface_class'] == 'wds/p2p')
+            continue;
+      if (is_array($interface[related_interfaces])) {
         $interface[related_interfaces] = implode('|',$interface[related_interfaces]);
+      }
       $interface['device_id'] = $ndevice['id'];
       $log .= guifi_device_interface_save($interface,$iid,$edit['id'],$ndevice['nid'],$to_mail);
     }

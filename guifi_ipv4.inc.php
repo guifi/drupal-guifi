@@ -576,16 +576,18 @@ function guifi_ipv4i_form($ipv4, $k, $first_port = true, $eInterfaces) {
 
   $iid_eInterfaces = array();
   foreach ($eInterfaces as $key => $iface) {
-    if (strpos($key,',')) {
-      $value = explode(",", $key);
-      $radio_iid = db_fetch_array(db_query("SELECT * FROM {guifi_interfaces} WHERE device_id = %d AND radiodev_counter = %d",$value['0'],$value['1']));
-      $iid = $radio_iid['id'];
-      if ( $radio_iid['interface_type'] === 'wds/p2p')
-        $iface = 'WDS-'.$iface;
-      $iid_eInterfaces[$iid] = $iface;
-    } else {
+    if (strpos($key,','))
+      continue;
+    $radio_iid = db_fetch_array(db_query("SELECT * FROM {guifi_interfaces} WHERE id = %d",$key));
+    if ( $radio_iid['interface_type'] === 'wds/p2p')
+      if ( empty($radio_iid['interface_class']))
+        $iface = 'WDS-wlan'.$radio_iid['radiodev_counter'];
+      else
+        $iface = $radio_iid['interface_class'];
+      if ( $radio_iid['interface_type'] === 'wLan')
+        $iface = 'wlan'.$radio_iid['radiodev_counter'];
+
       $iid_eInterfaces[$key] = $iface;
-    }
   }
 
   $form['id'] = array('#type'=>'hidden','#value'=>$ipv4['id']);
@@ -719,7 +721,7 @@ function guifi_ipv4s_form($edit, &$form_weight) {
     if (is_numeric($k)) {
       guifi_log(GUIFILOG_TRACE,'function guifi_ipv4s_form(vint LOOP)',$ipv4);
       $form[$k] =
-        guifi_ipv4i_form($ipv4, $k, $first,guifi_get_currentInterfaces($edit));
+        guifi_ipv4i_form($ipv4, $k, $first,guifi_get_currentInterfaces($edit, TRUE));
       $first = false;
     }
   }

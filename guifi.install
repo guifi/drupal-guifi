@@ -2688,7 +2688,7 @@ function guifi_update_1038() {
 function guifi_update_1039() {
   $items = array();
 
-  $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('7', 'protocol', '802.11ac', '802.11ac');");
+  $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('7', 'protocol', '802.11ac', '802.11ac')");
   $items[] = update_sql("UPDATE {guifi_types} SET relations = REPLACE (relations,'802.11a|802.11n', '802.11a|802.11n|802.11ac')");
 
   return $items;
@@ -2699,6 +2699,15 @@ function guifi_update_1040() {
 
   $items[] = update_sql("ALTER TABLE guifi_model_specs " .
   		"ADD COLUMN winterfaces VARCHAR(240) NULL COMMENT 'wireless interafaces' AFTER interfaces;");
+
+  return $items;
+}
+
+function guifi_update_1041() {
+  $items = array();
+
+  $items[] = update_sql("UPDATE {guifi_types} SET id = 4 WHERE id = 3 AND type = 'vlan'");
+  $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('3', 'vlan', 'wds/p2p', 'WDS PtP link', 'all')");
 
   return $items;
 }

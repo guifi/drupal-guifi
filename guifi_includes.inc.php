@@ -952,12 +952,19 @@ function guifi_get_currentDeviceMacs($device) {
   return $macs;  
 }
 
-function guifi_get_currentInterfaces($device) {
+function guifi_get_currentInterfaces($device, $iradios = FALSE) {
   guifi_log(GUIFILOG_TRACE,'function guifi_get_currentInterfaces(device)',$device);
   $interfaces = array();
 
   foreach ($device[radios] as $k => $radio) {
-    $interfaces[$device[id].','.$k] = 'wlan'.$k.' - '.$radio[ssid];
+    if ($iradios == FALSE) {
+      $interfaces[$device[id].','.$k] = 'wlan'.$k.' - '.$radio[ssid];
+    }
+    else  {
+      foreach ($radio['interfaces'] as $x => $wiface) {
+        $interfaces[$wiface['id']] = $wiface['interface_type'];
+      }
+    }
   }
   foreach (array('ports','interfaces','vlans','aggregations','tunnels') as $iClass){
     guifi_log(GUIFILOG_TRACE,

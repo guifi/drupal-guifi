@@ -72,7 +72,7 @@ function guifi_ports_form($edit,&$form_weight) {
   $total_ports = count($edit['interfaces']);
   $first_port = true;
   $eCountOpts = array();
-  for ($i = 0; $i <= $total_ports; $i++)
+  for ($i = 0; $i < $total_ports; $i++)
   	$eCountOpts[$i] = $i;
 
   $m = guifi_get_model_specs($edit[variable][model_id]);
@@ -124,8 +124,7 @@ function guifi_ports_form($edit,&$form_weight) {
       '#size'         => in_array($edit['type'],array('switch')) ? 10 : 20,
       '#size'         => 10,
       '#maxlength'    => 40,
-      '#disabled'     => ($interface['interface_type'] == 'wLan/Lan')
-                         or ($interface['deleted'])
+      '#disabled'     => ($interface['deleted'])
                          or (in_array($edit['type'],array('switch'))) ?
                            TRUE : FALSE,
       '#attributes'   => array('class'=>'interface-item'),
@@ -657,13 +656,10 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
     '#default_value'=> $vinterface[interface_type],
     '#size'         => 20,
     '#maxlength'    => 40,
-    '#disabled'     => (($vinterface['interface_type'] == 'wLan/Lan')
-                       or ($vinterface['deleted'])) ?
+    '#disabled'     => $vinterface['deleted'] ?
                          TRUE : FALSE,
     '#attributes'   => array('class'=>'interface-item'),
    );
-   if ($vinterface['interface_type'] == 'wLan/Lan')
-     $form[interface_type]['#value'] = 'wLan/Lan';
 
    if ($form['interface_type']['#disabled']) {
      $form['interface_type']['#value'] = $vinterface[interface_type];
