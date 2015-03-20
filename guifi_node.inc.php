@@ -160,6 +160,11 @@ function guifi_node_prepare(&$node){
   if (isset($_GET['zone'])){$node->zone_id = $_GET['zone'];}
   if (isset($_GET['zone'])){$node->zone_id = $_GET['zone'];}
 
+  if (isset($_GET['lat']))
+    if (isset($_GET['lon'])) {
+          $defzone_qry = db_fetch_array(db_query("SELECT id, ((maxx-minx)+(maxy-miny)) as distance FROM {guifi_zone} WHERE minx < '%s' AND maxx > '%s' AND miny < '%s' AND maxy > '%s' ORDER by distance LIMIT 1",$_GET['lon'],$_GET['lon'],$_GET['lat'],$_GET['lat']));
+          $node->ndfzone = $defzone_qry['id'];
+    }
   $coord=guifi_coord_dtodms($node->lat);
   if($coord != NULL) {
     $node->latdeg = $coord[0];
@@ -301,13 +306,18 @@ function guifi_node_form(&$node, $form_state) {
     );
   }
 
+print $node->ndfzone;
   if (empty($node->nid)) {
-    if (empty($node->zone_id)) {
-      if(!empty($user->guifi_default_zone)) {
-        $zone_id = $user->guifi_default_zone;
+    if (empty($node->ndfzone)) {
+      if (empty($node->zone_id)) {
+        if(!empty($user->guifi_default_zone)) {
+          $zone_id = $user->guifi_default_zone;
+        }
+      } else {
+        $zone_id = $node->zone_id;
       }
     } else {
-      $zone_id = $node->zone_id;
+      $zone_id = $node->ndfzone;
     }
   } else {
     $zone_id = $node->zone_id;
