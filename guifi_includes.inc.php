@@ -958,7 +958,7 @@ function guifi_get_currentInterfaces($device, $iradios = FALSE) {
 
   foreach ($device[radios] as $k => $radio) {
     if ($iradios == FALSE) {
-      $interfaces[$device[id].','.$k] = 'wlan'.$k.' - '.$radio[ssid];
+      $interfaces[$device[id].','.$k] = 'wlan'.($k+1).' - '.$radio[ssid];
     }
     else  {
       foreach ($radio['interfaces'] as $x => $wiface) {

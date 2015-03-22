@@ -581,11 +581,11 @@ function guifi_ipv4i_form($ipv4, $k, $first_port = true, $eInterfaces) {
     $radio_iid = db_fetch_array(db_query("SELECT * FROM {guifi_interfaces} WHERE id = %d",$key));
     if ( $radio_iid['interface_type'] === 'wds/p2p')
       if ( empty($radio_iid['interface_class']))
-        $iface = 'WDS-wlan'.$radio_iid['radiodev_counter'];
+        $iface = 'WDS-wlan'.($radio_iid['radiodev_counter']+1);
       else
         $iface = $radio_iid['interface_class'];
       if ( $radio_iid['interface_type'] === 'wLan')
-        $iface = 'wlan'.$radio_iid['radiodev_counter'];
+        $iface = 'wlan'.($radio_iid['radiodev_counter']+1);
 
       $iid_eInterfaces[$key] = $iface;
   }
