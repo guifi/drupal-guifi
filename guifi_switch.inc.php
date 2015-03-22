@@ -642,22 +642,27 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
     '#tree'         => TRUE,
   );
 
+  if ($vinterface[interface_class] == 'wds/p2p')
+    $vlan_wds = TRUE;
+
   $form['interface_class'] = array(
     '#type'         => 'select',
     '#title'        => ($first_port) ? t('%iClass type',array('%iClass'=>$iType)) : false,
     '#options'      => guifi_types($iType),
     '#default_value'=> $vinterface[interface_class],
-    '#disabled'     => ($vinterface['deleted']) ? TRUE : FALSE,
+    '#disabled'     => (($vlan_wds) ? TRUE : FALSE) OR (($vinterface['deleted']) ? TRUE : FALSE),
     '#attributes'   => array('class'=>'interface-item'),
   );
+
+
+
   $form['interface_type'] = array(
     '#type'         => 'textfield',
     '#title'        => ($first_port) ? t('name') : false,
     '#default_value'=> $vinterface[interface_type],
     '#size'         => 20,
     '#maxlength'    => 40,
-    '#disabled'     => $vinterface['deleted'] ?
-                         TRUE : FALSE,
+    '#disabled'     => (($vlan_wds) ? TRUE : FALSE) OR (($vinterface['deleted']) ? TRUE : FALSE),
     '#attributes'   => array('class'=>'interface-item'),
    );
 
@@ -677,7 +682,7 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
     '#title'        => ($first_port) ? t('parent') : false,
     '#options'      => array_diff($eInterfaces,array($vinterface[interface_type])),
     '#default_value'=> $vinterface['related_interfaces'],
-    '#disabled'     => ($vinterface['deleted']) ? TRUE : FALSE,
+    '#disabled'     => (($vlan_wds) ? TRUE : FALSE) OR (($vinterface['deleted']) ? TRUE : FALSE),
     '#attributes'   => array('class'=>'interface-item'),
   );  
   if ($iType == 'aggregation') {
@@ -697,6 +702,7 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
     '#size'         => 6,
     '#maxlength'    => 10,
     '#default_value'=> $vinterface[vlan],
+    '#disabled'     => (($vlan_wds) ? TRUE : FALSE) OR (($vinterface['deleted']) ? TRUE : FALSE),
     '#attributes'   => array('class'=>'interface-item'),
   );
 

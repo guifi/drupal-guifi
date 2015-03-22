@@ -306,7 +306,6 @@ function guifi_node_form(&$node, $form_state) {
     );
   }
 
-print $node->ndfzone;
   if (empty($node->nid)) {
     if (empty($node->ndfzone)) {
       if (empty($node->zone_id)) {
