@@ -2712,4 +2712,12 @@ function guifi_update_1041() {
   return $items;
 }
 
+function guifi_update_1042() {
+  $items = array();
+
+  $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description) VALUES ('23', 'device', 'cloudy', 'Server with Cloudy distribution based on Debian GNU/Linux')");
+
+  return $items;
+}
+
 ?>

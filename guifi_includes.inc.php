@@ -261,7 +261,7 @@ function guifi_server_descr($did) {
   $query = db_query("SELECT CONCAT(d.id,'-',z.nick,', ',l.nick,' ',d.nick) descr " .
       "FROM {guifi_devices} d, {guifi_location} l, {guifi_zone} z " .
       "WHERE d.id=%d " .
-      " AND d.type IN ('server','cam') ".
+      " AND d.type IN ('server','cam','cloudy') ".
       " AND d.nid=l.id" .
       " AND l.zone_id=z.id",
       $did);
@@ -2034,7 +2034,7 @@ function guifi_servername_validate($serverstr,&$form_state) {
     'FROM {guifi_devices} d, {guifi_location} l ' .
     'WHERE d.id="%d" ' .
     ' AND d.nid=l.id '.
-    ' AND d.type IN ("cam","server") ',
+    ' AND d.type IN ("cam","server", "cloudy") ',
     $sid[0]);
   while ($server = db_fetch_array($qry)) {
     $form_state['values']['device_id']=$server['id'];
