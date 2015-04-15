@@ -231,7 +231,7 @@ function guifi_schema() {
          'text' => array('type' => 'varchar', 'length' => '24', 'not null' => TRUE),
          'description' => array('type' => 'text', 'size' => 'big', 'not null' => TRUE),
          'relations' => array('type' => 'text', 'size' => 'big', 'not null' => FALSE)),
-    'primary key' => array('id'),
+    'primary key' => array('id', 'type'),
     'indexes' => array(
          'text' => array('text')),
   );
@@ -405,6 +405,46 @@ function guifi_schema() {
       'timestamp_changed' => array('type' => 'int', 'not null' => TRUE)),
     'primary key' => array('id'),
    );
+
+  $schema['guifi_maintainers'] = array(
+    'comment' => 'device maintainers',
+    'fields' => array(
+      'id' => array('type' => 'int', 'not null'  => TRUE, 'default' => 0, 'disp-width' => '11'),
+      'supplier_id' => array('type' => 'int', 'unsigned' => TRUE, 'not null'  => TRUE, 'disp-width' => '11', 'default' => 0, 'comment' => 'Foreign key to supplier'),
+      'subject_id' => array('type' => 'int', 'unsigned' => TRUE, 'not null'  => TRUE, 'disp-width' => '11', 'default' => 0, 'comment' => 'Foreign key to subject maintained (zone/node/device...)'),
+      'subject_type' => array('type' => 'varchar', 'length' => 15, 'not null'  => TRUE, 'default' => '', 'comment' => 'subject type (values zone, node, device....)'),
+      'commitment' => array('type' => 'varchar', 'length' => 15, 'not null'  => TRUE, 'default' => '', 'comment' => 'type of commitment: volunteer, FO, Wireless...'),
+      'sla' => array('type' => 'varchar', 'length' => 15, 'not null'  => TRUE, 'default' => '', 'comment' => 'SLA: bone, 24x7, 8x5...'),
+      'sla_resp' => array('type' => 'int', 'size'=>'small','not null'  => FALSE, 'comment' => 'Objective for response time' ),
+      'sla_fix' => array('type' => 'int', 'size'=>'small','not null'  => FALSE,  'comment' => 'Objective for solving time' ),
+      'weight' => array('type' => 'int', 'size'=>'small','not null'  => FALSE),
+      'comment' => array('type' => 'text', 'not null'  => false),
+      'user_created' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, 'default' => 0),
+      'user_changed' => array('type' => 'int', 'size' => 'medium',' not null' => FALSE),
+      'timestamp_created' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
+      'timestamp_changed' => array('type' => 'int', 'not null' => FALSE),
+      ),
+    'primary key' => array('id'),
+  );
+
+  $schema['guifi_funders'] = array(
+    'comment' => 'device funders',
+    'fields' => array(
+      'id' => array('type' => 'int', 'not null'  => TRUE, 'default' => 0, 'disp-width' => '11'),
+      'supplier_id' => array('type' => 'int', 'unsigned' => TRUE, 'not null'  => false, 'disp-width' => '11', 'default' => 0, 'comment' => 'Foreign key to supplier'),
+      'user_id' => array('type' => 'int', 'size' => 'medium', 'unsigned' => TRUE, 'not null'  => false, 'disp-width' => '11', 'default' => 0, 'comment' => 'Foreign key to userid'),
+      'comment' => array('type' => 'text', 'not null'  => TRUE),
+//      'removed' => array('type' => 'int', 'size'=>'small','not null'  => TRUE, 'default' => FALSE),
+      'subject_id' => array('type' => 'int', 'unsigned' => TRUE, 'not null'  => TRUE, 'disp-width' => '11', 'default' => 0, 'comment' => 'Foreign key to subject maintained (node/device...)'),
+      'subject_type' => array('type' => 'varchar', 'length' => 15, 'not null'  => TRUE, 'default' => '', 'comment' => 'subject type (values node, device....)'),
+      'weight' => array('type' => 'int', 'size'=>'small','not null'  => FALSE),
+      'user_created' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, 'default' => 0),
+      'user_changed' => array('type' => 'int', 'size' => 'medium',' not null' => FALSE),
+      'timestamp_created' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
+      'timestamp_changed' => array('type' => 'int', 'not null' => FALSE),
+      ),
+    'primary key' => array('id'),
+  );
 
   return $schema;
 }
@@ -801,66 +841,67 @@ function guifi_install() {
   // -- Volcant dades de la taula guifi_manufacturer
   // --
   update_sql("TRUNCATE guifi_manufacturer");
-  db_query("INSERT INTO {guifi_manufacturer} VALUES (1, 'Other', NULL);");
-  db_query("INSERT INTO {guifi_manufacturer} VALUES (2, 'Linksys', 'http://www.linksys.com');");
-  db_query("INSERT INTO {guifi_manufacturer} VALUES (8, 'Mikrotik', 'http://mikrotik.com');");
-  db_query("INSERT INTO {guifi_manufacturer} VALUES (9, 'Buffalo', 'http://www.buffalotech.com');");
-  db_query("INSERT INTO {guifi_manufacturer} VALUES (10, 'Ubiquiti', 'http://www.ubnt.com');");
-  db_query("INSERT INTO {guifi_manufacturer} VALUES (11, 'Meraki', 'http://meraki.com');");
-  db_query("INSERT INTO {guifi_manufacturer} VALUES (12, 'Gateworks', 'http://www.gateworks.com');");
-  db_query("INSERT INTO {guifi_manufacturer} VALUES (13, 'Asus', 'http://asus.com');");
-  db_query("INSERT INTO {guifi_manufacturer} VALUES (14, 'Pccengines', 'http://www.pcengines.ch');");
-  db_query("INSERT INTO {guifi_manufacturer} VALUES (15, 'Setup Informatica', 'http://www.setup.cat');");
-  db_query("INSERT INTO {guifi_manufacturer} VALUES (100, 'DLink', 'http://www.dlink.com');");
-  db_query("INSERT INTO {guifi_manufacturer} VALUES (101, 'Deliberant', 'http://www.deliberant.com');");
-  db_query("INSERT INTO {guifi_manufacturer} VALUES (102, 'TP-Link', 'http://www.tp-link.com');");
+  db_query("INSERT INTO `guifi_manufacturer` (`fid`, `name`, `url`) VALUES (1, 'Other', NULL);");
+  db_query("INSERT INTO `guifi_manufacturer` (`fid`, `name`, `url`) VALUES (2, 'Linksys', 'http://www.linksys.com');");
+  db_query("INSERT INTO `guifi_manufacturer` (`fid`, `name`, `url`) VALUES (8, 'Mikrotik', 'http://mikrotik.com');");
+  db_query("INSERT INTO `guifi_manufacturer` (`fid`, `name`, `url`) VALUES (9, 'Buffalo', 'http://www.buffalotech.com');");
+  db_query("INSERT INTO `guifi_manufacturer` (`fid`, `name`, `url`) VALUES (10, 'Ubiquiti', 'http://www.ubnt.com');");
+  db_query("INSERT INTO `guifi_manufacturer` (`fid`, `name`, `url`) VALUES (11, 'Meraki', 'http://meraki.com');");
+  db_query("INSERT INTO `guifi_manufacturer` (`fid`, `name`, `url`) VALUES (12, 'Gateworks', 'http://www.gateworks.com');");
+  db_query("INSERT INTO `guifi_manufacturer` (`fid`, `name`, `url`) VALUES (13, 'Asus', 'http://asus.com');");
+  db_query("INSERT INTO `guifi_manufacturer` (`fid`, `name`, `url`) VALUES (14, 'Pccengines', 'http://www.pcengines.ch');");
+  db_query("INSERT INTO `guifi_manufacturer` (`fid`, `name`, `url`) VALUES (15, 'Setup Informatica', 'http://www.setup.cat');");
+  db_query("INSERT INTO `guifi_manufacturer` (`fid`, `name`, `url`) VALUES (100, 'DLink', 'http://www.dlink.com');");
+  db_query("INSERT INTO `guifi_manufacturer` (`fid`, `name`, `url`) VALUES (101, 'Deliberant', 'http://www.deliberant.com');");
+  db_query("INSERT INTO `guifi_manufacturer` (`fid`, `name`, `url`) VALUES (102, 'TP-Link', 'http://www.tp-link.com');");
+
   // --
   // -- guifi_model_specs
   // --
   update_sql("TRUNCATE guifi_model_specs");
-  db_query("INSERT INTO `guifi_model_specs` (`mid`, `fid`, `model_class`, `model`,`type`, `radiodev_max`, `etherdev_max`, `optoports_max`,`rackeable`,`opto_interfaces`,`potencia_max`, `AP`, `virtualAP`, `client`, `interfaces`, `url`, `comments`, `supported`, `notification`, `user_created`, `user_changed`, `timestamp_created`, `timestamp_changed`) VALUES
-(3, 1, 'wireless|router','Other', NULL, 1, 1, 0, 0,NULL,NULL, 'Yes', 'No', 'Yes', 'wLan/Lan', 'none', 'To be used for unknown or not listed devices', 'Yes', '', 0, 0, 0, 0),
-(1, 2, 'wireless|router','WRT54Gv1-4', 'Extern', 1, 1, 0, 0,NULL,251, 'Si', 'No', 'Hack', 'wLan/Lan|vlan|vlan2|vlan3|vlan4|Wan', 'http://www.linksys.com/products/product.', 'El canvi de potència, mode client i WDS, via hack.\r\nHacks disponibles: sveasoft (Satori, Alchemy...), OpenWRT...', 'Yes', '', 0, 0, 0, 0),
-(15, 9, 'wireless|router','WHR-HP-G54, WHR-G54S', 'Extern', 1, 1, 0, 0,NULL,251, 'No', '', 'Hack', 'wLan/Lan|vlan|vlan2|vlan3|vlan4|Wan', 'http://www.buffalo-technology.com/products/product-detail.php?productid=124&categoryid=28', 'El canvi de potència, mode client i WDS, via hack.', 'Yes', '', 0, 0, 0, 0),
-(16, 2, 'wireless|router','WRT54GL', 'Extern', 1, 1, 0, 0,NULL, 251, 'No', '', 'Hack', 'wLan/Lan|vlan|vlan2|vlan3|vlan4|Wan', 'http://www.linksys.com/products/product.', 'El canvi de potència, mode client i WDS, via hack.\r\nHacks disponibles: sveasoft (Satori, Alchemy...), OpenWRT, DD-WRT, ...', 'Yes', '', 0, 0, 0, 0),
-(17, 2, 'wireless|router','WRT54GSv1-2', 'Extern', 1, 1, 0, 0,NULL, 251, 'No', '', 'Hack', 'wLan/Lan|vlan2|vlan3|vlan4|Wan', 'http://www.linksys.com/products/product.', 'El canvi de potència, mode client i WDS, via hack.\r\nHacks disponibles: sveasoft (Satori, Alchemy...), OpenWRT, DD-WRT, ...', 'Yes', '', 0, 0, 0, 0),
-(18, 2, 'wireless|router','WRT54GSv4', 'Extern', 1, 1, 0, 0,NULL,251, 'No', '', 'Hack', 'wLan/Lan|vlan|vlan2|vlan3|vlan4|Wan', 'http://www.linksys.com/products/product.', 'El canvi de potència mode client i WDS, via hack.\r\nHacks disponibles: sveasoft (Satori, Alchemy...), OpenWRT, DD-WRT, ...', 'Yes', '', 0, 0, 0, 0),
-(19, 8, 'wireless|router','Routerboard 532', NULL, 6, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3|ether4|ether5|ether6|ether7|ether8|ether9', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(20, 8, 'wireless|router','Routerboard 133C', NULL, 1, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(21, 8, 'wireless|router','Routerboard 133', NULL, 3, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(22, 8, 'wireless|router','Routerboard 112', NULL, 2, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(23, 8, 'wireless|router','Routerboard 153', NULL, 3, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3|ether4|ether5', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(24, 8, 'wireless|router','Supertrasto guifiBUS guifi.net', NULL, 24, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3|ether4|ether5', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(25, 10, 'wireless|router','NanoStation2', 'Extern', 1, 1, 0, 0,NULL, 400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ns2.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(26, 10, 'wireless|router','NanoStation5', 'Extern', 1, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ns5.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(27, 8, 'wireless|router','Routerboard 600', 'Extern', 8, 1, 0, 0,NULL,400, 'Si', 'Si', 'Si', 'wLan/Lan|ether2|ether3', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(28, 8, 'wireless|router','Routerboard 333', NULL, 6, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(29, 8, 'wireless|router','Routerboard 411', NULL, 6, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(30, 11, 'wireless|router','Meraki/Fonera', 'Extern', 1, 1, 0, 0,NULL,60, 'Si', 'Yes', 'Si', 'wLan/Lan', 'http://meraki.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(31, 8, 'wireless|router','Routerboard 433', NULL, 6, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(32, 10, 'wireless|router','LiteStation2', 'Extern', 1, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ls2.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(33, 10, 'wireless|router','LiteStation5', 'Extern', 1, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ls5.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(34, 10, 'wireless|router','NanoStation Loco2', 'Extern', 1, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(35, 10, 'wireless|router','NanoStation Loco5', 'Extern', 1, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(36, 10, 'wireless|router','Bullet2', 'Extern', 1, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(37, 10, 'wireless|router','Bullet5', 'Extern', 1, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(38, 10, 'wireless|router','RouterStation', 'Extern', 4, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ls5.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(39, 12, 'wireless|router','Avila GW2348-4', 'Extern', 4, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://www.gateworks.com/products/avila/gw2348-4.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(40, 13, 'wireless|router','Asus WL-500xx', 'Extern', 1, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://asus.com/products.aspx?l1=29&l2=172&l3=743&l4=60&model=1277&modelmenu=1', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(41, 14, 'wireless|router','Alix1', 'Extern', 5, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'wLan/Lan|eth0|eth1|eth2', 'http://www.pcengines.ch/alix1d.htm', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(42, 14, 'wireless|router','Alix2', 'Extern', 2, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'wLan/Lan|eth0|eth1|eth2', 'http://www.pcengines.ch/alix2d.htm', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(43, 14, 'wireless|router','Alix3', 'Extern', 2, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'wLan/Lan|eth0|eth1|eth2', 'http://www.pcengines.ch/alix3d.htm', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(44, 8, 'wireless|router','Routerboard 800', NULL, 8, 1, 0, 0,NULL,400, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3|ether4|ether5|ether6|ether7|ether8|ether9', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
-(45, 10, 'wireless|router','AirMaxM2 Rocket/Nano/Loco', 'Extern', 1, 1, 0, 0,NULL,100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(46, 10, 'wireless|router','AirMaxM5 Rocket/Nano/Loco', 'Extern', 1, 1, 0, 0,NULL,100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(47, 10, 'wireless|router','AirMaxM2 Bullet/PwBrg/AirGrd/NanoBr', 'Extern', 1, 1, 0, 0,NULL,100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(48, 10, 'wireless|router','AirMaxM5 Bullet/PwBrg/AirGrd/NanoBr', 'Extern', 1, 1, 0, 0,NULL,100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(49, 15, 'wireless|router','GuifiStation2', 'Extern', 1, 1, 0, 0,NULL,100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://tienda.setupinformatica.com/wac/detalle.php?codigo=CPEGS2', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(50, 15, 'wireless|router','GuifiStation5', 'Extern', 1, 1, 0, 0,NULL,100, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://tienda.setupinformatica.com/wac/detalle.php?codigo=CPEGS5', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(51, 10, 'wireless|router','RouterStationPro', 'Extern', 4, 1, 0, 0,NULL,400, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/rspro', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(52, 8, 'wireless|router','Routerboard 750/G', 'Extern', 0, 5, 0, 0,NULL,400, 'Yes', 'Yes', 'Yes', 'Lan/Lan|ether1|ether2|ether3|ether4|ether5', 'http://www.routerboard.com/pricelist.php?showProduct=90', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
-(53, 8, 'wireless|router','Routerboard SXT 5HnD', NULL, 1, 1, 0, 0,NULL,NULL, 'Yes', 'Yes', 'Yes', 'wlan1|ether1', 'http://www.routerboard.com/index.php?showProduct=108', NULL, 'Yes', '', 0, 0, 0, 0),
-(54, 8, 'router','Routerboard 1100', NULL, 0, 13, 0, 1,NULL,NULL, 'Yes', 'No', 'Yes', 'Lan/Lan|ether1|ether2|ether3|ether4|ether5|ether6|ether7|ether8|ether9|ether10|ether11|ether12|ether13', 'http://www.routerboard.com/index.php?showProduct=98', NULL, 'Yes', '', 0, 0, 0, 0);");
+  db_query("INSERT INTO `guifi_model_specs` (`mid`, `fid`, `model_class`, `model`,`type`, `radiodev_max`, `etherdev_max`, `optoports_max`,`rackeable`,`opto_interfaces`, `AP`, `virtualAP`, `client`, `interfaces`, `url`, `comments`, `supported`, `notification`, `user_created`, `user_changed`, `timestamp_created`, `timestamp_changed`) VALUES
+(3, 1, 'wireless|router','Other', NULL, 1, 1, 0, 0, NULL, 'Yes', 'No', 'Yes', 'wLan/Lan', 'none', 'To be used for unknown or not listed devices', 'Yes', '', 0, 0, 0, 0),
+(1, 2, 'wireless|router','WRT54Gv1-4', 'Extern', 1, 1, 0, 0, NULL, 'Si', 'No', 'Hack', 'wLan/Lan|vlan|vlan2|vlan3|vlan4|Wan', 'http://www.linksys.com/products/product.', 'El canvi de potència, mode client i WDS, via hack.\r\nHacks disponibles: sveasoft (Satori, Alchemy...), OpenWRT...', 'Yes', '', 0, 0, 0, 0),
+(15, 9, 'wireless|router','WHR-HP-G54, WHR-G54S', 'Extern', 1, 1, 0, 0, NULL, 'No', '', 'Hack', 'wLan/Lan|vlan|vlan2|vlan3|vlan4|Wan', 'http://www.buffalo-technology.com/products/product-detail.php?productid=124&categoryid=28', 'El canvi de potència, mode client i WDS, via hack.', 'Yes', '', 0, 0, 0, 0),
+(16, 2, 'wireless|router','WRT54GL', 'Extern', 1, 1, 0, 0,NULL, 'No', '', 'Hack', 'wLan/Lan|vlan|vlan2|vlan3|vlan4|Wan', 'http://www.linksys.com/products/product.', 'El canvi de potència, mode client i WDS, via hack.\r\nHacks disponibles: sveasoft (Satori, Alchemy...), OpenWRT, DD-WRT, ...', 'Yes', '', 0, 0, 0, 0),
+(17, 2, 'wireless|router','WRT54GSv1-2', 'Extern', 1, 1, 0, 0,NULL, 'No', '', 'Hack', 'wLan/Lan|vlan2|vlan3|vlan4|Wan', 'http://www.linksys.com/products/product.', 'El canvi de potència, mode client i WDS, via hack.\r\nHacks disponibles: sveasoft (Satori, Alchemy...), OpenWRT, DD-WRT, ...', 'Yes', '', 0, 0, 0, 0),
+(18, 2, 'wireless|router','WRT54GSv4', 'Extern', 1, 1, 0, 0, NULL, 'No', '', 'Hack', 'wLan/Lan|vlan|vlan2|vlan3|vlan4|Wan', 'http://www.linksys.com/products/product.', 'El canvi de potència mode client i WDS, via hack.\r\nHacks disponibles: sveasoft (Satori, Alchemy...), OpenWRT, DD-WRT, ...', 'Yes', '', 0, 0, 0, 0),
+(19, 8, 'wireless|router','Routerboard 532', NULL, 6, 1, 0, 0, NULL, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3|ether4|ether5|ether6|ether7|ether8|ether9', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(20, 8, 'wireless|router','Routerboard 133C', NULL, 1, 1, 0, 0, NULL, 'Si', 'Yes', 'Si', 'wLan/Lan', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(21, 8, 'wireless|router','Routerboard 133', NULL, 3, 1, 0, 0, NULL, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(22, 8, 'wireless|router','Routerboard 112', NULL, 2, 1, 0, 0, NULL, 'Si', 'Yes', 'Si', 'wLan/Lan', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(23, 8, 'wireless|router','Routerboard 153', NULL, 3, 1, 0, 0, NULL, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3|ether4|ether5', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(24, 8, 'wireless|router','Supertrasto guifiBUS guifi.net', NULL, 24, 1, 0, 0, NULL, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3|ether4|ether5', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(25, 10, 'wireless|router','NanoStation2', 'Extern', 1, 1, 0, 0, NULL, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ns2.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(26, 10, 'wireless|router','NanoStation5', 'Extern', 1, 1, 0, 0, NULL, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ns5.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(27, 8, 'wireless|router','Routerboard 600', 'Extern', 8, 1, 0, 0, NULL, 'Si', 'Si', 'Si', 'wLan/Lan|ether2|ether3', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(28, 8, 'wireless|router','Routerboard 333', NULL, 6, 1, 0, 0, NULL, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(29, 8, 'wireless|router','Routerboard 411', NULL, 6, 1, 0, 0, NULL, 'Si', 'Yes', 'Si', 'wLan/Lan', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(30, 11, 'wireless|router','Meraki/Fonera', 'Extern', 1, 1, 0, 0, NULL, 'Si', 'Yes', 'Si', 'wLan/Lan', 'http://meraki.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(31, 8, 'wireless|router','Routerboard 433', NULL, 6, 1, 0, 0, NULL, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(32, 10, 'wireless|router','LiteStation2', 'Extern', 1, 1, 0, 0, NULL, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ls2.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(33, 10, 'wireless|router','LiteStation5', 'Extern', 1, 1, 0, 0, NULL, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ls5.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(34, 10, 'wireless|router','NanoStation Loco2', 'Extern', 1, 1, 0, 0, NULL, 'No', 'No', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(35, 10, 'wireless|router','NanoStation Loco5', 'Extern', 1, 1, 0, 0, NULL, 'No', 'No', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(36, 10, 'wireless|router','Bullet2', 'Extern', 1, 1, 0, 0,NULL, 'No', 'No', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(37, 10, 'wireless|router','Bullet5', 'Extern', 1, 1, 0, 0,NULL, 'No', 'No', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(38, 10, 'wireless|router','RouterStation', 'Extern', 4, 1, 0, 0,NULL, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/products/ls5.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(39, 12, 'wireless|router','Avila GW2348-4', 'Extern', 4, 1, 0, 0,NULL, 'No', 'No', 'Si', 'Wan', 'http://www.gateworks.com/products/avila/gw2348-4.php', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(40, 13, 'wireless|router','Asus WL-500xx', 'Extern', 1, 1, 0, 0,NULL, 'No', 'No', 'Si', 'Wan', 'http://asus.com/products.aspx?l1=29&l2=172&l3=743&l4=60&model=1277&modelmenu=1', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(41, 14, 'wireless|router','Alix1', 'Extern', 5, 1, 0, 0,NULL, 'No', 'No', 'Si', 'wLan/Lan|eth0|eth1|eth2', 'http://www.pcengines.ch/alix1d.htm', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(42, 14, 'wireless|router','Alix2', 'Extern', 2, 1, 0, 0,NULL, 'No', 'No', 'Si', 'wLan/Lan|eth0|eth1|eth2', 'http://www.pcengines.ch/alix2d.htm', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(43, 14, 'wireless|router','Alix3', 'Extern', 2, 1, 0, 0,NULL, 'No', 'No', 'Si', 'wLan/Lan|eth0|eth1|eth2', 'http://www.pcengines.ch/alix3d.htm', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(44, 8, 'wireless|router','Routerboard 800', NULL, 8, 1, 0, 0,NULL, 'Si', 'Yes', 'Si', 'wLan/Lan|ether2|ether3|ether4|ether5|ether6|ether7|ether8|ether9', 'http://www.routerboard.com', NULL, 'Yes', '', 0, 0, 0, 0),
+(45, 10, 'wireless|router','AirMaxM2 Rocket/Nano/Loco', 'Extern', 1, 1, 0, 0, NULL, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(46, 10, 'wireless|router','AirMaxM5 Rocket/Nano/Loco', 'Extern', 1, 1, 0, 0, NULL, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(47, 10, 'wireless|router','AirMaxM2 Bullet/PwBrg/AirGrd/NanoBr', 'Extern', 1, 1, 0, 0, NULL, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(48, 10, 'wireless|router','AirMaxM5 Bullet/PwBrg/AirGrd/NanoBr', 'Extern', 1, 1, 0, 0, NULL, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://ubnt.com/airmax', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(49, 15, 'wireless|router','GuifiStation2', 'Extern', 1, 1, 0, 0, NULL, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://tienda.setupinformatica.com/wac/detalle.php?codigo=CPEGS2', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(50, 15, 'wireless|router','GuifiStation5', 'Extern', 1, 1, 0, 0, NULL, 'Yes', 'No', 'Si', 'eth0|ath0', 'http://tienda.setupinformatica.com/wac/detalle.php?codigo=CPEGS5', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(51, 10, 'wireless|router','RouterStationPro', 'Extern', 4, 1, 0, 0, NULL, 'No', 'No', 'Si', 'Wan', 'http://ubnt.com/rspro', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(52, 8, 'wireless|router','Routerboard 750/G', 'Extern', 0, 5, 0, 0, NULL, 'Yes', 'Yes', 'Yes', 'Lan/Lan|ether1|ether2|ether3|ether4|ether5', 'http://www.routerboard.com/pricelist.php?showProduct=90', 'Permet Firmwares de tercers', 'Yes', '', 0, 0, 0, 0),
+(53, 8, 'wireless|router','Routerboard SXT 5HnD', NULL, 1, 1, 0, 0,NULL, 'Yes', 'Yes', 'Yes', 'wlan1|ether1', 'http://www.routerboard.com/index.php?showProduct=108', NULL, 'Yes', '', 0, 0, 0, 0),
+(54, 8, 'router','Routerboard 1100', NULL, 0, 13, 0, 1,NULL, 'Yes', 'No', 'Yes', 'Lan/Lan|ether1|ether2|ether3|ether4|ether5|ether6|ether7|ether8|ether9|ether10|ether11|ether12|ether13', 'http://www.routerboard.com/index.php?showProduct=98', NULL, 'Yes', '', 0, 0, 0, 0);");
 
   // --
   // -- user status types
@@ -1292,8 +1333,8 @@ function guifi_update_667() {
 function guifi_update_700() {
   $items = array();
 
-  $items[] = update_sql("INSERT INTO {guifi_manufacturer} (fid ,nom ,url) VALUES ('12', 'Gateworks', 'http://www.gateworks.com'),('13', 'Asus', 'http://www.asus.com');");
-  $items[] = update_sql("INSERT INTO {guifi_model_specs} (mid ,fid ,model ,tipus ,radiodev_max ,potencia_max ,modes ,AP ,virtualAP ,WDS ,bridge ,client ,connector ,antenes ,router ,firewall ,QoS ,snmp ,hack ,interfaces ,url ,comentaris ,supported) VALUES
+  $items[] = update_sql("INSERT INTO {guifi_manufacturer} (fid, nom, url) VALUES ('12', 'Gateworks', 'http://www.gateworks.com'),('13', 'Asus', 'http://www.asus.com');");
+  $items[] = update_sql("INSERT INTO {guifi_model_specs} (mid, fid, model, tipus, radiodev_max, modes, AP, virtualAP, WDS, bridge, client, connector, antenes, router, firewall, QoS, snmp, hack, interfaces, url, comentaris, supported) VALUES
   ('34', '10', 'NanoStation Loco2', 'Extern', '1', '400', '802.11bg', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes'),
   ('35', '10', 'NanoStation Loco5', 'Extern', '1', '400', '802.11a', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes'),
   ('36', '10', 'Bullet2', 'Extern', '1', '400', '802.11bg', 'No', 'No', 'No', 'No', 'Si', 'RP-SMA', '2', 'Si', 'Si', 'Si', 'Si', 'Si', 'Wan', 'http://www.ubnt.com/products/loco.php', 'Permet Firmwares de tercers', 'Yes'),
