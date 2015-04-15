@@ -1490,6 +1490,29 @@ function guifi_install() {
 	(317,39,21,'',1,'albert.sarle@gmail.com',541,NULL,1332286488,NULL),
 	(318,36,24,'firmware_description',1,'albert.sarle@gmail.com',541,NULL,1332454981,NULL);");
 
+  // insert de firmwares
+  update_sql("INSERT INTO {guifi_firmware} (id, nom, descripcio, relations, enabled, notification, user_created, user_changed, timestamp_created, timestamp_changed) VALUES 
+	(1,'n/a','not available','Other',0,'albertsarle@gmailcom',541,0,0,0),
+	(2,'Alchemy','Alchemy from sveasoft','WRT54Gv1-4|WRT54GSv1-2',0,'albertsarle@gmailcom',541,0,0,0),
+	(3,'Talisman','Talisman from sveasoft','WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4',0,'albertsarle@gmailcom',541,0,0,0),
+	(4,'DD-WRTv23','DD-WRTv23Beta2 from BrainSlayer','WRT54Gv1-4|WHR-HP-G54, WHR-G54S|WRT54GL|WRT54',1,'albertsarle@gmailcom',541,541,0,1336245714),
+	(5,'DD-guifi','DD-guifi from Miquel Martos','WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|WHR-',1,'albertsarle@gmailcom',541,541,0,1336245706),
+	(6,'RouterOSv2.9','RouterOS 2.9 from Mikrotik','Routerboard 532|Routerboard 133C|Routerboard ',0,'albertsarle@gmailcom',541,0,0,0),
+	(7,'whiterussian','OpenWRT-whiterussian','WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Wrap',0,'albertsarle@gmailcom',541,0,0,0),
+	(8,'kamikaze','OpenWRT kamikaze','WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|Rout',0,'albertsarle@gmailcom',541,0,0,0),
+	(9,'Freifunk-BATMAN','OpenWRT-Freifunk-v1.6.16 with B.A.T.M.A.N','WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|WHR-',0,'albertsarle@gmailcom',541,0,0,0),
+	(10,'RouterOSv3.x','RouterOS 3.x from Mikrotik','Routerboard 532|Routerboard 133C|Routerboard ',0,'albertsarle@gmailcom',541,0,0,0),
+	(11,'AirOsv221','Ubiquti AirOs 2.2.1','NanoStation2|NanoStation5|NanoStation Loco2|N',0,'albertsarle@gmailcom',541,541,0,1328962781),
+	(12,'Freifunk-OLSR','OpenWRT-Freifunk-v1.6.16 with OLSR','WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4|WHR-',0,'albertsarle@gmailcom',541,0,0,0),
+	(13,'AirOsv30','Ubiquti AirOs 3.0','NanoStation2|NanoStation5|NanoStation Loco2|N',1,'albertsarle@gmailcom',541,541,0,1336245700),
+	(14,'RouterOSv4.0+','RouterOSv4.0+','Routerboard 532|Routerboard 133C|Routerboard ',1,'albertsarle@gmailcom',541,541,0,1336245758),
+	(15,'AirOsv52','Ubiquti AirOs 5.2','AirMaxM2 Rocket/Nano/Loco|AirMaxM5 Rocket/Nan',0,'albertsarle@gmailcom',541,0,0,0),
+	(16,'RouterOSv4.7+','RouterOS 4.7 and newer 4.x ','Routerboard 532|Routerboard 133C|Routerboard ',1,'albertsarle@gmailcom',541,541,0,1336245724),
+	(17,'GuifiStationOS1.0','GuifiStationOS v1.0 from Setup Informatica','GuifiStation2|GuifiStation5',0,'albertsarle@gmailcom',541,0,0,0),
+	(18,'gsffirm','Firmware de GràciaSenseFils MANET','WRT54Gv1-4|WHR-HP-G54, WHR-G54S|WRT54GL|WRT54',0,'albertsarle@gmailcom',541,0,0,0),
+	(19,'RouterOSv5.x','RouterOS 5.x or newer from Mikrotik','Routerboard 532|Routerboard 133C|Routerboard ',1,'albertsarle@gmailcom',541,541,0,1336245762),
+	(20,'AirOsv3.6+','Ubiquti AirOs 3.6+','NanoStation2|NanoStation5|NanoStation Loco2|N',0,'albertsarle@gmailcom',541,0,0,0),
+	(21,'DD-WRTv24preSP2','DD-WRTv24preSP2 from BrainSlayer','AirMaxM2 Bullet/PwBrg/AirGrd/NanoBr|AirMaxM5 ',1,'albertsarle@gmailcom',541,541,0,1336245719);");
 }
 
 // --
