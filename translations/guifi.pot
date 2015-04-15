@@ -2437,7 +2437,7 @@ msgid "Radio Model"
 msgstr ""
 
 #: guifi_radios.inc.php:46
-msgid "Select the readio model that do you have."
+msgid "Select the radio model that do you have."
 msgstr ""
 
 #: guifi_radios.inc.php:74

@@ -43,7 +43,7 @@ function guifi_radio_form($edit, &$form_weight) {
     '#required' => TRUE,
      '#default_value' => $edit['variable']['model_id'],
     '#options' => $models_array,
-    '#description' => t('Select the readio model that do you have.'),
+    '#description' => t('Select the radio model that do you have.'),
     '#prefix' => '<table><tr><td>',
     '#suffix' => '</td>',
     '#ahah' => array(
@@ -636,7 +636,7 @@ function guifi_radio_validate($form,$edit) {
 }
 
 /* guifi_radios_validate()): Validate radio item, called as a hook while validating the form
- *                           once per each readio
+ *                           once per each radio
  */
 function guifi_radios_validate($rid,$radio,$edit) {
   guifi_log(GUIFILOG_TRACE,"function _guifi_radio_validate()");
