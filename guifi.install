@@ -188,6 +188,9 @@ function guifi_schema() {
   		 'connector_type' => array('type' => 'varchar','length' => '10', 'not null' => FALSE, 'default' => NULL, 'comment' => 'connector type (RJ45,FO LX,SC...)'),
   		 'vlan' => array('type' => 'varchar','length' => '10', 'not null' => FALSE, 'default' => NULL, 'comment' => 'vlan (if have)'),
   		 'comments' => array('type' => 'varchar','length' => '64', 'not null' => FALSE, 'default' => NULL, 'Additional info/comments'),
+         'connector_type' => array('type' => 'varchar', 'length' => 10, 'comment' => 'connector type (RJ45,FO LX,SC...)'),
+         'vlan' => array('type' => 'varchar', 'length' => 10, 'comment' => 'vlan (if have)'),
+         'comments' => array('type' => 'varchar', 'length' => 64, 'comment' => 'Additional info/comments'),
          'connto_did' => array('type' => 'int', 'size' => 'medium', 'not null' => FALSE, 'comment' => 'connected to (device)'),
          'connto_iid' => array('type' => 'int', 'size' => 'medium', 'not null' => FALSE, 'comment' => 'connected to (interface)'),
       'primary key' => array('device_id', 'id'),
@@ -442,6 +445,26 @@ function guifi_schema() {
       'user_changed' => array('type' => 'int', 'size' => 'medium',' not null' => FALSE),
       'timestamp_created' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
       'timestamp_changed' => array('type' => 'int', 'not null' => FALSE),
+      ),
+    'primary key' => array('id'),
+  );
+
+
+  $schema['guifi_configuracioUnSolclic'] = array(
+    'comment' => 'UnSolclic Configurations',
+    'fields' => array(
+      'id' => array('type' => 'serial', 'not null' => TRUE),
+      'mid' => array('type' => 'int', 'not null' => TRUE),
+      'fid' => array('type' => 'int', 'not null' => TRUE),
+      'enabled' => array('type' => 'int', 'size' => 'tiny', 'unsigned' => TRUE, 'default' => 0),
+      'plantilla' => array('type' => 'text'),
+      'tipologia' => array('type' => 'int', 'size' => 'tiny', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
+      'notification' => array('type' => 'varchar', 'length' => 1024, 'not null' => TRUE),
+      'user_created' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE),
+      'user_changed' => array('type' => 'int', 'size' => 'medium',' not null' => TRUE),
+      'timestamp_created' => array('type' => 'int', 'not null' => TRUE),
+      'timestamp_changed' => array('type' => 'int', 'not null' => TRUE),
+      'template_file' => array('type' => 'varchar', 'length' => 45),
       ),
     'primary key' => array('id'),
   );
