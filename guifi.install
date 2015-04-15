@@ -457,6 +457,7 @@ function guifi_schema() {
       'mid' => array('type' => 'int', 'not null' => TRUE),
       'fid' => array('type' => 'int', 'not null' => TRUE),
       'enabled' => array('type' => 'int', 'size' => 'tiny', 'unsigned' => TRUE, 'default' => 0),
+      'snmp_id' => array('type' => 'varchar', 'length' => 32, 'not null' => TRUE),
       'plantilla' => array('type' => 'text'),
       'tipologia' => array('type' => 'int', 'size' => 'tiny', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
       'notification' => array('type' => 'varchar', 'length' => 1024, 'not null' => TRUE),
