@@ -1253,7 +1253,7 @@ function guifi_menu() {
     'page arguments' => array(2),
     'access callback' => 'user_access',
     'access arguments' => array('access content'),
-    'type' => CALLBACK
+     'type' => MENU_CALLBACK
   );
   $items['guifi/graph_detail'] = array(
     'title' => 'display detailed node graphs',
@@ -1271,7 +1271,7 @@ function guifi_menu() {
      'page callback' => 'guifi_api',
      'access callback' => 'user_access',
      'access arguments' => array('access content'),
-     'type' => CALLBACK
+     'type' => MENU_CALLBACK
   );
 
   // Spatial searches

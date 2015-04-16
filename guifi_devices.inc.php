@@ -1566,6 +1566,7 @@ function guifi_device_add_ipv4s_submit($form, &$form_state) {
  * choose the device type to create
  */
 function guifi_device_create_form($form_state, $node) {
+  guifi_log(GUIFILOG_TRACE,'function guifi_device_create_form()', $node);
 
   $types = guifi_types('device');
 
