@@ -174,7 +174,7 @@ function guifi_zone_autocomplete_field($zid,$fname) {
      '#default_value'=> ($zid!='') ?
          $zid.'-'.guifi_get_zone_name($zid) : NULL,
      '#maxsize'=> 256,
-     '#autocomplete_path' => 'budgets/js/select-zone',
+     '#autocomplete_path' => 'guifi/js/select-zone',
   );
 }
 
