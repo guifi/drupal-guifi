@@ -1916,7 +1916,6 @@ function _guifi_api_get_zone($device){
 	return $address['zone_id'];
 }
 
-/* _guifi
 
 /* Services API Calls */
 
@@ -2149,7 +2148,35 @@ function guifi_api_service_types($gapi, $parameters) {
 	$gapi -> addResponseField('service_type',$service_type);
 	return TRUE;
 }
+/*
+ * Get service
+ * Required parameters: 'server_id'
+ * Optional parameters: ---
+ */
+function guifi_api_service_list($gapi, $parameters) {
 
+	if (!guifi_api_check_fields($gapi, array('server_id'), $parameters)) {
+		return FALSE;
+	}
+	
+	$services = array();
+	
+	$query = db_query("SELECT * FROM {guifi_services} WHERE device_id='%s'", $parameters['server_id']);
+
+	while( $service = db_fetch_object($query) ) {
+		$services[]=array('id' => $service -> id,
+						'service_type' => $service -> service_type, 
+						'device_id' => $service -> device_id);
+	}
+	
+	$gapi -> addResponseField('services',$services);
+	return TRUE;
+}
+
+function guifi_api_cnml_clear($gapi, $parameters) {
+	cache_clear_all("%/cnml/%", cache_page, TRUE);
+	return TRUE;	
+}
 /* Examples API functions */
 
 /*
