@@ -279,7 +279,7 @@ function guifi_zone_select_field($zid,$fname) {
     '#prefix' => '<div id="select-zone">',
     '#suffix' => '</div>',
     '#ahah' => array(
-      'path' => 'guifi/js/select-zone/'.$fname,
+      'path' => 'guifi/js/select-zone/'.$fname.'/select',
       'wrapper' => 'select-zone',
       'method' => 'replace',
       'effect' => 'fade',

@@ -225,48 +225,54 @@ function guifi_ahah_select_node_device(){
  *
  * URL: http://guifi.net/guifi/js/select-zone/%
  */
-function guifi_ahah_select_zone($string) {
-  $matches = array();
+function guifi_ahah_select_zone() {
 
-  $string = strtoupper(arg(3));
+  if ( arg(4) == 'select' ) {
+    $cid = 'form_'. $_POST['form_build_id'];
+    $cache = cache_get($cid, 'cache_form');
 
-  $query =
-    'SELECT ' .
-    '  CONCAT(z.id,"-",z.title) str, m.title master '.
-    'FROM {guifi_zone} z, {guifi_zone} m ' .
-    'WHERE z.master=m.id '.
-    '  AND CONCAT(z.id,"-",upper(z.title)) LIKE "%'. $string .'%"';
+    $fname = arg(3);
+    $zid = $_POST[$fname];
 
-  $qry = db_query($query);
+    if ($cache) {
+      $form = $cache->data;
+      $form[$fname] =
+        guifi_zone_select_field($zid,$fname);
 
-  $c = 0;
-  $matches = array();
-  while (($value = db_fetch_array($qry)) and ($c < 50)) {
-    $c++;
-    $matches[$value['str']] = $value['str'].' ('.$value['master'].')';
+      cache_set($cid, $form, 'cache_form', $cache->expire);
+      // Build and render the new select element, then return it in JSON format.
+      $form_state = array();
+      $form['#post'] = array();
+      $form = form_builder($form['form_id']['#value'] , $form, $form_state);
+      $output = drupal_render($form[$fname]);
+
+      drupal_json(array('status' => TRUE, 'data' => $output));
+    } else {
+      drupal_json(array('status' => FALSE, 'data' => ''));
+    }
+    exit();
+    
+  } else {
+    $matches = array();
+    $string = strtoupper(arg(3));
+    $query =
+      'SELECT ' .
+      '  CONCAT(z.id,"-",z.title) str, m.title master '.
+      'FROM {guifi_zone} z, {guifi_zone} m ' .
+      'WHERE z.master=m.id '.
+      '  AND CONCAT(z.id,"-",upper(z.title)) LIKE "%'. $string .'%"';
+
+    $qry = db_query($query);
+
+    $c = 0;
+    $matches = array();
+    while (($value = db_fetch_array($qry)) and ($c < 50)) {
+      $c++;
+      $matches[$value['str']] = $value['str'].' ('.$value['master'].')';
+    }
+    print drupal_to_js($matches);
+    exit();
   }
-  print drupal_to_js($matches);
-  exit();
-}
-
-function guifi_ahah_select_zone2($string){
-  $matches = array();
-
-  $string = strtoupper(arg(3));
-
-  $qry = db_query('SELECT ' .
-                  '  CONCAT(z.id,"-",z.title) str '.
-                  'FROM {guifi_zone} z ' .
-                  'WHERE z.title like "%'.$string.'%"'
-                 );
-  $c = 0;
-  $matches = array();
-  while (($value = db_fetch_array($qry)) and ($c < 50)) {
-    $c++;
-    $matches[$value['str']] = $value['str'];
-  }
-  print drupal_to_js($matches);
-  exit();
 }
 
 function guifi_ahah_delete_ipv4()
