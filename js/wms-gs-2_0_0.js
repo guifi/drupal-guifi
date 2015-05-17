@@ -90,7 +90,7 @@ var GuifiLayer = function(map, url, layers) {
 var openStreet = new google.maps.ImageMapType({
       getTileUrl: function(ll, z) {
               var X = ll.x % (1 << z);  // wrap
-              return "http://alzina.act.uji.es/tiles/" + z + "/" + X + "/" + ll.y + ".png";
+              return "http://alzina.act.uji.es/" + z + "/" + X + "/" + ll.y + ".png";
       },
       tileSize: new google.maps.Size(256, 256),
       isPng: true,
