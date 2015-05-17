@@ -337,7 +337,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
             if (is_array($interfaces[$device->id][$radio->radiodev_counter])) if (count($interfaces[$device->id][$radio->radiodev_counter])) {
               foreach ($interfaces[$device->id][$radio->radiodev_counter] as $radio_interfaces)
               foreach ($radio_interfaces as $interface) {
-                if (!array_search($interface->interface_type,array('a' => 'wds/p2p','b' => 'wLan','c' => 'wLan/Lan','d' => 'Wan')))
+                if ((!array_search($interface->interface_type,array('a' => 'wds/p2p','b' => 'wLan','c' => 'wLan/Lan','d' => 'Wan'))) AND (!array_search($interface->interface_class,array('a' => 'wds/p2p'))))
                   continue;
                 if ($interface->interface_type == 'Wan' and $radio->mode != 'client') continue;
                 if ($action == 'detail') {
@@ -388,7 +388,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
           foreach ($interfaces[$device->id] as $device_interfaces)
           foreach ($device_interfaces as $counter_interfaces)
           foreach ($counter_interfaces as $interface) {
-            if (array_search($interface->interface_type,array('a' => 'wds/p2p','b' => 'wLan','c' => 'wlan/Lan')))
+            if ((array_search($interface->interface_type,array('a' => 'wds/p2p','b' => 'wLan','c' => 'wlan/Lan'))) AND (array_search($interface->interface_class,array('a' => 'wds/p2p'))))
               continue;
             if ($action == 'detail') {
               $interfaceXML = $deviceXML->addChild('interface');
