@@ -197,7 +197,8 @@ function guifi_cnml($cnmlid,$action = 'help') {
     $nodesummary->links = 0;
 
     if ($action != 'zones') {
-      $nodeXML = $CNML->addChild('node',htmlspecialchars($node->body,ENT_QUOTES));
+//      $nodeXML = $CNML->addChild('node',htmlspecialchars($node->body,ENT_QUOTES));
+        $nodeXML = $CNML->addChild('node');
       foreach ($node as $key => $value) {
        if ($value) switch ($key) {
          case 'body': break;
@@ -228,13 +229,17 @@ function guifi_cnml($cnmlid,$action = 'help') {
          foreach ($device as $key => $value) {
           if ($value) switch ($key) {
             case 'body': comment;
-            case 'id': $deviceXML->addAttribute('id',$value); break;
+            case 'id': $main_ip = guifi_main_ip($value);
+                       $deviceXML->addAttribute('id',$value);
+                       $deviceXML->addAttribute('mainipv4', $main_ip[ipv4]);
+                       break;
             case 'nick': $deviceXML->addAttribute('title',$value); break;
             case 'type': $deviceXML->addAttribute('type',$value); break;
             case 'flag': $deviceXML->addAttribute('status',$value); break;
             case 'graph_server': $deviceXML->addAttribute('graph_server',$value); break;
             case 'timestamp_created': $deviceXML->addAttribute('created',date('Ymd hi',$value)); break;
             case 'timestamp_changed': $deviceXML->addAttribute('updated',date('Ymd hi',$value)); break;
+           // case 'mainipv4': $deviceXML->addAttribute('mainipv4',guifi_main_ip(id)); break;
           }
          }
          // TODO obtenir model_id i firmware del device o no de extra
