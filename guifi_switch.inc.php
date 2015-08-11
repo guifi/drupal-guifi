@@ -662,7 +662,7 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
     '#default_value'=> $vinterface[interface_type],
     '#size'         => 20,
     '#maxlength'    => 40,
-    '#disabled'     => (($vlan_wds) ? TRUE : FALSE) OR (($vinterface['deleted']) ? TRUE : FALSE),
+//    '#disabled'     => (($vlan_wds) ? TRUE : FALSE) OR (($vinterface['deleted']) ? TRUE : FALSE),
     '#attributes'   => array('class'=>'interface-item'),
    );
 
