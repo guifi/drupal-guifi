@@ -609,8 +609,8 @@ function guifi_device_form($form_state, $params = array()) {
     $form_state['values']['links'] = array();
     $form_state['values']['netmask'] = '255.255.255.224';
     if ($form_state['values']['type'] == 'radio') {
-      $form_state['values']['variable']['firmware_id'] = '13';
-      $form_state['values']['variable']['model_id'] = '25';
+      $form_state['values']['variable']['firmware_id'] = '23';
+      $form_state['values']['variable']['model_id'] = '70';
     }
   }
 
