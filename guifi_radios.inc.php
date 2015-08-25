@@ -349,6 +349,17 @@ function guifi_radio_channel_field($rid, $channel, $protocol) {
      );
 }
 
+function guifi_radio_channel_bwith_field($rid, $channel) {
+  return array(
+    '#type' => 'select',
+    '#title' => t("Channel Bandwith"),
+    '#parents' => array('radios',$rid,'chbandwith'),
+    '#default_value' =>  $channel,
+    '#options' => guifi_types('chbandwith', NULL, NULL,NULL),
+    '#description' => t('Select the channel bandwith where this radio will operate.'),
+     );
+}
+
 function guifi_radio_radio_form($radio, $key, &$form_weight = -200) {
     guifi_log(GUIFILOG_TRACE,sprintf('function _guifi_radio_radio_form(key=%d)',$key),$radio);
 
@@ -396,7 +407,7 @@ function guifi_radio_radio_form($radio, $key, &$form_weight = -200) {
       '#collapsible' => TRUE,
       '#collapsed' => !(isset($radio['unfold_main'])),
       '#tree' => FALSE,
-      '#attributes' => array('class' => 'fieldset-device-main'),
+//      '#attributes' => array('class' => 'fieldset-device-main'),
 //      '#weight' => $fw2++,
     );
 
@@ -447,12 +458,13 @@ function guifi_radio_radio_form($radio, $key, &$form_weight = -200) {
 						'effect' => 'fade',
 					),
 		    );
+
 		    $f['s']['channel'] =
-			    guifi_radio_channel_field(
-				    $key,
-						$radio["channel"],
-						$radio['protocol']);
-		    if ($radio['mode'] == 'ap') {
+                            guifi_radio_channel_field($key, $radio["channel"], $radio['protocol']);
+                    $f['s']['chbandwith'] =
+                            guifi_radio_channel_bwith_field($key, $radio["chbandwith"]);
+
+             if ($radio['mode'] == 'ap') {
               $f['ap'] = array(
                 '#type' => 'fieldset',
                 '#title' => t('Connection acceptance policy'),

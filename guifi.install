@@ -775,10 +775,11 @@ function guifi_install() {
   // --
   update_sql("DELETE FROM `guifi_types` WHERE `type` = 'channel'");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('1', 'channel', '0', 'Auto 2.4GHz', '802.11b|802.11g|802.11n');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('1', 'channel', '0', 'Auto 2.4GHz', '802.11b|802.11g|802.11n');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('2', 'channel', '1', '1 - 2412 MHz', '802.11b|802.11g|802.11n');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('3', 'channel', '2', '2 - 2417 MHz', '802.11b|802.11g|802.11n');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('3', 'channel', '2', '2-. 2417 MHz', '802.11b|802.11g|802.11n');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('4', 'channel', '3', '3 - 2422 MHz', '802.11b|802.11g|802.11n');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('5', 'channel', '4', '4 - 2422 MHz', '802.11b|802.11g|802.11n');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('5', 'channel', '4', '4 - 2427 MHz', '802.11b|802.11g|802.11n');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('6', 'channel', '5', '5 - 2432 MHz', '802.11b|802.11g|802.11n');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('7', 'channel', '6', '6 - 2437 MHz', '802.11b|802.11g|802.11n');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('8', 'channel', '7', '7 - 2442 MHz', '802.11b|802.11g|802.11n');");
@@ -790,77 +791,110 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('14', 'channel', '13', '13 - 2472 MHz', '802.11b|802.11g|802.11n');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('15', 'channel', '14', '14 - 2477 MHz', '802.11b|802.11g|802.11n');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('16', 'channel', '5000', 'Auto 5GHz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('17', 'channel', '5180', '36 - 5180MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('18', 'channel', '5200', '40 - 5200MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('19', 'channel', '5220', '44 - 5220MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('20', 'channel', '5240', '48 - 5240MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('21', 'channel', '5260', '52 - 5260MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('22', 'channel', '5280', '56 - 5280MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('23', 'channel', '5300', '60 - 5300MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('24', 'channel', '5320', '64 - 5320MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('25', 'channel', '5500', '100 - 5500MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('26', 'channel', '5520', '104 - 5520MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('27', 'channel', '5540', '108 - 5540MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('28', 'channel', '5560', '112 - 5560MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('29', 'channel', '5580', '116 - 5580MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('30', 'channel', '5600', '120 - 5600MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('31', 'channel', '5620', '124 - 5620MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('32', 'channel', '5640', '128 - 5640MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('33', 'channel', '5660', '132 - 5660MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('34', 'channel', '5680', '136 - 5680MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('35', 'channel', '5700', '140 - 5700MHz - 20Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('36', 'channel', '5185', '37! - 5185MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('37', 'channel', '5190', '38! - 5190MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('38', 'channel', '5195', '39! - 5195MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('39', 'channel', '5205', '41! - 5205MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('40', 'channel', '5210', '42! - 5210MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('41', 'channel', '5215', '43! - 5215MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('42', 'channel', '5225', '45! - 5225MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('43', 'channel', '5230', '46! - 5230MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('44', 'channel', '5235', '47! - 5235MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('45', 'channel', '5245', '49! - 5245MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('46', 'channel', '5250', '50! - 5250MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('47', 'channel', '5255', '51! - 5255MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('48', 'channel', '5265', '53! - 5265MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('49', 'channel', '5270', '54! - 5270MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('50', 'channel', '5275', '55! - 5275MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('51', 'channel', '5285', '57! - 5285MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('52', 'channel', '5290', '58! - 5290MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('53', 'channel', '5295', '59! - 5295MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('54', 'channel', '5305', '61! - 5305MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('55', 'channel', '5310', '62! - 5310MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('56', 'channel', '5315', '63! - 5315MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('57', 'channel', '5505', '101! - 5505MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('58', 'channel', '5510', '102! - 5510MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('59', 'channel', '5515', '103! - 5515MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('60', 'channel', '5525', '105! - 5525MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('61', 'channel', '5530', '106! - 5530MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('62', 'channel', '5535', '107! - 5535MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('63', 'channel', '5545', '109! - 5545MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('64', 'channel', '5550', '110! - 5550MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('65', 'channel', '5555', '111! - 5555MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('66', 'channel', '5565', '113! - 5565MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('67', 'channel', '5570', '114! - 5570MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('68', 'channel', '5575', '115! - 5575MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('69', 'channel', '5585', '117! - 5585MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('70', 'channel', '5590', '118! - 5590MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('71', 'channel', '5595', '119! - 5595MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('72', 'channel', '5605', '121! - 5605MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('73', 'channel', '5610', '122! - 5610MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('74', 'channel', '5615', '123! - 5615MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('75', 'channel', '5625', '125! - 5625MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('76', 'channel', '5630', '126! - 5630MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('77', 'channel', '5635', '127! - 5635MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('78', 'channel', '5645', '129! - 5645MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('79', 'channel', '5650', '130! - 5650MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('80', 'channel', '5655', '131! - 5655MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('81', 'channel', '5665', '133! - 5665MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('82', 'channel', '5670', '134! - 5670MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('83', 'channel', '5675', '135! - 5675MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('84', 'channel', '5685', '137! - 5685MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('85', 'channel', '5690', '138! - 5690MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('86', 'channel', '5695', '139! - 5695MHz - 20Mhz/5Mhz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('17', 'channel', '5180', '36 - 5180MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('18', 'channel', '5200', '40 - 5200MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('19', 'channel', '5220', '44 - 5220MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('20', 'channel', '5240', '48 - 5240MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('21', 'channel', '5260', '52 - 5260MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('22', 'channel', '5280', '56 - 5280MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('23', 'channel', '5300', '60 - 5300MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('24', 'channel', '5320', '64 - 5320MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('25', 'channel', '5500', '100 - 5500MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('26', 'channel', '5520', '104 - 5520MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('27', 'channel', '5540', '108 - 5540MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('28', 'channel', '5560', '112 - 5560MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('29', 'channel', '5580', '116 - 5580MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('30', 'channel', '5600', '120 - 5600MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('31', 'channel', '5620', '124 - 5620MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('32', 'channel', '5640', '128 - 5640MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('33', 'channel', '5660', '132 - 5660MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('34', 'channel', '5680', '136 - 5680MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('35', 'channel', '5700', '140 - 5700MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('36', 'channel', '5185', '37 - 5185MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('37', 'channel', '5190', '38 - 5190MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('38', 'channel', '5195', '39 - 5195MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('39', 'channel', '5205', '41 - 5205MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('40', 'channel', '5210', '42 - 5210MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('41', 'channel', '5215', '43 - 5215MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('42', 'channel', '5225', '45 - 5225MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('43', 'channel', '5230', '46 - 5230MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('44', 'channel', '5235', '47 - 5235MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('45', 'channel', '5245', '49 - 5245MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('46', 'channel', '5250', '50 - 5250MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('47', 'channel', '5255', '51 - 5255MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('48', 'channel', '5265', '53 - 5265MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('49', 'channel', '5270', '54 - 5270MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('50', 'channel', '5275', '55 - 5275MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('51', 'channel', '5285', '57 - 5285MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('52', 'channel', '5290', '58 - 5290MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('53', 'channel', '5295', '59 - 5295MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('54', 'channel', '5305', '61 - 5305MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('55', 'channel', '5310', '62 - 5310MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('56', 'channel', '5315', '63 - 5315MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('57', 'channel', '5505', '101 - 5505MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('58', 'channel', '5510', '102 - 5510MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('59', 'channel', '5515', '103 - 5515MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('60', 'channel', '5525', '105 - 5525MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('61', 'channel', '5530', '106 - 5530MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('62', 'channel', '5535', '107 - 5535MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('63', 'channel', '5545', '109 - 5545MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('64', 'channel', '5550', '110 - 5550MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('65', 'channel', '5555', '111 - 5555MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('66', 'channel', '5565', '113 - 5565MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('67', 'channel', '5570', '114 - 5570MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('68', 'channel', '5575', '115 - 5575MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('69', 'channel', '5585', '117 - 5585MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('70', 'channel', '5590', '118 - 5590MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('71', 'channel', '5595', '119 - 5595MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('72', 'channel', '5605', '121 - 5605MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('73', 'channel', '5610', '122 - 5610MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('74', 'channel', '5615', '123 - 5615MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('75', 'channel', '5625', '125 - 5625MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('76', 'channel', '5630', '126 - 5630MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('77', 'channel', '5635', '127 - 5635MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('78', 'channel', '5645', '129 - 5645MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('79', 'channel', '5650', '130 - 5650MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('80', 'channel', '5655', '131 - 5655MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('81', 'channel', '5665', '133 - 5665MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('82', 'channel', '5670', '134 - 5670MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('83', 'channel', '5675', '135 - 5675MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('84', 'channel', '5685', '137 - 5685MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('85', 'channel', '5690', '138 - 5690MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('86', 'channel', '5695', '139 - 5695MHz', '802.11a|802.11n|802.11ac');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('87', 'channel', '0000', 'Auto 2-8GHz', 'WiMAX');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('88', 'channel', '0', '10Ghz auto', 'Legacy');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('89', 'channel', '10308', '48 - 10308MHz', 'Legacy');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('90', 'channel', '10322', '51 - 10322MHz', 'Legacy');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('91', 'channel', '10336', '54 - 10336MHz', 'Legacy');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('92', 'channel', '10350', '57 - 10350MHz', 'Legacy');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('93', 'channel', '10364', '59 - 10364MHz', 'Legacy');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('94', 'channel', '10378', '62 - 10378MHz', 'Legacy');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('95', 'channel', '10392', '65 - 10392MHz', 'Legacy');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('96', 'channel', '10406', '68 - 10406MHz', 'Legacy');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('97', 'channel', '10490', '85 - 10490MHz', 'Legacy');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('98', 'channel', '10504', '87 - 10504MHz', 'Legacy');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('99', 'channel', '10518', '90 - 10518MHz', 'Legacy');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('100', 'channel', '10532', '93 - 10532MHz', 'Legacy');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('101', 'channel', '10546', '96 - 10546MHz', 'Legacy');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('102', 'channel', '10560', '99 - 10560MHz', 'Legacy');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('103', 'channel', '10574', '101 - 10574MHz', 'Legacy');");
+
+  // --
+  // -- Wireless channel bandwith
+  db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES " .
+                "('1', 'chbandwit', '5Mhz', '5Mhz')," .
+                "('2', 'chbandwit', '7Mhz', '7Mhz')," .
+                "('3', 'chbandwit', '8Mhz', '8Mhz')," .
+                "('4', 'chbandwit', '10Mhz', '10Mhz')," .
+                "('5', 'chbandwit', '14Mhz', '14Mhz')," .
+                "('6', 'chbandwit', '20Mhz', '20Mhz')," .
+                "('7', 'chbandwit', '28Mhz', '28Mhz')," .
+                "('8', 'chbandwit', '30Mhz', '5Mhz')," .
+                "('9', 'chbandwit', '40Mhz', '5Mhz')," .
+                "('10', 'chbandwit', '50Mhz', '5Mhz')," .
+                "('11', 'chbandwit', '60Mhz', '5Mhz')," .
+                "('12', 'chbandwit', '70Mhz', '5Mhz')," .
+                "('13', 'chbandwit', '80Mhz', '5Mhz');");
 
   // --
   // -- Routing methods
@@ -3311,5 +3345,29 @@ function guifi_update_1042() {
 
   return $items;
 }
+
+function guifi_update_1043() {
+  $items = array();
+
+  $items[] = update_sql("ALTER TABLE guifi_radios ADD COLUMN chbandwith VARCHAR(8) NOT NULL DEFAULT '20Mhz' COMMENT 'Channel Bandwith' AFTER channel;");
+
+  $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description) VALUES " .
+                "('1', 'chbandwit', '5Mhz', '5Mhz')," .
+                "('2', 'chbandwit', '7Mhz', '7Mhz')," .
+                "('3', 'chbandwit', '8Mhz', '8Mhz')," .
+                "('4', 'chbandwit', '10Mhz', '10Mhz')," .
+                "('5', 'chbandwit', '14Mhz', '14Mhz')," .
+                "('6', 'chbandwit', '20Mhz', '20Mhz')," .
+                "('7', 'chbandwit', '28Mhz', '28Mhz')," .
+                "('8', 'chbandwit', '30Mhz', '5Mhz')," .
+                "('9', 'chbandwit', '40Mhz', '5Mhz')," .
+                "('10', 'chbandwit', '50Mhz', '5Mhz')," .
+                "('11', 'chbandwit', '60Mhz', '5Mhz')," .
+                "('12', 'chbandwit', '70Mhz', '5Mhz')," .
+                "('13', 'chbandwit', '80Mhz', '5Mhz');");
+
+  return $items;
+}
+
 
 ?>
