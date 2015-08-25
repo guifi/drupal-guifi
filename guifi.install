@@ -775,9 +775,8 @@ function guifi_install() {
   // --
   update_sql("DELETE FROM `guifi_types` WHERE `type` = 'channel'");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('1', 'channel', '0', 'Auto 2.4GHz', '802.11b|802.11g|802.11n');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('1', 'channel', '0', 'Auto 2.4GHz', '802.11b|802.11g|802.11n');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('2', 'channel', '1', '1 - 2412 MHz', '802.11b|802.11g|802.11n');");
-  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('3', 'channel', '2', '2-. 2417 MHz', '802.11b|802.11g|802.11n');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('3', 'channel', '2', '2 - 2417 MHz', '802.11b|802.11g|802.11n');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('4', 'channel', '3', '3 - 2422 MHz', '802.11b|802.11g|802.11n');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('5', 'channel', '4', '4 - 2427 MHz', '802.11b|802.11g|802.11n');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('6', 'channel', '5', '5 - 2432 MHz', '802.11b|802.11g|802.11n');");
