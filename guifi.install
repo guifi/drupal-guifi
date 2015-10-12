@@ -208,6 +208,7 @@ function guifi_schema() {
          'mode' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE),
          'protocol' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => '802.11bg'),
          'channel' => array('type' => 'int',  'not null' => FALSE),
+         'chbandwith' => array('comment' => 'Channel Bandwith', 'type' => 'varchar', 'length' => '8', 'not null' => TRUE, 'default' => '20Mhz'),
          'antenna_angle' => array('type' => 'int', 'not null' => FALSE, 'default' => 0),
          'antenna_gain' => array('type' => 'int', 'not null' => FALSE),
          'antenna_azimuth' => array('type' => 'int', 'not null' => FALSE, 'default' => 360),
@@ -881,19 +882,19 @@ function guifi_install() {
   // --
   // -- Wireless channel bandwith
   db_query("INSERT INTO {guifi_types} (id, type, text, description) VALUES " .
-                "('1', 'chbandwit', '5Mhz', '5Mhz')," .
-                "('2', 'chbandwit', '7Mhz', '7Mhz')," .
-                "('3', 'chbandwit', '8Mhz', '8Mhz')," .
-                "('4', 'chbandwit', '10Mhz', '10Mhz')," .
-                "('5', 'chbandwit', '14Mhz', '14Mhz')," .
-                "('6', 'chbandwit', '20Mhz', '20Mhz')," .
-                "('7', 'chbandwit', '28Mhz', '28Mhz')," .
-                "('8', 'chbandwit', '30Mhz', '5Mhz')," .
-                "('9', 'chbandwit', '40Mhz', '5Mhz')," .
-                "('10', 'chbandwit', '50Mhz', '5Mhz')," .
-                "('11', 'chbandwit', '60Mhz', '5Mhz')," .
-                "('12', 'chbandwit', '70Mhz', '5Mhz')," .
-                "('13', 'chbandwit', '80Mhz', '5Mhz');");
+                "('1', 'chbandwith', '5Mhz', '5Mhz')," .
+                "('2', 'chbandwith', '7Mhz', '7Mhz')," .
+                "('3', 'chbandwith', '8Mhz', '8Mhz')," .
+                "('4', 'chbandwith', '10Mhz', '10Mhz')," .
+                "('5', 'chbandwith', '14Mhz', '14Mhz')," .
+                "('6', 'chbandwith', '20Mhz', '20Mhz')," .
+                "('7', 'chbandwith', '28Mhz', '28Mhz')," .
+                "('8', 'chbandwith', '30Mhz', '30Mhz')," .
+                "('9', 'chbandwith', '40Mhz', '40Mhz')," .
+                "('10', 'chbandwith', '50Mhz', '50Mhz')," .
+                "('11', 'chbandwith', '60Mhz', '60Mhz')," .
+                "('12', 'chbandwith', '70Mhz', '70Mhz')," .
+                "('13', 'chbandwith', '80Mhz', '80Mhz');");
 
   // --
   // -- Routing methods
@@ -3351,19 +3352,19 @@ function guifi_update_1043() {
   $items[] = update_sql("ALTER TABLE guifi_radios ADD COLUMN chbandwith VARCHAR(8) NOT NULL DEFAULT '20Mhz' COMMENT 'Channel Bandwith' AFTER channel;");
 
   $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description) VALUES " .
-                "('1', 'chbandwit', '5Mhz', '5Mhz')," .
-                "('2', 'chbandwit', '7Mhz', '7Mhz')," .
-                "('3', 'chbandwit', '8Mhz', '8Mhz')," .
-                "('4', 'chbandwit', '10Mhz', '10Mhz')," .
-                "('5', 'chbandwit', '14Mhz', '14Mhz')," .
-                "('6', 'chbandwit', '20Mhz', '20Mhz')," .
-                "('7', 'chbandwit', '28Mhz', '28Mhz')," .
-                "('8', 'chbandwit', '30Mhz', '5Mhz')," .
-                "('9', 'chbandwit', '40Mhz', '5Mhz')," .
-                "('10', 'chbandwit', '50Mhz', '5Mhz')," .
-                "('11', 'chbandwit', '60Mhz', '5Mhz')," .
-                "('12', 'chbandwit', '70Mhz', '5Mhz')," .
-                "('13', 'chbandwit', '80Mhz', '5Mhz');");
+                "('1', 'chbandwith', '5Mhz', '5Mhz')," .
+                "('2', 'chbandwith', '7Mhz', '7Mhz')," .
+                "('3', 'chbandwith', '8Mhz', '8Mhz')," .
+                "('4', 'chbandwith', '10Mhz', '10Mhz')," .
+                "('5', 'chbandwith', '14Mhz', '14Mhz')," .
+                "('6', 'chbandwith', '20Mhz', '20Mhz')," .
+                "('7', 'chbandwith', '28Mhz', '28Mhz')," .
+                "('8', 'chbandwith', '30Mhz', '30Mhz')," .
+                "('9', 'chbandwith', '40Mhz', '40Mhz')," .
+                "('10', 'chbandwith', '50Mhz', '50Mhz')," .
+                "('11', 'chbandwith', '60Mhz', '60Mhz')," .
+                "('12', 'chbandwith', '70Mhz', '70Mhz')," .
+                "('13', 'chbandwith', '80Mhz', '80Mhz');");
 
   return $items;
 }
