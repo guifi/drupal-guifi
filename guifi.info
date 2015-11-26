@@ -1,6 +1,11 @@
-; $Id: guifi.info,v 3.0 2007/07/23 $
 name = guifi.net
 description = Main module for guifi.net provisioning system for wireless networks and communities.
 package = guifi.net
-core = 6.x
-version = 6.3-dev6.3
+core = 7.x
+version = "7.01"
+configure = admin/config/guifi
+
+;; stylesheets[all][] = guifi.css
+;; files[] = xxx
+;; scripts[] = xxx.js
+
