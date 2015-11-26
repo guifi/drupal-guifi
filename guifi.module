@@ -3,36 +3,35 @@
  * @file guifi.module
  */
 
-include_once("guifi_zone.inc.php");      // zone management
-include_once("guifi_maintainers.inc.php"); // maintainers
-include_once("guifi_funders.inc.php");   // funders
-include_once("guifi_ipv4.inc.php");      // ipv4 network management
-include_once("guifi_node.inc.php");      // node (location) management
-include_once("guifi_service.inc.php");   // services management
-include_once("guifi_devices.inc.php");   // device management
-include_once("guifi_radios.inc.php");    // radios management
-include_once("guifi_switch.inc.php");    // switch management
-include_once("guifi_interfaces.inc.php");// interfaces management
-include_once("guifi_links.inc.php");     // links management
-include_once("guifi_users.inc.php");     // user management
-include_once("guifi_graphs.inc.php");    // graphs management
-include_once("guifi_unsolclic.inc.php"); // unsolclic generator
-include_once("guifi_domains.inc.php");   // Domain name server management
-include_once("guifi_hosts.inc.php");     // Host name server management
-// include_once("guifi_nodexchange.inc.php");// nodeXchange (XML) generator
-include_once("guifi_cnml.inc.php");      // CNML (XML) generator
-include_once("guifi_gml.inc.php");       // gml (geographic XML export) generator
-include_once("guifi_maps.inc.php");      // maps management
-include_once("guifi_includes.inc.php");  // misc. routines
-include_once("guifi_networkutils.inc.php");  // network calc routines
-include_once("guifi_sql.inc.php");       // database changes
-include_once("guifi_ahah.inc.php");      // AHAH functions
-include_once("GeoCalc.class.php");       // geographic routines
-include_once("guifi_spatial.inc.php");   // spatial searches
+include_once  'guifi_zone.inc.php';
+//include_once 'guifi_maintainers.inc.php'; // maintainers
+//include_once 'guifi_funders.inc.php';   // funders
+//include_once 'guifi_ipv4.inc.php';      // ipv4 network management
+//include_once 'guifi_node.inc.php';      // node (location) management
+//include_once 'guifi_service.inc.php';   // services management
+//include_once 'guifi_devices.inc.php';   // device management
+//include_once 'guifi_radios.inc.php';    // radios management
+//include_once 'guifi_switch.inc.php';    // switch management
+//include_once 'guifi_interfaces.inc.php';// interfaces management
+//include_once 'guifi_links.inc.php';     // links management
+include_once 'guifi_users.inc.php';     // user management
+//include_once 'guifi_graphs.inc.php';    // graphs management
+//include_once 'guifi_unsolclic.inc.php'; // unsolclic generator
+//include_once 'guifi_domains.inc.php';   // Domain name server management
+//include_once 'guifi_hosts.inc.php';     // Host name server management
+// include_once 'guifi_nodexchange.inc.php';// nodeXchange (XML) generator
+//include_once 'guifi_cnml.inc.php';      // CNML (XML) generator
+//include_once 'guifi_gml.inc.php';       // gml (geographic XML export) generator
+//include_once 'guifi_maps.inc.php';      // maps management
+include_once 'guifi_includes.inc.php';  // misc. routines
+//include_once 'guifi_networkutils.inc.php';  // network calc routines
+include_once 'guifi_sql.inc.php';       // database changes
+//include_once 'guifi_ahah.inc.php';      // AHAH functions
+//include_once 'GeoCalc.class.php';       // geographic routines
+//include_once 'guifi_spatial.inc.php';   // spatial searches
 
-include_once("guifi_api.inc.php");       // Guifi public API includes
-include_once("libs/GuifiAPI.php");       // Guifi API
-
+//include_once 'guifi_api.inc.php';       // Guifi public API includes
+//include_once 'libs/GuifiAPI.php';       // Guifi API
 
 
 /** Implementation of drupal main hooks.
@@ -43,17 +42,15 @@ include_once("libs/GuifiAPI.php");       // Guifi API
 
 
 function guifi_menu() {
-  $items = array();
   //
   // ADMINISTRATION settings
   //
-  $items['admin/settings/guifi'] = array(
+  $items['admin/config/guifi'] = array(
     'title' => 'guifi.net configuration',
     'description' => 'Configure guifi.net module',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('guifi_admin_settings'),
     'access arguments' => array('access administration pages'),
-    'type' => MENU_NORMAL_ITEM,
   );
 
   $items['guifi'] = array(
@@ -145,6 +142,7 @@ function guifi_menu() {
     'access arguments' => array('access content'),
     'weight' => 1,
   );
+
   $items['guifi/menu/workflow/usersqueue'] = array(
     'title' => 'Users queue',
     'description' => 'Track the users assigned to nodes detected as active, and therefore pending for approval',
@@ -159,6 +157,7 @@ function guifi_menu() {
     'page arguments' => array('node/'. guifi_zone_root() .'/view/pending'),
     'access arguments' => array('access content'),
   );
+
   $items['guifi/menu/workflow/availability'] = array(
     'title' => 'Availability report',
     'description' => 'Report of the status and availability of all nodes',
@@ -166,7 +165,8 @@ function guifi_menu() {
     'page arguments' => array('node/'. guifi_zone_root() .'/view/availability'),
     'access arguments' => array('access content'),
   );
-    $items['guifi/menu/workflow/datareview'] = array(
+
+  $items['guifi/menu/workflow/datareview'] = array(
     'title' => 'Data review',
     'description' => '',
     'page callback' => 'guifi_tools_datareview',
@@ -308,7 +308,7 @@ function guifi_menu() {
     'title' => 'guifi.net settings',
     'description' => 'Change the settings for "guifi.net" module ',
     'page callback' => 'drupal_goto',
-    'page arguments' => array('admin/settings/guifi'),
+    'page arguments' => array('admin/config/guifi'),
     'access arguments' => array('administer site configuration'),
     'weight' => 100,
   );
@@ -1284,45 +1284,14 @@ function guifi_menu() {
   );
 
   return $items;
-/*
-    $items[] = array('path' => 'admin/guifi/list', 'title' => t('list'),
-      'type' => MENU_DEFAULT_LOCAL_TASK, 'weight' => -10);
-
-     $items[] = array('path' => 'guifi/graph',
-      'title' => t('display graph'),
-      'callback' => 'guifi_graph',
-      'access' => user_access('access content'),
-      'type' => MENU_SUGGESTED_ITEM);
-     $items[] = array('path' => 'guifi/purge',
-      'title' => t('purge orphan devices/interfaces/ip addresses'),
-      'callback' => 'guifi_purge',
-      'access' => user_access('administer guifi networks'),
-      'type' => MENU_SUGGESTED_ITEM);
-     $items[] = array('path' => 'guifi/refresh',
-      'title' => t('check if data must be refreshed'),
-      'callback' => 'guifi_refresh',
-      'access' => user_access('access content'),
-      'type' => MENU_SUGGESTED_ITEM);
-
-    // guifi module menus
-    $items[] = array('path' => 'guifi',
-      'title' => t('guifi mesh networking database and provisioning system'),
-      'callback' => 'guifi_page',
-      'access' => user_access('access content'),
-      'type' => MENU_SUGGESTED_ITEM);
-
-    // cron tasks: Empty notification queue
-    $items[] = array('path' => 'guifi/notify',
-      'title' => t('send notifications'),
-      'callback' => 'guifi_notify_send',
-      'access' => 'administer guifi networks',
-      'type' => MENU_LOCAL_TASK,
-    );
-
-  return $items;*/
 }
 
-/* guifi_init(): Initialization hook: Load stylesheet */
+/**
+ * Implements hook_init().
+ *
+ * Initialization hook: Load stylesheet.
+ */
+
 function guifi_init() {
   drupal_add_css(drupal_get_path('module', 'guifi') .'/guifi.css');
   if (module_exists('event'))
@@ -1467,21 +1436,43 @@ function guifi_help($section) {
 }
 
 /**
- * Implementation of hook_perm().
+ * Implementation of hook_permission().
  */
-function guifi_perm() {
+function guifi_permission() {
   return array(
-    'administer guifi zones',
-    'administer guifi networks',
-    'administer guifi users',
-    'administer guifi dns',
-    'guifi module developer',
-    'create guifi zones',
-    'create guifi nodes',
-    'create guifi dns',
-    'edit own guifi zones',
-    'edit own guifi nodes',
-    'edit own guifi dns'
+    'administer guifi zones' => array(
+      'title' => t('Administer guifi zone'),
+    ),
+    'administer guifi networks' => array(
+      'title' => t('Administer guifi networks'),
+    ),
+    'administer guifi users' => array(
+      'title' => t('Administer guifi users'),
+    ),
+    'administer guifi dns' => array(
+      'title' => t('Administer DNS domains'),
+    ),
+    'guifi module developer' => array(
+      'title' => t('guifi developer options'),
+    ),
+    'create guifi zones' => array(
+      'title' => t('Create guifi zones'),
+    ),
+    'create guifi nodes' => array(
+      'title' => t('Create guifi nodes'),
+    ),
+    'create guifi dns' => array(
+      'title' => t('Create DNS domains'),
+    ),
+    'edit own guifi zones' => array(
+      'title' => t('Edit own guifi zones'),
+    ),
+    'edit own guifi nodes' => array(
+      'title' => t('Edit own guifi nodes'),
+    ),
+    'edit own guifi dns' => array(
+      'title' => t('Edit own DNS domains'),
+    ),
   );
 }
 
@@ -2023,38 +2014,36 @@ function guifi_link($type, $node = 0) {
 function guifi_page($full = FALSE) {
 
   $blocks = array();
-  if ($menus = db_fetch_array(db_query(
+  
+  if ($menus = db_query(
     "SELECT menu_name, mlid " .
     "FROM {menu_links} " .
     "WHERE link_path = 'guifi/menu'" .
-    " AND module = 'system'"))) {
+    " AND module = 'system'")->fetchAssoc()) {
     $result = db_query("
       SELECT m.*, ml.*
       FROM {menu_links} ml
       INNER JOIN {menu_router} m ON ml.router_path = m.path
-      WHERE ml.link_path != 'guifi/menu/help'
-        AND menu_name = '%s'
-        AND ml.plid = %d
-        AND hidden = 0",
-      $menus['menu_name'], $menus['mlid']);
-    while ($item = db_fetch_array($result)) {
+      WHERE ml.link_path <> 'guifi/menu/help' AND menu_name = :menu_name AND ml.plid = :mlid AND hidden = 0", $menus, array('fetch' => PDO::FETCH_ASSOC));
+
+  foreach ($result as $item) {
       _menu_link_translate($item);
       if (!$item['access']) {
         continue;
       }
-      // The link 'description' either derived from the hook_menu 'description'
-      // or entered by the user via menu module is saved as the title attribute.
+      // The link description, either derived from 'description' in hook_menu()
+      // or customized via menu module is used as title attribute.
       if (!empty($item['localized_options']['attributes']['title'])) {
         $item['description'] = $item['localized_options']['attributes']['title'];
+        unset($item['localized_options']['attributes']['title']);
       }
       $block = $item;
       $block['content'] = '';
-      if ($item['block_callback'] && function_exists($item['block_callback'])) {
-        $function = $item['block_callback'];
-        $block['content'] .= $function();
+      $block['content'] .= theme('admin_block_content', array('content' => system_admin_menu_block($item)));
+      if (!empty($block['content'])) {
+        $block['show'] = TRUE;
       }
-      $block['content'] .=
-        theme_guifi_menu_block_content(system_admin_menu_block($item));
+
       // Prepare for sorting as in function _menu_tree_check_access().
       // The weight is offset so it is always positive, with a uniform 5-digits.
       $blocks[(50000 + $item['weight']) .' '. $item['title'] .' '. $item['mlid']] = $block;
@@ -2074,7 +2063,7 @@ function guifi_page($full = FALSE) {
 }
 
 function guifi_cron() {
-  include_once('guifi_cron.inc.php');
+  include_once 'guifi_cron.inc.php';
 
   // Check for sending notifications
   $msg_exp = variable_get('guifi_notify_last', 0) +
@@ -2792,11 +2781,12 @@ function theme_guifi_menu_block_content($content) {
  * @ingroup themeable
  */
 function theme_guifi_menu_page($blocks) {
+
   $stripe = 0;
   $container = array();
 
   foreach ($blocks as $block) {
-    if ($block_output = theme('admin_block', $block)) {
+    if ($block_output = theme('admin_block', array('block' => $block))) {
       if (empty($block['position'])) {
         // perform automatic striping.
         $block['position'] = ++$stripe % 2 ? 'left' : 'right';
@@ -2808,25 +2798,11 @@ function theme_guifi_menu_page($blocks) {
     }
   }
 
-  $output = '<div class="admin clear-block">';
-  $output .= '<div class="compact-link">';
-  $dest = drupal_get_destination();
-  if ($dest == 'destination=guifi')
-    $suffix = '/full';
-  else
-    $suffix = '';
-  if (guifi_menu_compact_mode()) {
-    $link = 'guifi/menu/compact/off';
-    $output .= l(t('Show descriptions'), $link . $suffix, array('title' => t('Expand layout to include descriptions.')));
-  }
-  else {
-    $link = 'guifi/menu/compact/on';
-    $output .= l(t('Hide descriptions'), $link . $suffix, array('title' => t('Compact layout by hiding descriptions.')));
-  }
-  $output .= '</div>';
+  $output = '<div class="admin clearfix">';
+  $output .= theme('system_compact_link');
 
   foreach ($container as $id => $data) {
-    $output .= '<div class="'. $id .' clear-block">';
+    $output .= '<div class="' . $id . ' clearfix">';
     $output .= $data;
     $output .= '</div>';
   }
