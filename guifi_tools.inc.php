@@ -18,7 +18,7 @@
  */
 function guifi_tools_ip_search($ipv4 = NULL) {
 
-  $output = drupal_get_form('guifi_tools_ip_search_form',$ipv4);
+  $output = drupal_render(drupal_get_form('guifi_tools_ip_search_form',$ipv4));
 
   if (is_null($ipv4))
     return $output;
@@ -26,21 +26,25 @@ function guifi_tools_ip_search($ipv4 = NULL) {
   $output .= '<h2>'.t('Query result for "ipv4 LIKE %ipv4"',
     array('%ipv4' => "'".$ipv4."'")).'</h2>';
 
-  $headers = array(t('id'),
-    array('data' => t('nipv4')),
-    t('mask'),t('interface'),t('device'),t('node'));
-  $sql = 'SELECT *,inet_aton(ipv4) AS nipv4 FROM {guifi_ipv4} WHERE ipv4 LIKE "%s" ORDER BY inet_aton(ipv4)';
-  $sqla = pager_query($sql,50,0,NULL,$ipv4);
-  while ($ipv4 = db_fetch_object($sqla)) {
+  $headers = array(t('id'),t('ipv4'), t('mask'),t('interface'),t('device'),t('node'));
+
+  
+  $sql = db_select('guifi_ipv4', 'i')
+    ->fields('i', array('id','ipv4','netmask','interface_id'))
+    ->condition('ipv4', $ipv4, 'LIKE')
+    ->orderBy('nipv4', 'ASC')
+    ->extend('PagerDefault')
+    ->limit(50);
+  $sql->addExpression('inet_aton(ipv4)', 'nipv4');
+    
+  foreach ($sql->execute() as $ipv4 ) {
     $row = array();
     $row[] = $ipv4->id.'/'.$ipv4->interface_id;
     $row[] = $ipv4->ipv4;
     $row[] = $ipv4->netmask;
-
     // interface
-    if ($interface = db_fetch_object(db_query(
-         'SELECT * from {guifi_interfaces} WHERE id=%d',
-         $ipv4->interface_id))) {
+    if ($interface = db_query(
+         'SELECT * from {guifi_interfaces} WHERE id = :interface_id', array(':interface_id' => $ipv4->interface_id))->fetchObject()) {
       $row[] = $interface->id.'/'.$interface->radiodev_counter.' '.
         $interface->interface_type;
     } else {
@@ -50,9 +54,8 @@ function guifi_tools_ip_search($ipv4 = NULL) {
     }
 
     // device
-    if ($device = db_fetch_object(db_query(
-         'SELECT * from {guifi_devices} WHERE id=%d',
-         $interface->device_id))) {
+    if ($device = db_query(
+         'SELECT * from {guifi_devices} WHERE id = :dev_id', array(':dev_id' => $interface->device_id))->fetchObject()) {
       $row[] = $device->id.'-'.
         l($device->nick,'guifi/device/'.$device->id);
     } else {
@@ -62,23 +65,23 @@ function guifi_tools_ip_search($ipv4 = NULL) {
     }
 
     // node
-    if ($node = db_fetch_object(db_query(
-         'SELECT id from {guifi_location} WHERE id=%d',
-         $device->nid))) {
-      $node = node_load(array('nid' => $node->id));
-      $row[] = $node->id.'-'.
-        l($node->title,'node/'.$node->id);
+    if ($node = db_query(
+         'SELECT id from {guifi_location} WHERE id = :did', array(':did' => $device->nid))->fetchObject()) {
+      $node = node_load($node->id);
+      $row[] = $node->nid.'-'.
+        l($node->title,'node/'.$node->nid);
     } else {
       $row[] = t('Orphan');
       $rows[] = $row;
       continue;
     }
-
+      
     $rows[] = $row;
   }
 
-  $output .= theme('table',$headers,$rows);
-  $output .= theme_pager(NULL, 50);
+  $output .= theme('table',array('header' => $headers, 'rows' => $rows));
+  $output .= theme('pager');
+  
   return $output;
 }
 
@@ -86,13 +89,13 @@ function guifi_tools_ip_search($ipv4 = NULL) {
 /**
  * IP search form.
  */
-function guifi_tools_ip_search_form($form_state, $params = array()) {
+function guifi_tools_ip_search_form($form_state, array $params = array()) {
 
   $form['ipv4'] = array(
     '#type' => 'textfield',
     '#title' => t('Network IPv4 address'),
     '#required' => TRUE,
-    '#default_value' => $params,
+    '#default_value' => $params['build_info']['args'],
     '#size' => 16,
     '#maxlength' => 16,
     '#description' => t('Enter a valid ipv4 network address or pattern ' .
@@ -111,7 +114,7 @@ function guifi_tools_ip_search_form($form_state, $params = array()) {
  * IP search form submit.
  */
 function guifi_tools_ip_search_form_submit($form, &$form_state) {
-   drupal_goto('guifi/menu/ip/ipsearch/'.urlencode($form_state['values']['ipv4']));
+   drupal_goto('guifi/menu/ip/ipsearch/'.$form_state['values']['ipv4']);
    return;
 }
 
@@ -126,7 +129,8 @@ function guifi_tools_ip_search_form_submit($form, &$form_state) {
  *   Table with information about nodes, HTML formatted.
  */
 function guifi_tools_mac_search($mac = NULL) {
-  $output = drupal_get_form('guifi_tools_mac_search_form',$mac);
+
+  $output = drupal_render(drupal_get_form('guifi_tools_mac_search_form',$mac));
 
   if (is_null($mac))
     return $output;
@@ -135,17 +139,22 @@ function guifi_tools_mac_search($mac = NULL) {
     array('%mac' => "'".$mac."'")).'</h2>';
 
   $headers = array(t('mac'),t('interface'),t('device'),t('node'));
-  $sqlm = pager_query('SELECT * FROM {guifi_interfaces} WHERE mac LIKE "%s"',50,0,NULL,$mac);
-  while ($interface = db_fetch_object($sqlm)) {
+
+  $sql = db_select('guifi_interfaces', 'i')
+    ->fields('i', array('id','device_id','mac','radiodev_counter','interface_type'))
+    ->condition('mac', $mac, 'LIKE')
+    ->extend('PagerDefault')
+    ->limit(50);
+    
+  foreach ($sql->execute() as $interface ) {
     $row = array();
     $row[] = $interface->mac;
     $row[] = $interface->id.'/'.$interface->radiodev_counter.' '.
       $interface->interface_type;
 
     // device
-    if ($device = db_fetch_object(db_query(
-         'SELECT * from {guifi_devices} WHERE id=%d',
-         $interface->device_id))) {
+    if ($device = db_query(
+         'SELECT * from {guifi_devices} WHERE id = :dev_id', array(':dev_id' => $interface->device_id))->fetchObject()) {
       $row[] = $device->id.'-'.
         l($device->nick,'guifi/device/'.$device->id);
     } else {
@@ -155,12 +164,11 @@ function guifi_tools_mac_search($mac = NULL) {
     }
 
     // node
-    if ($node = db_fetch_object(db_query(
-         'SELECT id from {guifi_location} WHERE id=%d',
-         $device->nid))) {
-      $node = node_load(array('nid' => $node->id));
-      $row[] = $node->id.'-'.
-        l($node->title,'node/'.$node->id);
+    if ($node = db_query(
+         'SELECT id from {guifi_location} WHERE id = :did', array(':did' => $device->nid))->fetchObject()) {
+      $node = node_load($node->id);
+      $row[] = $node->nid.'-'.
+        l($node->title,'node/'.$node->nid);
     } else {
       $row[] = t('Orphan');
       $rows[] = $row;
@@ -170,8 +178,8 @@ function guifi_tools_mac_search($mac = NULL) {
     $rows[] = $row;
   }
 
-  $output .= theme('table',$headers,$rows);
-  $output .= theme_pager(NULL, 50);
+  $output .= theme('table',array('header' => $headers, 'rows' => $rows));
+  $output .= theme('pager');
   return $output;
 }
 
@@ -179,13 +187,13 @@ function guifi_tools_mac_search($mac = NULL) {
 /**
  * MAC search form.
  */
-function guifi_tools_mac_search_form($form_state, $params = array()) {
+function guifi_tools_mac_search_form($form_state, array $params = array()) {
 
   $form['mac'] = array(
     '#type' => 'textfield',
     '#title' => t('MAC address'),
     '#required' => TRUE,
-    '#default_value' => $params,
+    '#default_value' => $params['build_info']['args'],
     '#size' => 20,
     '#maxlength' => 20,
     '#description' => t('Enter a valid MAC address or pattern ' .
@@ -358,11 +366,11 @@ function guifi_tools_ip_rangesearch_form_submit($form, $form_state) {
  */
 function guifi_tools_mail_search($mail = NULL) {
 
-  $output = drupal_get_form('guifi_tools_mail_search_form',$mail);
+  $output = drupal_render(drupal_get_form('guifi_tools_mail_search_form',$mail));
 
   // If a valid email address has been given, allow massive update
   if ((!empty($mail)) and (valid_email_address($mail)))
-    $output .= drupal_get_form('guifi_tools_mail_update_form',$mail);
+    $output .= drupal_render(drupal_get_form('guifi_tools_mail_update_form',$mail));
 
   // Close the form table
   $output .= '</table></table>';
@@ -378,8 +386,14 @@ function guifi_tools_mail_search($mail = NULL) {
   $tables = array('guifi_zone','guifi_location','guifi_devices','guifi_services','guifi_users');
 
   foreach ($tables as $table) {
-    $sqlm = db_query('SELECT * FROM {%s} WHERE notification LIKE "%s"',$table,$mail);
-    while ($amails = db_fetch_object($sqlm)) {
+
+    $sql = db_select($table, 'i')
+      ->fields('i')
+      ->condition('notification', $mail, 'LIKE')
+      ->extend('PagerDefault')
+      ->limit(50);
+
+    foreach ($sql->execute() as $amails ) {
       $row = array();
       $row[] = $table;
       $row[] = $amails->notification;
@@ -431,7 +445,8 @@ function guifi_tools_mail_search($mail = NULL) {
   } // foreach table
 
   if (count($rows))
-    $output .= theme('table',$headers,$rows);
+  $output .= theme('table',array('header' => $headers, 'rows' => $rows));
+  $output .= theme('pager');
   return $output;
 }
 
@@ -439,7 +454,7 @@ function guifi_tools_mail_search($mail = NULL) {
 /**
  * E-mail address search form
  */
-function guifi_tools_mail_search_form($form_state, $params = array()) {
+function guifi_tools_mail_search_form($form_state, array $params = array()) {
 
 //  $form['submit'] = array(
 //    '#type' => 'submit',
@@ -451,7 +466,7 @@ function guifi_tools_mail_search_form($form_state, $params = array()) {
     '#type' => 'textfield',
     '#title' => t('e-mail address'),
     '#required' => TRUE,
-    '#default_value' => $params,
+    '#default_value' => $params['build_info']['args'],
     '#size' => 50,
     '#maxlength' => 50,
     '#description' => t('Enter a valid e-mail address to look for ' .
@@ -478,11 +493,11 @@ function guifi_tools_mail_search_form($form_state, $params = array()) {
 /**
  * E-mail address update form
  */
-function guifi_tools_mail_update_form($form_state, $params = array()) {
-
+function guifi_tools_mail_update_form($form_state, array $params = array()) {
+ 
   $form['mail_search'] = array(
     '#type' => 'value',
-    '#value' => $params);
+    '#value' => $params['build_info']['args']);
 //  $form['submit'] = array(
 //    '#type' => 'submit',
 //    '#value' => t('Replace with'),
@@ -493,12 +508,12 @@ function guifi_tools_mail_update_form($form_state, $params = array()) {
     '#type' => 'textfield',
     '#title' => t('New e-mail address'),
     '#required' => FALSE,
-    '#default_value' => $params,
+    '#default_value' => $params['build_info']['args'],
     '#size' => 50,
     '#maxlength' => 50,
     '#description' => t('Enter a valid e-mail address to replace %mail for ' .
         'all the rows of the report below.',
-        array('%mail' => $params)),
+        array('%mail' => $params['build_info']['args'])),
     '#prefix'=> '<td>',
     '#suffix'=> '</td>',
   );
@@ -555,11 +570,10 @@ function guifi_tools_mail_update_form_submit($form, &$form_state) {
   $tables = array('guifi_zone','guifi_location','guifi_devices','guifi_services','guifi_users');
 
   foreach ($tables as $table) {
-    $sqlm = db_query('SELECT * FROM {%s} WHERE notification LIKE "%s"',
-      $table,
-      $form_state['values']['mail_search']);
-
-    while ($amails = db_fetch_object($sqlm)) {
+    $sql = db_select($table, 'i')
+      ->fields('i')
+      ->condition('notification', $form_state['values']['mail_search'], 'LIKE');
+    foreach ( $sql->execute() as $amails) {
       // Check that the user has update access and creates the link
       $continue = FALSE;
       if (!user_access('administer guifi networks'))
