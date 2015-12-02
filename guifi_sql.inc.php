@@ -43,7 +43,7 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
     $insert = TRUE;
 
   $qc = db_query('SHOW COLUMNS FROM ' . $table);
-  while ($column = db_fetch_object($qc))
+  foreach ($qc as $column)
     $columns[] = $column->Field;
 
   // cleanup columns which doesn't exists into the database
@@ -57,26 +57,26 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
   if ($insert) {
     switch ($table) {
 	  case 'guifi_model_specs':
-	    $next_id = db_fetch_array(db_query("SELECT max(mid)+1 mid FROM {$table} "));
+	    $next_id = db_query("SELECT max(mid)+1 mid FROM {$table} ")->fetchAssoc();
 	    $data['mid'] = $next_id['mid'];
 	    $data['user_created'] = $user->uid;
 	    $data['timestamp_created'] = time();
             break;
 	  case 'guifi_manufacturer':
-	    $next_id = db_fetch_array(db_query("SELECT max(fid)+1 fid FROM {$table} "));
+	    $next_id = db_query("SELECT max(fid)+1 fid FROM {$table} ")->fetchAssoc();
 	    $data['fid'] = $next_id['fid'];
 	    $data['user_created'] = $user->uid;
 	    $data['timestamp_created'] = time();
             break;
 	  case 'guifi_types':
-	    $next_id = db_fetch_array(db_query("SELECT max(id)+1 id FROM {$table}WHERE type = '%s'",$data['type']));
+	    $next_id = db_query("SELECT max(id)+1 id FROM {$table}WHERE type = '%s'",$data['type'])->fetchAssoc();
 	    $data['id'] = $next_id['id'];
             break;
 	  case 'budget_funds':
 	    $data['timestamp_created'] = time();
 	  case 'budget_items':
-	    $next_id = db_fetch_array(db_query("SELECT max(id)+1 id FROM {$table} " .
-	        "WHERE budget_id = %d",$data['budget_id']));
+	    $next_id = db_query("SELECT max(id)+1 id FROM {$table} " .
+	        "WHERE budget_id = %d",$data['budget_id'])->fetchAssoc();
 	    if (is_null($next_id['id']))
 	      $next_id['id'] = 1;
 	    $data['id'] = $next_id['id'];
@@ -86,7 +86,7 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 	  case 'guifi_maintainers':
 	  case 'guifi_funders':
 	  case 'guifi_users':
-	    $next_id = db_fetch_array(db_query("SELECT max(id)+1 id FROM {$table}"));
+	    $next_id = db_query("SELECT max(id)+1 id FROM {$table}")->fetchAssoc();
 	    if (is_null($next_id['id']))
 	      $next_id['id'] = 1;
 	    $data['id'] = $next_id['id'];
@@ -106,11 +106,11 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 	//      $data['radiodev_counter']=$next_id['id'];
 	//    break;
 	  case 'guifi_interfaces':
-	    $new_id=db_fetch_array(db_query('SELECT max(id)+1 id FROM {guifi_interfaces}'));
+	    $new_id=db_query('SELECT max(id)+1 id FROM {guifi_interfaces}')->fetchAssoc();
 	    $data['id']=$new_id['id'];
 	    break;
 	  case 'guifi_ipv4':
-	    $next_id = db_fetch_array(db_query('SELECT max(a.id) + 1 id FROM {guifi_ipv4} a, {guifi_interfaces} i WHERE a.interface_id=i.id AND i.id=%d',$data['interface_id']));
+	    $next_id = db_query('SELECT max(a.id) + 1 id FROM {guifi_ipv4} a, {guifi_interfaces} i WHERE a.interface_id=i.id AND i.id=%d',$data['interface_id'])->fetchAssoc();
 	    if (is_null($next_id['id']))
 	      $next_id['id'] = 0;
 	    $data['id'] = $next_id['id'];
@@ -118,7 +118,7 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 	  case 'guifi_links':
 	    // fill only if insert (remote id already know the id)
 	    if (($insert) && ($data['id']==-1))  {
-	      $next_id=db_fetch_array(db_query('SELECT max(id)+1 id FROM {guifi_links}'));
+	      $next_id=db_query('SELECT max(id)+1 id FROM {guifi_links}')->fetchAssoc();
 	      if (is_null($next_id['id']))
 	        $next_id['id'] = 1;
 	      $data['id']=$next_id['id'];
@@ -131,7 +131,7 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 	  case 'guifi_parametres':
 	  case 'guifi_parametresConfiguracioUnsolclic':
 	  case 'guifi_parametresFirmware':
-	    $new_id=db_fetch_array(db_query("SELECT max(id)+1 id FROM {$table}"));
+	    $new_id=db_query("SELECT max(id)+1 id FROM {$table}")->fetchAssoc();
 	    $data['id']=$new_id['id'];
 	    $data['user_created'] = $user->uid;
 	    $data['timestamp_created'] = time();
@@ -211,11 +211,16 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
      if (is_null($value))
        $where_data[$k] = $k.' is NULL';
      else
-       if ( $table == 'guifi_types')
+       if ( $table == 'guifi_types') {
          $where_data[$k] = $k.' = \''.$value.'\'';
-       else
+         $cond[0] = '\''.$k.'\'';
+         $cond[1] = '\''.$value.'\'';
+         }
+       else {
          $where_data[$k] = $k.' = '.$value;
-
+         $cond[0] = $k;
+         $cond[1] = $value;
+       }
    // check what's being changed
    $sqlqc = 'SELECT '.implode(',',array_keys($data)).
            ' FROM {'.$table.'}'.
@@ -223,14 +228,10 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
    $ck = 0;
    $qc = db_query($sqlqc);
 
-   while ($odata = db_fetch_array($qc)) {
+   while ($odata = $qc->fetchAssoc()) {
      $orig_data = $odata;
      $ck++;
    }
-//
-//   print "SQL:$sqlqc\n<br />Rows: $ck\n<br />";
-//   print_r($orig_data);
-//   exit;
 
    if ($ck != 1)
    {
@@ -257,6 +258,7 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
    // perform the update only if there are changes in real data (excluding
    // user changed and timestamp)
    $input = $orig_data;
+
    $output = $data;
    if (isset($input['timestamp_changed'])) {
      unset($input['timestamp_changed']);
@@ -275,24 +277,13 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 
    // constructing update
    $log .= $table.' '.t('UPDATED').":<br />";
-   foreach ($new_data as $k => $value) {
-     $log .= "\t - ".$k.': '.$orig_data[$k].' -> '.$value.'<br />';
-     if (is_float($value))
-       $values_data[$k] = $k.'=%f';
-     else if (is_numeric($value))
-       $values_data[$k] = $k.'=%f';
-     else
-       $values_data[$k] = $k."='%s'";
-   }
-   $sql_str .= "UPDATE {".$table."} SET ".implode(', ',$values_data).
-               " WHERE ".implode(' AND ',$where_data);
+
+   db_update($table)
+     ->fields($new_data)
+     ->condition($cond[0], $cond[1])
+     ->execute();
  }
 
-  // execute SQL statement
-  guifi_log(GUIFILOG_TRACE,"function _guifi_sql($sql_str)",$new_data);
-
-  $log .= $sql_str . ' (' . implode(', ', $new_data) . ')<br />';
-  db_query($sql_str, $new_data);
   return ($data);
 }
 

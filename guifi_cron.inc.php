@@ -24,8 +24,8 @@ function guifi_notify_send($send = TRUE) {
   // Get all the queue to be processesed, grouping to every single destination
   $qt = db_query("
     SELECT *
-    FROM {guifi_notify}");
-  while ($message = db_fetch_array($qt)) {
+    FROM {guifi_notify}")->fetchAssoc();
+  foreach ($qt as $message) {
     $messages[$message['id']] = $message;
     foreach (unserialize($message['to_array']) as $dest)
        $destinations[$dest][] = $message['id'];

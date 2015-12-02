@@ -1,21 +1,19 @@
 <?php
+
+
 /**
  * @file guifi_maintainers.inc.php
  * Manage guifi_maintainers fieldssets, validations, etc...
  */
 
  function guifi_maintainers_load($id, $subject_type, $ret = "maintainer") {
-   $qsql = sprintf('SELECT * FROM {guifi_maintainers} ' .
-   		'WHERE subject_id = %d ' .
-   		' AND subject_type = "%s" ' .
+   $qsql = db_query('SELECT * FROM {guifi_maintainers} ' .
+   		'WHERE subject_id = :si' .
+   		' AND subject_type = :st ' .
    		'ORDER BY id',
-   		$id,$subject_type);
-   $result = db_query($qsql);
-   guifi_log(GUIFILOG_TRACE,
-     'function guifi_maintainers_load(sql)',
-     $ret . ' - '. $qsql);
+   		array(':si' => $id,':st' => $subject_type));
 
-   while ($m = db_fetch_array($result)) {
+   foreach ($qsql as $m) {
    	 switch ($ret ) {
    	 	case "maintainer":
           $m['maintainer'] = $m['supplier_id'].'-'.budgets_supplier_get_suppliername($m['supplier_id']);
@@ -146,14 +144,14 @@ function guifi_maintainers_form($node,&$form_weight) {
       'Use "Preview" button if you need more rows to fill.'),
     '#collapsible' => TRUE,
     '#collapsed'   => ($node->maintainers[0]!='') ? TRUE : FALSE,
-    '#attributes'  => array('class'=>'maintainers'),
+    '#attributes'  => array('class'=> array('maintainers')),
     '#weight'      => $form_weight++,
     '#tree'        => TRUE,
   );    
 
   $maintainer_id=0;
   $nmaintainers = count($node->maintainers);
-//  guifi_log(GUIFILOG_BASIC, 'function guifi_zone_form(mantainers)', $node->maintainers[$maintainer_id]);
+
   guifi_log(GUIFILOG_TRACE, 'function guifi_maintainers_form(mantainers 2)', $node->maintainers);
   do {
     $form['maintainers'][$maintainer_id]['maintainer'] = array (

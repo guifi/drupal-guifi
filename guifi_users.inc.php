@@ -207,7 +207,7 @@ function guifi_user_password_mail($key, &$message, $params) {
 **/
 function guifi_user_load($id) {
 
-  $item = db_fetch_array(db_query('SELECT * FROM {guifi_users} WHERE id = %d', $id));
+  $item = db_query('SELECT * FROM {guifi_users} WHERE id = :id', array(':id' => $id->uid))->fetchAssoc();
   $item['services'] = unserialize($item['services']);
   $item['vars'] = unserialize($item['extra']);
   if (!empty($item['content_filters']))

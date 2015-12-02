@@ -4,11 +4,9 @@ var marker_NE;
 var marker_SW;
 var marker_move ;
 
-if(Drupal.jsEnabled) {
-    $(document).ready(function(){
+    jQuery(document).ready(function($) {
         draw_map();
-    }); 
-}
+    });
 
 function draw_map() {
 
@@ -781,10 +779,8 @@ function draw_map() {
 
     var marcador = new google.maps.Marker();
 
-    var newNE = new google.maps.LatLng(document.getElementById("maxy").value, 
-			                           document.getElementById("maxx").value);
-    var newSW = new google.maps.LatLng(document.getElementById("miny").value, 
-			                           document.getElementById("minx").value); 
+    var newNE = new google.maps.LatLng(document.getElementById("maxy").value, document.getElementById("maxx").value);
+    var newSW = new google.maps.LatLng(document.getElementById("miny").value, document.getElementById("minx").value); 
 
     var newBounds = new google.maps.LatLngBounds(newSW, newNE) ;
 

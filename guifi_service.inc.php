@@ -45,7 +45,7 @@ function guifi_service_load($node) {
   else
     $k = $node;
 
-  $node = db_fetch_object(db_query("SELECT * FROM {guifi_services} WHERE id = '%d'", $k));
+  $node = db_query("SELECT * FROM {guifi_services} WHERE id = :id", array(':id' => $k))->fetchObject();
   $node->var = unserialize($node->extra);
   $node->l = 'node/'.$node->id;
 
@@ -412,18 +412,6 @@ function guifi_service_multiplefield($field, $fname, $descr) {
       '#size' => 60,
       '#maxlength' => 60,
     );
-//  $f[99] = array(
-//    '#type' => 'image_button',
-//    '#src' => drupal_get_path('module', 'guifi').'/icons/add.png',
-//    '#attributes' => array('title' => t('Add more choices')),
-//    '#prefix' => '</div>',
-//    '#ahah' => array(
-//      'path' => 'guifi/js/mfield/'.$fname,
-//      'wrapper' => 'mfield-'.$fname,
-//      'method' => 'replace',
-//      'effect' => 'fade',
-//    )
-//  );
 
   return $f;
 }
@@ -445,7 +433,7 @@ function guifi_service_nick_validate($element, &$form_state) {
   }
 }
 
-function guifi_service_str($id,$emptystr = 'Take from parents') {
+function guifi_service_str($id, $emptystr = 'Take from parents') {
   if (empty($id))
     return t($emptystr);
   if ($id == -1)
@@ -477,8 +465,8 @@ function guifi_service_name_validate($nodestr,&$form_state) {
     return;
 
   $nid = explode('-',$nodestr['#value']);
-  $qry = db_query('SELECT id FROM {guifi_services} WHERE id="%s"',$nid[0]);
-  while ($node = db_fetch_array($qry))
+  $qry = db_query('SELECT id FROM {guifi_services} WHERE id = :id',array(':id' => $nid[0]));
+  foreach ($qry->fetchObject() as $node)
     return $nodestr;
 
   form_error($nodestr,

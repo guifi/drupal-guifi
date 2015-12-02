@@ -132,7 +132,7 @@ function guifi_main_ip($device_id) {
   }
 }
 
-function guifi_types($type,$start = 24,$end = 0,$relations = NULL) {
+function guifi_types($type, $start = 24, $end = 0, $relations = NULL) {
   if ($type == 'netmask') {
     for ($n = $start; $n > $end; $n--) {
       $item = _ipcalc_by_netbits('0.0.0.0',$n);
@@ -155,18 +155,20 @@ function guifi_types($type,$start = 24,$end = 0,$relations = NULL) {
         from
           guifi_firmware f
           inner join
-        guifi_configuracioUnSolclic usc ON usc.fid = f.id  and usc.mid = %d
-        order by name asc", $relations);
-        while ($type = db_fetch_array($query)) {
+        guifi_configuracioUnSolclic usc ON usc.fid = f.id  and usc.mid = :relations
+        order by name asc", array(':relations' => $relations))->fetchAssoc();
+        foreach ($query as $type) {
           $values[] = $type;
         }
         return $values;
   }
 
-  if ($relations == NULL) $query = db_query("SELECT text, description FROM {guifi_types} WHERE type='%s' ORDER BY id",$type);
+  if ($relations == NULL)
+    $query = db_query("SELECT text, description FROM {guifi_types} WHERE type = :type ORDER BY id",array(':type' => $type));
   else
-    $query = db_query("SELECT text, description FROM {guifi_types} WHERE type='%s' AND RELATIONS LIKE '%s' ORDER BY id",$type,'%'.$relations.'%');
-  while ($type = db_fetch_object($query)) {
+    $query = db_query("SELECT text, description FROM {guifi_types} WHERE type = :type AND RELATIONS LIKE :relations ORDER BY id",array(':type' => $type, ':relations' => '%'.$relations.'%'));
+  //foreach ($query->fetchObject() as $type) {
+    while ($type = $query->fetchObject()) {
     $values[$type->text] = t($type->description);
   }
   return $values;
@@ -1042,7 +1044,7 @@ function guifi_get_zone_nick($id) {
 }
 
 function guifi_get_zone_name($id) {
-  $node = db_fetch_object(db_query("SELECT title FROM {guifi_zone} WHERE id=%d",$id));
+  $node = db_query("SELECT title FROM {guifi_zone} WHERE id = :id",array(':id' => $id))->fetchObject();
   return empty($node->title) ? t('None') : $node->title;
 }
 
@@ -1895,21 +1897,21 @@ function guifi_notify(&$to_mail, $subject, &$message,$verbose = TRUE, $notify = 
 
   if ($notify) {
     if ($to_mail != NULL) {
-      $next_id = db_fetch_array(db_query('SELECT max(id)+1 id FROM {guifi_notify}'));
+      $next_id = db_query('SELECT max(id)+1 id FROM {guifi_notify}')->fetchAssoc();
       if (is_null($next_id['id']))
         $next_id['id'] = 1;
       db_query("
         INSERT INTO {guifi_notify}
           (id,timestamp,who_id,who_name,to_array,subject,body)
         VALUES
-           (%d,%d,%d,'%s','%s','%s','%s')",
-        $next_id['id'],
-        time(),
-        $user->uid,
-        $user->name,
-        serialize($to_mail),
-        $msubject,
-        $message);
+           (:next_id,:time,:uid,:name,:mail,:subject,:msg)",
+        array(':next_id' => $next_id['id'],
+        ':time' => time(),
+        ':uid' => $user->uid,
+        ':name' => $user->name,
+        ':mail' => serialize($to_mail),
+        ':subject' => $msubject,
+        ':msg' => $message));
       drupal_set_message(
         t('A notification will be sent to: %to',
           array('%to' => implode(',',$to_mail))));
@@ -2125,14 +2127,17 @@ function guifi_coord_dtodms($coord){
 }
 
 function guifi_gmap_key() {
-  drupal_add_js(drupal_get_path('module', 'guifi').'/js/wms-gs-2_0_0.js','module');
-  drupal_set_html_head('<script src="//maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places' .
-      '" type="text/javascript"></script>');
+  drupal_add_js(drupal_get_path('module', 'guifi').'/js/wms-gs-2_0_0.js','file');
+  $element = array(
+  '#type' => 'markup', // The #tag is the html tag - <link />
+  '#markup' => '<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>',
+  );
+  drupal_add_html_head($element, 'guifi_gmap_key');
   return TRUE;
 }
 
 function guifi_validate_js($form_name) {
-  drupal_add_js(drupal_get_path('module', 'guifi').'/js/jquery.validate.pack.js','module');
+  drupal_add_js(drupal_get_path('module', 'guifi').'/js/jquery.validate.pack.js','file');
   drupal_add_js (
     '$(document).ready(function(){$("'.$form_name.'").validate()}); ',
     'inline');

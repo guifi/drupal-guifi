@@ -2036,3 +2036,12 @@ function guifi_schema() {
 
   return $schema;
 }
+
+/**
+ * Implements hook_install().
+ */
+
+function guifi_install() {
+
+
+}

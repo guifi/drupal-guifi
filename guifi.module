@@ -3,19 +3,19 @@
  * @file guifi.module
  */
 
-include_once  'guifi_zone.inc.php';
-//include_once 'guifi_maintainers.inc.php'; // maintainers
+include_once 'guifi_zone.inc.php';
+include_once 'guifi_maintainers.inc.php'; // maintainers
 //include_once 'guifi_funders.inc.php';   // funders
 //include_once 'guifi_ipv4.inc.php';      // ipv4 network management
 //include_once 'guifi_node.inc.php';      // node (location) management
-//include_once 'guifi_service.inc.php';   // services management
+include_once 'guifi_service.inc.php';   // services management
 //include_once 'guifi_devices.inc.php';   // device management
 //include_once 'guifi_radios.inc.php';    // radios management
 //include_once 'guifi_switch.inc.php';    // switch management
 //include_once 'guifi_interfaces.inc.php';// interfaces management
 //include_once 'guifi_links.inc.php';     // links management
 include_once 'guifi_users.inc.php';     // user management
-//include_once 'guifi_graphs.inc.php';    // graphs management
+include_once 'guifi_graphs.inc.php';    // graphs management
 //include_once 'guifi_unsolclic.inc.php'; // unsolclic generator
 //include_once 'guifi_domains.inc.php';   // Domain name server management
 //include_once 'guifi_hosts.inc.php';     // Host name server management
@@ -26,7 +26,7 @@ include_once 'guifi_users.inc.php';     // user management
 include_once 'guifi_includes.inc.php';  // misc. routines
 //include_once 'guifi_networkutils.inc.php';  // network calc routines
 include_once 'guifi_sql.inc.php';       // database changes
-//include_once 'guifi_ahah.inc.php';      // AHAH functions
+include_once 'guifi_ahah.inc.php';      // AHAH functions
 //include_once 'GeoCalc.class.php';       // geographic routines
 //include_once 'guifi_spatial.inc.php';   // spatial searches
 
@@ -65,7 +65,7 @@ function guifi_menu() {
 
   // Refresh maps callback
   $items['guifi/refresh'] = array(
-    'title' => t('check if data must be refreshed'),
+    'title' => 'check if data must be refreshed',
     'page callback' => 'guifi_refresh',
     'access callback' => 'user_access',
     'access arguments' => array('access content'),
@@ -1385,33 +1385,27 @@ function guifi_node_info() {
   return array(
     'guifi_zone' => array(
       'name' => t('guifi.net zone'),
-      'module' => 'guifi_zone',
+      'base' => 'guifi_zone',
       'description' => t("Create a community, area or zone. A typical zone hierarchy can be related to the territory (Country/Region/City...) but not have to, i.e. a single city can have many groups or communities with distinct IP addressing policies.<br />Every zone will have it's own page so it can be used as the homepage of that community.<br />The zones must belong at least to the root zone, but can also belong to other zones, so in that way a hierarchy is created.<br />Every zone have its own properties like maps or ip ranges and every node will have to be assigned to an existing zone, and will inherit the zone properties like his IP address and drawn in the corresponding map.<br />If zone properties are leaved blank, will inherit the parent zone properties."),
       'has_title' => TRUE,
       'title_label' => t('Zone name'),
-      'has_body' => TRUE,
-      'body_label' => t('Information about this zone'),
     ),
     'guifi_node' => array(
       'name' => t('guifi.net node'),
-      'module' => 'guifi_node',
+      'base' => 'guifi_node',
       'description' => t("Create a node. A node is a physical location " .
         "(will be dynamically drawed on the maps using lat/lon coordinates) " .
         "where there are network devices, servers, etc.<br />" .
         "Every node have to be assigned to a guifi zone."),
       'has_title' => TRUE,
       'title_label' => t('Location name'),
-      'has_body' => TRUE,
-      'body_label' => t('Information about this location'),
     ),
     'guifi_service' => array(
       'name' => t('guifi.net service'),
-      'module' => 'guifi_service',
+      'base' => 'guifi_service',
       'description' => t("Create a service. A service is any resource available on the network that should be listed in the content directory of the site, like a web server, internet proxy,ntp, instant messaging, voip gateway, etc... ."),
       'has_title' => TRUE,
       'title_label' => t('Service name'),
-      'has_body' => TRUE,
-      'body_label' => t('Information about this service'),
     ),
   );
 }
@@ -1426,9 +1420,9 @@ function guifi_help($section) {
       return t('Select an operation from the menus to manage zones.');
     case 'admin/guifi/zone/add':
       return t('Enter de zone information.');
-    case 'node/add#guifi-node':
+    case 'node/add#guifi_node':
       return t("Create a node. A node is a physical location (will be dynamically drawed on the maps using lat/lon coordinates) where there are network devices, servers, etc.<br />Every node have to assigned to a guifi zone.");
-    case 'node/add#guifi-zone':
+    case 'node/add#guifi_zone':
       return t("Create a community, area or zone. A typical zone hierarchy can be related to the territory (Country/Region/City...) but not have to, i.e. a single city can have many groups or communities with distinct IP addressing policies.<br />Every zone will have its own page so it can be used as the homepage of that community.<br />The zones must belong at least to the root zone, but can also belong to other zones, so in that way a hierarchy is created.<br />Every zone have its own properties like maps or ip ranges and every node will have to be assigned to an existing zone, and will inherit the zone properties like its IP address and will be drawn in the corresponding map.<br />If zone properties are leaved blank, will inherit the parent zone properties.");
     case 'node/add#guifi-service':
       return t("Create a service. A service is any resource available on the network that should be listed in the content directory of the site, like a web server, internet proxy,ntp, instant messaging, voip gateway, etc... .");
@@ -2819,9 +2813,9 @@ function theme_guifi_contacts($node, $header = TRUE) {
   if (!isset($node->uid))
     $node->uid = $node->user_created;
 
-  $name_created = db_fetch_object(db_query('SELECT u.name FROM {users} u WHERE u.uid = %d', $node->user_created));
-  $name_managed = db_fetch_object(db_query('SELECT u.name FROM {users} u WHERE u.uid = %d', $node->uid));
-  $name_changed = db_fetch_object(db_query('SELECT u.name FROM {users} u WHERE u.uid = %d', $node->user_changed));
+  $name_created = db_query('SELECT u.name FROM {users} u WHERE u.uid = :ucreated', array(':ucreated' => $node->user_created))->fetchObject();
+  $name_managed = db_query('SELECT u.name FROM {users} u WHERE u.uid = :uid', array(':uid' =>$node->uid))->fetchObject();
+  $name_changed = db_query('SELECT u.name FROM {users} u WHERE u.uid = :uchanged', array(':uchanged' =>$node->user_changed))->fetchObject();
 
   if (($node->notification) and (user_access('create guifi nodes')))
     $rows[] = '<a href="mailto:'. $node->notification .'">'. t('email contact (available if you are logged in)') .'</a>';

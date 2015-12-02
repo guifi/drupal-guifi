@@ -11,11 +11,9 @@ var icon_NE;
 var icon_SW;
 var icon_move ;
 
-if(Drupal.jsEnabled) {
-    $(document).ready(function(){
+    jQuery(document).ready(function($) {
         draw_map();
-    }); 
-}
+    });
 
 function draw_map() 
 {

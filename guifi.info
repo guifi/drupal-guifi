@@ -7,5 +7,36 @@ configure = admin/config/guifi
 
 ;; stylesheets[all][] = guifi.css
 ;; files[] = xxx
-;; scripts[] = xxx.js
+;;scripts[] = js/guifi_gmap_zonelimits.js
+;;scripts[] = js/guifi_gmap_zone.js
 
+;;files[] = guifi.module
+files[] = guifi_zone.inc.php
+files[] = guifi_maintainers.inc.php ;; maintainers
+;;files[] = guifi_funders.inc.php   ;; funders
+;;files[] = guifi_ipv4.inc.php      ;; ipv4 network management
+;;files[] = guifi_node.inc.php      ;; node (location) management
+files[] = guifi_service.inc.php   ;; services management
+;;files[] = guifi_devices.inc.php   ;; device management
+;;files[] = guifi_radios.inc.php    ;; radios management
+;;files[] = guifi_switch.inc.php    ;; switch management
+;;files[] = guifi_interfaces.inc.php;; interfaces management
+;;files[] = guifi_links.inc.php     ;; links management
+files[] = guifi_users.inc.php     ;; user management
+;;files[] = guifi_graphs.inc.php    ;; graphs management
+;;files[] = guifi_unsolclic.inc.php ;; unsolclic generator
+;;files[] = guifi_domains.inc.php   ;; Domain name server management
+;;files[] = guifi_hosts.inc.php     ;; Host name server management
+;; files[] = guifi_nodexchange.inc.php;; nodeXchange (XML) generator
+;;files[] = guifi_cnml.inc.php      ;; CNML (XML) generator
+;;files[] = guifi_gml.inc.php       ;; gml (geographic XML export) generator
+;;files[] = guifi_maps.inc.php      ;; maps management
+files[] = guifi_includes.inc.php  ;; misc. routines
+;;files[] = guifi_networkutils.inc.php  ;; network calc routines
+files[] = guifi_sql.inc.php       ;; database changes
+;;files[] = guifi_ahah.inc.php      ;; AHAH functions
+;;files[] = GeoCalc.class.php       ;; geographic routines
+;;files[] = guifi_spatial.inc.php   ;; spatial searches
+
+;;files[] = guifi_api.inc.php       ;; Guifi public API includes
+;;files[] = libs/GuifiAPI.php       ;; Guifi API

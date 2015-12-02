@@ -77,28 +77,26 @@ function guifi_ahah_select_server(){
   $string = strtoupper(arg(3));
 
   $qry = db_query('SELECT ' .
-                  '  CONCAT(d.id,"-",z.nick,", ",l.nick," ",d.nick) str '.
+                  '  CONCAT(d.id,\'-\',z.nick,\', \',l.nick,\' \',d.nick) str '.
                   'FROM {guifi_devices} d, {guifi_location} l, {guifi_zone} z ' .
                   'WHERE d.type IN ("server","cam","cloudy") ' .
                   '  AND d.nid=l.id AND l.zone_id=z.id ' .
-                  '  AND (UPPER(CONCAT(d.id,"-",z.nick,", ",l.nick," ",d.nick) LIKE "%'.
-                       strtoupper($string).'%")'.
-                  '  OR (l.id like "%'.$string.'%"'.
-                  '  OR l.nick like "%'.$string.'%"'.
-                  '  OR d.nick like "%'.$string.'%"'.
-                  '  OR z.nick like "%'.$string.'%"))'
-                 );
+                  '  AND (UPPER(CONCAT(d.id,\'-\',z.nick,\', \',l.nick,\' \',d.nick) ' .
+                  '  LIKE :string) ' .
+                  '  OR (l.id like :string' .
+                  '  OR l.nick like :string' .
+                  '  OR d.nick like :string' .
+                  '  OR z.nick like :string))',array(':string' => '%' . db_like($string) .'%')
+ );
+
   $c = 0;
   $na = t('Not assigned');
   $matches[$na] = $na;
-  while (($value = db_fetch_array($qry)) and ($c < 50)) {
+  while (($value = $qry->fetchAssoc()) and ($c < 50)) {
     $c++;
-// TODO need a revision.
-//    $matches[json_encode($value['str'],JSON_UNESCAPED_UNICODE)] =
-//       json_encode($value['str'],JSON_UNESCAPED_UNICODE);
       $matches[$value['str']] = $value['str'];
   }
-  print drupal_to_js($matches);
+  print drupal_json_encode($matches);
   exit();
 }
 
@@ -115,22 +113,27 @@ function guifi_ahah_select_service(){
   $string = strtoupper(arg(4));
 
   $qry = db_query('SELECT ' .
-                  '  CONCAT(s.id,"-",z.title,", ",s.nick) str '.
+                  '  CONCAT(s.id,\'-\',z.title,\', \',s.nick) str '.
                   'FROM {guifi_services} s, {guifi_zone} z ' .
-                  'WHERE s.service_type like "%'.$service_type.'%" ' .
+                  'WHERE s.service_type like :service_type ' .
                   '  AND s.zone_id=z.id ' .
-                  '  AND (UPPER(CONCAT(s.id,"-",z.title,", ",s.nick) LIKE "%'.
-                       $string.'%")'.
-                  '  OR (s.id like "%'.$string.'%"'.
-                  '  OR s.nick like "%'.$string.'%"'.
-                  '  OR z.title like "%'.$string.'%"))'
+                  '  AND (UPPER(CONCAT(s.id,\'-\',z.title,\', \',s.nick) LIKE :string)'.
+                  '  OR (s.id like :string2'.
+                  '  OR s.nick like :string3'.
+                  '  OR z.title like :string4))', array(':service_type' => '%' . db_like($service_type) .'%',
+                                ':string' => '%' . db_like($string) .'%',
+                                ':string2' => '%' . db_like($string) .'%',
+                                ':string3' => '%' . db_like($string) .'%',
+                                ':string4' => '%' . db_like($string) .'%',
+                                )
                  );
+    
   $c = 0;
-  while (($value = db_fetch_array($qry)) and ($c < 50)) {
+  while (($value = $qry->fetchAssoc()) and ($c < 50)) {
     $c++;
     $matches[$value['str']] = $value['str'];
   }
-  print drupal_to_js($matches);
+  print drupal_json_encode($matches);
   exit();
 }
 
@@ -146,17 +149,17 @@ function guifi_ahah_select_user(){
   $string = strtoupper(arg(3));
 
   $qry = db_query('SELECT ' .
-                  '  CONCAT(u.uid,"-",u.name," (",u.mail,")") str '.
+                  '  CONCAT(u.uid,\'-\',u.name,\' (\',u.mail,\')\') str '.
                   'FROM {users} u '.
-                  'WHERE (UPPER(CONCAT(u.uid,"-",u.name," (",u.mail,")")) ' .
-                  ' like "%'.$string.'%")'
+                  'WHERE (UPPER(CONCAT(u.uid,\'-\',u.name,\' (\',u.mail,\')\')) ' .
+                  ' like :string)', array(':string' => '%' . db_like($string) .'%')
                  );
   $c = 0;
-  while (($value = db_fetch_array($qry)) and ($c < 50)) {
+  while (($value = $qry->fetchAssoc()) and ($c < 50)) {
     $c++;
     $matches[$value['str']] = $value['str'];
   }
-  print drupal_to_js($matches);
+  print drupal_json_encode($matches);
   exit();
 }
 
@@ -257,20 +260,20 @@ function guifi_ahah_select_zone() {
     $string = strtoupper(arg(3));
     $query =
       'SELECT ' .
-      '  CONCAT(z.id,"-",z.title) str, m.title master '.
+      '  CONCAT(z.id,\'-\',z.title) str, m.title master '.
       'FROM {guifi_zone} z, {guifi_zone} m ' .
       'WHERE z.master=m.id '.
-      '  AND CONCAT(z.id,"-",upper(z.title)) LIKE "%'. $string .'%"';
+      '  AND CONCAT(z.id,\'-\',upper(z.title)) LIKE :string';
 
-    $qry = db_query($query);
+    $qry = db_query($query, array(':string' => '%' . db_like($string) .'%'));
 
     $c = 0;
     $matches = array();
-    while (($value = db_fetch_array($qry)) and ($c < 50)) {
+    while (($value = $qry->fetchAssoc()) and ($c < 50)) {
       $c++;
       $matches[$value['str']] = $value['str'].' ('.$value['master'].')';
     }
-    print drupal_to_js($matches);
+    print drupal_json_encode($matches);
     exit();
   }
 }

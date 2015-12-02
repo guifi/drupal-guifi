@@ -1,10 +1,10 @@
 var map = null;
 
-if(Drupal.jsEnabled) {
-    $(document).ready(function(){
-        draw_map();
-    });
-}
+
+$(document).ready(function(){
+    draw_map();
+});
+
 
 var init_widget;
 var swinit = 0;
