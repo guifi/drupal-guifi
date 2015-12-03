@@ -293,7 +293,7 @@ function guifi_zone_form($node, $form_state) {
     'function guifi_zone_form()',
     $node);
 
-  //drupal_set_breadcrumb(guifi_zone_ariadna($node->id));
+  drupal_set_breadcrumb(guifi_zone_ariadna($node->id));
   $form_weight = 0;
 
   $form = array();
@@ -1055,7 +1055,6 @@ function guifi_zone_childs_and_parents($zid) {
 }
 
 function guifi_zone_childs($zid) {
-print $zid;
   return array_keys(guifi_zone_childs_tree($zid , 9999));
 }
 
