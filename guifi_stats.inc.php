@@ -56,7 +56,7 @@
 function guifi_stats_growthmap() {
   $output = "";
   if (guifi_gmap_key()) {
-    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_growthmap.js','module');
+    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_growthmap.js');
     $output .=  '<form>' .
         '<input type=hidden value='.base_path().drupal_get_path('module','guifi').'/js/'.' id=edit-jspath />' .
         '<input type=hidden value='.variable_get('guifi_wms_service','').' id=guifi-wms />' .
@@ -95,7 +95,7 @@ function guifi_growthmap_map_form($form_state) {
  * nodes statistics
  */
 function guifi_stats_nodes() {
-  drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_stats_nodes.js','module');
+  drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_stats_nodes.js');
   $output = "";
   if(isset($_GET['id'])){
     $vid=$_GET['id'];
@@ -255,7 +255,7 @@ function guifi_stats_chart01(){ //growth_chart
     $items=2004;
     $label="a";
     $today=getdate();
-	while ($record=db_fetch_object($result)){
+	while ($record = $result->fetchObject()){
       if($record->ano>=2004){
         if($mes==12){
           $mes=1;
@@ -404,7 +404,7 @@ function guifi_stats_chart02(){
     $result=db_query($vsql);    
     $tot=0;
     $max=0;
-	while ($record=db_fetch_object($result)){
+	while ($record = $result->fetchObject()){
       if($record->ano>=2004){
          //$nreg++;
          $tot+=$record->num;
@@ -501,7 +501,7 @@ function guifi_stats_chart03(){
     
     $tot=0;
     $valor=0;
-	while ($record=db_fetch_object($result)){
+	while ($record = $result->fetchObject()){
         $tot+=$record->num;
         $data[]=array("$record->mes",$record->num);
     };
@@ -603,7 +603,7 @@ function guifi_stats_chart04(){
     
     $result=db_query($vsql);        
     
-    while ($record=db_fetch_object($result)){
+    while ($record = $result->fetchObject()){
       $data[]=array("$record->mes".'/'.substr("$record->year",2,2),$record->num);
       if($record->mes!=$today[mon] || $record->year!=$today[year]){
         $n++;
@@ -705,7 +705,7 @@ function guifi_stats_chart05($nmonths){
     $today=getdate();
     if($nmonths==0) $nmonths=12;
     $max=0;
-	while ($record=db_fetch_object($result)){
+	while ($record = $result->fetchObject()){
       if($record->ano>=2004){
         if($mes==12){
           $mes=1;
@@ -908,7 +908,7 @@ function guifi_stats_chart06(){
     $vsql .= "GROUP BY zone_id ";
     
     $result=db_query($vsql);        
-    while ($record=db_fetch_object($result)){
+    while ($record = $result->fetchObject()){
       foreach ($azone as $key => $grupzone) {
         if (in_array($record->zone_id,$grupzone)){
           $avalue[$key]=$avalue[$key]+$record->num;
@@ -1010,7 +1010,7 @@ function guifi_stats_chart07(){
     $vsql .= "GROUP BY zone_id ";
     
     $result=db_query($vsql);        
-    while ($record=db_fetch_object($result)){
+    while ($record = $result->fetchObject()){
       if($record->total>=20){
         $vn=$record->num/$record->total*100;
         $vmin=0;
@@ -1104,7 +1104,7 @@ function guifi_stats_feeds($pnum){
     $output .= '<atom:link href="http://guifi.net/guifi/stats/feeds/0" rel="self" type="application/rss+xml" />';
     $output .= '<description>'.$vst.' guifi.net'.'</description>';
     $result=db_query("select COUNT(*) as num from {guifi_location} where status_flag='Working'");
-    if ($record=db_fetch_object($result)){
+    if ($record = $result->fetchObject()){
       $output .= '<item>';
       $output .= '<guid isPermaLink="FALSE">http://guifi.net/guifi/menu/stats/nodes?dat='.date("d/m/Y",time()).'</guid>';
       $output .= '<description>';

@@ -95,10 +95,10 @@ function guifi_main_interface($mode = NULL) {
 }
 
 function guifi_main_ip($device_id) {
-  $qryipv4 = db_fetch_object(db_query('SELECT mainipv4 from {guifi_devices} where id = %d',$device_id));
+  $qryipv4 = db_query('SELECT mainipv4 from {guifi_devices} where id = :did', array(':did' => $device_id))->fetchObject();
   if ($qryipv4->mainipv4) {
    $devmainipv4 = explode(',',$qryipv4->mainipv4);
-   $ipv4 = db_fetch_object(db_query('SELECT ipv4, netmask from {guifi_ipv4} where id = %d AND interface_id = %d',$devmainipv4['1'], $devmainipv4['0']));
+   $ipv4 = db_query('SELECT ipv4, netmask from {guifi_ipv4} where id = :id AND interface_id = :iface_id', array(':id' => $devmainipv4['1'], ':iface_id' => $devmainipv4['0']))->fetchObject();
    $item = _ipcalc($ipv4->ipv4,$ipv4->netmask);
    $ipv4arr = array('ipv4' => $ipv4->ipv4,'maskbits' => $item['maskbits'], 'netmask' => $ipv4->netmask);
    return $ipv4arr;
@@ -106,9 +106,9 @@ function guifi_main_ip($device_id) {
   else {
     $qips = db_query('SELECT a.ipv4,a.netmask,a.id, i.interface_type
         FROM {guifi_interfaces} i LEFT JOIN {guifi_ipv4} a ON a.interface_id=i.id
-        WHERE i.device_id=%d ORDER BY a.id',$device_id);
+        WHERE i.device_id = :did ORDER BY a.id', array(':did' => $device_id));
     $ip_array=array();
-    while ($ip = db_fetch_object($qips)) {
+    while ($ip = $qips->fetchObject()) {
       if ($ip->ipv4 != NULL) {
         $item = _ipcalc($ip->ipv4,$ip->netmask);
         $ipv4arr = array('ipv4' => $ip->ipv4,'maskbits' => $item['maskbits'], 'netmask' => $ip->netmask);
@@ -188,8 +188,8 @@ function guifi_validate_types($type, $text, $relations = NULL) {
 
 
 function guifi_get_mac($id,$itype) {
-  $dev = db_fetch_object(db_query("SELECT mac from {guifi_devices} WHERE id = %d",$id));
-  $mac = db_fetch_object(db_query("SELECT relations FROM {guifi_types} WHERE type='interface' AND text='%s'",$itype));
+  $dev = db_query("SELECT mac from {guifi_devices} WHERE id = :id",array(':id' => $id))->fetchObject();
+  $mac = db_query("SELECT relations FROM {guifi_types} WHERE type='interface' AND text = :itype", array(':itype' => $itype))->fetchObject();
 
 //  print "Assign MAC: ".$id."-".$itype." Device: ".$dev->id." op ".$mac->relations."\n<br />";
 
@@ -200,7 +200,7 @@ function guifi_get_mac($id,$itype) {
 }
 
 function guifi_get_model_specs($mid) {
-  $m = db_fetch_object(db_query('select * from {guifi_model_specs} where mid=%d',$mid));
+  $m = db_query('select * from {guifi_model_specs} where mid = :mid',array(':mid' => $mid))->fetchObject();
 
   $m->ethernames = explode('|',$m->interfaces);
   for ($i=0; $i < $m->etherdev_max; $i++)
@@ -236,7 +236,7 @@ function guifi_get_model_specs($mid) {
  * @return TRUE if relation is valid,m FALSE if is invalid
 */
 function guifi_type_relation($type,$subject,$related) {
-  $relations = db_fetch_object(db_query("SELECT text, relations FROM {guifi_types} WHERE type='%s' AND text='%s'",$type,$subject));
+  $relations = db_query("SELECT text, relations FROM {guifi_types} WHERE type = :type AND text = :text",array(':type' => $type,':text' => $subject))->fetchObject();
   $pattern = str_replace("/","\/",$relations->relations);
 
 //  print "preg_match: ".$pattern." ".$subject." related ".$related." relations ".$re"\n<br />";
@@ -260,15 +260,14 @@ function guifi_url($url,$text = NULL) {
 }
 
 function guifi_server_descr($did) {
-  $query = db_query("SELECT CONCAT(d.id,'-',z.nick,', ',l.nick,' ',d.nick) descr " .
+  $server = db_query("SELECT CONCAT(d.id,'-',z.nick,', ',l.nick,' ',d.nick) descr " .
       "FROM {guifi_devices} d, {guifi_location} l, {guifi_zone} z " .
-      "WHERE d.id=%d " .
+      "WHERE d.id = :id " .
       " AND d.type IN ('server','cam','cloudy') ".
       " AND d.nid=l.id" .
       " AND l.zone_id=z.id",
-      $did);
+      array(':id' => $did))->fetchObject();
 
-  $server = db_fetch_object($query);
   return $server->descr;
 }
 
@@ -885,32 +884,32 @@ function guifi_validate_ip($ip,&$form_state) {
 }
 
 function guifi_device_loaduser($id) {
-  $device = db_fetch_object(db_query("SELECT d.user_created FROM {guifi_devices} d WHERE d.id=%d",$id));
+  $device = db_query("SELECT d.user_created FROM {guifi_devices} d WHERE d.id = :id", array(':id' => $id))->fetchObject();
   return ($device->user_created);
 }
 
 function guifi_get_nodeuser($id) {
-  $node = db_fetch_object(db_query("SELECT d.user_created FROM {guifi_location} d WHERE d.id=%d",$id));
+  $node = db_query("SELECT d.user_created FROM {guifi_location} d WHERE d.id = :id", array(':id' => $id))->fetchObject();
   return ($node->user_created);
 }
 
 function guifi_get_hostname($id) {
-  $device = db_fetch_object(db_query("SELECT d.nick FROM {guifi_devices} d WHERE d.id=%d",$id));
+  $device = db_query("SELECT d.nick FROM {guifi_devices} d WHERE d.id = :id", array(':id' => $id))->fetchObject();
   return guifi_to_7bits($device->nick);
 }
 
 function guifi_get_ap_ssid($id,$radiodev_counter) {
-  $radio = db_fetch_object(db_query("SELECT r.ssid, d.id FROM {guifi_radios} r LEFT JOIN {guifi_devices} d ON r.id=d.id WHERE r.id=%d AND r.radiodev_counter=%d",$id,$radiodev_counter));
+  $radio = db_query("SELECT r.ssid, d.id FROM {guifi_radios} r LEFT JOIN {guifi_devices} d ON r.id=d.id WHERE r.id = :id AND r.radiodev_counter = :rc", array(':id' => $id, ':rc' => $radiodev_counter))->fetchObject();
   return guifi_clean_ssid($radio->ssid);
 }
 
 function guifi_get_ap_protocol($id,$radiodev_counter) {
-  $radio = db_fetch_object(db_query("SELECT r.protocol, d.id FROM {guifi_radios} r LEFT JOIN {guifi_devices} d ON r.id=d.id WHERE r.id=%d AND r.radiodev_counter=%d",$id,$radiodev_counter));
+  $radio = db_query("SELECT r.protocol, d.id FROM {guifi_radios} r LEFT JOIN {guifi_devices} d ON r.id=d.id WHERE r.id = :id AND r.radiodev_counter = :rc", array(':id' => $id, ':rc' => $radiodev_counter))->fetchObject();
   return $radio->protocol;
 }
 
 function guifi_get_ap_channel($id,$radiodev_counter) {
-  $radio = db_fetch_object(db_query("SELECT r.channel, d.id FROM {guifi_radios} r LEFT JOIN {guifi_devices} d ON r.id=d.id WHERE r.id=%d AND r.radiodev_counter=%d",$id,$radiodev_counter));
+  $radio = db_query("SELECT r.channel, d.id FROM {guifi_radios} r LEFT JOIN {guifi_devices} d ON r.id=d.id WHERE r.id = :id AND r.radiodev_counter = :rc", array(':id' => $id, ':rc' => $radiodev_counter))->fetchObject();
   return $radio->channel;
 }
 
@@ -1205,7 +1204,7 @@ function guifi_ipcalc_get_subnet_by_nid(
 
   $zone = node_load(array('nid' => $nid));
 
-  if ($zone->type == 'guifi_node')
+  if ($zone->type == 'guifi_location')
     $zone = guifi_zone_load($zone->zone_id);
 
   $rzone = $zone;

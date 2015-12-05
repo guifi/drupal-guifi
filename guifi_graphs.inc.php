@@ -158,20 +158,20 @@ function guifi_graphs_get_server($id, $type='device') {
           return FALSE;
 	case 'device':
     case 'radio':
-      $d = db_fetch_object(db_query('SELECT nid, graph_server FROM {guifi_devices} WHERE id=%d',$id));
+      $d = db_query('SELECT nid, graph_server FROM {guifi_devices} WHERE id = :id', array(':id' => $id))->fetchObject();
       if ($d->graph_server)
         return $d->graph_server;
-      $countRadios = db_fetch_object(db_query(
+      $countRadios = db_query(
       "SELECT count(*) c " .
       "FROM {guifi_radios} " .
-      "WHERE nid=%d " .
-      "  AND mode='ap'",$d->nid));
+      "WHERE nid = :nid " .
+      "  AND mode='ap'", array(':nid' => $d->nid))->fetchObject();
       if ($countRadios->c > 0)
         // node has APs, inherits node graph server
         return guifi_graphs_get_server($d->nid,'node');
 
       // client: finding an ap/client link for this node, inherits from remote node
-      $link = db_fetch_object(db_query(
+      $link = db_query(
 	      "SELECT " .
         "  l2.device_id ".
 				"FROM {guifi_links} l1, " .
@@ -179,8 +179,8 @@ function guifi_graphs_get_server($id, $type='device') {
 				"WHERE l1.id=l2.id " .
 				"  AND l1.nid != l2.nid " .
 				"  AND l1.link_type='ap/client' " .
-				"  AND l1.nid=%d ",
-				$d->nid));
+				"  AND l1.nid = :nid ",
+				array(':nid' => $d->nid))->fetchObject();
       if ($link)
         return guifi_graphs_get_server($link->device_id,'device');
       else

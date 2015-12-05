@@ -647,7 +647,7 @@ function theme_guifi_service_data($node, $links = TRUE) {
   $output .= theme_guifi_contacts($node);
 
   if ($links) {
-    drupal_set_breadcrumb(guifi_node_ariadna($node));
+    drupal_set_breadcrumb(guifi_location_ariadna($node));
     $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
     print theme('page',$output, FALSE);
     return;
@@ -711,7 +711,7 @@ function theme_guifi_services_list($node,$service = '%') {
     $typestr = t('by device');
   } else {
     $node = node_load(array('nid' => $node->id));
-    if ($node->type == 'guifi_node')
+    if ($node->type == 'guifi_location')
       $typestr = t('by node');
     else
       $typestr = t('by zone');
@@ -733,7 +733,7 @@ function theme_guifi_services_list($node,$service = '%') {
   switch ($typestr) {
     case t('by node'):
       drupal_set_title(t('services @ %node',array('%node' => $node->title)));
-      drupal_set_breadcrumb(guifi_node_ariadna($node,'node/%d/view/services'));
+      drupal_set_breadcrumb(guifi_location_ariadna($node,'node/%d/view/services'));
       $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
       break;
     case t('by zone'):
@@ -746,7 +746,7 @@ function theme_guifi_services_list($node,$service = '%') {
         array('%dname' => $device['nick'],
               '%nid' => $device['nid'])));
       $node = node_load(array('nid' => $device['nid']));
-      drupal_set_breadcrumb(guifi_node_ariadna($node));
+      drupal_set_breadcrumb(guifi_location_ariadna($node));
       $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
       break;
   }

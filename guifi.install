@@ -2045,3 +2045,45 @@ function guifi_install() {
 
 
 }
+
+function guifi_update_7000() {
+
+// Replace all guifi_noce content type to guifi_location.
+
+  db_update('node')
+    ->expression('type', 'replace(type, \'guifi_node\', \'guifi_location\')')
+    ->execute();
+
+  db_update('subscriptions')
+    ->expression('value', 'replace(value, \'guifi_node\', \'guifi_location\')')
+    ->execute();
+
+  db_update('subscriptions_queue')
+    ->expression('value', 'replace(value, \'guifi_node\', \'guifi_location\')')
+    ->execute();
+
+  db_update('field_config_instance')
+    ->expression('bundle', 'replace(bundle, \'guifi_node\', \'guifi_location\')')
+    ->expression('bundle', 'replace(bundle, \'comment_node_guifi_node\', \'comment_node_guifi_location\')')
+    ->execute();
+
+  db_update('field_data_body')
+    ->expression('bundle', 'replace(bundle, \'guifi_node\', \'guifi_location\')')
+    ->execute();
+  
+  db_update('field_data_comment_body')
+    ->expression('bundle', 'replace(bundle, \'comment_node_guifi_node\', \'comment_node_guifi_location\')')
+    ->execute();
+
+  db_update('field_data_upload')
+    ->expression('bundle', 'replace(bundle, \'guifi_node\', \'guifi_location\')')
+    ->execute();
+
+  db_update('field_revision_body')
+    ->expression('bundle', 'replace(bundle, \'guifi_node\', \'guifi_location\')')
+    ->execute();
+
+  db_update('field_revision_upload')
+    ->expression('bundle', 'replace(bundle, \'guifi_node\', \'guifi_location\')')
+    ->execute();
+}

@@ -105,7 +105,7 @@ function guifi_user_delete_confirm_submit($form, &$form_state) {
     return;
 
   $guifi_user = guifi_user_load($form_state['values']['id']);
-  $node = guifi_node_load($guifi_user['nid']);
+  $node = guifi_location_load($guifi_user['nid']);
   $to_mail = array();
 
   $subject = t('User %username deleted by %user.',
@@ -466,7 +466,7 @@ function _guifi_user_queue_device_form_submit($form, $form_state) {
       $d['radios'][0]['interfaces'][$edit['iid']]['ipv4'][0]['links'][$edit['lid']]['flag'] =
         'Working';
       guifi_device_save($d);
-      $n = guifi_node_load($form_state['clicked_button']['#post']['nid']);
+      $n = guifi_location_load($form_state['clicked_button']['#post']['nid']);
       $form_state['values']['status'] = 'Approved';
     case 'saveUser':
       $u = guifi_user_load($form_state['clicked_button']['#post']['uid']);
@@ -761,7 +761,7 @@ function guifi_users_queue($zone) {
       $nsr = 1;
 
     $node = node_load(array('nid' => $u['nid']));
-    if (guifi_node_access('update',$node)) {
+    if (guifi_location_access('update',$node)) {
       $edit_node_icon =
         l(guifi_img_icon('edit.png'),
           'node/'.$u['nid'].'/edit',
@@ -879,7 +879,7 @@ function guifi_users_node_list($node) {
   $output = drupal_get_form('guifi_users_node_list_form',$node);
 
   $node = node_load(array('nid' => $node->id));
-  drupal_set_breadcrumb(guifi_node_ariadna($node));
+  drupal_set_breadcrumb(guifi_location_ariadna($node));
   $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
   // To gain space, save bandwith and CPU, omit blocks
   print theme('page', $output, FALSE);
@@ -915,7 +915,7 @@ function guifi_users_node_list_form($form_state, $params = array()) {
   $title = t('Users @') .' ' .$node->title;
   drupal_set_title($title);
 
-  if ($node->type == 'guifi_node') {
+  if ($node->type == 'guifi_location') {
     $query = db_query(
       "SELECT id " .
       "FROM {guifi_users} " .
@@ -996,7 +996,7 @@ function guifi_users_node_list_form($form_state, $params = array()) {
       '#title'=> t('There are no users to list at').' '.$node->title
     );
     if (user_access('administer guifi users')  or $node->uid == $owner)
-      if ($node->type == 'guifi_node') {
+      if ($node->type == 'guifi_location') {
         $f['addUser'] = array(
           '#type' => 'submit',
           '#value' => t('Add user')

@@ -34,7 +34,7 @@ function guifi_tools_ip_search($ipv4 = NULL) {
     ->condition('ipv4', $ipv4, 'LIKE')
     ->orderBy('nipv4', 'ASC')
     ->extend('PagerDefault')
-    ->limit(50);
+    ->limit(variable_get("guifi_pagelimit", 50));
   $sql->addExpression('inet_aton(ipv4)', 'nipv4');
     
   foreach ($sql->execute() as $ipv4 ) {
@@ -144,7 +144,7 @@ function guifi_tools_mac_search($mac = NULL) {
     ->fields('i', array('id','device_id','mac','radiodev_counter','interface_type'))
     ->condition('mac', $mac, 'LIKE')
     ->extend('PagerDefault')
-    ->limit(50);
+    ->limit(variable_get("guifi_pagelimit", 50));
     
   foreach ($sql->execute() as $interface ) {
     $row = array();
@@ -391,7 +391,7 @@ function guifi_tools_mail_search($mail = NULL) {
       ->fields('i')
       ->condition('notification', $mail, 'LIKE')
       ->extend('PagerDefault')
-      ->limit(50);
+      ->limit(variable_get("guifi_pagelimit", 50));
 
     foreach ($sql->execute() as $amails ) {
       $row = array();
@@ -415,7 +415,7 @@ function guifi_tools_mail_search($mail = NULL) {
               $continue = TRUE;
             break;
           case 'guifi_location':
-            if (guifi_node_access('update',$amails->id))
+            if (guifi_location_access('update',$amails->id))
               $continue = TRUE;
             break;
           case 'guifi_service':
@@ -599,7 +599,7 @@ function guifi_tools_mail_update_form_submit($form, &$form_state) {
           case 'guifi_location':
             $title = $amails->nick;
             $type = t('Node');
-            if (guifi_node_access('update',$amails->id))
+            if (guifi_location_access('update',$amails->id))
               $continue = TRUE;
             break;
           case 'guifi_service':

@@ -7,9 +7,9 @@ include_once 'guifi_zone.inc.php';
 include_once 'guifi_maintainers.inc.php'; // maintainers
 //include_once 'guifi_funders.inc.php';   // funders
 //include_once 'guifi_ipv4.inc.php';      // ipv4 network management
-//include_once 'guifi_node.inc.php';      // node (location) management
+include_once 'guifi_location.inc.php';      // node (location) management
 include_once 'guifi_service.inc.php';   // services management
-//include_once 'guifi_devices.inc.php';   // device management
+include_once 'guifi_devices.inc.php';   // device management
 //include_once 'guifi_radios.inc.php';    // radios management
 //include_once 'guifi_switch.inc.php';    // switch management
 //include_once 'guifi_interfaces.inc.php';// interfaces management
@@ -24,7 +24,7 @@ include_once 'guifi_graphs.inc.php';    // graphs management
 //include_once 'guifi_gml.inc.php';       // gml (geographic XML export) generator
 //include_once 'guifi_maps.inc.php';      // maps management
 include_once 'guifi_includes.inc.php';  // misc. routines
-//include_once 'guifi_networkutils.inc.php';  // network calc routines
+include_once 'guifi_networkutils.inc.php';  // network calc routines
 include_once 'guifi_sql.inc.php';       // database changes
 include_once 'guifi_ahah.inc.php';      // AHAH functions
 //include_once 'GeoCalc.class.php';       // geographic routines
@@ -661,29 +661,29 @@ function guifi_menu() {
 
   // node (location) menus
 
-  $items['node/%guifi_node/view/distances'] = array(
+  $items['node/%guifi_location/view/distances'] = array(
     'title' => 'distances',
-    'page callback' => 'guifi_node_distances',
+    'page callback' => 'guifi_location_distances',
     'page arguments' => array(1),
     'access arguments' => array('access content'),
     'type' => MENU_LOCAL_TASK
   );
-  $items['node/%guifi_node/view/distancesmap'] = array(
+  $items['node/%guifi_location/view/distancesmap'] = array(
     'title' => 'profiles map',
-    'page callback' => 'guifi_node_distances_map',
+    'page callback' => 'guifi_location_distances_map',
     'page arguments' => array(1),
     'access arguments' => array('access content'),
     'type' => MENU_LOCAL_TASK
   );
-  $items['node/%guifi_node/view/nodedata'] = array(
+  $items['node/%guifi_location/view/nodedata'] = array(
     'title' => 'data',
-    'page callback' => 'theme_guifi_node_data',
+    'page callback' => 'theme_guifi_location_data',
     'page arguments' => array(1, 'TRUE'),
     'access callback' => 'user_access',
     'access arguments' => array('access content'),
     'type' => MENU_LOCAL_TASK
   );
-  $items['node/%guifi_node/view/nodeservices'] = array(
+  $items['node/%guifi_location/view/nodeservices'] = array(
     'title' => 'services',
     'page callback' => 'theme_guifi_services_list',
     'page arguments' => array(1),
@@ -691,31 +691,31 @@ function guifi_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_LOCAL_TASK
   );
-  $items['node/%guifi_node/view/devices'] = array(
+  $items['node/%guifi_location/view/devices'] = array(
     'title' => 'devices',
-    'page callback' => 'theme_guifi_node_devices_list',
+    'page callback' => 'theme_guifi_location_devices_list',
     'page arguments' => array(1, 'TRUE'),
     'access callback' => 'user_access',
     'access arguments' => array('access content'),
     'type' => MENU_LOCAL_TASK
   );
-  $items['node/%guifi_node/view/links'] = array(
+  $items['node/%guifi_location/view/links'] = array(
     'title' => 'links',
-    'page callback' => 'theme_guifi_node_links',
+    'page callback' => 'theme_guifi_location_links',
     'page arguments' => array(1, 'TRUE'),
     'access callback' => 'user_access',
     'access arguments' => array('access content'),
     'type' => MENU_LOCAL_TASK
   );
-  $items['node/%guifi_node/view/graphs'] = array(
+  $items['node/%guifi_location/view/graphs'] = array(
     'title' => 'graphs',
-    'page callback' => 'theme_guifi_node_graphs_overview',
+    'page callback' => 'theme_guifi_location_graphs_overview',
     'page arguments' => array(1, 'TRUE'),
     'access callback' => 'user_access',
     'access arguments' => array('access content'),
     'type' => MENU_LOCAL_TASK
   );
-  $items['node/%guifi_node/view/users'] = array(
+  $items['node/%guifi_location/view/users'] = array(
     'title' => 'users',
     'page callback' => 'guifi_users_node_list',
     'page arguments' => array(1),
@@ -723,7 +723,7 @@ function guifi_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_LOCAL_TASK
   );
-  $items['node/%guifi_node/user/add'] = array(
+  $items['node/%guifi_location/user/add'] = array(
     'page callback' => 'guifi_user_add',
     'page arguments' => array(1),
     'access callback' => 'user_access',
@@ -856,7 +856,7 @@ function guifi_menu() {
    ); */
 
   // Devices menus
-  $items['guifi/device/add/%guifi_node/%'] = array(
+  $items['guifi/device/add/%guifi_location/%'] = array(
     'title' => 'add device',
     'page callback' => 'guifi_device_add',
 //     'page arguments' => array(1),
@@ -1316,7 +1316,7 @@ function guifi_nodeapi($node, $op, $arg = 0) {
 
 function guifi_search_result($node = FALSE) {
   switch ($node->type) {
-    case 'guifi_node':
+    case 'guifi_location':
       $extra = l(guifi_img_icon('wifi.png'), 'node/'. $node->nid .'/view',
         array(
           'attributes' => array('title' => t('View node %node at %zone',
@@ -1367,7 +1367,7 @@ function guifi_update_index($node = FALSE) {
     return;
 
   $index = '<h1>'. $node->nid .'</h1><h1>'. $node->nick .'</h1><h3>'. $node->title .'</h3>';
-  if ($node->type == 'guifi_node') {
+  if ($node->type == 'guifi_location') {
     $qry = db_query('SELECT * FROM {guifi_users} WHERE nid=%d', $node->nid);
     while ($u = db_fetch_object($qry))
       $index .= '<h2>'. $u->username .'</h2>'.
@@ -1390,9 +1390,9 @@ function guifi_node_info() {
       'has_title' => TRUE,
       'title_label' => t('Zone name'),
     ),
-    'guifi_node' => array(
+    'guifi_location' => array(
       'name' => t('guifi.net node'),
-      'base' => 'guifi_node',
+      'base' => 'guifi_location',
       'description' => t("Create a node. A node is a physical location " .
         "(will be dynamically drawed on the maps using lat/lon coordinates) " .
         "where there are network devices, servers, etc.<br />" .
@@ -1420,7 +1420,7 @@ function guifi_help($section) {
       return t('Select an operation from the menus to manage zones.');
     case 'admin/guifi/zone/add':
       return t('Enter de zone information.');
-    case 'node/add#guifi_node':
+    case 'node/add#guifi_location':
       return t("Create a node. A node is a physical location (will be dynamically drawed on the maps using lat/lon coordinates) where there are network devices, servers, etc.<br />Every node have to assigned to a guifi zone.");
     case 'node/add#guifi_zone':
       return t("Create a community, area or zone. A typical zone hierarchy can be related to the territory (Country/Region/City...) but not have to, i.e. a single city can have many groups or communities with distinct IP addressing policies.<br />Every zone will have its own page so it can be used as the homepage of that community.<br />The zones must belong at least to the root zone, but can also belong to other zones, so in that way a hierarchy is created.<br />Every zone have its own properties like maps or ip ranges and every node will have to be assigned to an existing zone, and will inherit the zone properties like its IP address and will be drawn in the corresponding map.<br />If zone properties are leaved blank, will inherit the parent zone properties.");
@@ -1963,47 +1963,57 @@ function guifi_display_block_1() {
 }
 
 
-function guifi_link($type, $node = 0) {
-  $links = array();
+function guifi_node_view($node, $view_mode, $langcode) {
 
-  if ($type == "node" && $node->type == "guifi_zone") {
-    $links['mrtg'] = array(
-      'title' => t('create mrtg config'),
-      'href' => "guifi/mrtg/$node->nid",
-      'attributes' => array(
-        'title' => t('get an mrtg configuration file for this zone')));
-//    $links['nodeXchange'] = array(
-//      'title'=> t('nodeXchange'),
-//      'href' => "guifi/nodexchange/$node->nid",
-//      'attributes' => array('title' => t('export zone in nodeXchange format')));
-    $links['guifiproxy'] = array(
-      'title' => t('guifiproxy'),
-      'href' => "guifi/csvproxy/$node->nid",
-      'attributes' => array('title' => t('export zone proxy services in csv format')));
+  switch ($node->type) {
+    case 'node':
+    case 'guifi_zone':
     $links['cnml'] = array(
-      'title' => t('CNML'),
-      'href' => "guifi/cnml/$node->nid",
-      'attributes' => array('title' => t('export zone in CNML format')));
+              'title' => t('CNML'),
+              'attributes' => array('title' => t('export zone in CNML format')),
+              'href' => "guifi/cnml/$node->nid",
+            );
+
+    // TODO MIQUEL
+    // REMOVE FINALLY!
+    /*
+    $links['guifiproxy'] = array(
+              'title' => t('guifiproxy'),
+              'attributes' => array('title' => t('export zone proxy services in csv format')),
+              'href' => "guifi/csvproxy/$node->nid",
+            );
+    */
+
     $links['gml'] = array(
-      'title' => t('gml'),
-      'href' => "guifi/gml/$node->nid",
-      'attributes' => array('title' => t('export zone in gml format')));
+              'title' => t('GML'),
+              'attributes' => array('title' => t('export zone in GML format')),
+              'href' => "guifi/gml/$node->nid",
+            );
+
     if (module_exists('budgets')) {
       $links['budgets'] = array(
-        'title' => t('budgets'),
-        'href' => "budgets/$node->nid/list",
-        'attributes' => array('title' => t('view budgets for this zone')));
+                'title' => t('budgets'),
+                'attributes' => array('title' => t('view budgets for this zone')),
+                'href' => "budgets/$node->nid/list",
+              );
     }
-  }
-  if ($type == "node" && $node->type == "guifi_node") {
+      break;
+    case 'node':
+    case 'guifi_location':
     $links['cnml'] = array(
-      'title' => t('CNML'),
-      'href' => "guifi/cnml/$node->nid/node",
-      'attributes' => array('title' => t('export node in CNML format')));
+              'title' => t('CNML'),
+              'attributes' => array('title' => t('export zone in CNML format')),
+              'href' => "guifi/cnml/$node->nid",
+            );
+      break;
   }
 
-  return $links;
+  $node->content['links']['guifi_zone'] = array(
+      '#links' => $links,
+      '#attributes' => array('class' => array('links', 'inline')),
+  );
 }
+
 
 function guifi_page($full = FALSE) {
 
@@ -2804,7 +2814,7 @@ function theme_guifi_menu_page($blocks) {
   return $output;
 }
 
-function theme_guifi_contacts($node, $header = TRUE) {
+function theme_guifi_contacts($node) {
   global $user;
 
   if (is_array($node))
@@ -2830,7 +2840,10 @@ function theme_guifi_contacts($node, $header = TRUE) {
     $rows[] = t('updated by') .': '.
       l($name_changed->name, 'user/'. $node->user_changed) .'&nbsp;'. t('at') .'&nbsp;'. format_date($node->timestamp_changed);
 
-  return '<small>'. theme('box', ($header) ? t('contact information') : '', implode(' · ', $rows)) .'</small>';
+  return  theme('table',array(
+    'header' => array(t('contact information')),
+    'rows' => array( array(implode(' · ', $rows))),
+    'attributes' => array('width' => '100%')));
 }
 
 function guifi_menu_link_alter(&$item, $menu) {
