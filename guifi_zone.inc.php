@@ -15,7 +15,7 @@ function guifi_zone_access($op, $node) {
     $op);
 
   if (is_numeric($node))
-    $node = node_load(array('nid' => $node));
+    $node = node_load($node);
 
 
   if ($op == 'view') {
@@ -46,7 +46,56 @@ function guifi_zone_access($op, $node) {
   return FALSE;
 }
 
+/**
+ * Implementation of hook_view().
+ *
+ *  guifi_zone_view(): zone view page
+**/
+function guifi_zone_view($node, $view_mode, $langcode = NULL) {
 
+  if ($view_mode == 'teaser')
+    return $node;
+  if ($view_mode == 'block')
+    return $node;
+
+  $zone = guifi_zone_load($node->nid);
+  
+  $node->content['data'] = array(
+    '#type' => 'markup',
+    '#weight' => 2,
+    '#markup' => theme('table',
+                  array('header' => NULL, 
+                        'rows' => array(
+                          array(
+                            array(
+                              'data' =>'<small>'.theme_guifi_zone_data($zone).theme_guifi_contacts($zone).'</small>',
+                              'width' => '35%'),
+                            array(
+                              'data' => guifi_zone_simple_map($zone),
+                               'width' => '65%'),
+                          )
+                        ),
+                        'attributes' => array('width' => '100%')
+                        )
+                  )
+  );
+
+  $node->content['graph'] = array(
+    '#type' => 'markup',
+    '#weight' => 3,
+    '#markup' => theme_guifi_zone_stats($zone),
+    );
+    
+// TODO MIQUEL
+/*
+  $node->content['nodes'] = array(
+    '#type' => 'markup',
+    '#weight' => 2,
+    '#markup' => theme_guifi_zone_nodes($zone),
+  );
+*/
+  return $node;
+}
 
 /** zone editing functions
 **/
@@ -140,15 +189,6 @@ function guifi_zone_get_coords($zid) {
     unset($coords['master']);
     return $coords;
   }
-}
-
-function guifi_zone_root() {
-  $root = db_query(
-    "SELECT id " .
-    "FROM {guifi_zone} " .
-    "WHERE master = 0")->fetchObject();
-  return $root->id;
-
 }
 
 function guifi_zone_autocomplete_field($zid,$fname) {
@@ -597,15 +637,13 @@ function guifi_zone_service_validate($element, &$form_state) {
   }
 }
 
-
-
 /** guifi_zone_prepare(): Default values
  */
 function guifi_zone_prepare(&$node) {
   global $user;
 
   // Init default values
-  if ($node->id=='') {
+  if ($node->id == '') {
     if ($node->notification == '')
       $node->notification = $user->mail;
     $node->time_zone = '+01 2 2';
@@ -624,7 +662,6 @@ function guifi_zone_map_help($rid) {
   $output .= '<p>'.t('Select the lens controls to zoom in/out or re-center the map at the clicked position. If the image has enough high resolution, you can add a node at the red star position by using the link that will appear.').'</p>';
   return $output;
 }
-
 
 function guifi_zone_hidden_map_fileds($node) {
   $output  = '<form><input type="hidden" id="minx" value="'.$node->minx.'"/>';
@@ -907,7 +944,7 @@ function guifi_zone_delete(&$node) {
  */
 function guifi_zone_get_parents($id) {
 
-  $parent=$id;
+  $parent = $id;
   $parents[] = $id;
   while ($parent > 0) {
     $result = db_query('
@@ -915,7 +952,7 @@ function guifi_zone_get_parents($id) {
       FROM {guifi_zone} z
       WHERE z.id = :zid',
       array(':zid' => $parent));
-    foreach ($result as $row);
+    $row = $result->fetchObject();
     $parent = $row->master;
     $parents[] = $parent;
   }
@@ -987,16 +1024,15 @@ function guifi_zone_data($zone) {
   */
   if ($zone->homepage)
     $rows[] = array(t('homepage'),l($zone->homepage,$zone->homepage));
-    
     $rows[] = array(t('default proxy'),
               l(guifi_service_str($zone->proxy_id),
                 guifi_zone_get_service($zone,'proxy_id', TRUE))
               );
 
   if ($zone->graph_server > 0)
-    $gs = node_load(array('nid' => $zone->graph_server));
+    $gs = node_load($zone->graph_server);
   else
-    $gs = node_load(array('nid' => guifi_graphs_get_server($zone->id,'zone')));
+    $gs = node_load(guifi_graphs_get_server($zone->id,'zone'));
 
   $rows[] = array(t('default graph server'),array(
     'data' => l(guifi_service_str($zone->graph_server),
@@ -1107,10 +1143,10 @@ function guifi_zone_availability($zone, $desc = "all") {
     $qry->addField('d', 'flag', 'dflag');
     $qry->addField('d', 'timestamp_changed', 'changed');
     $qry->condition('d.type', 'radio', '=')
-    ->condition('d.nid', $nid, '=')
-    ->orderBy('dnick', 'ASC')
-    ->extend('PagerDefault')
-    ->limit(variable_get("guifi_pagelimit", 50));
+      ->condition('d.nid', $nid, '=')
+      ->orderBy('dnick', 'ASC');
+      
+    $qry = $qry->extend('PagerDefault')->limit(variable_get("guifi_pagelimit", 50));
 
     $rows = array();
 
@@ -1275,60 +1311,13 @@ function guifi_zone_availability($zone, $desc = "all") {
   return $output;
 }
 
-/**  guifi_zone_view(): zone view page
-**/
-function guifi_zone_view($node, $view_mode, $langcode = NULL) {
-
-  if ($view_mode == 'teaser')
-    return $node;
-  if ($view_mode == 'block')
-    return $node;
-
-  $zone = guifi_zone_load($node->nid);
-  
-  $node->content['data'] = array(
-    '#type' => 'markup',
-    '#weight' => 2,
-    '#markup' => theme('table',
-                  array('header' => NULL, 
-                        'rows' => array(
-                          array(
-                            array(
-                              'data' =>'<small>'.theme_guifi_zone_data($zone).theme_guifi_contacts($zone).'</small>',
-                              'width' => '35%'),
-                            array(
-                              'data' => guifi_zone_simple_map($zone),
-                               'width' => '65%'),
-                          )
-                        ),
-                        'attributes' => array('width' => '100%')
-                        )
-                  )
-  );
-
-  $node->content['graph'] = array(
-    '#type' => 'markup',
-    '#weight' => 3,
-    '#markup' => theme_guifi_zone_stats($zone),
-    );
-    
-// TODO MIQUEL
-/*
-  $node->content['nodes'] = array(
-    '#type' => 'markup',
-    '#weight' => 2,
-    '#markup' => theme_guifi_zone_nodes($zone),
-  );
-*/
-  return $node;
-}
-
 /** Miscellaneous utilities related to zones
 **/
 
 /** guifi_zone_l(): Creates a link to the zone
 **/
 function guifi_zone_l($id, $title = NULL, $linkto = 'node/') {
+
   if ($id == 0)
     $id = guifi_zone_root();
   if (empty($title))
@@ -1498,7 +1487,7 @@ function theme_guifi_zone_nodes($node,$links = TRUE) {
 
   if ($links) {
     drupal_set_breadcrumb(guifi_zone_ariadna($node->id,'node/%d/view/nodes'));
-    $node = node_load(array('nid' => $node->id));
+    $node = node_load($node->id);
     $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
     print theme('page',$output, FALSE);
     return;
@@ -1506,7 +1495,6 @@ function theme_guifi_zone_nodes($node,$links = TRUE) {
 
   return $output;
 }
-
 
 /** * guifi_zone_map(): Print de page show de zone map and nodes.
  */
@@ -1528,7 +1516,6 @@ function theme_guifi_zone_map($node) {
 function theme_guifi_zone_networks($zone) {
 
   drupal_set_breadcrumb(guifi_zone_ariadna($zone->id,'node/%d/view/ipv4'));
-  $zone = node_load(array('nid' => $zone->id));
 
   $ips_allocated = guifi_ipcalc_get_ips();
 
@@ -1536,18 +1523,19 @@ function theme_guifi_zone_networks($zone) {
     $output = l(t('add network'),'node/'.$zone->id.'/view/ipv4/add');
 
   // zone & parents
-  $table = guifi_ipv4_print_data($zone,'parents',$ips_allocated);
-  $output .= theme('box', t('zone and zone parent(s) network allocation(s)'), $table);
+    $table = theme('table',array(
+    'header' => array(t('zone and zone parent(s) network allocation(s)')),
+    'rows' => array(array(guifi_ipv4_print_data($zone,'parents',$ips_allocated))),
+    'attributes' => array('width' => '100%')));
 
-  // zone childs
-  $table = guifi_ipv4_print_data($zone,'childs',$ips_allocated);
-  $output .= theme('box', t('zone child(s) network allocation(s)'), $table);
-
-  $output .= theme_links(module_invoke_all('link', 'node', $zone, FALSE));
-
-  print theme('page',$output, FALSE);
-
-  return;
+  $output .= '<div>' . $table . '</div>';
+  
+      $table2 = theme('table',array(
+    'header' => array(t('zone child(s) network allocation(s)')),
+    'rows' => array(array(guifi_ipv4_print_data($zone,'childs',$ips_allocated))),
+    'attributes' => array('width' => '100%')));
+  $output .= '<div>' . $table2 . '</div>';
+  return $output;
 }
 
 /** theme_guifi_zone_data():  outputs the zone information
@@ -1567,14 +1555,6 @@ function theme_guifi_zone_data($zone, $links = TRUE) {
 
   $output = '<div>' . $table . '</div>';
 
-  // TODO MIQUEL
-
-  if ($links) {
-
-    $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
- 
-
-  }
 
   return $output;
 }
@@ -1582,7 +1562,7 @@ function theme_guifi_zone_data($zone, $links = TRUE) {
 /** theme_guifi_zone_stats():  outputs the stats graph
 **/
 function theme_guifi_zone_stats($zone) {
-global $base_url;
+  global $base_url;
 
   $output = theme('table', array('header' => array(t('zone statistics')), 'rows' => array(array(array(
                               'data' => '<a href="'.$base_url.'/guifi/menu/stats/nodes?zone='.$zone->id.'">'.
@@ -1590,7 +1570,6 @@ global $base_url;
                                         '&amp;width=400&amp;height=300&amp;title=void" /></a>','&nbsp;',
                               'width' => '100%')
                               ))));
- // $output .= '</fieldset>';
   return $output;
 }
 

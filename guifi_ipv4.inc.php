@@ -227,35 +227,16 @@ function guifi_ipv4_form_validate($form,$form_state) {
   }
 
   $zone = guifi_zone_load($form_state['values']['zone']);
-
-/* NO MORE AD-HOC ZONES
-  if (($zone->master != 0) and
-      ($zone->zone_mode != 'ad-hoc')) {
-    if (!in_array($form_state['values']['network_type'],array('public','backbone')))
-      form_set_error('network_type',
-        t('Only ad-hoc/mesh or root zones can have ad-hoc/mesh ranges assigned'));
-  }
-  if (($zone->zone_mode == 'ad-hoc') and
-     ($form_state['values']['network_type'] == 'backbone'))
-    form_set_error('network_type',
-      t('You must specify the protocol for backbone ranges on ad-hoc/mesh zones'));
-*/
 }
 
 /* outputs the network information data
 **/
-function guifi_ipv4_print_data($zone,$list = 'parents',$ips_allocated) {
+function guifi_ipv4_print_data($zone, $list = 'parents', $ips_allocated) {
   global $user;
 
   $header = array(
-//    array('data' => t('zone'),'style' => 'text-align: right;'),
+
     array('data' => t('network')),
-    t('start / end'),
-    array('data' => t('hosts'),'style' => 'text-align: right;'),
-    t('type'),
-    t('min / max'),
-    array('data' => t('ips used'),'style' => 'text-align: right;'),
-    array('data' => t('used %'),'style' => 'text-align: right;'),
   );
 
   if (user_access('administer guifi networks'))
@@ -273,18 +254,22 @@ function guifi_ipv4_print_data($zone,$list = 'parents',$ips_allocated) {
 
   if (empty($zones))
     return t('There is no zones to look at');
-
-  $sql = 'SELECT
+  $rows = array();
+/*
+  $sql = db_select('guifi_networks', 'n')
+    ->fields('n', array('zone','id','base','mask','network_type'))
+    ->condition('zone', array(implode(',',$zones)), 'IN')
+    ->orderBy('FIND_IN_SET(zone,\''.implode(',',$zones).'\')');
+  //NO RUTLLA :(
+*/
+  $sql = db_query("SELECT
             zone, id, base, mask, network_type
           FROM {guifi_networks}
-          WHERE zone IN ('.implode(',',$zones).')
-          ORDER BY FIND_IN_SET(zone,"'.implode(',',$zones).'")';
+          WHERE zone IN (".implode(',',$zones).")
+          ORDER BY FIND_IN_SET(zone,'".implode(',',$zones)."')");
 
-  $rows = array();
-
-  $result = pager_query($sql,variable_get('guifi_pagelimit', 10));
   $current_zoneid = -1;
-  while ($net = db_fetch_object($result)) {
+  while ($net = $sql->fetchObject()) {
     $item = _ipcalc($net->base,$net->mask);
 
     // obtaing the used ip's
@@ -339,8 +324,7 @@ function guifi_ipv4_print_data($zone,$list = 'parents',$ips_allocated) {
 
 
   if (count($rows)) {
-    $output .= theme('table', $header, $rows);
-    $output .= theme('pager', NULL, variable_get('guifi_pagelimit', 10));
+  $output = theme('table',array('header' => $header, 'rows' => $rows));
   } else
     $output .= t('None');
 

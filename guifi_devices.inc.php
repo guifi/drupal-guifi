@@ -88,9 +88,9 @@ function guifi_device_load($id,$ret = 'array') {
       $qip = db_query('
         SELECT COUNT(*)
         FROM {guifi_ipv4}
-        WHERE interface_id = :id', array(':id' => $i['id']));
+        WHERE interface_id = :id', array(':id' => $i['id']))->fetchAssoc();
 
-      if (db_result($qip) == 0) {
+      if ($qip == 0) {
         print "iface wLanLan without any ip: ".$i['id']." ";
         // safe delete interface
         _guifi_db_delete('guifi_interfaces', array('id' => $i['id']));
@@ -99,17 +99,17 @@ function guifi_device_load($id,$ret = 'array') {
         $qlink = db_query('
           SELECT COUNT(*)
           FROM {guifi_links}
-          WHERE interface_id = :id', array(':id' => $i['id']));
+          WHERE interface_id = :id', array(':id' => $i['id']))->fetchAssoc();
 
-        if (db_result($qlink) == 0) {
+        if ($qlink == 0) {
      // print "Aquesta wlan/lan no te links ".$i['id']." ";
 
           $qwlan = db_query('
             SELECT COUNT (*)
             FROM {guifi_radios}
-            WHERE id=%d', $id);
+            WHERE id = :id',array(':id' => $id))->fetchAssoc();
 
-          if (db_result($qwlan) == 0) {
+          if ($qwlan == 0) {
             print "false wLanLan: ".$i['id']." ";
           // Device does not have any radios, don't need this bridge. convert to ethernet interface class.
             db_query("UPDATE {guifi_interfaces} SET radiodev_counter = NULL, etherdev_counter = '0', interface_class = 'ethernet', interface_type = 'Lan', related_interfaces = NULL WHERE id = :id", array(':id' => $i['id']));
@@ -150,33 +150,29 @@ function guifi_device_load($id,$ret = 'array') {
         SELECT l2.*
         FROM {guifi_links} l1
         LEFT JOIN {guifi_links} l2 ON l1.id=l2.id
-        WHERE l1.link_type NOT IN ("ap/client","wds/p2p")
-        AND l1.device_id=%d
-        AND l1.interface_id=%d
-        AND l1.ipv4_id=%d
-        AND l2.device_id!=%d',
-        $id,
-        $i['id'],
-        $a['id'],
-        $id);
-      while ($l = db_fetch_array($ql)) {
+        WHERE l1.link_type NOT IN (\'ap/client\',\'wds/p2p\')
+        AND l1.device_id = :did
+        AND l1.interface_id = :iid
+        AND l1.ipv4_id = :ipv4_id
+        AND l2.device_id != :did2',
+        array(':did' => $id, ':iid' => $i['id'], ':ipv4_id' => $a['id'], ':did2' => $id));
+      while ($l = $ql->fetchAssoc()) {
         $ipdec2 = array();
         $iparr2 = array();
         $qra = db_query('
           SELECT *
           FROM {guifi_ipv4}
-          WHERE id=%d
-          AND interface_id=%d',
-          $l['ipv4_id'],
-          $l['interface_id']);
-        while ($ra = db_fetch_array($qra)) {
+          WHERE id = :ipv4_id
+          AND interface_id = :iid',
+          array(':ipv4_id' => $l['ipv4_id'],':iid' => $l['interface_id']));
+        while ($ra = $qra->fetchAssoc()) {
           $ipdec2[$ra['id']] = ip2long($ra['ipv4']);
           $lr = $l;
-          $lr['interface'] = db_fetch_array(db_query('
+          $lr['interface'] = db_query('
             SELECT *
             FROM {guifi_interfaces}
-            WHERE id=%d',
-            $l['interface_id']));
+            WHERE id = :iid',
+            array(':iid' => $l['interface_id']))->fetchAssoc();
           $lr['interface']['ipv4'] = $ra;
           $iparr2[$ra['id']] = $lr;
         } // foreach remote interface
@@ -502,9 +498,9 @@ function guifi_device_access($op, $id) {
       else {
 //      	guifi_log(GUIFILOG_BASIC,'guifi_device_access(update)',$device);
 
-        if ((empty($device['maintainers'])) and (guifi_node_access($op,$node)))
+        if ((empty($device['maintainers'])) and (guifi_location_access($op,$node)))
           return TRUE;
-        if ((empty($device['funders'])) and (guifi_node_access($op,$node)))
+        if ((empty($device['funders'])) and (guifi_location_access($op,$node)))
           return TRUE;
       }
   }
@@ -623,7 +619,7 @@ function guifi_device_form($form_state, $params = array()) {
     }
   }
 
-  drupal_set_breadcrumb(guifi_node_ariadna($form_state['values']['nid']));
+  drupal_set_breadcrumb(guifi_location_ariadna($form_state['values']['nid']));
 
   // Check permissions
   if ($params['edit']){
@@ -638,7 +634,7 @@ function guifi_device_form($form_state, $params = array()) {
   $zone = node_load($node->zone_id);
 
   // Setting the breadcrumb
-  drupal_set_breadcrumb(guifi_node_ariadna($form_state['values']['nid']));
+  drupal_set_breadcrumb(guifi_location_ariadna($form_state['values']['nid']));
 
   // if contact is NULL, then get it from the node or the user logged in drupal
   if (is_null($form_state['values']['notification']))
@@ -1322,7 +1318,7 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
     $verbose,
     $notify);
 
-  guifi_node_set_flag($edit['nid']);
+  guifi_location_set_flag($edit['nid']);
   guifi_clear_cache($edit['nid']);
   guifi_clear_cache($edit['id']);
   variable_set('guifi_refresh_dns',time());
@@ -1580,13 +1576,13 @@ function guifi_device_delete($device, $notify = TRUE, $verbose = TRUE) {
       $log,
       $verbose,
       $notify);
-    guifi_node_set_flag($device['nid']);
+    guifi_location_set_flag($device['nid']);
 
     drupal_goto('node/'.$device['nid']);
   }
 
   $node = node_load(array('nid' => $device['nid']));
-  drupal_set_breadcrumb(guifi_node_ariadna($node));
+  drupal_set_breadcrumb(guifi_location_ariadna($node));
 
   $output = drupal_get_form('guifi_device_delete_confirm',
     array('name' => $device['nick'],'id' => $device['id']));
@@ -1645,7 +1641,7 @@ function guifi_device_create_form($form_state, $node) {
 
   $zone = guifi_zone_load($node->zone_id);
 
-  if (!guifi_node_access('create',$node->nid)) {
+  if (!guifi_location_access('create',$node->nid)) {
     $form['text_add'] = array(
      '#type' => 'item',
      '#value' => t('You are not allowed to update this node.'),
@@ -2366,7 +2362,7 @@ function guifi_device_print($device = NULL) {
   $node = node_load(array('nid' => $device[nid]));
   $title = t('Node:').' <a href="'.url('node/'.$node->nid).'">'.$node->nick.'</a> &middot; '.t('Device:').'&nbsp;'.$device[nick];
 
-  drupal_set_breadcrumb(guifi_node_ariadna($node));
+  drupal_set_breadcrumb(guifi_location_ariadna($node));
 
   switch (arg(4)) {
   case 'all': case 'data': default:
@@ -2678,7 +2674,7 @@ function guifi_device_get_service($id, $type ,$path = FALSE) {
   if (!empty($z->$type))
     $ret = $z->$type;
   else
-    $ret = guifi_node_get_service($z->nid,$type);
+    $ret = guifi_location_get_service($z->nid,$type);
 
   if ($path)
     if ($ret)

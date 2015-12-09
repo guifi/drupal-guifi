@@ -13,17 +13,19 @@
    		'ORDER BY id',
    		array(':si' => $id,':st' => $subject_type));
 
-   foreach ($qsql as $m) {
-   	 switch ($ret ) {
-   	 	case "maintainer":
+  foreach ($qsql->fetchAssoc() as $m) {
+    switch ($ret ) {
+      case "maintainer":
+        if (module_exists('budgets')) {
           $m['maintainer'] = $m['supplier_id'].'-'.budgets_supplier_get_suppliername($m['supplier_id']);
           $maintainers[] = $m;
-          break;
-        case "uid":
-          $s = node_load(array('nid'=>$m['supplier_id']));
-          $maintainers[] = $s->uid;
-          break;
-   	 }
+        }
+      break;
+      case "uid":
+        $s = node_load(array('nid'=>$m['supplier_id']));
+        $maintainers[] = $s->uid;
+      break;
+    }
 
    }
    guifi_log(GUIFILOG_TRACE,
@@ -230,9 +232,9 @@ function guifi_maintainers_parents($zid,$ret = 'maintainer') {
     $result = db_query('
       SELECT z.master master
       FROM {guifi_zone} z
-      WHERE z.id = %d',
-      $parent);
-    $row = db_fetch_object($result);
+      WHERE z.id = :zid',
+      array(':zid' => $parent));
+    $row = $result->fetchObject();
     $parent = $row->master;
 
     if ($parent) {

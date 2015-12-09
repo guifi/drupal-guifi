@@ -32,9 +32,8 @@ function guifi_tools_ip_search($ipv4 = NULL) {
   $sql = db_select('guifi_ipv4', 'i')
     ->fields('i', array('id','ipv4','netmask','interface_id'))
     ->condition('ipv4', $ipv4, 'LIKE')
-    ->orderBy('nipv4', 'ASC')
-    ->extend('PagerDefault')
-    ->limit(variable_get("guifi_pagelimit", 50));
+    ->orderBy('nipv4', 'ASC');
+  $sql = $sql->extend('PagerDefault')->limit(variable_get("guifi_pagelimit", 50));
   $sql->addExpression('inet_aton(ipv4)', 'nipv4');
     
   foreach ($sql->execute() as $ipv4 ) {
@@ -142,9 +141,8 @@ function guifi_tools_mac_search($mac = NULL) {
 
   $sql = db_select('guifi_interfaces', 'i')
     ->fields('i', array('id','device_id','mac','radiodev_counter','interface_type'))
-    ->condition('mac', $mac, 'LIKE')
-    ->extend('PagerDefault')
-    ->limit(variable_get("guifi_pagelimit", 50));
+    ->condition('mac', $mac, 'LIKE');
+    $sql = $sql->extend('PagerDefault')->limit(variable_get("guifi_pagelimit", 50));
     
   foreach ($sql->execute() as $interface ) {
     $row = array();
@@ -389,9 +387,8 @@ function guifi_tools_mail_search($mail = NULL) {
 
     $sql = db_select($table, 'i')
       ->fields('i')
-      ->condition('notification', $mail, 'LIKE')
-      ->extend('PagerDefault')
-      ->limit(variable_get("guifi_pagelimit", 50));
+      ->condition('notification', $mail, 'LIKE');
+    $sql = $sql->extend('PagerDefault')->limit(variable_get("guifi_pagelimit", 50));
 
     foreach ($sql->execute() as $amails ) {
       $row = array();
@@ -783,7 +780,6 @@ function guifi_tools_datareview() {
   //$output .= theme_pager(NULL, 50);
   return $output;
 }
-
 
 /**
  * Checks if there is a path between two devices

@@ -27,6 +27,9 @@ function guifi_service_access($op, $node) {
   }
 }
 
+function guifi_service_access_callback($node) {
+  return ($node->type == 'guifi_service') && user_access('access content');
+}
 /**
  * @todo Improve asserts in the beginning
  * @todo what object is expected to be $node?
@@ -36,24 +39,29 @@ function guifi_service_access($op, $node) {
  *   Object with the extra field ($node->var) and link to the node ($node->l)
  *   or FALSE if $node is not found in database
  */
+
 function guifi_service_load($node) {
-  if (!$node)
-    return FALSE;
+  if (is_object($node)) {
+    $id = $node->nid;
+    if ($node->type != 'guifi_service')
+      return FALSE;
+  } else
+  if (is_numeric($node))
+    $id = $node;
 
-  if (is_object($node))
-    $k = $node->nid;
-  else
-    $k = $node;
+  $loaded = db_query("SELECT * FROM {guifi_services} WHERE id = :id", array(':id' => $id))->fetchObject();
 
-  $node = db_query("SELECT * FROM {guifi_services} WHERE id = :id", array(':id' => $k))->fetchObject();
-  $node->var = unserialize($node->extra);
-  $node->l = 'node/'.$node->id;
+  $loaded->var = unserialize($loaded->extra);
+  $loaded->l = 'node/'.$loaded->id;
 
-  if (!$node->id == NULL)
+   if ($loaded->id != NULL)
+    return $loaded;
+   else
     return $node;
 
   return FALSE;
 }
+
 
 /**
  * Present the guifi zone editing form.
@@ -569,13 +577,13 @@ function theme_guifi_service_data($node, $links = TRUE) {
     $node = node_load(array('nid' => $node->id));
   guifi_log(GUIFILOG_TRACE,'guifi_service_print_data()',$node);
 
-  $zone         = db_fetch_object(db_query('SELECT title FROM {guifi_zone} WHERE id = %d', $node->zone_id));
-  $type         = db_fetch_object(db_query('SELECT description FROM {guifi_types} WHERE type="service" AND text = "%s"', $node->service_type));
+  $zone         = db_query('SELECT title FROM {guifi_zone} WHERE id = :zid', array(':zid' => $node->zone_id))->fetchObject();
+  $type         = db_query('SELECT description FROM {guifi_types} WHERE type="service" AND text = :text', array(':text' => $node->service_type))-fetchObject();
 
   $rows[] = array(t('service'),$node->nid .'-' .$node->nick,'<b>' .$node->title .'</b>');
   $rows[] = array(t('type'),$node->service_type,t($type->description));
   if ($node->device_id > 0) {
-    $device = db_fetch_object(db_query('SELECT nick FROM {guifi_devices} WHERE id = %d', $node->device_id));
+    $device = db_query('SELECT nick FROM {guifi_devices} WHERE id = :did', array(':did' => $node->device_id));
     $url = url('guifi/device/'.$node->device_id);
     $rows[] = array(t('device & status'),'<a href='.$url.'>'.$device->nick.'</a>',
               array('data' => t($node->status_flag),'class' => $node->status_flag));
@@ -681,10 +689,10 @@ function guifi_list_services_query($param, $typestr = 'by zone', $service = '%')
   $query = db_query($sqlprefix.$sqlwhere.' ORDER BY s.service_type, s.zone_id, s.nick');
 
   $current_service = '';
-  while ($service = db_fetch_object($query)) {
-    $node = node_load(array('nid' => $service->id));
+  while ($service = $query->fetchObject()) {
+    $node = node_load($service->id);
     if ($current_service != $service->service_type) {
-      $typedescr = db_fetch_object(db_query("SELECT * FROM {guifi_types} WHERE type='service' AND text = '%s'",$service->service_type));
+      $typedescr = db_query("SELECT * FROM {guifi_types} WHERE type='service' AND text = :text", array(':text' => $service->service_type))->fetchObject();
       $rows[] = array('<strong>'.t($typedescr->description).'</strong>', NULL, NULL, NULL,NULL);
       $current_service = $service->service_type;
     }
@@ -710,7 +718,6 @@ function theme_guifi_services_list($node,$service = '%') {
   if (is_numeric($node)) {
     $typestr = t('by device');
   } else {
-    $node = node_load(array('nid' => $node->id));
     if ($node->type == 'guifi_location')
       $typestr = t('by node');
     else
@@ -720,15 +727,16 @@ function theme_guifi_services_list($node,$service = '%') {
   $rows = guifi_list_services_query($node,$typestr);
 
   ($rows) ?
-     $box .= theme('table',
+     $box .= theme('table', array('header' =>
        array(t('service'),t('zone'),t('device'),t('status'), t('disponibilitat')),
-       array_merge($rows),
-       array('width' => '100%'))
+       'rows' => array_merge($rows),
+       'attributes' => array('width' => '100%')))
      : $box .= t('There are no services defined at the database');
 
-  $output = theme('box',
-    t('Services of %node (%by)',array('%node' => $node->title,'%by' => $typestr)),
-    $box);
+    $table = theme('table',array(
+    'header' => array(t('Services of @node (@by)',array('@node' => $node->title,'@by' => $typestr))),
+    'rows' => array(array($box)),
+    'attributes' => array('width' => '100%')));
 
   switch ($typestr) {
     case t('by node'):
@@ -750,15 +758,16 @@ function theme_guifi_services_list($node,$service = '%') {
       $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
       break;
   }
-  $output .= theme_pager(NULL, variable_get("guifi_pagelimit", 50));
-  print theme('page',$output, FALSE);
-  return;
+//  $output .= theme_pager(NULL, variable_get("guifi_pagelimit", 50));
+//  print theme('page',$output, FALSE);
+  $output .= '<div>' . $table . '</div>';
+  return $output;
 }
 /**
  * outputs the node information
 **/
 function guifi_service_view($node, $teaser = FALSE, $page = FALSE, $block = FALSE) {
-  node_prepare($node);
+ // node_prepare($node);
   if ($teaser)
     return $node;
   if ($block)

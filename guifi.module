@@ -3,13 +3,15 @@
  * @file guifi.module
  */
 
+ include_once 'guifi_includes.inc.php';
 include_once 'guifi_zone.inc.php';
-include_once 'guifi_maintainers.inc.php'; // maintainers
-//include_once 'guifi_funders.inc.php';   // funders
-//include_once 'guifi_ipv4.inc.php';      // ipv4 network management
 include_once 'guifi_location.inc.php';      // node (location) management
 include_once 'guifi_service.inc.php';   // services management
 include_once 'guifi_devices.inc.php';   // device management
+
+include_once 'guifi_maintainers.inc.php'; // maintainers
+//include_once 'guifi_funders.inc.php';   // funders
+include_once 'guifi_ipv4.inc.php';      // ipv4 network management
 //include_once 'guifi_radios.inc.php';    // radios management
 //include_once 'guifi_switch.inc.php';    // switch management
 //include_once 'guifi_interfaces.inc.php';// interfaces management
@@ -23,7 +25,7 @@ include_once 'guifi_graphs.inc.php';    // graphs management
 //include_once 'guifi_cnml.inc.php';      // CNML (XML) generator
 //include_once 'guifi_gml.inc.php';       // gml (geographic XML export) generator
 //include_once 'guifi_maps.inc.php';      // maps management
-include_once 'guifi_includes.inc.php';  // misc. routines
+  // misc. routines
 include_once 'guifi_networkutils.inc.php';  // network calc routines
 include_once 'guifi_sql.inc.php';       // database changes
 include_once 'guifi_ahah.inc.php';      // AHAH functions
@@ -661,73 +663,76 @@ function guifi_menu() {
 
   // node (location) menus
 
+    $items['node/%guifi_location/view/nodedata'] = array(
+    'title' => 'data',
+    'page callback' => 'theme_guifi_location_data',
+    'page arguments' => array(1),
+    'access callback' => 'guifi_location_access_callback',
+    'access arguments' => array(1),
+    'type' => MENU_LOCAL_TASK
+  );
+  
   $items['node/%guifi_location/view/distances'] = array(
     'title' => 'distances',
     'page callback' => 'guifi_location_distances',
     'page arguments' => array(1),
-    'access arguments' => array('access content'),
+    'access callback' => 'guifi_location_access_callback',
+    'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK
   );
   $items['node/%guifi_location/view/distancesmap'] = array(
     'title' => 'profiles map',
     'page callback' => 'guifi_location_distances_map',
     'page arguments' => array(1),
-    'access arguments' => array('access content'),
-    'type' => MENU_LOCAL_TASK
-  );
-  $items['node/%guifi_location/view/nodedata'] = array(
-    'title' => 'data',
-    'page callback' => 'theme_guifi_location_data',
-    'page arguments' => array(1, 'TRUE'),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access callback' => 'guifi_location_access_callback',
+    'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK
   );
   $items['node/%guifi_location/view/nodeservices'] = array(
     'title' => 'services',
     'page callback' => 'theme_guifi_services_list',
     'page arguments' => array(1),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access callback' => 'guifi_location_access_callback',
+    'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK
   );
   $items['node/%guifi_location/view/devices'] = array(
     'title' => 'devices',
     'page callback' => 'theme_guifi_location_devices_list',
-    'page arguments' => array(1, 'TRUE'),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'page arguments' => array(1),
+    'access callback' => 'guifi_location_access_callback',
+    'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK
   );
   $items['node/%guifi_location/view/links'] = array(
     'title' => 'links',
     'page callback' => 'theme_guifi_location_links',
-    'page arguments' => array(1, 'TRUE'),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'page arguments' => array(1),
+    'access callback' => 'guifi_location_access_callback',
+    'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK
   );
   $items['node/%guifi_location/view/graphs'] = array(
     'title' => 'graphs',
     'page callback' => 'theme_guifi_location_graphs_overview',
-    'page arguments' => array(1, 'TRUE'),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'page arguments' => array(1),
+    'access callback' => 'guifi_location_access_callback',
+    'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK
   );
   $items['node/%guifi_location/view/users'] = array(
     'title' => 'users',
     'page callback' => 'guifi_users_node_list',
     'page arguments' => array(1),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access callback' => 'guifi_location_access_callback',
+    'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK
   );
   $items['node/%guifi_location/user/add'] = array(
     'page callback' => 'guifi_user_add',
-    'page arguments' => array(1),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'page arguments' => 1,
+    'access callback' => 'guifi_location_access_callback',
+    'access arguments' => array(1),
     'type' => MENU_CALLBACK
   );
   $items['guifi/user/%/edit'] = array(
@@ -751,8 +756,8 @@ function guifi_menu() {
     'title' => 'data',
     'page callback' => 'theme_guifi_service_data',
     'page arguments' => array(1),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access callback' => 'guifi_service_access_callback',
+    'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK
   );
 // TODO:
@@ -1296,6 +1301,15 @@ function guifi_init() {
   drupal_add_css(drupal_get_path('module', 'guifi') .'/guifi.css');
   if (module_exists('event'))
     drupal_add_css(drupal_get_path('module', 'event') .'/event.css');
+}
+
+function guifi_zone_root() {
+  $root = db_query(
+    "SELECT id " .
+    "FROM {guifi_zone} " .
+    "WHERE master = 0")->fetchObject();
+  return $root->id;
+
 }
 
 function guifi_nodeapi($node, $op, $arg = 0) {

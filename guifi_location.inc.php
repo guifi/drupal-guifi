@@ -48,6 +48,9 @@ function guifi_location_access($op, $node) {
   return FALSE;
 }
 
+function guifi_location_access_callback($node) {
+  return ($node->type == 'guifi_location') && user_access('access content');
+}
 /** guifi_location_ariadna(): Get an array of zone hierarchy and node devices
  * to build the breadcrumb
 **/
@@ -63,11 +66,11 @@ function guifi_location_ariadna($node, $nlink = 'node/%d',$dlink = 'guifi/device
 
   foreach (array_reverse(guifi_zone_get_parents($node->zone_id)) as $parent)
   if ($parent > 0) {
-    $parentData = db_fetch_array(db_query(
+    $parentData = db_query(
       'SELECT z.id, z.title ' .
       'FROM {guifi_zone} z ' .
-      'WHERE z.id = %d ',
-      $parent));
+      'WHERE z.id = :zid ',
+      array(':zid' => $parent))->fetchAssoc();
     $ret[] = l($parentData['title'],sprintf($zlink,$parentData['id']));
   }
   $ret[] = l($node->title,sprintf($nlink,$node->id));
@@ -77,11 +80,11 @@ function guifi_location_ariadna($node, $nlink = 'node/%d',$dlink = 'guifi/device
   $child = array();
   $query = db_query('SELECT d.id, d.nick, d.type ' .
       'FROM {guifi_devices} d ' .
-      'WHERE d.nid = %d ' .
+      'WHERE d.nid = :nid ' .
       'ORDER BY d.id DESC',
-      $node->id);
+      array(':nid' => $node->id));
   $c = 0;
-  while ($dChild = db_fetch_array($query) and ($c <= 10)) {
+  while ($dChild = $query->fetchAssoc() and ($c <= 10)) {
     $child[] = l($dChild['nick'],sprintf($dlink,$dChild['id']),
       array(
         'attributes' => array('title' => $dChild['type'])
@@ -103,35 +106,40 @@ function guifi_location_ariadna($node, $nlink = 'node/%d',$dlink = 'guifi/device
 }
 
 
-/** guifi_location_add(): creates a new node
-*/
-function guifi_location_add($id) {
-  $zone = guifi_zone_load($id);
-  // Set the defaults for a node of this zone
-  // Callback to node/guifi-node/add
-  drupal_goto('node/add/guifi-node?edit[title]='.$zone->id);
-}
-
-
 /** guifi_location_load(): load and constructs node array from the database
 **/
+
 function guifi_location_load($node) {
-  if (is_object($node))
-    $k = $node->nid;
-  else
-    $k = $node;
 
-  $node = db_query("SELECT * FROM {guifi_location} WHERE id = :nid", array(':nid' => $k))->fetchObject();
+  if (is_object($node)) {
+    $id = $node->nid;
+    if ($node->type != 'guifi_location')
+      return FALSE;
+  } else
+  if (is_numeric($node))
+    $id = $node;
 
-  $node->maintainers=guifi_maintainers_load($node->id,'location');
-  // TODO MIQUEL
-//  $node->funders=guifi_funders_load($node->id,'location');
+  $loaded = db_query("SELECT * FROM {guifi_location} WHERE id = :id", array(':id' => $id))->fetchObject();
 
-  if (!$node->id == NULL)
+  /*
+  foreach ($nodes as $node) {
+    $location = db_query("SELECT * FROM {guifi_location} WHERE id = :nid", array(':nid' => $node->nid))->fetchObject();
+    foreach ($location as $k => $values) {
+    $nodes[$node->nid]->$k = $location->$k;
+// TODO MIQUEL
+//    $nodes[$node->nid]->$k = guifi_maintainers_load($location->id,'location');
+//    $nodes[$node->nid]->$k = guifi_funders_load($location->id,'location');
+    }
+  }
+ */
+   if ($loaded->id != NULL)
+    return $loaded;
+   else
     return $node;
 
   return FALSE;
 }
+
 
 /** node editing functions
 **/
@@ -163,7 +171,8 @@ function guifi_location_prepare(&$node){
 
   if (isset($_GET['lat']))
     if (isset($_GET['lon'])) {
-          $defzone_qry = db_fetch_array(db_query("SELECT id, ((maxx-minx)+(maxy-miny)) as distance FROM {guifi_zone} WHERE minx < '%s' AND maxx > '%s' AND miny < '%s' AND maxy > '%s' ORDER by distance LIMIT 1",$_GET['lon'],$_GET['lon'],$_GET['lat'],$_GET['lat']));
+          $defzone_qry = db_query("SELECT id, ((maxx-minx)+(maxy-miny)) as distance FROM {guifi_zone} WHERE minx < :minx AND maxx > :maxx AND miny < :miny AND maxy > :maxy ORDER by distance LIMIT 1",
+          array(':minx' => $_GET['lon'], ':maxx' => $_GET['lon'], ':miny' => $_GET['lat'], ':maxy' => $_GET['lat']))->fetchAssoc();
           $node->ndfzone = $defzone_qry['id'];
     }
   $coord=guifi_coord_dtodms($node->lat);
@@ -180,7 +189,7 @@ function guifi_location_prepare(&$node){
   }
 }
 
-function guifi_location_form(&$node, $form_state) {
+function guifi_location_form($node, $form_state) {
   global $user;
 
   $form_weight = 0;
@@ -471,8 +480,8 @@ function guifi_location_form(&$node, $form_state) {
     );
   }
   $radios = array();
-  $query = db_query("SELECT * FROM {guifi_radios} WHERE nid=%d",$node->id);
-  while ($radio = db_fetch_array($query)) {
+  $query = db_query("SELECT * FROM {guifi_radios} WHERE nid = :nid", array(':nid' => $node->id))->fetchAssoc();
+  while ($radio = $query) {
     $radios[] = $radio;
   }
 
@@ -516,7 +525,6 @@ function guifi_location_nick_validate($element, &$form_state) {
     form_set_error('nick', t('Nick already in use.'));
   }
 }
-
 
 
 function guifi_location_get_service($id, $type ,$path = FALSE) {
@@ -640,11 +648,12 @@ function guifi_location_update($node) {
   $to_mail = explode(',',$node->notification);
 
   // Refresh maps?
-  $pn = db_fetch_object(db_query(
+  $pn = db_query(
     'SELECT l.*
     FROM {guifi_location} l
-    WHERE l.id=%d',
-    $node->nid));
+    WHERE l.id = :nid',
+    array(':nid' => $node->nid))->fetchObject();
+
   if (($pn->lat != $node->lat) || ($pn->lon != $node->lon) || ($pn->status_flag != $node->status_flag)) {
   // touch(variable_get('guifi_rebuildmaps','/tmp/ms_tmp/REBUILD'));
     variable_set('guifi_refresh_cnml',time());
@@ -698,49 +707,58 @@ function guifi_location_delete($node) {
 /** guifi_location_view(): outputs the node information
 
 **/
-function guifi_location_view($node, $teaser = FALSE, $page = FALSE, $block = FALSE) {
-  node_prepare($node);
-  if ($teaser)
+function guifi_location_view($node, $view_mode, $langcode = NULL) {
+
+  if ($view_mode == 'teaser')
     return $node;
-  if ($block)
+  if ($view_mode == 'bloc')
     return $node;
+  if (empty($node->id)) // from guifi_location
+    $location = guifi_location_load($node->nid);
 
   drupal_set_breadcrumb(guifi_location_ariadna($node));
+  
   $node->content['data'] = array(
-    '#value'=> theme_table(NULL,
-      array(
-        array(
-          array(
-            'data' => '<small>'.
-            theme_guifi_location_data($node).
-            '</small>',
-            'width' => '50%'
-          ),
-          array(
-            'data' => theme_guifi_location_map($node),
-            'width' => '50%'
-          )
-        )
-      )
-    ),
-    '#weight'=> 1);
+    '#type' => 'markup',
+    '#weight' => 2,
+    '#markup' => theme('table',
+                  array('header' => NULL, 
+                        'rows' => array(
+                          array(
+                            array(
+                              'data' =>'<small>'.theme_guifi_location_data($location).theme_guifi_contacts($location).'</small>',
+                              'width' => '50%'),
+                            array(
+                              'data' => theme_guifi_location_map($location),
+                               'width' => '50%'),
+                          )
+                        ),
+                        'attributes' => array('width' => '100%')
+                        )
+                  )
+  );
+
+  /*
   $node->content['graphs'] = array(
-    '#value'=> theme_guifi_location_graphs_overview($node),
+    '#value'=> theme_guifi_location_graphs_overview($location),
     '#weight'=> 2);
   $node->content['devices'] = array(
-    '#value'=> theme_guifi_location_devices_list($node),
+    '#value'=> theme_guifi_location_devices_list($location),
     '#weight'=> 3);
   $node->content['wdsLinks'] = array(
-    '#value'=> theme_guifi_location_links_by_type($node->id,'wds'),
+    '#value'=> theme_guifi_location_links_by_type($location->id,'wds'),
     '#weight'=> 4);
   $node->content['cableLinks'] = array(
-    '#value'=> theme_guifi_location_links_by_type($node->id,'cable'),
+    '#value'=> theme_guifi_location_links_by_type($location->id,'cable'),
     '#weight'=> 5);
   $node->content['clientLinks'] = array(
-    '#value'=> theme_guifi_location_links_by_type($node->id,'ap/client'),
+    '#value'=> theme_guifi_location_links_by_type($location->id,'ap/client'),
     '#weight'=> 6);
-  return $node;
+
+*/
+    return $node;
 }
+
 
 function guifi_location_hidden_map_fileds($node) {
   $output  = '<from>';
@@ -870,20 +888,8 @@ function guifi_location_distances_list($filters,$node) {
 //  $filters = $form_state['values']['filters'];
 
   // get the nodes and compute distances
-/***
-  $result = db_query(
-      "SELECT " .
-        "n.id, n.lat, n.lon, n.nick, n.status_flag, n.zone_id  " .
-      "FROM {guifi_location} n " .
-      "WHERE n.id !=%d " .
-        "AND (n.lat != '' " .
-        "AND n.lon != '') " .
-        "AND (n.lat != 0 " .
-        "AND n.lon != 0)",
-      $node->id);
-***/
 
-  $result = db_query("SELECT n.id, n.lat, n.lon, n.nick, n.status_flag, n.zone_id, n.timestamp_changed, count(*) radios FROM {guifi_location} n LEFT JOIN {guifi_radios} r ON n.id = r.nid WHERE n.id !=%d AND (n.lat != '' AND n.lon != '')AND (n.lat != 0 AND n.lon != 0) GROUP BY 1",$node->id);
+  $result = db_query("SELECT n.id, n.lat, n.lon, n.nick, n.status_flag, n.zone_id, n.timestamp_changed, count(*) radios FROM {guifi_location} n LEFT JOIN {guifi_radios} r ON n.id = r.nid WHERE n.id != :nid AND (n.lat != '' AND n.lon != '')AND (n.lat != 0 AND n.lon != 0) GROUP BY 1", array(':nid' => $node->id));
 
   $oGC = new GeoCalc();
   $nodes = array();
@@ -905,7 +911,7 @@ function guifi_location_distances_list($filters,$node) {
       $allow_prev = FALSE;
   }
 
-  while ($node = db_fetch_array($result)) {
+  while ($node = $result->fetchAssoc()) {
      $distance = round($oGC->EllipsoidDistance($lat1, $long1, $node["lat"], $node["lon"]),3);
 
      // Apply filters
@@ -1141,9 +1147,10 @@ function guifi_location_set_flag($id) {
   $query = db_query(
     "SELECT d.id, d.flag " .
     "FROM {guifi_devices} d " .
-    "WHERE d.nid = %d",
-    $id);
-  while ($device = db_fetch_object($query)) {
+    "WHERE d.nid = :id",
+    array(':id' => $id));
+
+  while ($device = $query->fetchObject()) {
     if ($scores[$device->flag] > $score)
       $score = $scores[$device->flag];
   } // eof while devices
@@ -1162,14 +1169,11 @@ function guifi_location_set_flag($id) {
 
 /* Themes (presentation) functions */
 
-function theme_guifi_location_data($node,$links = FALSE) {
+function theme_guifi_location_data($node) {
   guifi_log(GUIFILOG_TRACE,'function guifi_location_data(node)',$node);
-
-/*  $zone = db_fetch_object(db_query('SELECT id, title, master, zone_mode FROM {guifi_zone} WHERE id = %d',
-                      $node->zone_id));*/
-  $zone = db_fetch_object(db_query('SELECT id, title, master FROM {guifi_zone} WHERE id = %d', $node->zone_id));
+  
+  $zone = db_query('SELECT id, title FROM {guifi_zone} WHERE id = :zid', array(':zid' => $node->zone_id))->fetchObject();
   $rows[] = array(t('node'),$node->nid .' ' .$node->nick,'<b>' .$node->title .'</b>');
-//  $rows[] = array(t('zone (mode)'),l($zone->title,'node/'.$zone->id).' ('.t($zone->zone_mode).')',$node->zone_description);
   $rows[] = array(t('zone'),l($zone->title,'node/'.$zone->id),$node->zone_description);
   $rows[] = array(t('position (lat/lon)'),sprintf('<a href="http://maps.guifi.net/world.phtml?Lat=%f&Lon=%f&Layers=all" target="_blank">Lat:%f<br />Lon:%f</a>',
                    $node->lat,$node->lon,$node->lat,$node->lon),$node->elevation .'&nbsp;'.t('meters above the ground'));
@@ -1188,8 +1192,8 @@ function theme_guifi_location_data($node,$links = FALSE) {
       array('data'=>implode(', ',guifi_maintainers_links($node->maintainers)),
             'colspan'=>2));
   } else {
-  	$radios = db_fetch_object(db_query(
-      'SELECT count(id) c FROM {guifi_radios} WHERE nid=%d',$node->id));
+  	$radios = db_query(
+      'SELECT count(id) c FROM {guifi_radios} WHERE nid = :nid', array(':nid' => $node->id))->fetchObject();
     if ($radios->c > 1) {
   	  $pmaintainers = guifi_maintainers_parents($node->zone_id);
   	  if (!empty($pmaintainers))
@@ -1209,34 +1213,25 @@ function theme_guifi_location_data($node,$links = FALSE) {
               $gs->l, array('attributes' => array('title' => $gs->nick.' - '.$gs->title))),
     'colspan' => 2));
 
-  $output = theme('table', NULL,array_merge($rows));
-  $output .= theme_guifi_contacts($node);
+  $output = theme('table', array('header' => NULL, 'rows' => array_merge($rows)));
 
-  if ($links) {
-    $node = node_load(array('nid' => $node->id));
-    drupal_set_title(t('%node data',array('%node' => $node->title)));
-    drupal_set_breadcrumb(guifi_location_ariadna($node));
-    $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
-    print theme('page',$output, FALSE);
-    return;
-  }
 
-  return theme('box', NULL,$output);
+  return $output;
 }
 
 
 function theme_guifi_location_map($node) {
+
+  drupal_set_breadcrumb(guifi_location_ariadna($node->id,'node/%d/view/map'));
+  
   if (guifi_gmap_key()) {
-    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_point.js','module');
-    $output = '<div id="map" style="width: 100%; height: 340px; margin:5px;"></div>';
+    $output ='<div id="map" style="width: 100%; height: 340px; margin:5px;"></div>';
     $output .= guifi_location_hidden_map_fileds($node);
-  } else {
-    $output = '<IFRAME FRAMEBORDER="0" ALIGN=right SRC="'.variable_get("guifi_maps", 'http://maps.guifi.net').'/world.phtml?IFRAME=Y&MapSize=300,240&Lat='.$node->lat.'&Lon='.$node->lon.'&Layers=all" WIDTH="350" HEIGHT="290" MARGINWIDTH="0" MARGINHEIGHT="0" SCROLLING="AUTO">';
-    $output .= t('Sorry, your browser can\'t display the embedded map');
-    $output .= '</IFRAME>';
-  }
+    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_point.js');
+   }
+
   return $output;
-}
+  }
 
 /**
  * guifi_location_graph_overview
@@ -1247,15 +1242,15 @@ function theme_guifi_location_graphs_overview($node,$links = FALSE) {
   $gs = guifi_service_load(guifi_graphs_get_server($node->id,'node'));
 
   $radios = array();
-  $query = db_query("SELECT * FROM {guifi_radios} WHERE nid=%d",$node->id);
-  while ($radio = db_fetch_array($query)) {
+  $query = db_query("SELECT * FROM {guifi_radios} WHERE nid = :nid", array(':nid' => $node->id));
+  while ($radio = $query->fetchAssoc()) {
     $radios[] = $radio;
   }
-  // print "Count radios: ".count($radios)."\n<br />";
+
   if (count($radios) > 1) {
     if (substr($gs->var['url'],0,3)=="fot"){
       //  graph all devices.about a node. Ferran Ot
-      while ($radio = db_fetch_object($query)){
+      while ($radio = $query->fetchObject()){
         $ssid=get_SSID_radio($radio->id);
         $ssid=strtolower($ssid);
         $mrtg_url=substr($gs->var['url'],3);
@@ -1324,8 +1319,8 @@ function theme_guifi_location_devices_list($node,$links = FALSE) {
   // Form for adding a new device
   $form = drupal_get_form('guifi_device_create_form',$node);
 
-  $query = db_query("SELECT d.id FROM {guifi_devices} d WHERE nid=%d",$id);
-  while ($d = db_fetch_object($query)) {
+  $query = db_query("SELECT d.id FROM {guifi_devices} d WHERE nid = :nid", array(':nid' => $id));
+  while ($d = $query->fetchObject()) {
      $device = guifi_device_load($d->id);
 
      // Edit and delete buttons
@@ -1373,13 +1368,13 @@ function theme_guifi_location_devices_list($node,$links = FALSE) {
        $mDescr = $device['manufacturer'].'-'.$device['model'];
      else
        $mDescr = '';
-     $uCreated = db_fetch_object(db_query('SELECT u.name FROM {users} u WHERE u.uid = %d', $device[user_created]));
+     $uCreated = db_query('SELECT u.name FROM {users} u WHERE u.uid = :uid', array(':uid' => $device[user_created]))->fetchObject();
      $deviceAttr = $device[id].' '.$mDescr.'
          '
        .t('created by').': '.$uCreated->name
        .' '. t('at') .' '. format_date($device[timestamp_created], 'small');
      if (!empty($device[timestamp_changed])) {
-       $uChanged = db_fetch_object(db_query('SELECT u.name FROM {users} u WHERE u.uid = %d', $device[user_changed]));
+       $uChanged = db_query('SELECT u.name FROM {users} u WHERE u.uid = :uid', array(':uid' =>  $device[user_changed]))->fetchObject();
        $deviceAttr .= '
            '.t('updated by').': '.$uChanged->name
        .' '. t('at') .' '. format_date($device[timestamp_changed], 'small');
@@ -1465,14 +1460,14 @@ function theme_guifi_location_links_by_type($id = 0, $ltype = '%') {
     "  LEFT JOIN {guifi_location} l ON d.nid = l.id " .
     "  LEFT JOIN {guifi_ipv4} a ON i.id=a.interface_id " .
     "    AND a.id=c.ipv4_id " .
-    "  LEFT JOIN {guifi_radios} r ON d.id=r.id " .
-    "    AND i.radiodev_counter=r.radiodev_counter " .
-    "WHERE d.nid = %d AND link_type like '%s' " .
+    "  LEFT JOIN {guifi_radios} r ON d.id = r.id " .
+    "    AND i.radiodev_counter = r.radiodev_counter " .
+    "WHERE d.nid = :nid AND link_type like :type " .
     "ORDER BY c.device_id, i.id",
-    $id,
-    $ltype);
+    array(':nid' => $id, ':type' => $ltype));
+
   $devant = ' ';
-  while ($loc1 = db_fetch_object($queryloc1)) {
+  while ($loc1 = $queryloc1->fetchObject()) {
     $queryloc2 = db_query(
       "SELECT c.id, l.id nid, l.nick, r.ssid, c.device_id, d.nick device_nick, " .
       "  a.ipv4 ip, l.lat, l.lon " .
@@ -1484,17 +1479,15 @@ function theme_guifi_location_links_by_type($id = 0, $ltype = '%') {
       "    AND a.id = c.ipv4_id " .
       "  LEFT JOIN {guifi_radios} r ON d.id=r.id " .
       "    AND i.radiodev_counter=r.radiodev_counter " .
-      "WHERE c.id = %d " .
-      "  AND c.device_id <> %d " .
-      "  AND c.id NOT IN (%s)",
-      $loc1->id,
-      $loc1->device_id,
-      implode(",",$listed));
+      "WHERE c.id = :id " .
+      "  AND c.device_id <> :did " .
+      "  AND c.id NOT IN (:listed)",
+      array(':id' => $loc1->id, ':did' => $loc1->device_id, ':listed' => implode(",",$listed)));
     $listed[] = $loc1->device_id;
     $devact = $loc1->device_nick;
     if ($loc1->ssid)
       $devact.= ' - '.$loc1->ssid;
-    while ($loc2 = db_fetch_object($queryloc2)) {
+    while ($loc2 = $queryloc2->fetchObject()) {
       $gDist = round($oGC->EllipsoidDistance($loc1->lat, $loc1->lon, $loc2->lat, $loc2->lon),3);
       if ($gDist) {
         $total = $total + $gDist;
@@ -1513,7 +1506,7 @@ function theme_guifi_location_links_by_type($id = 0, $ltype = '%') {
       else
         $gDist = 'n/a';
       if ($loc1->nid <> $loc2->nid) {
-        $cr = db_fetch_object(db_query("SELECT count(*) count FROM {guifi_radios} r WHERE id=%d",$loc2->device_id));
+        $cr = db_query("SELECT count(*) count FROM {guifi_radios} r WHERE id = :loc2", array(':loc2' => $loc2->device_id))->fetchObject;
         if ($cr->count > 1)
           $dname = $loc2->device_nick.'/'.$loc2->ssid;
         else

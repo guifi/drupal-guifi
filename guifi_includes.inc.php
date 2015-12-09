@@ -76,13 +76,13 @@ function guifi_main_ethernet($device_id) {
   $Qi= db_query(
      'SELECT i.id
       FROM {guifi_interfaces} i
-      WHERE i.device_id=%d
+      WHERE i.device_id = :did
       ORDER BY radiodev_counter,etherdev_counter,id',
-      $device_id);
-  $i = db_fetch_object($Qi);
-  if (empty($i->id))
+      array(':did' => $device_id))->fetchObject();
+
+  if (empty($Qi->id))
     return false;
-  return $i->id;
+  return $Qi->id;
 }
 
 function guifi_main_interface($mode = NULL) {
@@ -1135,7 +1135,7 @@ function guifi_ipcalc_get_ips(
     $sql .= ' WHERE '.implode(' AND ',$sql_where);
 
   $query = db_query($sql);
-  while ($ip = db_fetch_array($query)) {
+  while ($ip = $query->fetchAssoc()) {
     if ( ($ip['ipv4'] != 'dhcp') and (!empty($ip['ipv4'])) )  {
       $ip_dec = ip2long($ip['ipv4']);
 //      print "ip: $ip[ipv4] $ip_dec - ";
