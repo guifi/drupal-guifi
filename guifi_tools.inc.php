@@ -88,13 +88,13 @@ function guifi_tools_ip_search($ipv4 = NULL) {
 /**
  * IP search form.
  */
-function guifi_tools_ip_search_form($form_state, array $params = array()) {
+function guifi_tools_ip_search_form($form, &$form_state, $params) {
 
   $form['ipv4'] = array(
     '#type' => 'textfield',
     '#title' => t('Network IPv4 address'),
     '#required' => TRUE,
-    '#default_value' => $params['build_info']['args'],
+    '#default_value' => $params,
     '#size' => 16,
     '#maxlength' => 16,
     '#description' => t('Enter a valid ipv4 network address or pattern ' .
@@ -185,13 +185,13 @@ function guifi_tools_mac_search($mac = NULL) {
 /**
  * MAC search form.
  */
-function guifi_tools_mac_search_form($form_state, array $params = array()) {
+function guifi_tools_mac_search_form($form, &$form_state, $params) {
 
   $form['mac'] = array(
     '#type' => 'textfield',
     '#title' => t('MAC address'),
     '#required' => TRUE,
-    '#default_value' => $params['build_info']['args'],
+    '#default_value' => $params,
     '#size' => 20,
     '#maxlength' => 20,
     '#description' => t('Enter a valid MAC address or pattern ' .
@@ -451,7 +451,7 @@ function guifi_tools_mail_search($mail = NULL) {
 /**
  * E-mail address search form
  */
-function guifi_tools_mail_search_form($form_state, array $params = array()) {
+function guifi_tools_mail_search_form($form, &$form_state, $params) {
 
 //  $form['submit'] = array(
 //    '#type' => 'submit',
@@ -463,7 +463,7 @@ function guifi_tools_mail_search_form($form_state, array $params = array()) {
     '#type' => 'textfield',
     '#title' => t('e-mail address'),
     '#required' => TRUE,
-    '#default_value' => $params['build_info']['args'],
+    '#default_value' => $params,
     '#size' => 50,
     '#maxlength' => 50,
     '#description' => t('Enter a valid e-mail address to look for ' .
@@ -490,11 +490,11 @@ function guifi_tools_mail_search_form($form_state, array $params = array()) {
 /**
  * E-mail address update form
  */
-function guifi_tools_mail_update_form($form_state, array $params = array()) {
+function guifi_tools_mail_update_form($form, &$form_state, $params) {
  
   $form['mail_search'] = array(
     '#type' => 'value',
-    '#value' => $params['build_info']['args']);
+    '#value' => $params);
 //  $form['submit'] = array(
 //    '#type' => 'submit',
 //    '#value' => t('Replace with'),
@@ -505,12 +505,12 @@ function guifi_tools_mail_update_form($form_state, array $params = array()) {
     '#type' => 'textfield',
     '#title' => t('New e-mail address'),
     '#required' => FALSE,
-    '#default_value' => $params['build_info']['args'],
+    '#default_value' => $params,
     '#size' => 50,
     '#maxlength' => 50,
     '#description' => t('Enter a valid e-mail address to replace %mail for ' .
         'all the rows of the report below.',
-        array('%mail' => $params['build_info']['args'])),
+        array('%mail' => $params)),
     '#prefix'=> '<td>',
     '#suffix'=> '</td>',
   );

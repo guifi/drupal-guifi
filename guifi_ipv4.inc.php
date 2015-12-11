@@ -249,27 +249,23 @@ function guifi_ipv4_print_data($zone, $list = 'parents', $ips_allocated) {
     unset($zones[$k]);
   } else {
     $zones = guifi_zone_get_parents($zone->id);
-    $pager = 0;
+    $pager = 1;
   }
 
   if (empty($zones))
     return t('There is no zones to look at');
   $rows = array();
-/*
+
   $sql = db_select('guifi_networks', 'n')
     ->fields('n', array('zone','id','base','mask','network_type'))
-    ->condition('zone', array(implode(',',$zones)), 'IN')
+    ->condition('zone', $zones, 'IN')
     ->orderBy('FIND_IN_SET(zone,\''.implode(',',$zones).'\')');
-  //NO RUTLLA :(
-*/
-  $sql = db_query("SELECT
-            zone, id, base, mask, network_type
-          FROM {guifi_networks}
-          WHERE zone IN (".implode(',',$zones).")
-          ORDER BY FIND_IN_SET(zone,'".implode(',',$zones)."')");
+  if ($list == 'childs')
+    $sql = $sql->extend('PagerDefault')->limit(variable_get("guifi_pagelimit", 50));
+  $result = $sql->execute();
 
   $current_zoneid = -1;
-  while ($net = $sql->fetchObject()) {
+  while ($net = $result->fetchObject()) {
     $item = _ipcalc($net->base,$net->mask);
 
     // obtaing the used ip's
@@ -324,7 +320,9 @@ function guifi_ipv4_print_data($zone, $list = 'parents', $ips_allocated) {
 
 
   if (count($rows)) {
-  $output = theme('table',array('header' => $header, 'rows' => $rows));
+  $output .= theme('table',array('header' => $header, 'rows' => $rows));
+  if ($list == 'childs')
+    $output .= theme('pager');
   } else
     $output .= t('None');
 

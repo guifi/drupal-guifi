@@ -11,7 +11,7 @@ function guifi_service_access($op, $node) {
   global $user;
 
   if (is_numeric($node))
-    $node = node_load(array('nid' => $node));
+    $node = node_load($node);
 
   if ($op == 'create') {
     return user_access('create guifi nodes');
@@ -574,7 +574,7 @@ function guifi_service_update($node) {
 **/
 function theme_guifi_service_data($node, $links = TRUE) {
   if (!isset($node->nid))
-    $node = node_load(array('nid' => $node->id));
+    $node = node_load($node->id);
   guifi_log(GUIFILOG_TRACE,'guifi_service_print_data()',$node);
 
   $zone         = db_query('SELECT title FROM {guifi_zone} WHERE id = :zid', array(':zid' => $node->zone_id))->fetchObject();
@@ -670,27 +670,32 @@ function guifi_list_services_query($param, $typestr = 'by zone', $service = '%')
   $sqlprefix =
     "SELECT s.*,z.title zonename " .
     "FROM {guifi_services} s " .
-    "  LEFT JOIN {guifi_devices} d ON s.device_id=d.id " .
-    "  LEFT JOIN {guifi_zone} z ON s.zone_id=z.id " .
-    "  LEFT JOIN {guifi_location} l ON d.nid=l.id " .
+    "  LEFT JOIN {guifi_devices} d ON s.device_id = d.id " .
+    "  LEFT JOIN {guifi_zone} z ON s.zone_id = z.id " .
+    "  LEFT JOIN {guifi_location} l ON d.nid = l.id " .
     "WHERE ";
   switch ($typestr) {
     case t('by zone'):
       $childs = guifi_zone_childs($param->id);
-      $sqlwhere = sprintf('s.zone_id IN (%s) ',implode(',',$childs));
+      $sqlwhere = 's.zone_id IN (:value) ';
+      $value = $childs;
       break;
     case t('by node'):
-      $sqlwhere = sprintf('d.nid = %d ',$param->nid);
+      $sqlwhere = 'd.nid = :value ';
+      $value = $param->nid;
       break;
     case t('by device'):
-      $sqlwhere = sprintf('d.id = %d ',$param);
+      $sqlwhere = 'd.id = :value ';
+      $value = $param;
       break;
   }
-  $query = db_query($sqlprefix.$sqlwhere.' ORDER BY s.service_type, s.zone_id, s.nick');
+  $query = db_query($sqlprefix.$sqlwhere.' ORDER BY s.service_type, s.zone_id, s.nick', array(':value' => $value));
 
   $current_service = '';
   while ($service = $query->fetchObject()) {
     $node = node_load($service->id);
+    $node_srv = guifi_service_load($service->id);
+    
     if ($current_service != $service->service_type) {
       $typedescr = db_query("SELECT * FROM {guifi_types} WHERE type='service' AND text = :text", array(':text' => $service->service_type))->fetchObject();
       $rows[] = array('<strong>'.t($typedescr->description).'</strong>', NULL, NULL, NULL,NULL);
@@ -703,7 +708,7 @@ function guifi_list_services_query($param, $typestr = 'by zone', $service = '%')
     $rows[] = array('<a href="' .base_path() .'node/'.$service->id.'">'.$node->title.'</a>',
                     '<a href="' .base_path() .'node/'.$service->zone_id.'">'.$service->zonename.'</a>',
                     '<a href="' .base_path() .'guifi/device/'.$service->device_id.'">'.guifi_get_hostname($service->device_id).'</a>',
-                    array('data' => t($node->status_flag),'class' => $node->status_flag),
+                    array('data' => t($node_srv->status_flag),'class' => $node_srv->status_flag),
                     $status_url,);
   }
 
@@ -728,7 +733,7 @@ function theme_guifi_services_list($node,$service = '%') {
 
   ($rows) ?
      $box .= theme('table', array('header' =>
-       array(t('service'),t('zone'),t('device'),t('status'), t('disponibilitat')),
+       array(t('service'),t('zone'),t('device'),t('status'), t('availability')),
        'rows' => array_merge($rows),
        'attributes' => array('width' => '100%')))
      : $box .= t('There are no services defined at the database');
@@ -753,13 +758,12 @@ function theme_guifi_services_list($node,$service = '%') {
       drupal_set_title(t('View device %dname',
         array('%dname' => $device['nick'],
               '%nid' => $device['nid'])));
-      $node = node_load(array('nid' => $device['nid']));
+      $node = node_load($device['nid']);
       drupal_set_breadcrumb(guifi_location_ariadna($node));
       $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
       break;
   }
-//  $output .= theme_pager(NULL, variable_get("guifi_pagelimit", 50));
-//  print theme('page',$output, FALSE);
+
   $output .= '<div>' . $table . '</div>';
   return $output;
 }

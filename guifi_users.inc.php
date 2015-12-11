@@ -20,7 +20,7 @@ function guifi_user_access($op, $id) {
   else
     $guifi_user = guifi_user_load($id);
 
-  $node = node_load(array('nid' => $guifi_user['nid']));
+  $node = node_load($guifi_user['nid']);
 
   switch($op) {
     case 'create':
@@ -582,7 +582,7 @@ function guifi_user_form_validate($form, &$form_state) {
 
 function guifi_users_queue($zone) {
 
-  function _guifi_user_queue_device_form($form_state, $d = array()) {
+  function _guifi_user_queue_device_form($form, &$form_state, $d) {
 
     guifi_log(GUIFILOG_TRACE,'function guifi_user_queue_device_form()',$d);
 
@@ -636,22 +636,17 @@ function guifi_users_queue($zone) {
     return $f;
   }
 
-  function _guifi_user_queue_form($form_state, $params = array()) {
+  function _guifi_user_queue_form($form, &$form_state, $u = '') {
 
-    guifi_log(GUIFILOG_TRACE,'function guifi_user_queue_form()',$params);
-
-    if (empty($form_state['values'])) {
-      $form_state['values'] = $params;
-    }
+    guifi_log(GUIFILOG_TRACE,'function guifi_user_queue_form()',$form_state);
     $f['status'] = array(
       '#type' => 'select',
-//      '#title' => t('Status'),
       '#options' => guifi_types('user_status'),
-      '#default_value' => $form_state['values']['status'],
+      '#default_value' => $u['status'],
       '#prefix' => '<table><tr><td>',
       '#suffix' => '</td>'
     );
-    $f['uid'] = array('#type' => 'hidden','#value' => $form_state['values']['id']);
+    $f['uid'] = array('#type' => 'hidden','#value' => $u['id']);
     $f['saveUser'] = array(
       '#type' => 'image_button',
       '#src'=> drupal_get_path('module', 'guifi').'/icons/save.png',
@@ -668,12 +663,12 @@ function guifi_users_queue($zone) {
     $query = db_query(
       'SELECT d.id ' .
       'FROM {guifi_devices} d ' .
-      'WHERE d.nid=%d' .
-      '  AND type="radio"',
-      $u['nid']
+      'WHERE d.nid = :nid' .
+      '  AND type =\'radio\'',
+      array(':nid' => $u['nid'])
     );
     $rows = array();
-    while ($d = db_fetch_array($query)) {
+    while ($d = $query->fetchAssoc()) {
      $d = guifi_device_load($d['id']);
      $d['uid']=$u['id'];
 
@@ -729,17 +724,22 @@ function guifi_users_queue($zone) {
   $childs = guifi_zone_childs($zone->id);
   $childs[] = $zone->id;
 
-  $sql =
-    'SELECT ' .
-    '  u.*, l.id nid, l.nick nnick, l.status_flag nflag, l.zone_id ' .
-    'FROM {guifi_users} u, {guifi_location} l ' .
-    'WHERE u.nid=l.id' .
-    '  AND (l.status_flag != "Working" OR u.status != "Approved") ' .
-    '  AND l.zone_id IN ('.implode(',',$childs).') ' .
-    'ORDER BY FIND_IN_SET(u.status,"New,Pending,Approved,Rejected"),' .
-    '  u.timestamp_created';
-  $query = pager_query($sql,variable_get("guifi_pagelimit", 50));
-
+  $sql = db_select('guifi_users', 'u');
+  $sql->join('guifi_location', 'l', 'u.nid = l.id');
+  $sql->fields('u')
+    ->fields('l', array('zone_id'));
+  $sql->addField('l', 'id', 'nid');
+  $sql->addField('l', 'nick', 'nnick');
+  $sql->addField('l', 'status_flag', 'nflag');
+  $db_or = db_or();
+  $db_or->condition('l.status_flag','Working', '!=');
+  $db_or->condition('u.status', 'Approved', '!=');
+  $sql->condition($db_or);
+  $sql->condition('l.zone_id', array($childs), 'IN');
+  $sql->orderBy('FIND_IN_SET(u.status,\'New,Pending,Approved,Rejected\'), u.timestamp_created');
+  $sql = $sql->extend('PagerDefault')->limit(variable_get("guifi_pagelimit", 50));
+  $result = $sql->execute();
+  
   $rows = array();
   $nrow = 0;
 
@@ -750,9 +750,9 @@ function guifi_users_queue($zone) {
     else
       $administer = FALSE;
 
-  while ($u = db_fetch_array($query)) {
+  while ($u = $result->fetchAssoc()) {
     $pUser = (object) guifi_user_load($u['id']);
-    $proxy = node_load(array('nid' => $pUser->services['proxy']));
+    $proxy = node_load($pUser->services['proxy']);
 
     $srows =  _guifi_user_queue_devices($u);
     $nsr   = count($srows);
@@ -760,7 +760,7 @@ function guifi_users_queue($zone) {
     if (empty($nsr))
       $nsr = 1;
 
-    $node = node_load(array('nid' => $u['nid']));
+    $node = node_load($u['nid']);
     if (guifi_location_access('update',$node)) {
       $edit_node_icon =
         l(guifi_img_icon('edit.png'),
@@ -865,12 +865,10 @@ function guifi_users_queue($zone) {
     t('Current status')
   );
 
-  $output .= theme('table', $header, $rows);
-  $output .= theme_pager(NULL, variable_get("guifi_pagelimit", 50));
-
-  // Full screen (no lateral bars, etc...)
-  print theme('page', $output, FALSE);
-  // If normal output, retrurn $output...
+  $output .= theme('table', array('header' => $header, 'rows' => $rows));
+  $output .= theme('pager');
+  
+  return $output;
 }
 
 function guifi_users_node_list($node) {
@@ -878,7 +876,7 @@ function guifi_users_node_list($node) {
   guifi_log(GUIFILOG_TRACE,'function guifi_users_node_list()',$node);
   $output = drupal_get_form('guifi_users_node_list_form',$node);
 
-  $node = node_load(array('nid' => $node->id));
+  $node = node_load($node->id);
   drupal_set_breadcrumb(guifi_location_ariadna($node));
   $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
   // To gain space, save bandwith and CPU, omit blocks
@@ -898,7 +896,7 @@ function guifi_users_node_list_form($form_state, $params = array()) {
     if (is_numeric($params))
       $node = node_load($params);
     else
-      $node = node_load(array('nid' => $params->id));
+      $node = node_load($params->id);
   }
 
 //  $form_state['#redirect'] = FALSE;
@@ -951,7 +949,7 @@ function guifi_users_node_list_form($form_state, $params = array()) {
     else
       $realname = $guser->firstname;
 
-    $service = node_load(array('nid' => $guser->services['proxy']));
+    $service = node_load($guser->services['proxy']);
 
     if (user_access('administer guifi users') or $node->uid == $owner) {
       $realname2 = $realname;
@@ -1186,7 +1184,7 @@ function _guifi_users_dump_federated($node,$ldif = FALSE) {
       while ($item = db_fetch_object($query)) {
         $extra = unserialize($item->extra);
 	  if (($item->id!=$node->nid) & (is_array($extra[fed]))) {
-            $p_node = node_load(array('nid' => $item->id));
+            $p_node = node_load($item->id);
               if (($extra['fed']['OUT'] != '0') AND ($extra['fed']['OUT'] == 'OUT')) {
                 $head .= '#   ' .$p_node->nid." - ".$p_node->title."\n";
 	        $federated_out[] = $item->id;

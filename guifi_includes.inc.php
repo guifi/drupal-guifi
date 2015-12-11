@@ -157,7 +157,7 @@ function guifi_types($type, $start = 24, $end = 0, $relations = NULL) {
           inner join
         guifi_configuracioUnSolclic usc ON usc.fid = f.id  and usc.mid = :relations
         order by name asc", array(':relations' => $relations))->fetchAssoc();
-        foreach ($query as $type) {
+        while ($type = $query->fetchAssoc()) {
           $values[] = $type;
         }
         return $values;
@@ -1015,27 +1015,26 @@ function guifi_get_devicename($id, $format = 'nick') {
 }
 
 function guifi_get_nodename($id) {
-  $node = db_fetch_object(db_query("SELECT d.nick FROM {guifi_location} d WHERE d.id=%d",$id));
-  return guifi_to_7bits($node->nick);
+  $node = db_query("SELECT d.nick FROM {guifi_location} d WHERE d.id = :id", array(':id' => $id))->fetchObject();
 }
 
 function guifi_get_location($id) {
-  $node = db_fetch_object(db_query("SELECT d.lat,d.lon FROM {guifi_location} d WHERE d.id=%d",$id));
+  $node = db_query("SELECT d.lat,d.lon FROM {guifi_location} d WHERE d.id = :id", array(':id' => $id))->fetchObject();
   return array('lat' => $node->lat, 'lon' => $node->lon);
 }
 
 function guifi_get_zone_of_node($id) {
-  $node = db_fetch_object(db_query("SELECT d.zone_id FROM {guifi_location} d WHERE d.id=%d",$id));
+  $node = db_query("SELECT d.zone_id FROM {guifi_location} d WHERE d.id = :id", array(':id' => $id))->fetchObject();
   return $node->zone_id;
 }
 
 function guifi_get_zone_of_service($id) {
-  $node = db_fetch_object(db_query("SELECT s.zone_id FROM {guifi_services} s WHERE s.id=%d",$id));
+  $node = db_query("SELECT s.zone_id FROM {guifi_services} s WHERE s.id = :id", array(':id' => $id))->fetchObject();
   return $node->zone_id;
 }
 
 function guifi_get_zone_nick($id) {
-  $node = db_fetch_object(db_query("SELECT nick, title FROM {guifi_zone} WHERE id=%d",$id));
+  $node = db_query("SELECT nick, title FROM {guifi_zone} WHERE id = :id", array(':id' => $id))->fetchObject();
   if (!empty($node->nick))
     return $node->nick;
   else
@@ -1048,7 +1047,7 @@ function guifi_get_zone_name($id) {
 }
 
 function guifi_get_interface_descr($iid) {
-  $interface = db_fetch_object(db_query("SELECT device_id, interface_type, radiodev_counter  FROM {guifi_interfaces} WHERE id=%d",$iid));
+  $interface = db_query("SELECT device_id, interface_type, radiodev_counter  FROM {guifi_interfaces} WHERE id = :iid", array(':iid' => $iid))->fetchObject();
   if ($interface->radiodev_counter != NULL) {
     $ssid = guifi_get_ap_ssid($interface->device_id,$interface->radiodev_counter);
     return $ssid.' '.$interface->interface_type;
@@ -1202,7 +1201,7 @@ function guifi_ipcalc_get_subnet_by_nid(
 
   $tbegin = microtime(TRUE);
 
-  $zone = node_load(array('nid' => $nid));
+  $zone = node_load($nid);
 
   if ($zone->type == 'guifi_location')
     $zone = guifi_zone_load($zone->zone_id);
@@ -1597,6 +1596,8 @@ function guifi_cnml_call_service($target,$service,$params=array(),$extra=NULL) {
   else
     $url = $gs->var['url'];
 
+    if ($url == '')
+      return;
   $basename = basename($url);
 
   // Temporary, for backward compatibility, to take out later
@@ -1651,9 +1652,12 @@ function guifi_cnml_args($args,$extra=NULL) {
  * Returns image url to CNML
  */
 function guifi_cnml_availability($args,$gs = NULL) {
+
   if (is_null($gs))
     $gs = guifi_service_load(guifi_graphs_get_server($args['device'],'device'));
 
+  $url = guifi_cnml_call_service($gs,'availability',$args);
+  if ($url != '') {
   $img_url =
     '<img src="'.guifi_cnml_call_service($gs,'availability',$args).'">';
 
@@ -1668,6 +1672,9 @@ function guifi_cnml_availability($args,$gs = NULL) {
   else
     // old v1.0 format for backward compatibility
     return $img_url;
+  }
+  else
+    return t('unknown');
 }
 
 function guifi_clean_ssid($str) {

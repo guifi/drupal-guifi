@@ -85,15 +85,13 @@ function guifi_zone_view($node, $view_mode, $langcode = NULL) {
     '#weight' => 3,
     '#markup' => theme_guifi_zone_stats($zone),
     );
-    
-// TODO MIQUEL
-/*
+
   $node->content['nodes'] = array(
     '#type' => 'markup',
-    '#weight' => 2,
+    '#weight' => 4,
     '#markup' => theme_guifi_zone_nodes($zone),
   );
-*/
+
   return $node;
 }
 
@@ -1079,8 +1077,8 @@ function guifi_zone_totals($zones) {
     "FROM {guifi_location} l " .
     "WHERE l.zone_id in (:zones) " .
     "GROUP BY status_flag",
-    array(':zones' => implode(',',$zones)))->fetchObject();
-  foreach ($result as $sum) {
+    array(':zones' => $zones));
+  while ($sum = $result->fetchObject()) {
     $summary[$sum->status_flag] = $sum->total;
     $summary['Total'] = $summary['Total'] + $sum->total;
   }
@@ -1113,7 +1111,7 @@ function guifi_zone_childs_tree($parents, $maxdepth, &$depth = 0) {
 
   $result = db_query('SELECT z.id, z.master ' .
                      'FROM {guifi_zone} z ' .
-                     'WHERE z.master IN ( :curdpt )', array(':curdpt' => implode(',',$current_depth)));
+                     'WHERE z.master IN ( :curdpt )', array(':curdpt' => $current_depth));
 
   $childs = $parents;
   $found = FALSE;
@@ -1235,7 +1233,7 @@ function guifi_zone_availability($zone, $desc = "all") {
   $sql->addField('l', 'timestamp_created', 'ncreated');
   $sql->addField('l', 'timestamp_changed', 'nchanged');
   $sql->condition('l.status_flag', $qstatus, '!=')
-    ->condition('z.id', array(implode(',',$childs)), 'IN')
+    ->condition('z.id', $childs, 'IN')
     ->orderBy('ncreated', 'DESC');
   $sql = $sql->extend('PagerDefault')->limit(variable_get("guifi_pagelimit", 50));
   $result = $sql->execute();
@@ -1412,19 +1410,12 @@ function theme_guifi_zone_nodes($node,$links = TRUE) {
   $output = '<h2>' .t('Nodes listed at') .' ' .$node->title .'</h2>';
 
   // Going to list child zones totals
-  $result = db_query('SELECT z.id, z.title FROM {guifi_zone} z WHERE z.master = :nid ORDER BY z.weight, z.title',array(':nid' => $node->id))->fetchObject();
+  $result = db_query('SELECT z.id, z.title FROM {guifi_zone} z WHERE z.master = :nid ORDER BY z.weight, z.title',array(':nid' => $node->id));
 
   $rows = array();
 
-  $header = array(
-      array('data' => t('Zone name')),
-      array('data' => t('Online'), NULL, NULL,'style' => 'text-align: right'),
-      array('data' => t('Planned'), NULL, NULL,'style' => 'text-align: right'),
-      array('data' => t('Building'), NULL, NULL,'style' => 'text-align: right'),
-      array('data' => t('Testing'), NULL, NULL,'style' => 'text-align: right'),
-      array('data' => t('Inactive'), NULL, NULL,'style' => 'text-align: right'),
-      array('data' => t('Total'), NULL, NULL,'style' => 'text-align: right'));
-  foreach ($result as $zone) {
+  $header = array( t('Zone name'), t('Online'), t('Planned'), t('Building'), t('Testing'), t('Inactive'), t('Total'));
+  while ($zone = $result->fetchObject()) {
     $summary = guifi_zone_totals(guifi_zone_childs($zone->id));
     $rows[] = array(
       array('data' => guifi_zone_l($zone->id,$zone->title,'node/'),'class' => 'zonename'),
@@ -1450,28 +1441,21 @@ function theme_guifi_zone_nodes($node,$links = TRUE) {
     array('data' => number_format($totals['Total']   ,0, NULL,variable_get('guifi_thousand','.')),'class' => 'Total','align' => 'right'));
 
    if (count($rows)>1)
-     $output .= theme('table', $header, $rows);
+     $output .= theme('table', array('header' => $header, 'rows' => $rows));
 
   // Going to list the zone nodes
   $rows = array();
-  $result = pager_query('
+  $result = db_query('
     SELECT l.id,l.nick, l.notification, l.zone_description,
       l.status_flag, count(*) radios
     FROM {guifi_location} l LEFT JOIN {guifi_radios} r ON l.id = r.nid
-    WHERE l.zone_id = %d
+    WHERE l.zone_id = :zone_id
     GROUP BY 1,2,3,4,5
     ORDER BY radios DESC, l.nick',
-    50,0,
-    'SELECT count(*)
-    FROM {guifi_location}
-    WHERE zone_id = :id',
-  array(':id' => $node->id))->fetchObject();
-  $header = array(
-    array('data' => t('nick (shortname)')),
-    array('data' => t('supernode')),
-    array('data' => t('area')),
-    array('data' => t('status')));
-  foreach ($result as $loc) {
+  array(':zone_id' => $node->id));
+  
+  $header = array( t('nick (shortname)'), t('supernode'), t('area'), t('status'));
+  while ($loc = $result->fetchObject()) {
     if ($loc->radios == 1)
       $loc->radios = t('No');
     $rows[] = array(
@@ -1481,16 +1465,8 @@ function theme_guifi_zone_nodes($node,$links = TRUE) {
       array('data' => t($loc->status_flag),'class' => $loc->status_flag));
   }
   if (count($rows)>0) {
-    $output .= theme('table', $header, $rows);
-    $output .= theme_pager(NULL, 50);
-  }
-
-  if ($links) {
-    drupal_set_breadcrumb(guifi_zone_ariadna($node->id,'node/%d/view/nodes'));
-    $node = node_load($node->id);
-    $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
-    print theme('page',$output, FALSE);
-    return;
+    $output .= theme('table', array('header' => $header, 'rows' => $rows));
+    $output .= theme('pager');
   }
 
   return $output;
@@ -1523,18 +1499,17 @@ function theme_guifi_zone_networks($zone) {
     $output = l(t('add network'),'node/'.$zone->id.'/view/ipv4/add');
 
   // zone & parents
-    $table = theme('table',array(
+    $output .= theme('table',array(
     'header' => array(t('zone and zone parent(s) network allocation(s)')),
     'rows' => array(array(guifi_ipv4_print_data($zone,'parents',$ips_allocated))),
     'attributes' => array('width' => '100%')));
-
-  $output .= '<div>' . $table . '</div>';
   
-      $table2 = theme('table',array(
+      $output .= theme('table',array(
     'header' => array(t('zone child(s) network allocation(s)')),
     'rows' => array(array(guifi_ipv4_print_data($zone,'childs',$ips_allocated))),
     'attributes' => array('width' => '100%')));
-  $output .= '<div>' . $table2 . '</div>';
+
+
   return $output;
 }
 

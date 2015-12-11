@@ -13,7 +13,7 @@ function guifi_location_access($op, $node) {
   global $user;
 
   if (is_numeric($node))
-    $node = node_load(array('nid' => $node));
+    $node = node_load( $node);
 
   if ($op == 'view')
     return TRUE;
@@ -557,7 +557,7 @@ function guifi_location_validate($node,$form) {
       t('Can\'t be assigned to root zone, please assign the node to an appropiate zone.'));
   }else{
     $nz=0;
-    guifi_zone_childs_tree_depth($node->zone_id, 3, $nz);
+    guifi_zone_childs_tree($node->zone_id, 3, $nz);
     if($nz>2){
       form_set_error('zone_id',
         t('Can\'t be assigned to parent zone, please assign the node to an final zone.'));
@@ -815,7 +815,7 @@ function guifi_location_distances_map($node) {
       '</form>';
   }
 
-  $node = node_load(array('nid' => $node->id));
+  $node = node_load($node->id);
   drupal_set_breadcrumb(guifi_location_ariadna($node));
   $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
   print theme('page',$output, FALSE);
@@ -828,7 +828,7 @@ function guifi_location_distances($node) {
     guifi_get_zone_nick($node->zone_id).
     '-'.$node->nick);
   $output .= drupal_get_form('guifi_location_distances_form',$node);
-  $node = node_load(array('nid' => $node->id));
+  $node = node_load($node->id);
   drupal_set_breadcrumb(guifi_location_ariadna($node));
   $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
   print theme('page',$output, FALSE);
@@ -1030,7 +1030,7 @@ function guifi_location_distances_list($filters,$node) {
 //    $height_url = "http://www.heywhatsthat.com/bin/profile.cgi?src=profiler&axes=1&curvature=1&metric=1&" .
 //        "pt0=".$20.96144,-9.84375,ff0000&pt1=42.293564,11.25,00c000";
     $height_url_long = base_path().'node/'.$orig.'/view/distancesmap?lat2='.$node['lat'].'&lon2='.$node['lon'];
-    $zone = node_load(array('nid' => $node['zone_id']));
+    $zone = node_load($node['zone_id']);
 
     if ($filters['search'])
     if (!(stristr($zone->nick.$node['nick'],$filters['search'])))
@@ -1162,7 +1162,7 @@ function guifi_location_set_flag($id) {
   // set the highest score found
   $scores = array_flip($scores);
 
-  $node = node_load(array('nid' => $id));
+  $node = node_load($id);
   $node->status_flag = $scores[$score];
   node_save($node);
 }
@@ -1204,9 +1204,9 @@ function theme_guifi_location_data($node) {
   }
 
   if ($node->graph_server > 0)
-    $gs = node_load(array('nid' => $node->graph_server));
+    $gs = node_load($node->graph_server);
   else
-    $gs = node_load(array('nid' => guifi_graphs_get_server($node->id,'node')));
+    $gs = node_load(guifi_graphs_get_server($node->id,'node'));
 
   $rows[] = array(t('graphs provided from'),array(
     'data' => l(guifi_service_str($node->graph_server),
@@ -1292,7 +1292,7 @@ function theme_guifi_location_graphs_overview($node,$links = FALSE) {
   $output = theme('table', NULL,$ret);
 
   if ($links) {
-    $node = node_load(array('nid' => $node->id));
+    $node = node_load($node->id);
     drupal_set_title(t('graph overview @ %node',array('%node' => $node->title)));
     drupal_set_breadcrumb(guifi_location_ariadna($node));
     $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
@@ -1409,7 +1409,7 @@ function theme_guifi_location_devices_list($node,$links = FALSE) {
 
   // Again, it creates a table with the links, if they exist
   if ($links) {
-    $node = node_load(array('nid' => $node->id));
+    $node = node_load($node->id);
     drupal_set_title(t('devices @ %node',array('%node' => $node->title)));
     drupal_set_breadcrumb(guifi_location_ariadna($node));
     $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
@@ -1427,7 +1427,7 @@ function theme_guifi_location_links($node, $links = FALSE) {
     theme_guifi_location_links_by_type($node->id,'ap/client');
 
   if ($links) {
-    $node = node_load(array('nid' => $node->id));
+    $node = node_load($node->id);
     drupal_set_title(t('links @ %node',array('%node' => $node->title)));
     drupal_set_breadcrumb(guifi_location_ariadna($node));
     $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
@@ -1482,7 +1482,7 @@ function theme_guifi_location_links_by_type($id = 0, $ltype = '%') {
       "WHERE c.id = :id " .
       "  AND c.device_id <> :did " .
       "  AND c.id NOT IN (:listed)",
-      array(':id' => $loc1->id, ':did' => $loc1->device_id, ':listed' => implode(",",$listed)));
+      array(':id' => $loc1->id, ':did' => $loc1->device_id, ':listed' => $listed));
     $listed[] = $loc1->device_id;
     $devact = $loc1->device_nick;
     if ($loc1->ssid)
