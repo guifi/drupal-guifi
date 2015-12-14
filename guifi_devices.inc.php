@@ -1639,7 +1639,7 @@ function guifi_device_create_form($form_state, $node) {
 
   $types = guifi_types('device');
 
-  $zone = guifi_zone_load($node->zone_id);
+  $zone = node_load($node->zone_id);
 
   if (!guifi_location_access('create',$node->nid)) {
     $form['text_add'] = array(

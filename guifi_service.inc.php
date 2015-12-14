@@ -28,7 +28,11 @@ function guifi_service_access($op, $node) {
 }
 
 function guifi_service_access_callback($node) {
-  return ($node->type == 'guifi_service') && user_access('access content');
+  $node = node_load($node);
+  if ($node->type == 'guifi_service')
+    return user_access('access content');
+  else
+    return FALSE;
 }
 /**
  * @todo Improve asserts in the beginning
@@ -39,29 +43,18 @@ function guifi_service_access_callback($node) {
  *   Object with the extra field ($node->var) and link to the node ($node->l)
  *   or FALSE if $node is not found in database
  */
+function guifi_service_load($nodes) {
 
-function guifi_service_load($node) {
-  if (is_object($node)) {
-    $id = $node->nid;
-    if ($node->type != 'guifi_service')
-      return FALSE;
-  } else
-  if (is_numeric($node))
-    $id = $node;
-
-  $loaded = db_query("SELECT * FROM {guifi_services} WHERE id = :id", array(':id' => $id))->fetchObject();
-
-  $loaded->var = unserialize($loaded->extra);
-  $loaded->l = 'node/'.$loaded->id;
-
-   if ($loaded->id != NULL)
-    return $loaded;
-   else
-    return $node;
-
-  return FALSE;
+  foreach ($nodes as $node) {
+    $service = db_query("SELECT * FROM {guifi_services} WHERE id = :nid", array(':nid' => $node->nid))->fetchObject();
+    foreach ($service as $k => $value) {
+      $nodes[$node->nid]->$k = $value;
+      $nodes[$node->nid]->var = unserialize($service->extra);
+      $nodes[$node->nid]->l = 'node/'.$service->id;
+    }
+  }
+  return $nodes;
 }
-
 
 /**
  * Present the guifi zone editing form.
@@ -78,7 +71,7 @@ function guifi_service_form($node, $param) {
  // $f = guifi_form_hidden_var($node,array('id'));
 
   if ( (empty($node->nid)) and (is_numeric($node->title)) ) {
-    $zone = guifi_zone_load($node->title);
+    $zone = node_load($node->title);
     $node->zone_id = $node->title;
     $node->contact = $user->mail;
     $default = t('<service>');
@@ -448,7 +441,7 @@ function guifi_service_str($id, $emptystr = 'Take from parents') {
     return t('No service');
 
   // there is a value, create the string
-  $proxy = guifi_service_load($id);
+  $proxy = node_load($id);
   $proxystr = $id.'-'.
     guifi_get_zone_name($proxy->zone_id).', '.
     $proxy->nick;
@@ -483,11 +476,9 @@ function guifi_service_name_validate($nodestr,&$form_state) {
   return $nodestr;
 }
 
-
 /**
  * Save changes to a guifi item into the database.
  */
-
 function guifi_service_insert($node) {
   global $user;
   $log = '';
@@ -572,13 +563,15 @@ function guifi_service_update($node) {
 /**
  * outputs the zone information data
 **/
-function theme_guifi_service_data($node, $links = TRUE) {
-  if (!isset($node->nid))
-    $node = node_load($node->id);
+function theme_guifi_service_data($node) {
+
+  if (empty($node->nid))
+    $node = node_load($node);
+
   guifi_log(GUIFILOG_TRACE,'guifi_service_print_data()',$node);
 
   $zone         = db_query('SELECT title FROM {guifi_zone} WHERE id = :zid', array(':zid' => $node->zone_id))->fetchObject();
-  $type         = db_query('SELECT description FROM {guifi_types} WHERE type="service" AND text = :text', array(':text' => $node->service_type))-fetchObject();
+  $type         = db_query('SELECT description FROM {guifi_types} WHERE type=\'service\' AND text = :text', array(':text' => $node->service_type))->fetchObject();
 
   $rows[] = array(t('service'),$node->nid .'-' .$node->nick,'<b>' .$node->title .'</b>');
   $rows[] = array(t('type'),$node->service_type,t($type->description));
@@ -651,15 +644,11 @@ function theme_guifi_service_data($node, $links = TRUE) {
       $rows[] = array(NULL,$domain, NULL);
   }
 
-  $output = theme('table', NULL,$rows);
+  $output = theme('table', array('header' => NULL, 'rows' => $rows));
   $output .= theme_guifi_contacts($node);
 
-  if ($links) {
-    drupal_set_breadcrumb(guifi_location_ariadna($node));
-    $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
-    print theme('page',$output, FALSE);
-    return;
-  }
+
+  drupal_set_breadcrumb(guifi_location_ariadna($service));
 
   return $output;
 }
@@ -694,7 +683,7 @@ function guifi_list_services_query($param, $typestr = 'by zone', $service = '%')
   $current_service = '';
   while ($service = $query->fetchObject()) {
     $node = node_load($service->id);
-    $node_srv = guifi_service_load($service->id);
+    $node_srv = node_load($service->id);
     
     if ($current_service != $service->service_type) {
       $typedescr = db_query("SELECT * FROM {guifi_types} WHERE type='service' AND text = :text", array(':text' => $service->service_type))->fetchObject();
@@ -718,7 +707,10 @@ function guifi_list_services_query($param, $typestr = 'by zone', $service = '%')
 /*
  * guifi_list_services
  */
-function theme_guifi_services_list($node,$service = '%') {
+function theme_guifi_services_list($node, $service = '%') {
+
+  if (empty($node->id))
+    $node = node_load($node);
 
   if (is_numeric($node)) {
     $typestr = t('by device');
@@ -770,32 +762,49 @@ function theme_guifi_services_list($node,$service = '%') {
 /**
  * outputs the node information
 **/
-function guifi_service_view($node, $teaser = FALSE, $page = FALSE, $block = FALSE) {
- // node_prepare($node);
-  if ($teaser)
+function guifi_service_view($node, $view_mode, $langcode = NULL) {
+
+  if ($view_mode == 'teaser')
     return $node;
-  if ($block)
+  if ($view_mode == 'bloc')
     return $node;
 
-  if ($page) {
-    drupal_set_breadcrumb(guifi_zone_ariadna($node->zone_id,'node/%d/view/services'));
-    $node->content['body']['#value'] =
-      theme('box',t('Description'),$node->content['body']['#value']);
-    $node->content['body']['#weight'] = 1;
-    $service_data =
-        array(
-          '#value' => theme('box', t('service information'),
-             theme_guifi_service_data($node, FALSE)),
-          '#weight' => -0,
-        );
+  drupal_set_breadcrumb(guifi_zone_ariadna($node->zone_id,'node/%d/view/services'));
+  if ($view_mode == 'full') {
+
+  $node->content['title'] = array(
+    '#type' => 'markup',
+    '#weight' => 0,
+    '#markup' => theme('table',
+                  array('header' => array(t('Description')), 
+                        'rows' => NULL,
+                        'attributes' => array('width' => '100%')
+                        )
+                  )
+  );
+  
+  $service_data = theme('table',
+                  array('header' => array(t('service information')), 
+                        'rows' => array(
+                          array(
+                            array(
+                              'data' => theme_guifi_service_data($node),
+                              'width' => '100%'),
+                          )
+                        ),
+                        'attributes' => array('width' => '100%')
+                        )
+                  );
+
+
 
     if ($node->service_type == 'DNS') {
-      $form = drupal_get_form('guifi_domain_create_form',$node);
+      $form = drupal_render(drupal_get_form('guifi_domain_create_form',$node));
       $id = $node->id;
       $rows = array();
       $header = array( '<h2>'.t('Domain').'</h2>', array('data' => t('type'),'style' => 'text-align: left;'), array('data' => t('Scope')));
-      $query = db_query("SELECT d.id FROM {guifi_dns_domains} d WHERE sid=%d",$id);
-        while ($d = db_fetch_object($query)) {
+      $query = db_query("SELECT d.id FROM {guifi_dns_domains} d WHERE sid = :sid", array(':sid' => $id));
+        while ($d = $query->fetchObject()) {
           $domain = guifi_domain_load($d->id);
           if (guifi_domain_access('update',$domain['id'])) {
             $edit_domain = l(guifi_img_icon('edit.png'),'guifi/domain/'.$domain['id'].'/edit',
@@ -819,33 +828,28 @@ function guifi_service_view($node, $teaser = FALSE, $page = FALSE, $block = FALS
         }
         if (count($rows)) {
           $node->content['data'] = array(
-            $service_data,
-            array(
-              '#value' => theme('table', $header, $rows).$form,
-              '#weight' => 1,
-            )
-          );
+                '#type' => 'markup',
+                '#weight' => 2,
+                '#markup' => $service_data.theme('table', array('header' => $header, 'rows' => $rows)).$form
+                );
         }
         else {
           $node->content['data'] = array(
-            array(
-              '#value' => theme('box', t('service information'),
-                 theme_guifi_service_data($node, FALSE)).$form,
-              '#weight' => -0,
-             )
+            '#type' => 'markup',
+            '#weight' => 2,
+            '#markup' => $service_data.$form,
           );
         }
     }
     else {
-      $node->content['data'] = array(
-        array(
-         '#value' => theme('box', t('service information'),
-                 theme_guifi_service_data($node, FALSE)).$form,
-         '#weight' => -0,
-        )
-      );
+  $node->content['data'] = array(
+    '#type' => 'markup',
+    '#weight' => 2,
+    '#markup' => $service_data,
+  );
     }
   }
+
   return $node;
 }
 

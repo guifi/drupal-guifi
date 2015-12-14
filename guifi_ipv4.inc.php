@@ -95,14 +95,14 @@ function guifi_ipv4_form($form_state, $params = array()) {
     // if new network, initialize the zone
 	  if ($params['add']) {
 		  $zone_id=$params['add'];
-      $zone = guifi_zone_load($zone_id);
+      $zone = node_load($zone_id);
 
 		  // if is root zone, don't find next value'
 		  if ($zone_id != guifi_zone_root()) {
 
 
 			  // not root zone, fill default values looking to next available range
-			  $zone = guifi_zone_load($zone_id);
+			  $zone = node_load($zone_id);
 
 			  $ndefined = db_fetch_object(db_query('SELECT count(*) c FROM guifi_networks WHERE zone=%d',$zone_id));
 
@@ -226,7 +226,7 @@ function guifi_ipv4_form_validate($form,$form_state) {
       form_set_error('base', t('Network already in use.'));
   }
 
-  $zone = guifi_zone_load($form_state['values']['zone']);
+  $zone = node_load($form_state['values']['zone']);
 }
 
 /* outputs the network information data

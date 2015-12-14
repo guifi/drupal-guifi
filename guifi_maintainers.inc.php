@@ -13,7 +13,7 @@
    		'ORDER BY id',
    		array(':si' => $id,':st' => $subject_type));
 
-  foreach ($qsql->fetchAssoc() as $m) {
+  while ($m = $qsql->fetchAssoc()) {
     switch ($ret ) {
       case "maintainer":
         if (module_exists('budgets')) {

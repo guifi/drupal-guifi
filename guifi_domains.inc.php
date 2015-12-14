@@ -10,12 +10,12 @@
 function guifi_domain_load($id,$ret = 'array') {
   guifi_log(GUIFILOG_FULL,'function guifi_domain_load()');
 
-  $domain = db_fetch_array(db_query('
+  $domain = db_query('
     SELECT d.*
     FROM {guifi_dns_domains} d, {guifi_services} l
-    WHERE d.id = %d
+    WHERE d.id = :id
     AND d.sid = l.id',
-    $id));
+    array(':id' => $id))->fetchAssoc();
   if (empty($domain)) {
     drupal_set_message(t('Domain (%num) does not exist.',array('%num' => $id)));
     return;
@@ -24,12 +24,12 @@ function guifi_domain_load($id,$ret = 'array') {
   $qr = db_query('
     SELECT *
     FROM {guifi_dns_hosts}
-    WHERE id = %d ORDER BY counter',
-    $id
+    WHERE id = :id ORDER BY counter',
+    array(':id' => $id)
   );
 
   $rc = 0;
-  while ($host = db_fetch_array($qr)) {
+  while ($host = $qr->fetchAssoc()) {
     $rc++;
     $domain['hosts'][$host['counter']] = $host;
   }
@@ -60,7 +60,7 @@ function guifi_domain_access($op, $id) {
   else
     $domain = guifi_domain_load($id);
 
-  $node = node_load(array('nid' => $domain['sid']));
+  $node = node_load($domain['sid']);
 
   if ($op == 'create') {
     if ((user_access('administer guifi dns')) || (user_access('create guifi dns'))) {
@@ -133,8 +133,8 @@ function guifi_domain_form($form_state, $params = array()) {
     $form_state['values']['sid'] = $params['add'];
     $form_state['values']['new'] = TRUE;
     if ($params['mname']) {
-      $masteridqry = db_query("SELECT name FROM {guifi_dns_domains} WHERE name = '%s'",$params['mname']);
-      $mname = db_fetch_object($masteridqry);
+      $masteridqry = db_query("SELECT name FROM {guifi_dns_domains} WHERE name = :name", array(':name' => $params['mname']));
+      $mname = $masteridqry->fetchObject();
       $form_state['values']['mname'] = $mname->name;
       $form_state['values']['name'] = $params['dname'].'.'.$params['mname'];
     } else {
@@ -158,7 +158,7 @@ function guifi_domain_form($form_state, $params = array()) {
     $form_state['values']['hosts']['0']['opt']['options'] = array( 'NS' => 'NS', 'MX' => '0' );
   }
 
-  drupal_set_breadcrumb(guifi_node_ariadna($form_state['values']['sid']));
+  drupal_set_breadcrumb(guifi_location_ariadna($form_state['values']['sid']));
 
   // Check permissions
   if ($params['edit']){
@@ -172,7 +172,7 @@ function guifi_domain_form($form_state, $params = array()) {
   $node = node_load(array('nid' => $form_state['values']['sid']));
 
   // Setting the breadcrumb
-  drupal_set_breadcrumb(guifi_node_ariadna($form_state['values']['sid']));
+  drupal_set_breadcrumb(guifi_location_ariadna($form_state['values']['sid']));
 
   // if contact is NULL, then get it from the node or the user logged in drupal
   if (is_null($form_state['values']['notification']))
@@ -410,12 +410,12 @@ function guifi_domain_form_validate($form,&$form_state) {
     $query = db_query("
       SELECT name
       FROM {guifi_dns_domains}
-      WHERE lcase(name)=lcase('%s')
-      AND id <> %d AND scope = '%s'",
-      strtolower($form_state['values']['name']),
-      $form_state['values']['id'],$form_state['values']['scope']);
+      WHERE lcase(name)=lcase(:name)
+      AND id <> :id AND scope = :scope",
+      array(':name' => strtolower($form_state['values']['name']),
+      ':id' => $form_state['values']['id'], ':scope' => $form_state['values']['scope']));
 
-    while (db_fetch_object($query)) {
+    while ($query->fetchObject()) {
       form_set_error('name', t('Domain Name already in use in scope: %scope.',array('%scope' => $form_state['values']['scope'])));
     }
   }
@@ -423,15 +423,15 @@ function guifi_domain_form_validate($form,&$form_state) {
   $qrydomainname = db_query("
         SELECT name
         FROM {guifi_dns_domains}
-        WHERE id = '%d'", $form_state['values']['id']);
+        WHERE id = :id", array(':id' => $form_state['values']['id']));
   $domainname = array();
-  $domainname = db_fetch_array($qrydomainname);
+  $domainname = $qrydomainname->fetchAssoc();
   $qrydomaindlg = db_query("
         SELECT *
         FROM {guifi_dns_domains}
         WHERE mname = '%s'", $domainname['name']);
   $dlgdomainname = array();
-  $dlgdomainname = db_fetch_array($qrydomaindlg);
+  $dlgdomainname = $qrydomaindlg->fetchAssoc();
 
 if (!empty($domainname['name']))
   if (($form_state['values']['name'] != $domainname['name']) AND ($domainname['name'] == $dlgdomainname['mname'])) {
@@ -445,15 +445,15 @@ if (!empty($domainname['name']))
   $qrymasterdomain = db_query("
         SELECT *
         FROM {guifi_dns_domains}
-        WHERE name = '%s'", $masterdomain);
+        WHERE name = :domain", array(':domain' => $masterdomain));
   $did = array();
-  $did= db_fetch_array($qrymasterdomain);
+  $did= $qrymasterdomain->fetchAssoc();
   $queryhosts = db_query("
        SELECT *
        FROM {guifi_dns_hosts}
-       WHERE id = '%d'", $did['id']);
+       WHERE id = :id", array(':id' => $did['id']));
 
-  while ($hosts = db_fetch_array($queryhosts)) {
+  while ($hosts = $queryhosts->fetchAssoc()) {
     $hostx = $hosts['host'];
     if ($hostx == $domain) {
       form_set_error('name', t('Subdomain name <strong>%hostname</strong> already in use as <strong>HOSTNAME</strong> from master domain : <strong>%domain</strong>',array('%hostname' => $hostx ,'%domain' => $form_state['values']['mname']))
@@ -476,13 +476,13 @@ if (!empty($domainname['name']))
     $qry = db_query("
       SELECT *
       FROM {guifi_services}
-      WHERE id = '%d'", $form_state['values']['sid']);
-    $dev = db_fetch_object($qry);
+      WHERE id = :id", array(':id' => $form_state['values']['sid']));
+    $dev = $qry->fetchObject();
     $devqry = db_query("
       SELECT *
       FROM {guifi_devices}
-      WHERE id = '%d'", $dev->device_id);
-    $device = db_fetch_object($devqry);
+      WHERE id = :id", array(':id' => $dev->device_id));
+    $device = $devqry->fetchObject();
       form_set_error('ipv4', t('Server <strong>%nick</strong> does not have an IPv4 address. Please, check it.', array('%nick' => $device->nick)));
   }
 
@@ -494,8 +494,8 @@ if (!empty($domainname['name']))
       $qrydomain = db_query("
         SELECT mname, name
         FROM {guifi_dns_domains}
-        WHERE mname = '%s'", $form_state['values']['name']);
-      while ($hostdom = db_fetch_array($qrydomain)) {
+        WHERE mname = :name", array(':name' => form_state['values']['name']));
+      while ($hostdom = $qrydomain->fetchAssoc()) {
         $hostdomx = strstr($hostdom['name'], '.', true);
         if ($hostdomx == $hosts['host']) {
           form_set_error('hosts]['.$host_id.'][host', t('Hostname Error! There is already a delegate domain with this name: <strong>%hostname.%mname</strong>.', array('%hostname' => $hosts['host'],'%mname' => $hostdom['mname'])));
@@ -521,8 +521,8 @@ if (!empty($domainname['name']))
         $qrydomain = db_query("
            SELECT name
            FROM {guifi_dns_domains}
-           WHERE mname = '%s'", $form_state['values']['name']);
-        while ($hostdom = db_fetch_array($qrydomain)) {
+           WHERE mname = :name", array(':name' => $form_state['values']['name']));
+        while ($hostdom = $qrydomain->fetchAssoc()) {
           $hostdomx = strstr($hostdom['name'], '.', true);
           if (!empty($aliasa)) {
             if ($hostdomx == $aliasa) {
@@ -774,7 +774,7 @@ function guifi_domain_delete($domain, $notify = TRUE, $verbose = TRUE) {
   }
 
   $node = node_load(array('nid' => $domain['sid']));
-  drupal_set_breadcrumb(guifi_node_ariadna($node));
+  drupal_set_breadcrumb(guifi_location_ariadna($node));
 
   $output = drupal_get_form('guifi_domain_delete_confirm',
     array('name' => $domain['name'],'id' => $domain['id']));
@@ -803,11 +803,15 @@ function guifi_domain_add() {
   print theme('page', $output, FALSE);
 }
 
+function ajax_domain_type_form($form, $form_state) {
+  return $form['domain_type_form'];
+}
 /* guifi_domain_create_form(): generates html output form with a listbox,
  * choose the domain type to create
  */
-function guifi_domain_create_form($form_state, $node) {
+function guifi_domain_create_form($form, &$form_state, $params) {
 
+ $node = $params;
   $ip = guifi_main_ip($node->device_id);
   if (guifi_domain_access('create',$node->sid)) {
     $form['text_add'] = array(
@@ -818,7 +822,7 @@ function guifi_domain_create_form($form_state, $node) {
    return $form;
   }
   if (empty($ip['ipv4'])) {
-    $device = db_fetch_object(db_query('SELECT nick FROM {guifi_devices} WHERE id = %d', $node->device_id));
+    $device = db_query('SELECT nick FROM {guifi_devices} WHERE id = :did', array(':did' => $node->device_id))->fetchObject();
     $url = url('guifi/device/'.$node->device_id);
     $form['text'] = array(
       '#type' => 'item',
@@ -831,8 +835,8 @@ function guifi_domain_create_form($form_state, $node) {
     '#title' => t('Select new domain type'),
     '#default_value' => 'none',
     '#options' => array('NULL' => 'none', 'master' => 'Master, ex: newdomain.net','delegation' => 'Delegation, ex: newdomain.guifi.net'),
-    '#ahah' => array(
-      'path' => 'guifi/js/add-domain',
+    '#ajax' => array(
+      'callback' => 'ajax_domain_type_form',
       'wrapper' => 'select_type',
       'effect' => 'fade',
     )
@@ -843,7 +847,9 @@ function guifi_domain_create_form($form_state, $node) {
     '#type' => 'fieldset',
   );
 
-  if ($form_state['values']['domain_type'] == 'master') {
+
+  
+  if ($form_state['values']['domain_type'] === 'master') {
     $form['domain_type_form']['sid'] = array(
       '#type' => 'hidden',
       '#value' => $node->id
@@ -894,7 +900,7 @@ function guifi_domain_create_form($form_state, $node) {
     );
   }
 
-  if ($form_state['values']['domain_type'] == 'delegation') {
+  if ($form_state['values']['domain_type'] === 'delegation') {
     $ip = guifi_main_ip($node->device_id);
     $form['domain_type_form']['sid'] = array(
       '#type' => 'hidden',
@@ -915,7 +921,7 @@ function guifi_domain_create_form($form_state, $node) {
       ORDER BY name"
     );
     $values = array();
-    while ($type = db_fetch_object($domqry)) {
+    while ($type = $domqry->fetchObject()) {
       $values[$type->name] = $type->name;
     }
     $form['domain_type_form']['mname'] = array(
@@ -1002,7 +1008,7 @@ function guifi_domain_print($domain = NULL) {
   $output = '<div id="guifi">';
   $title ='';
 
-  drupal_set_breadcrumb(guifi_node_ariadna($node));
+  drupal_set_breadcrumb(guifi_location_ariadna($node));
 
   switch (arg(4)) {
   case 'all':
@@ -1035,15 +1041,15 @@ function guifi_domain_print($domain = NULL) {
 
 function guifi_delegations_print_data($domain, $scope) {
 
-  $query = db_query("SELECT id, name, ipv4 FROM {guifi_dns_domains} WHERE mname = '%s' AND scope = '%s' ", $domain, $scope);
+  $query = db_query("SELECT id, name, ipv4 FROM {guifi_dns_domains} WHERE mname = :domain AND scope = :scope ", array(':domain' => $domain, ':scope' => $scope));
 
-  while ($delegation = db_fetch_object($query)) {
-    $host = db_fetch_object(db_query("
+  while ($delegation = $query->fetchObject()) {
+    $host = db_query("
        SELECT host
        FROM {guifi_dns_hosts}
-       WHERE id = '%d'",
-       $delegation->id
-     ));
+       WHERE id = :id",
+       array(':id' => $delegation->id)
+       )->fetchObject();
      $rows[] = array(
        $delegation->name,
        $delegation->ipv4,

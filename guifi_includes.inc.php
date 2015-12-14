@@ -1204,7 +1204,7 @@ function guifi_ipcalc_get_subnet_by_nid(
   $zone = node_load($nid);
 
   if ($zone->type == 'guifi_location')
-    $zone = guifi_zone_load($zone->zone_id);
+    $zone = node_load($zone->zone_id);
 
   $rzone = $zone;
 
@@ -1350,7 +1350,7 @@ function guifi_ipcalc_get_subnet_by_nid(
     // Take a look at the parent network zones
     $master = $zone->master;
     if ( $zone->master > 0)
-      $zone = guifi_zone_load($zone->master);
+      $zone = node_load($zone->master);
 
   } while ( $master  > 0);
 
@@ -2094,8 +2094,9 @@ function guifi_devicename_validate($devicestr,&$form_state) {
 }
 
 function guifi_notify_mail($key, &$message, $params) {
-  $language = $message['language'];
-  $variables = user_mail_tokens($params['account'], $language);
+  $data['user'] = $params['account'];
+  $options['language'] = $message['language'];
+  user_mail_tokens($variables, $data, $options);
   switch($key) {
     case 'notify':
       $message['subject'] = $params['mail']['subject'];
@@ -2103,8 +2104,6 @@ function guifi_notify_mail($key, &$message, $params) {
       break;
   }
 }
-
-
 
 /** converteix les coordenades de graus,minuts i segons a graus amb decimals
  *  guifi_coord_dmstod($deg:int,$min:int,$seg:min):float or NULL..

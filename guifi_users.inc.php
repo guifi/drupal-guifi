@@ -105,7 +105,7 @@ function guifi_user_delete_confirm_submit($form, &$form_state) {
     return;
 
   $guifi_user = guifi_user_load($form_state['values']['id']);
-  $node = guifi_location_load($guifi_user['nid']);
+  $node = node_load($guifi_user['nid']);
   $to_mail = array();
 
   $subject = t('User %username deleted by %user.',
@@ -466,7 +466,7 @@ function _guifi_user_queue_device_form_submit($form, $form_state) {
       $d['radios'][0]['interfaces'][$edit['iid']]['ipv4'][0]['links'][$edit['lid']]['flag'] =
         'Working';
       guifi_device_save($d);
-      $n = guifi_location_load($form_state['clicked_button']['#post']['nid']);
+      $n = node_load($form_state['clicked_button']['#post']['nid']);
       $form_state['values']['status'] = 'Approved';
     case 'saveUser':
       $u = guifi_user_load($form_state['clicked_button']['#post']['uid']);
@@ -580,7 +580,10 @@ function guifi_user_form_validate($form, &$form_state) {
   }
 }
 
-function guifi_users_queue($zone) {
+function guifi_users_queue($node) {
+
+  if (empty($node->id))
+    $node = node_load($node);
 
   function _guifi_user_queue_device_form($form, &$form_state, $d) {
 
@@ -715,14 +718,14 @@ function guifi_users_queue($zone) {
   global $user;
   $owner = $user->uid;
 
-  guifi_log(GUIFILOG_TRACE,'function guifi_users_node_list()',$zone);
+  guifi_log(GUIFILOG_TRACE,'function guifi_users_node_list()',$node);
 
-  drupal_set_breadcrumb(guifi_zone_ariadna($zone->id,'node/%d/view/userqueue'));
-  $title = t('Queue of pending users @') .' ' .$zone->title;
+  drupal_set_breadcrumb(guifi_zone_ariadna($node->id,'node/%d/view/userqueue'));
+  $title = t('Queue of pending users @') .' ' .$node->title;
   drupal_set_title($title);
 
-  $childs = guifi_zone_childs($zone->id);
-  $childs[] = $zone->id;
+  $childs = guifi_zone_childs($node->id);
+  $childs[] = $node->id;
 
   $sql = db_select('guifi_users', 'u');
   $sql->join('guifi_location', 'l', 'u.nid = l.id');

@@ -13,7 +13,7 @@ function guifi_location_access($op, $node) {
   global $user;
 
   if (is_numeric($node))
-    $node = node_load( $node);
+    $node = node_load($node);
 
   if ($op == 'view')
     return TRUE;
@@ -48,15 +48,12 @@ function guifi_location_access($op, $node) {
   return FALSE;
 }
 
-function guifi_location_access_callback($node) {
-  return ($node->type == 'guifi_location') && user_access('access content');
-}
 /** guifi_location_ariadna(): Get an array of zone hierarchy and node devices
  * to build the breadcrumb
 **/
 function guifi_location_ariadna($node, $nlink = 'node/%d',$dlink = 'guifi/device/%d', $zlink = 'node/%s') {
   if (is_numeric($node)) {
-    $node = guifi_location_load($node);
+    $node = node_load($node);
     $node->title = $node->nick; // hack to show the node title
   }
 
@@ -105,41 +102,30 @@ function guifi_location_ariadna($node, $nlink = 'node/%d',$dlink = 'guifi/device
   return $ret;
 }
 
+function guifi_location_access_callback($node) {
+  $node = node_load($node);
+  if ($node->type === 'guifi_location')
+    return user_access('access content');
+  else
+    return FALSE;
+}
 
 /** guifi_location_load(): load and constructs node array from the database
 **/
 
-function guifi_location_load($node) {
+function guifi_location_load($nodes) {
 
-  if (is_object($node)) {
-    $id = $node->nid;
-    if ($node->type != 'guifi_location')
-      return FALSE;
-  } else
-  if (is_numeric($node))
-    $id = $node;
-
-  $loaded = db_query("SELECT * FROM {guifi_location} WHERE id = :id", array(':id' => $id))->fetchObject();
-
-  /*
-  foreach ($nodes as $node) {
-    $location = db_query("SELECT * FROM {guifi_location} WHERE id = :nid", array(':nid' => $node->nid))->fetchObject();
-    foreach ($location as $k => $values) {
-    $nodes[$node->nid]->$k = $location->$k;
+ foreach ($nodes as $node) {
+   $location = db_query("SELECT * FROM {guifi_location} WHERE id = :nid", array(':nid' => $node->nid))->fetchObject();
+     foreach ($location as $k => $value) {
+    $nodes[$node->nid]->$k = $value;
 // TODO MIQUEL
-//    $nodes[$node->nid]->$k = guifi_maintainers_load($location->id,'location');
-//    $nodes[$node->nid]->$k = guifi_funders_load($location->id,'location');
+//    $nodes[$node->nid]->$value = guifi_maintainers_load($location->id,'location');
+//    $nodes[$node->nid]->$value = guifi_funders_load($location->id,'location');
     }
   }
- */
-   if ($loaded->id != NULL)
-    return $loaded;
-   else
-    return $node;
-
-  return FALSE;
+return $nodes;
 }
-
 
 /** node editing functions
 **/
@@ -149,7 +135,7 @@ function guifi_location_prepare(&$node){
 
   if(empty($node->nid)){
     if(is_numeric($node->title)){
-      $zone = guifi_zone_load($node->title);
+      $zone = node_load($node->title);
       $node->zone_id = $node->title;
       $default = t('<nodename>');
       $node->title = NULL;
@@ -529,7 +515,7 @@ function guifi_location_nick_validate($element, &$form_state) {
 
 function guifi_location_get_service($id, $type ,$path = FALSE) {
   if (is_numeric($id))
-    $z = guifi_location_load($id);
+    $z = node_load($id);
   else
     $z = $id;
 
@@ -702,8 +688,6 @@ function guifi_location_delete($node) {
 }
 
 /** node visualization (view) function calls */
-
-
 /** guifi_location_view(): outputs the node information
 
 **/
@@ -713,8 +697,6 @@ function guifi_location_view($node, $view_mode, $langcode = NULL) {
     return $node;
   if ($view_mode == 'bloc')
     return $node;
-  if (empty($node->id)) // from guifi_location
-    $location = guifi_location_load($node->nid);
 
   drupal_set_breadcrumb(guifi_location_ariadna($node));
   
@@ -726,10 +708,10 @@ function guifi_location_view($node, $view_mode, $langcode = NULL) {
                         'rows' => array(
                           array(
                             array(
-                              'data' =>'<small>'.theme_guifi_location_data($location).theme_guifi_contacts($location).'</small>',
+                              'data' =>'<small>'.theme_guifi_location_data($node).theme_guifi_contacts($node).'</small>',
                               'width' => '50%'),
                             array(
-                              'data' => theme_guifi_location_map($location),
+                              'data' => theme_guifi_location_map($node),
                                'width' => '50%'),
                           )
                         ),
@@ -740,25 +722,24 @@ function guifi_location_view($node, $view_mode, $langcode = NULL) {
 
   /*
   $node->content['graphs'] = array(
-    '#value'=> theme_guifi_location_graphs_overview($location),
+    '#value'=> theme_guifi_location_graphs_overview($node),
     '#weight'=> 2);
   $node->content['devices'] = array(
-    '#value'=> theme_guifi_location_devices_list($location),
+    '#value'=> theme_guifi_location_devices_list($node),
     '#weight'=> 3);
   $node->content['wdsLinks'] = array(
-    '#value'=> theme_guifi_location_links_by_type($location->id,'wds'),
+    '#value'=> theme_guifi_location_links_by_type($node->id,'wds'),
     '#weight'=> 4);
   $node->content['cableLinks'] = array(
-    '#value'=> theme_guifi_location_links_by_type($location->id,'cable'),
+    '#value'=> theme_guifi_location_links_by_type($node->id,'cable'),
     '#weight'=> 5);
   $node->content['clientLinks'] = array(
-    '#value'=> theme_guifi_location_links_by_type($location->id,'ap/client'),
+    '#value'=> theme_guifi_location_links_by_type($node->id,'ap/client'),
     '#weight'=> 6);
 
 */
     return $node;
 }
-
 
 function guifi_location_hidden_map_fileds($node) {
   $output  = '<from>';
@@ -769,11 +750,9 @@ function guifi_location_hidden_map_fileds($node) {
   return $output;
 }
 
-
 /** guifi_location_print_distances(): list of neighbors
 
 **/
-
 function guifi_location_distances_map($node) {
   $rows = array();
 
@@ -821,7 +800,6 @@ function guifi_location_distances_map($node) {
   print theme('page',$output, FALSE);
   return;
 }
-
 
 function guifi_location_distances($node) {
   drupal_set_title(t('distances from').' '.
@@ -1168,8 +1146,10 @@ function guifi_location_set_flag($id) {
 }
 
 /* Themes (presentation) functions */
-
 function theme_guifi_location_data($node) {
+  if (empty($node->id))
+  $node = node_load($node);
+  
   guifi_log(GUIFILOG_TRACE,'function guifi_location_data(node)',$node);
   
   $zone = db_query('SELECT id, title FROM {guifi_zone} WHERE id = :zid', array(':zid' => $node->zone_id))->fetchObject();
@@ -1218,7 +1198,6 @@ function theme_guifi_location_data($node) {
 
   return $output;
 }
-
 
 function theme_guifi_location_map($node) {
 
@@ -1302,7 +1281,6 @@ function theme_guifi_location_graphs_overview($node,$links = FALSE) {
 
   return $output;
 }
-
 
 function theme_guifi_location_devices_list($node,$links = FALSE) {
   $id = $node->id;
@@ -1437,7 +1415,6 @@ function theme_guifi_location_links($node, $links = FALSE) {
 
   return $output;
 }
-
 
 function theme_guifi_location_links_by_type($id = 0, $ltype = '%') {
   $oGC = new GeoCalc();

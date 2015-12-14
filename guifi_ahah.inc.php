@@ -473,7 +473,7 @@ function guifi_ahah_select_device() {
     $form = $cache->data;
 
     if ($action == 'guifi_location_distances') {
-      $node = guifi_location_load($_POST['filters']['from_node']);
+      $node = node_load($_POST['filters']['from_node']);
       $form['list-devices'] =
         guifi_location_distances_list($_POST['filters'],$node);
     } else
@@ -782,10 +782,10 @@ function guifi_ahah_add_cable_link() {
 
   $qry = db_query('SELECT id, nick ' .
                   'FROM {guifi_devices} ' .
-                  'WHERE nid=%d',
-                  $node[0]);
+                  'WHERE nid = :nid',
+                  array(':nid' => $node[0]));
 
-  while ($value = db_fetch_array($qry)) {
+  while ($value = $qry->fetchAssoc()) {
     if (!($value['id']==$orig_device_id))
       $list[$value['id']] = $value['nick'];
   }
@@ -1350,29 +1350,4 @@ function guifi_ahah_select_channel($rid){
   exit;
 }
 
-/**
- * Add domain
- *
- * URL: http://guifi.net/guifi/js/add-domain
- */
-function guifi_ahah_add_domain() {
-  $form_state = array('storage' => NULL, 'submitted' => FALSE);
-  $form_build_id = $_POST['form_build_id'];
-  $form = form_get_cache($form_build_id, $form_state);
-
-  $args = $form['#parameters'];
-  $form_id = array_shift($args);
-  $form_state['post'] = $form['#post'] = $_POST;
-  $form['#programmed'] = $form['#redirect'] = FALSE;
-
-  drupal_process_form($form_id, $form, $form_state);
-  $form = drupal_rebuild_form($form_id, $form_state, $args, $form_build_id);
-
-  $textfields = $form['domain_type_form'];
-  $output = drupal_render($textfields);
-
-  // Final rendering callback.
-  print drupal_json(array('status' => TRUE, 'data' => $output));
-  exit();
-}
 ?>

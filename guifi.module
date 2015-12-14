@@ -19,8 +19,8 @@ include_once 'guifi_ipv4.inc.php';      // ipv4 network management
 include_once 'guifi_users.inc.php';     // user management
 include_once 'guifi_graphs.inc.php';    // graphs management
 //include_once 'guifi_unsolclic.inc.php'; // unsolclic generator
-//include_once 'guifi_domains.inc.php';   // Domain name server management
-//include_once 'guifi_hosts.inc.php';     // Host name server management
+include_once 'guifi_domains.inc.php';   // Domain name server management
+include_once 'guifi_hosts.inc.php';     // Host name server management
 // include_once 'guifi_nodexchange.inc.php';// nodeXchange (XML) generator
 //include_once 'guifi_cnml.inc.php';      // CNML (XML) generator
 //include_once 'guifi_gml.inc.php';       // gml (geographic XML export) generator
@@ -533,56 +533,56 @@ function guifi_menu() {
     'title' => 'nodes',
     'page callback' => 'theme_guifi_zone_nodes',
     'page arguments' => array(1),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access callback' => 'guifi_zone_access_callback',
+    'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK,
   );
   $items['node/%guifi_zone/view/map'] = array(
     'title' => 'map',
     'page callback' => 'theme_guifi_zone_map',
     'page arguments' => array(1),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access callback' => 'guifi_zone_access_callback',
+    'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK
   );
   $items['node/%guifi_zone/view/data'] = array(
     'title' => 'data',
     'page callback' => 'theme_guifi_zone_data',
     'page arguments' => array(1),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access callback' => 'guifi_zone_access_callback',
+    'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK
   );
   $items['node/%guifi_zone/view/availability'] = array(
     'title' => 'availability',
     'page callback' => 'guifi_zone_availability',
     'page arguments' => array(1),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access callback' => 'guifi_zone_access_callback',
+    'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK
   );
   $items['node/%guifi_zone/view/pending'] = array(
     'title' => 'pending/review',
     'page callback' => 'guifi_zone_availability',
     'page arguments' => array(1, 3),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access callback' => 'guifi_zone_access_callback',
+    'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK
   );
   $items['node/%guifi_zone/view/services'] = array(
     'title' => 'services',
     'page callback' => 'theme_guifi_services_list',
     'page arguments' => array(1),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access callback' => 'guifi_zone_access_callback',
+    'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK
   );
   $items['node/%guifi_zone/view/ipv4'] = array(
     'title' => 'networks',
     'page callback' => 'theme_guifi_zone_networks',
     'page arguments' => array(1),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access callback' => 'guifi_zone_access_callback',
+    'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK
   );
   if (module_exists('budgets')) {
@@ -590,8 +590,8 @@ function guifi_menu() {
       'title' => 'Suppliers',
       'page callback' => 'budgets_supplier_list_by_zone',
       'page arguments' => array(1,3),
-      'access callback' => 'user_access',
-      'access arguments' => array('access content'),
+      'access callback' => 'guifi_zone_access_callback',
+      'access arguments' => array(1),
       'weight'=> 99,
       'type' => MENU_LOCAL_TASK
     );
@@ -599,32 +599,32 @@ function guifi_menu() {
       'title' => 'all',
       'page callback' => 'budgets_supplier_list_by_zone',
       'page arguments' => array(1),
-      'access callback' => 'user_access',
-      'access arguments' => array('access content'),
+      'access callback' => 'guifi_zone_access_callback',
+      'access arguments' => array(1),
       'type' => MENU_LOCAL_TASK
     );
     $items['node/%guifi_zone/suppliers/caps_services=isp'] = array(
       'title' => 'isp',
       'page callback' => 'budgets_supplier_list_by_zone',
       'page arguments' => array(1,3),
-      'access callback' => 'user_access',
-      'access arguments' => array('access content'),
+      'access callback' => 'guifi_zone_access_callback',
+      'access arguments' => array(1),
       'type' => MENU_LOCAL_TASK
     );
     $items['node/%guifi_zone/suppliers/role=professional'] = array(
       'title' => 'professional',
       'page callback' => 'budgets_supplier_list_by_zone',
       'page arguments' => array(1,3),
-      'access callback' => 'user_access',
-      'access arguments' => array('access content'),
+      'access callback' => 'guifi_zone_access_callback',
+      'access arguments' => array(1),
       'type' => MENU_LOCAL_TASK
     );
     $items['node/%guifi_zone/suppliers/role=volunteer'] = array(
       'title' => 'volunteer',
       'page callback' => 'budgets_supplier_list_by_zone',
       'page arguments' => array(1,3),
-      'access callback' => 'user_access',
-      'access arguments' => array('access content'),
+      'access callback' => 'guifi_zone_access_callback',
+      'access arguments' => array(1),
       'type' => MENU_LOCAL_TASK
     );
   }
@@ -632,8 +632,8 @@ function guifi_menu() {
     'title' => 'users queue',
     'page callback' => 'guifi_users_queue',
     'page arguments' => array(1),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
+    'access callback' => 'guifi_zone_access_callback',
+    'access arguments' => array(1),
     'type' => MENU_LOCAL_TASK
   );
   $items['node/%guifi_zone/view/ipv4/add'] = array(
@@ -1164,12 +1164,6 @@ function guifi_menu() {
   $items['guifi/js/add-radio'] = array(
     'title' => 'Javascript Add Wireless Radio',
     'page callback' => 'guifi_ahah_add_radio',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK,
-  );
-  $items['guifi/js/add-domain'] = array(
-    'title' => 'Javascript Add Domain',
-    'page callback' => 'guifi_ahah_add_domain',
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
