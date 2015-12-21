@@ -43,7 +43,7 @@ function guifi_service_access_callback($node) {
  *   Object with the extra field ($node->var) and link to the node ($node->l)
  *   or FALSE if $node is not found in database
  */
-function guifi_service_load($node) {
+function guifi_service_load($nodes) {
 
   foreach ($nodes as $node) {
     $service = db_query("SELECT * FROM {guifi_services} WHERE id = :nid", array(':nid' => $node->nid))->fetchObject();
