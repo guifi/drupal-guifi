@@ -180,7 +180,7 @@ function guifi_location_form($node, $form_state) {
 
   $form_weight = 0;
 
-  $type = node_get_types('type',$node);
+  $type = node_type_get_type($node);
 
   if (!empty($node->zone_id))
     drupal_set_breadcrumb(guifi_location_ariadna($node));

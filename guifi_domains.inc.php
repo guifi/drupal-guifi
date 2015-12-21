@@ -118,43 +118,45 @@ function guifi_domain_form_submit($form, &$form_state) {
 
 }
 
+function guifi_domain_edit($domain) {
+  $output = drupal_render(drupal_get_form('guifi_domain_form',$domain));
+  return $output;
+}
+
 /* guifi_domain_form(): Present the guifi domain main editing form. */
-function guifi_domain_form($form_state, $params = array()) {
+function guifi_domain_form($form_id, &$form_state, $domain )  {
   global $user;
 
-  guifi_log(GUIFILOG_TRACE,'function guifi_domain_form()',$params);
-
   if (empty($form_state['values']))
-    $form_state['values'] = $params;
+    $form_state['values'] = $domain;
     $form_state['#redirect'] = FALSE;
-
   // if new domain, initializing variables
-  if (($form_state['values']['sid'] == NULL) && ($params['add'] != NULL)) {
+  if (($form_state['values']['sid'] == NULL) && ($form_state['add'] != NULL)) {
     $form_state['values']['sid'] = $params['add'];
     $form_state['values']['new'] = TRUE;
     if ($params['mname']) {
-      $masteridqry = db_query("SELECT name FROM {guifi_dns_domains} WHERE name = :name", array(':name' => $params['mname']));
+      $masteridqry = db_query("SELECT name FROM {guifi_dns_domains} WHERE name = :name", array(':name' => $form_state['mname']));
       $mname = $masteridqry->fetchObject();
       $form_state['values']['mname'] = $mname->name;
-      $form_state['values']['name'] = $params['dname'].'.'.$params['mname'];
+      $form_state['values']['name'] = $form_state['dname'].'.'.$form_state['mname'];
     } else {
-      $form_state['values']['name'] = $params['dname'];
+      $form_state['values']['name'] = $form_state['dname'];
     }
-    $form_state['values']['type'] = $params['type'];
+    $form_state['values']['type'] = $form_state['type'];
 
-     if ($params['scope'] == 'external') {
+     if ($form_state['scope'] == 'external') {
        $form_state['values']['ipv4'] = '';
      } else {
-      $form_state['values']['ipv4'] = $params['ipv4'];
+      $form_state['values']['ipv4'] = $form_state['ipv4'];
     }
-    $form_state['values']['scope'] = $params['scope'];
-    $form_state['values']['management'] = $params['management'];
+    $form_state['values']['scope'] = $form_state['scope'];
+    $form_state['values']['management'] = $form_state['management'];
     $form_state['values']['allow'] = 'disabled';
     $form_state['values']['hosts']['0']['new'] = TRUE;
     $form_state['values']['hosts']['0']['counter'] = '0';
     $form_state['values']['hosts']['0']['host'] = 'ns1';
-    $form_state['values']['hosts']['0']['ipv4'] = $params['ipv4'];
-    $form_state['values']['hosts']['0']['ipv6'] = $params['ipv6'];
+    $form_state['values']['hosts']['0']['ipv4'] = $form_state['ipv4'];
+    $form_state['values']['hosts']['0']['ipv6'] = $form_state['ipv6'];
     $form_state['values']['hosts']['0']['opt']['options'] = array( 'NS' => 'NS', 'MX' => '0' );
   }
 
@@ -162,17 +164,14 @@ function guifi_domain_form($form_state, $params = array()) {
 
   // Check permissions
   if ($params['edit']){
-    if (!guifi_domain_access('update',$params['edit'])){
+    if (!guifi_domain_access('update',$form_state['edit'])){
       drupal_set_message(t('You are not authorized to edit this domain','error'));
       return;
     }
   }
 
   // Loading node & zone where the domain belongs to (some information will be used)
-  $node = node_load(array('nid' => $form_state['values']['sid']));
-
-  // Setting the breadcrumb
-  drupal_set_breadcrumb(guifi_location_ariadna($form_state['values']['sid']));
+  $node = node_load($form_state['values']['sid']);
 
   // if contact is NULL, then get it from the node or the user logged in drupal
   if (is_null($form_state['values']['notification']))
@@ -206,13 +205,13 @@ function guifi_domain_form($form_state, $params = array()) {
       '#value'=> TRUE
     );
 
-  if ($params['add'] != NULL){
-    drupal_set_title(t('adding a new type %domain at %node',
-      array('%node' => $node->nick,
-            '%domain' => $form_state['values']['type']
+  if ($form_state['add'] != NULL){
+    drupal_set_title(t('adding a new type @domain at @node',
+      array('@node' => $node->nick,
+            '@domain' => $form_state['values']['type']
            )));
   } else {
-    drupal_set_title(t('edit domain %dname',array('%dname' => $form_state['values']['name'])));
+    drupal_set_title(t('edit domain @dname',array('@dname' => $form_state['values']['name'])));
   }
 
   // All preprocess is complete, now going to create the form
@@ -373,7 +372,7 @@ function guifi_domain_form($form_state, $params = array()) {
     if (function_exists('guifi_host_form')){
       $form = array_merge($form,
         call_user_func('guifi_host_form',
-        $form_state['values'],
+        $form_state,
         $form_weight));
     }
   }
@@ -429,7 +428,7 @@ function guifi_domain_form_validate($form,&$form_state) {
   $qrydomaindlg = db_query("
         SELECT *
         FROM {guifi_dns_domains}
-        WHERE mname = '%s'", $domainname['name']);
+        WHERE mname = :name", array(':name' => $domainname['name']));
   $dlgdomainname = array();
   $dlgdomainname = $qrydomaindlg->fetchAssoc();
 
@@ -680,7 +679,6 @@ function guifi_domain_save($edit, $verbose = TRUE, $notify = TRUE) {
 
 }
 
-
 function guifi_domain_buttons($continue = FALSE,$action = '', $nopts = 0, &$form_weight = 1000) {
   $form['reset'] = array(
     '#type' => 'button',
@@ -800,7 +798,7 @@ function guifi_domain_add() {
     'management' => arg(9)));
 
   // To gain space, save bandwith and CPU, omit blocks
-  print theme('page', $output, FALSE);
+  return $output;
 }
 
 function ajax_domain_type_form($form, $form_state) {
@@ -847,8 +845,6 @@ function guifi_domain_create_form($form, &$form_state, $params) {
     '#type' => 'fieldset',
   );
 
-
-  
   if ($form_state['values']['domain_type'] === 'master') {
     $form['domain_type_form']['sid'] = array(
       '#type' => 'hidden',
@@ -982,13 +978,12 @@ function guifi_domain_create($nid) {
   print theme('page',$form);
 }
 
-
 /****************************************
    domain output information functions
 *****************************************/
 /* guifi_domain_print_data(): outputs a detailed domain information data */
 function guifi_domain_print_data($domain) {
-  $node = node_load(array('nid' => $domain['sid']));
+  $node = node_load($domain['sid']);
   $rows[] = array('<strong>'.t('Service:').' <a href="'.url('node/'.$node->nid).'">'.$node->nick.'</a>');
   $rows[] = array('<strong>'.t('Domain:').'</strong> '.$domain['name']);
   $rows[] = array('<strong>'.t('Scope:').'</strong> '.$domain['scope']);
@@ -996,7 +991,6 @@ function guifi_domain_print_data($domain) {
 
   return array_merge($rows);
 }
-
 
 /* guifi_domain_print(): main print function, outputs the domain information and call the others */
 function guifi_domain_print($domain = NULL) {
@@ -1008,35 +1002,37 @@ function guifi_domain_print($domain = NULL) {
   $output = '<div id="guifi">';
   $title ='';
 
-  drupal_set_breadcrumb(guifi_location_ariadna($node));
-
   switch (arg(4)) {
   case 'all':
   case 'data':
   default:
-    $table = theme('table', NULL, guifi_domain_print_data($domain));
-    $output .= theme('box', $title, $table);
+    $output .= theme('table',array(
+    'header' => $title,
+    'rows' => array(array(theme('table', array('header' => NULL, 'rows' => guifi_domain_print_data($domain))))),
+    'attributes' => array('width' => '100%')));
     if (arg(4) == 'data')
       break;
   case 'delegations':
     $header = array(t('Delegation'),t('IPv4 Address'),t('Nameserver'));
-    $table = theme('table', $header, guifi_delegations_print_data($domain['name'], $domain['scope']));
-    $output .= theme('box', t('Delegations'), $table);
+    $output .= theme('table',array(
+    'header' => NULL,
+    'rows' => array(array(theme('table', array('header' => $header, 'rows' => guifi_delegations_print_data($domain['name'], $domain['scope']))))),
+    'attributes' => array('width' => '100%')));
     if (arg(4) == 'delegations')
       break;
   case 'hosts':
     $header = array(t('HostName'),t('Alias'),t('IPv4 Address'),t('IPv6 Address'),t('Namserver'),t('MailServer'),t('MX Priority'));
-    $table = theme('table', $header, guifi_hosts_print_data($domain['id']));
-    $output .= theme('box', t('Hostnames'), $table);
+    $output .= theme('table',array(
+    'header' => NULL,
+    'rows' => array(array(theme('table', array('header' => $header, 'rows' => guifi_hosts_print_data($domain['id']))))),
+    'attributes' => array('width' => '100%')));
     break;
   }
 
   $output .= '</div>';
 
-  drupal_set_title(t('View domain %dname',array('%dname' => $domain['name'])));
-  $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
-  print theme('page',$output, FALSE);
-  return;
+  drupal_set_title(t('View domain @dname',array('@dname' => $domain['name'])));
+  return $output;
 }
 
 function guifi_delegations_print_data($domain, $scope) {
@@ -1067,12 +1063,6 @@ function guifi_domain_item_delete_msg($msg) {
       'recover the values from the database.');
 }
 
-function guifi_domain_edit($domain) {
-  $output = drupal_get_form('guifi_domain_form',$domain);
-
-  // To gain space, save bandwith and CPU, omit blocks
-  print theme('page', $output, FALSE);
-}
 
 
 ?>

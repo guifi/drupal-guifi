@@ -25,7 +25,6 @@ function guifi_notify_send($send = TRUE) {
   $qt = db_query("
     SELECT *
     FROM {guifi_notify}");
-
   while ($message = $qt->fetchAssoc()) {
     $messages[$message['id']] = $message;
     foreach (unserialize($message['to_array']) as $dest)

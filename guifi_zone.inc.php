@@ -103,7 +103,6 @@ function guifi_zone_access_callback($node) {
 
 /** zone editing functions
 **/
-
 /** guifi_zone_load(): Load the zone from the guifi database.
  */
 function guifi_zone_load($nodes) {
@@ -999,8 +998,6 @@ function guifi_zone_data($zone) {
 
   $rows[] = array(t('zone name'),$zone->nick.' - <b>' .$zone->title .'</b>');
 
-  // TODO MIQUEL
-  /*
   if (count($zone->maintainers)) {
     $rows[] = array(
       t('Maintenance & SLAs'),
@@ -1012,7 +1009,7 @@ function guifi_zone_data($zone) {
         t('Maintenance & SLAs').' '.t('(from parents)'),
         implode(', ',guifi_maintainers_links($pmaintainers)));
   }
-  */
+  
   if ($zone->homepage)
     $rows[] = array(t('homepage'),l($zone->homepage,$zone->homepage));
     $rows[] = array(t('default proxy'),

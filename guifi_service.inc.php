@@ -43,7 +43,7 @@ function guifi_service_access_callback($node) {
  *   Object with the extra field ($node->var) and link to the node ($node->l)
  *   or FALSE if $node is not found in database
  */
-function guifi_service_load($nodes) {
+function guifi_service_load($node) {
 
   foreach ($nodes as $node) {
     $service = db_query("SELECT * FROM {guifi_services} WHERE id = :nid", array(':nid' => $node->nid))->fetchObject();
@@ -85,7 +85,7 @@ function guifi_service_form($node, $param) {
     '#type' => 'hidden',
     '#value' => $node->id
   );
-  $type = db_fetch_object(db_query("SELECT description FROM {guifi_types} WHERE type='service' AND text='%s'",$node->service_type));
+  $type = db_query("SELECT description FROM {guifi_types} WHERE type='service' AND text = :type", array(':type' => $node->service_type))->fetchObject();
   if ($node->nid > 0)
     $f['service_type'] = array(
      '#type' => 'item',
@@ -95,7 +95,7 @@ function guifi_service_form($node, $param) {
     //$output = form_item(t('Service type'),$node->service_type,t($type->description));
 
 
-  $type = node_get_types('type',$node);
+  $type = node_type_get_type($node);
 
   if (($type->has_title)) {
     $f['title'] = array(
@@ -427,9 +427,9 @@ function guifi_service_nick_validate($element, &$form_state) {
   }
   guifi_validate_nick($element['#value']);
 
-  $query = db_query("SELECT nick FROM {guifi_services} WHERE lcase(nick)='%s' AND id <> %d",
-    strtolower($element['#value']),$form_state['values']['nid']);
-  if (db_result($query)){
+  $query = db_query("SELECT nick FROM {guifi_services} WHERE lcase(nick)=:nick AND id <> :id",
+    array(':nick' => strtolower($element['#value']), ':id' => $form_state['values']['nid']));
+  if ($query->fetchField()){
     form_set_error('nick', t('Nick already in use.'));
   }
 }
@@ -855,10 +855,10 @@ function guifi_service_view($node, $view_mode, $langcode = NULL) {
 
 function dump_guifi_proxy_federation($node) {
 
-  $qryself=db_query("SELECT id,extra FROM {guifi_services} WHERE service_type = 'Proxy' AND id = '%s' AND (status_flag = 'Working' OR status_flag = 'Testing') ORDER BY id",$node->id);
-  $qryothers = db_query("SELECT id,extra FROM {guifi_services} WHERE service_type = 'Proxy' AND id != '%s' AND (status_flag = 'Working' OR status_flag = 'Testing') ORDER BY id",$node->id);
+  $qryself=db_query("SELECT id,extra FROM {guifi_services} WHERE service_type = 'Proxy' AND id = :id AND (status_flag = 'Working' OR status_flag = 'Testing') ORDER BY id", array(':id' => $node->id));
+  $qryothers = db_query("SELECT id,extra FROM {guifi_services} WHERE service_type = 'Proxy' AND id != :id AND (status_flag = 'Working' OR status_flag = 'Testing') ORDER BY id", array(':id' => $node->id));
 
-  $ownproxy = db_fetch_array( $qryself );
+  $ownproxy = $qryself->fetchAssoc();
   $extra=unserialize($ownproxy['extra']);
   $in = $extra['fed']['IN'];
   $out = $extra['fed']['OUT'];
@@ -869,7 +869,7 @@ function dump_guifi_proxy_federation($node) {
     $head = $ownproxy['id']."-".$inout."\n";
   else
    $head = "0000-private\n";
-  while ( ($row = db_fetch_array( $qryothers )) != null) {
+  while ( ($row = $qryothers->fetchAssoc() ) != null) {
     unset($extra);
     $extra=unserialize($row['extra']);
     $in = $extra['fed']['IN'];

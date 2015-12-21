@@ -22,7 +22,7 @@
         }
       break;
       case "uid":
-        $s = node_load(array('nid'=>$m['supplier_id']));
+        $s = node_load($m['supplier_id']);
         $maintainers[] = $s->uid;
       break;
     }

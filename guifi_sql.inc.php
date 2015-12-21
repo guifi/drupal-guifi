@@ -37,7 +37,6 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
     $log .= _guifi_db_delete($table,$key,$to_mail);
     return $log;
   }
-
   // insert?
   if ($data['new'])
     $insert = TRUE;
@@ -97,6 +96,9 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 	  case 'guifi_dns_hosts':
 	    $data['user_created'] = $user->uid;
 	    $data['timestamp_created'] = time();
+	    // default values
+	    $data['user_changed'] = $user->uid;
+	    $data['timestamp_changed'] = time();
 	    break;
 	//  case 'guifi_radios':
 	//      // radio id already comes (device exists), looking for next radio id  at this device  (radiodev_counter)
@@ -110,7 +112,7 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 	    $data['id']=$new_id['id'];
 	    break;
 	  case 'guifi_ipv4':
-	    $next_id = db_query('SELECT max(a.id) + 1 id FROM {guifi_ipv4} a, {guifi_interfaces} i WHERE a.interface_id=i.id AND i.id=%d',$data['interface_id'])->fetchAssoc();
+	    $next_id = db_query('SELECT max(a.id) + 1 id FROM {guifi_ipv4} a, {guifi_interfaces} i WHERE a.interface_id=i.id AND i.id = :iid', array(':iid' => $data['interface_id']))->fetchAssoc();
 	    if (is_null($next_id['id']))
 	      $next_id['id'] = 0;
 	    $data['id'] = $next_id['id'];
@@ -181,27 +183,15 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
       break;
   }
 
-// // set numeric & refix if ipv4
-// if ($table == 'guifi_ipv4') {
-//   if (isset($data['ipv4']))
-//     $data['lipv4'] = ip2long($data['ip4']);
-// }
-
-  $sql_str = '';
+  // insert
   $values_data = array();
   if ($insert) {
-      // insert
     foreach ($data as $k => $value) {
-      if (is_numeric($value)) {
-        if (is_float($value)) {
-          $values_data[$k] = "%f";
-        } else
-          $values_data[$k] = "%d";
-      } else
-        $values_data[$k] = "'%s'";
+      $values_data[$k] = $value;
     }
-    $sql_str .= "INSERT INTO {" . $table . "} (" . implode(',', array_keys($data)) . ") VALUES (" . implode(',', $values_data) . ")";
-    $new_data = $data;
+  db_insert($table)
+     ->fields($values_data)
+     ->execute();
   } else {
    // update
 
@@ -327,16 +317,16 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
 
 
   case 'guifi_dns_domains':
-    $item=db_fetch_object(db_query(
+    $item = db_query(
       'SELECT d.id did, d.name dname, d.notification, d.sid,
         l.nick nname, l.notification ncontact
        FROM {guifi_dns_domains} d LEFT JOIN {guifi_services} l ON d.sid=l.id
-       WHERE d.id = %d',
-       $key['id']));
+       WHERE d.id = :id',
+       array(':id' => $key['id']))->fetchObject();
     $log .= t('Domain %id-%name at node %nname deleted.',array('%id' => $key['id'],'%name' => $item->dname,'%nname' => $item->nname));
     // cascade to dns_hosts
-    $qc = db_query('SELECT id, counter FROM {guifi_dns_hosts} WHERE id=%d',$key['id']);
-    while ($host = db_fetch_array($qc))
+    $qc = db_query('SELECT id, counter FROM {guifi_dns_hosts} WHERE id = :id', array(':id' => $key['id']));
+    while ($host = $qc->fetchAssoc())
       $log .= '<br />'._guifi_db_delete('guifi_dns_hosts',$host,$to_mail,$depth);
   break;
 

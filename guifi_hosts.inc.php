@@ -4,13 +4,15 @@
  */
 
 /* guifi_host_form(): Main host form (Common parameters)*/
-function guifi_host_form($edit,$form_weight) {
-
+function guifi_host_form($form_state, $form_weight) {
   global $user;
 
   guifi_log(GUIFILOG_TRACE,'function guifi_host_form()',$edit);
 
   $collapse = FALSE;
+  $edit = $form_state['values'];
+
+
 
   $msg = (count($edit['hosts'])) ?
     format_plural(count($edit['hosts']),'1 host','@count hosts') :
@@ -21,16 +23,14 @@ function guifi_host_form($edit,$form_weight) {
     if ($value['unfold'])
       $collapse =FALSE;
 
-
   $form['r'] = array(
     '#type' => 'fieldset',
     '#title' => $msg ,
     '#collapsible' => TRUE,
     '#collapsed' => $collapse,
     '#tree' => FALSE,
-    '#prefix' => '<img src="/'.
-      drupal_get_path('module', 'guifi').
-     '/icons/home.png"> '.t("Host Name's for this domain"),
+    '#prefix' => '<img src="/'.drupal_get_path('module', 'guifi').'/icons/home.png"> '.t("Host Name's for this domain"),
+
     '#weight' => $form_weight++,
   );
 
@@ -49,7 +49,7 @@ function guifi_host_form($edit,$form_weight) {
         '#description' => t('Host aliases. Save or press "Preview" to get more entries'),
         '#weight' => $form_weight++,
       );
-
+  
       // after rebuild forms, check serialized values.
       unset ($alias);
       if (!empty($host['aliases'])) {
@@ -145,7 +145,7 @@ function guifi_host_form($edit,$form_weight) {
       $bw = $form_weight - 1000;
       if (!isset($host['deleted'])) {
         // Only allow delete and move functions if the host has been saved
-        if ($host['new']==FALSE)  {
+        if ($host['new'] == FALSE)  {
           $form['r']['hosts'][$key]['delete'] = array(
             '#type' => 'image_button',
             '#access' => $access,
@@ -173,11 +173,12 @@ function guifi_host_form($edit,$form_weight) {
     '#attributes' => array('title' => t('Add New Host')),
     '#parents' => array('AddHost'),
     '#executes_submit_callback' => TRUE,
-    '#submit' => array(guifi_host_add_host_submit),
+    '#submit' => array('guifi_host_add_host_submit'),
     '#weight' => $form_weight++,
   );
 
   return $form;
+
 }
 
 function guifi_host_host_form($host, $key, &$form_weight = -200) {
@@ -265,6 +266,37 @@ function guifi_host_host_form($host, $key, &$form_weight = -200) {
   return $f;
 }
 
+/* Add  a host to the device */
+function guifi_host_add_host_submit(&$form, &$form_state) {
+  if ($form_state['values']['newhost_name'] == NULL)
+    return TRUE;
+
+  $edit = $form_state['values'];
+
+  // next id
+  $rc = 0; // Host hostdev_counter next pointer
+  $tc = 0; // Total active hosts
+
+  // fills $rc & $tc proper values
+  if (isset($edit['hosts'])) foreach ($edit['hosts'] as $k => $r)
+    if ($k+1 > $rc)  {
+      $rc = $k+1;
+      if (!$edit['hosts'][$k][delete])
+        $tc++;
+    }
+    $node=node_load($edit['sid']);
+    $host=array();
+    $host['new']=TRUE;
+    $host['host']=$edit['newhost_name'];
+    $host['counter'] = $rc;
+    $host['unfold'] = TRUE;
+    $form_state['rebuild'] = TRUE;
+    $form_state['values']['hosts'][] = $host;
+
+    drupal_set_message(t(' %host added',
+       array('%host' => $host['host'])));
+    return;
+}
 
 function guifi_ipv4_validate($element,&$form_state) {
   guifi_log(GUIFILOG_TRACE,"function _guifi_host_ipv4_validate()");
@@ -298,40 +330,6 @@ function guifi_ipv6_validate($element,&$form_state) {
     }
 }
 
-/* Add  a host to the device */
-function guifi_host_add_host_submit(&$form, &$form_state) {
-  guifi_log(GUIFILOG_TRACE, "function guifi_host_add_host_submit()",$form_state['values']);
-
-  if ($form_state['values']['newhost_name'] == NULL)
-    return TRUE;
-
-  $edit = $form_state['values'];
-
-  // next id
-  $rc = 0; // Host hostdev_counter next pointer
-  $tc = 0; // Total active hosts
-
-  // fills $rc & $tc proper values
-  if (isset($edit['hosts'])) foreach ($edit['hosts'] as $k => $r)
-    if ($k+1 > $rc)  {
-      $rc = $k+1;
-      if (!$edit['hosts'][$k][delete])
-        $tc++;
-    }
-    $node=node_load(array('nid' => $edit['sid']));
-    $host=array();
-    $host['new']=TRUE;
-    $host['host']=$edit['newhost_name'];
-    $host['counter'] = $rc;
-    $host['unfold'] = TRUE;
-    $form_state['rebuild'] = TRUE;
-    $form_state['values']['hosts'][] = $host;
-
-    drupal_set_message(t(' %host added',
-       array('%host' => $host['host'])));
-    return;
-}
-
 function guifi_host_delete_submit($form, &$form_state) {
   guifi_log(GUIFILOG_TRACE,"function guifi_host_delete_submit()",$form_state['clicked_button]']);
   $host_id = $form_state['clicked_button']['#parents'][1];
@@ -345,21 +343,21 @@ function guifi_host_delete_submit($form, &$form_state) {
 
 function guifi_hosts_print_data($id) {
 
-  $querydom = db_query("
+  $querydom = db_query('
     SELECT *
     FROM {guifi_dns_domains}
-    WHERE id = %d",
-    $id
+    WHERE id = :id',
+    array(':id' => $id)
   );
-  $domain = db_fetch_object($querydom);
-  $queryhosts = db_query("
+  $domain = $querydom->fetchObject();
+  $queryhosts = db_query('
      SELECT *
      FROM {guifi_dns_hosts}
-     WHERE id = '%d'",
-     $domain->id
+     WHERE id = :id',
+     array(':id' => $domain->id)
    );
 
-  while ($host = db_fetch_array($queryhosts)) {
+  while ($host = $queryhosts->fetchAssoc()) {
     $aliases = unserialize($host['aliases']);
     $options = unserialize($host['options']);
     if ($aliases) {

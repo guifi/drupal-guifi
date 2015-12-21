@@ -5,17 +5,13 @@
  */
 
  function guifi_funders_load($id, $subject_type, $ret = "txt") {
-   $qsql = sprintf('SELECT * FROM {guifi_funders} ' .
-   		'WHERE subject_id = %d ' .
-   		' AND subject_type = "%s" ' .
-   		'ORDER BY id',
-   		$id,$subject_type);
-   $result = db_query($qsql);
-   guifi_log(GUIFILOG_TRACE,
-     'function guifi_funders_load(sql)',
-     $qsql);
+   $qsql = db_query('SELECT * FROM {guifi_funders} ' .
+     'WHERE subject_id = :id ' .
+     ' AND subject_type = :type ' .
+     'ORDER BY id',
+     array(':id' => $id, ':type' => $subject_type));
 
-   while ($m = db_fetch_array($result)) {
+   while ($m = $qsql->fetchAssoc()) {
    	 switch ($ret) {
    	   case "txt":
    	     if (!(empty($m['supplier_id'])))

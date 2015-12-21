@@ -8,9 +8,8 @@ include_once 'guifi_zone.inc.php';
 include_once 'guifi_location.inc.php';      // node (location) management
 include_once 'guifi_service.inc.php';   // services management
 include_once 'guifi_devices.inc.php';   // device management
-
 include_once 'guifi_maintainers.inc.php'; // maintainers
-//include_once 'guifi_funders.inc.php';   // funders
+include_once 'guifi_funders.inc.php';   // funders
 include_once 'guifi_ipv4.inc.php';      // ipv4 network management
 //include_once 'guifi_radios.inc.php';    // radios management
 //include_once 'guifi_switch.inc.php';    // switch management
@@ -1368,6 +1367,7 @@ function guifi_search_result($node = FALSE) {
             array('%type' => $node->service_type, '%zone' => guifi_get_zone_name($node->zone_id)))))) .' - '.
         strtoupper($node->service_type);
   }
+
 }
 
 function guifi_update_index($node = FALSE) {

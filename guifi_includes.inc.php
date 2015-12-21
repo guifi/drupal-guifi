@@ -1941,7 +1941,7 @@ function guifi_notification_validate($to) {
     $temail = trim($email);
     if (!valid_email_address($temail)) {
       drupal_set_message(
-        t('%email is not valid',array('%email' => $temail)),'error');
+        t('@email is not valid',array('@email' => $temail)),'error');
       return FALSE;
     }
     $trimmed[] = $temail;
@@ -2040,11 +2040,11 @@ function guifi_servername_validate($serverstr,&$form_state) {
   $qry = db_query(
     'SELECT d.id,l.zone_id ' .
     'FROM {guifi_devices} d, {guifi_location} l ' .
-    'WHERE d.id="%d" ' .
+    'WHERE d.id = :id ' .
     ' AND d.nid=l.id '.
-    ' AND d.type IN ("cam","server", "cloudy") ',
-    $sid[0]);
-  while ($server = db_fetch_array($qry)) {
+    ' AND d.type IN (\'cam\',\'server\', \'cloudy\') ',
+    array(':id' => $sid[0]));
+  while ($server = $qry->fetchAssoc()) {
     $form_state['values']['device_id']=$server['id'];
     $form_state['values']['zone_id']=$server['zone_id'];
     return $serverstr;
@@ -2060,8 +2060,8 @@ function guifi_nodename_validate($nodestr,&$form_state) {
     return;
 
   $nid = explode('-',$nodestr['#value']);
-  $qry = db_query('SELECT id FROM {guifi_location} WHERE id="%s"',$nid[0]);
-  while ($node = db_fetch_array($qry)) {
+  $qry = db_query('SELECT id FROM {guifi_location} WHERE id = :nid', array(':nid' => $nid[0]));
+  while ($node = $qry->fetchAssoc()) {
     $form_state['values']['nid']=$node['id'];
     return $nodestr;
   }
@@ -2081,8 +2081,8 @@ function guifi_devicename_validate($devicestr,&$form_state) {
 
   $dev = explode('-',$devicestr['#value']);
   $qry = db_query(
-    'SELECT id FROM {guifi_devices} WHERE id="%s"',$dev[0]);
-  while ($device = db_fetch_array($qry)) {
+    'SELECT id FROM {guifi_devices} WHERE id = :dev', array(':dev' => $dev[0]));
+  while ($device = $qry->fetchAssoc()) {
     if ($form_state['values']['form_id'] != 'guifi_device_form')
       $form_state['values']['nid']=$device['id'];
     return $devicestr;
