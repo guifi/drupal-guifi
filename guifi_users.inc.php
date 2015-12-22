@@ -524,17 +524,17 @@ function guifi_user_form_validate($form, &$form_state) {
       $query = db_query(
         "SELECT username, nid, services " .
         "FROM {guifi_users} " .
-        "WHERE username ='%s'",
-        $edit['username']);
+        "WHERE username = :username",
+        array(':username' => $edit['username']));
 
-    while ($proxy_id = db_fetch_object($query)) {
+    while ($proxy_id = $query->fetchObject()) {
       $services = unserialize($proxy_id->services);
       $qry2 = db_query(
         "SELECT nick " .
         "FROM {guifi_services} " .
-        "WHERE id = %d",
-        $services['proxy']);
-      $proxy_name = db_fetch_object($qry2);
+        "WHERE id = :proxy",
+        array(':proxy' => $services['proxy']));
+      $proxy_name = $qry2->fetchObject();
 
       form_set_error('username', t('The user %username is already defined ' .
         'at the node %nodename ' .
@@ -563,10 +563,10 @@ function guifi_user_form_validate($form, &$form_state) {
       $query = db_query(
         "SELECT username, notification, nid, services " .
         "FROM {guifi_users} " .
-        "WHERE notification ='%s'",
-        $edit['notification']);
+        "WHERE notification = :notification",
+        array(':notification' => $edit['notification']));
 
-    while ($guifi_users = db_fetch_object($query)) {
+    while ($guifi_users = $query->fetchObject()) {
 
       form_set_error('notification', t('The e-mail address: %notification is already defined ' .
         'for the user: %username on node %nodename ' .
@@ -920,9 +920,9 @@ function guifi_users_node_list_form($form_state, $params = array()) {
     $query = db_query(
       "SELECT id " .
       "FROM {guifi_users} " .
-      "WHERE nid = %d " .
+      "WHERE nid = :nid " .
       "ORDER BY lastname, firstname",
-      $node->nid);
+      array(':nid' => $node->nid));
   } else
     $query = db_query(
       "SELECT id " .
@@ -940,7 +940,7 @@ function guifi_users_node_list_form($form_state, $params = array()) {
 
   $options = array();
 
-  while ($guserid = db_fetch_object($query)) {
+  while ($guserid = $query->fetchObject()) {
     $guser = (object)guifi_user_load($guserid->id);
     $services = $guser->services;
     if ($node->type == 'guifi_service') {
@@ -1096,19 +1096,19 @@ function guifi_users_dump_return($node,$federated = FALSE,$ldif = FALSE) {
   // query ALL zones, kept in memory zones array
   $zones = array();
   $query = db_query("SELECT id, title FROM {guifi_zone}");
-  while ($item = db_fetch_object($query))
+  while ($item = $query->fetchObject())
     $zones[$item->id] = $item->title;
 
   // query ALL node zones, kept in memory node_zones array
   $node_zones = array();
   $query = db_query("SELECT id, zone_id FROM {guifi_location}");
-  while ($item = db_fetch_object($query))
+  while ($item = $query->fetchObject())
     $node_zones[$item->id] = $item->zone_id;
 
   // query ALL users, kept in memory users array
   $query = db_query("SELECT * FROM {guifi_users} WHERE status='Approved'");
   $users = array();
-  while ($item = db_fetch_object($query)) {
+  while ($item = $query->fetchObject()) {
     $user = (object)NULL;
     $user->username = $item->username;
     $user->password = $item->password;
@@ -1184,7 +1184,7 @@ function _guifi_users_dump_federated($node,$ldif = FALSE) {
       $head .= "#\n";
       $head .= '#   ' .$node->nid." - ".$node->title."\n";
       $query = db_query("SELECT id,extra FROM {guifi_services} WHERE service_type='Proxy'");
-      while ($item = db_fetch_object($query)) {
+      while ($item = $query->fetchObject()) {
         $extra = unserialize($item->extra);
 	  if (($item->id!=$node->nid) & (is_array($extra[fed]))) {
             $p_node = node_load($item->id);

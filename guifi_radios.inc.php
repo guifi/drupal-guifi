@@ -809,8 +809,8 @@ function _guifi_radio_prepare_add_radio($edit) {
     }
   }
 
-  $node = node_load(array('nid' => $edit['nid']));
-  $zone = node_load(array('nid' => $node->zone_id));
+  $node = node_load($edit['nid']);
+  $zone = node_load($node->zone_id);
   if (($zone->nick == '') or ($zone->nick == NULL)) {
     $zone->nick = guifi_abbreviate($zone->nick);
   }

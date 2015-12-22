@@ -157,7 +157,6 @@ function _guifi_get_supplier_name($node) {
   return $node->title;
 }
 
-
 function guifi_zone_get_coords($zid) {
   guifi_log(GUIFILOG_TRACE,
     'function guifi_zone_get_coords()',

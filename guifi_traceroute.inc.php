@@ -11,7 +11,7 @@ function guifi_live_ping($device_id) {
   if (empty($device_id))
     $output = t('Target device not specified.');
   else {
-    $gs = guifi_service_load(guifi_graphs_get_server($device_id,'device'));
+    $gs = node_load(guifi_graphs_get_server($device_id,'device'));
     $ipd = guifi_main_ip($device_id);
     $ipf = guifi_main_ip($gs->device_id);
   }
@@ -31,7 +31,7 @@ function guifi_live_traceroute($device_id) {
   if (empty($device_id))
     $output = t('Target device not specified.');
   else {
-    $gs = guifi_service_load(guifi_graphs_get_server($device_id,'device'));
+    $gs = node_load(guifi_graphs_get_server($device_id,'device'));
     $ipd = guifi_main_ip($device_id);
     $ipf = guifi_main_ip($gs->device_id);
   }

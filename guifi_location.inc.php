@@ -118,10 +118,13 @@ function guifi_location_load($nodes) {
  foreach ($nodes as $node) {
    $location = db_query("SELECT * FROM {guifi_location} WHERE id = :nid", array(':nid' => $node->nid))->fetchObject();
      foreach ($location as $k => $value) {
-    $nodes[$node->nid]->$k = $value;
+    if ($k != 'body')
+      $nodes[$node->nid]->$k = $value;
 // TODO MIQUEL
-//    $nodes[$node->nid]->$value = guifi_maintainers_load($location->id,'location');
-//    $nodes[$node->nid]->$value = guifi_funders_load($location->id,'location');
+/*
+    $nodes[$node->nid]->$value = guifi_maintainers_load($location->id,'location');
+    $nodes[$node->nid]->$value = guifi_funders_load($location->id,'location');
+*/
     }
   }
 return $nodes;
@@ -208,7 +211,7 @@ function guifi_location_form($node, $form_state) {
    * funders fieldset
    */
   $form_weight=-4;
-  $form['funders'] = guifi_funders_form($node,$form_weight);
+ // $form['funders'] = guifi_funders_form($node,$form_weight);
 
   $form_weight=0;
   $form['nick'] = array(
@@ -466,8 +469,8 @@ function guifi_location_form($node, $form_state) {
     );
   }
   $radios = array();
-  $query = db_query("SELECT * FROM {guifi_radios} WHERE nid = :nid", array(':nid' => $node->id))->fetchAssoc();
-  while ($radio = $query) {
+  $query = db_query("SELECT * FROM {guifi_radios} WHERE nid = :nid", array(':nid' => $node->id));
+  while ($radio = $query->fetchAssoc()) {
     $radios[] = $radio;
   }
 
@@ -695,14 +698,14 @@ function guifi_location_view($node, $view_mode, $langcode = NULL) {
 
   if ($view_mode == 'teaser')
     return $node;
-  if ($view_mode == 'bloc')
+  if ($view_mode == 'block')
     return $node;
 
   drupal_set_breadcrumb(guifi_location_ariadna($node));
   
   $node->content['data'] = array(
     '#type' => 'markup',
-    '#weight' => 2,
+    '#weight' => 1,
     '#markup' => theme('table',
                   array('header' => NULL, 
                         'rows' => array(
@@ -720,24 +723,31 @@ function guifi_location_view($node, $view_mode, $langcode = NULL) {
                   )
   );
 
-  /*
   $node->content['graphs'] = array(
-    '#value'=> theme_guifi_location_graphs_overview($node),
-    '#weight'=> 2);
+    '#type' => 'markup',
+    '#weight' => 2,
+    '#markup' => theme_guifi_location_graphs_overview($node),
+    );
   $node->content['devices'] = array(
-    '#value'=> theme_guifi_location_devices_list($node),
-    '#weight'=> 3);
+    '#type' => 'markup',
+    '#weight' => 3,
+    '#markup' => theme_guifi_location_devices_list($node),
+    );
   $node->content['wdsLinks'] = array(
-    '#value'=> theme_guifi_location_links_by_type($node->id,'wds'),
-    '#weight'=> 4);
+    '#type' => 'markup',
+    '#weight' => 4,
+    '#markup' => theme_guifi_location_links_by_type($node->id,'wds'),
+    );
   $node->content['cableLinks'] = array(
-    '#value'=> theme_guifi_location_links_by_type($node->id,'cable'),
-    '#weight'=> 5);
+    '#type' => 'markup',
+    '#weight' => 5,
+    '#markup' => theme_guifi_location_links_by_type($node->id,'cable'),
+    );
   $node->content['clientLinks'] = array(
-    '#value'=> theme_guifi_location_links_by_type($node->id,'ap/client'),
-    '#weight'=> 6);
-
-*/
+    '#type' => 'markup',
+    '#weight' => 6,
+    '#markup' => theme_guifi_location_links_by_type($node->id,'ap/client'),
+    );
     return $node;
 }
 
@@ -1216,28 +1226,18 @@ function theme_guifi_location_map($node) {
  * guifi_location_graph_overview
  * outputs an overiew graph of the node
 **/
-function theme_guifi_location_graphs_overview($node,$links = FALSE) {
+function theme_guifi_location_graphs_overview($node) {
+  if (empty($node->id))
+    $node = node_load($node);
 
-  $gs = guifi_service_load(guifi_graphs_get_server($node->id,'node'));
+  $gs = node_load(guifi_graphs_get_server($node->id,'node'));
 
   $radios = array();
   $query = db_query("SELECT * FROM {guifi_radios} WHERE nid = :nid", array(':nid' => $node->id));
   while ($radio = $query->fetchAssoc()) {
     $radios[] = $radio;
   }
-
   if (count($radios) > 1) {
-    if (substr($gs->var['url'],0,3)=="fot"){
-      //  graph all devices.about a node. Ferran Ot
-      while ($radio = $query->fetchObject()){
-        $ssid=get_SSID_radio($radio->id);
-        $ssid=strtolower($ssid);
-        $mrtg_url=substr($gs->var['url'],3);
-        $rows[] = array('<a href="'.$mrtg_url.'/14all.cgi?log='.$ssid.'_6&cfg=mrtg.cfg" target="_blank"> <img src="'.$mrtg_url.'/14all.cgi?log='.$ssid.'_6&cfg=mrtg.cfg&png=weekly"></a>');
-        $rows[] = array('<a href="'.$mrtg_url.'/14all.cgi?log='.$ssid.'_ping&cfg=mrtg.cfg" target="_blank"> <img src="'.$mrtg_url.'/14all.cgi?log='.$ssid.'_ping&cfg=mrtg.cfg&png=weekly"></a>');
-      }
-      $ret = array_merge($rows);
-    } else {
       $args = array('type' => 'supernode',
         'node' => $node->id,
       );
@@ -1258,31 +1258,20 @@ function theme_guifi_location_graphs_overview($node,$links = FALSE) {
                  '"></a>',
         'align' => 'center'));
 
-//      $rows[] = array(
-//      guifi_cnml_call_service($gs->var['url'],'graph',$args,'direction=in'sprintf('<a href="'.base_path().'guifi/graph_detail?'.$args.'in"><img src="'.$gs->var['url'].'?'.$args.'in"></a>',$node->id));
-//      $rows[] = array(sprintf('<a href="'.base_path().'guifi/graph_detail?'.$args.'out"><img src="'.$gs->var['url'].'?'.$args.'out"></a>',$node->id));
       $ret = array_merge($rows);
-    }
   } else {
     if (count($radios)==1)
     $ret = guifi_device_graph_overview($radios[0]);
   }
 
-  $output = theme('table', NULL,$ret);
-
-  if ($links) {
-    $node = node_load($node->id);
-    drupal_set_title(t('graph overview @ %node',array('%node' => $node->title)));
-    drupal_set_breadcrumb(guifi_location_ariadna($node));
-    $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
-    print theme('page',$output, FALSE);
-    return;
-  }
+  $output = theme('table', array('header' => NULL, 'rows' => $ret));
 
   return $output;
 }
 
-function theme_guifi_location_devices_list($node,$links = FALSE) {
+function theme_guifi_location_devices_list($node) {
+  if (empty($node->id))
+    $node = node_load($node);
   $id = $node->id;
   $rows = array();
 
@@ -1295,7 +1284,7 @@ function theme_guifi_location_devices_list($node,$links = FALSE) {
     t('unsolclic'));
 
   // Form for adding a new device
-  $form = drupal_get_form('guifi_device_create_form',$node);
+  $form = drupal_render(drupal_get_form('guifi_device_create_form',$node));
 
   $query = db_query("SELECT d.id FROM {guifi_devices} d WHERE nid = :nid", array(':nid' => $id));
   while ($d = $query->fetchObject()) {
@@ -1379,39 +1368,23 @@ function theme_guifi_location_devices_list($node,$links = FALSE) {
   // Creates the table with devices if any, otherwise just outputs the node has not devices
   if (count($rows))
     $output = '<h4>'.t('devices').'</h4>'.
-      theme('table', $header, $rows,
-        array('class' => 'device-data')).
+      theme('table', array('header' => $header, 'rows' => $rows,
+        array('class' => 'device-data'))).
       $form;
   else
-    $output = theme('box',t('This node does not have any device'),$form);
-
-  // Again, it creates a table with the links, if they exist
-  if ($links) {
-    $node = node_load($node->id);
-    drupal_set_title(t('devices @ %node',array('%node' => $node->title)));
-    drupal_set_breadcrumb(guifi_location_ariadna($node));
-    $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
-    print theme('page',$output, FALSE);
-    return;
-  }
+    $output = '<p>'.t('This node does not have any device').'</p>'.$form;
 
   return $output;
 }
 
-function theme_guifi_location_links($node, $links = FALSE) {
+function theme_guifi_location_links($node) {
+  if (empty($node->id))
+    $node = node_load($node);
+
   $output =
     theme_guifi_location_links_by_type($node->id,'wds').
     theme_guifi_location_links_by_type($node->id,'cable').
     theme_guifi_location_links_by_type($node->id,'ap/client');
-
-  if ($links) {
-    $node = node_load($node->id);
-    drupal_set_title(t('links @ %node',array('%node' => $node->title)));
-    drupal_set_breadcrumb(guifi_location_ariadna($node));
-    $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
-    print theme('page',$output, FALSE);
-    return;
-  }
 
   return $output;
 }
@@ -1421,9 +1394,9 @@ function theme_guifi_location_links_by_type($id = 0, $ltype = '%') {
 
   $total = 0;
   if ($ltype == '%')
-    $titlebox = t('links');
+    $titlebox = array(t('links'));
   else
-    $titlebox = t('links').' ('.$ltype.')';
+    $titlebox = array(t('links').' ('.$ltype.')');
 
   $header = array(t('linked nodes (device)'), t('ip'), t('status'), t('kms.'),t('az.'));
 
@@ -1510,19 +1483,16 @@ function theme_guifi_location_links_by_type($id = 0, $ltype = '%') {
   } // while loc1
 
   if (count($rows)) {
-    $output .= theme('table', $header, $rows,array('class' => 'device-data'));
+    $output = theme('table', array('header' => $header, 'rows' => $rows,array('class' => 'device-data')));
     if ($total)
       $output .= t('Total:').'&nbsp;'.$total.'&nbsp;'.t('kms.');
   } else
     if ($ltype == '%')
-      $output .= '<p align="right">'.t('No links defined').'</p>';
+      $output = '<p align="right">'.t('No links defined').'</p>';
     else
       return;
-//      $output .= '<p align="right">'.
-//        t('No %type links defined',
-//          array('%type' => $ltype)).
-//        '</p>';
-  return theme('box',$titlebox,$output);
+
+  return theme('table', array('header' => $titlebox, 'rows' => array(array($output))));
 
 }
 

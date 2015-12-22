@@ -356,7 +356,7 @@ function guifi_device_load_radios($id,&$device) {
           $iparr[$a['id']] = $a;
         }
         asort($ipdec);
-        $zone = node_load(array('nid' => $iparr[0]['zone_id']));
+        $zone = node_load($iparr[0]['zone_id']);
 // TODO MIQUEL
 //        $iparr[0]['ospf_zone'] = guifi_get_ospf_zone($zone);
 
@@ -478,7 +478,7 @@ function guifi_device_access($op, $id) {
   else
     $device = guifi_device_load($id);
 
-  $node = node_load(array('nid' => $device['nid']));
+  $node = node_load($device['nid']);
 
   switch($op) {
     case 'create':
@@ -630,7 +630,7 @@ function guifi_device_form($form_state, $params = array()) {
   }
 
   // Loading node & zone where the device belongs to (some information will be used)
-  $node = node_load(array('nid' => $form_state['values']['nid']));
+  $node = node_load($form_state['values']['nid']);
   $zone = node_load($node->zone_id);
 
   // Setting the breadcrumb
@@ -1581,7 +1581,7 @@ function guifi_device_delete($device, $notify = TRUE, $verbose = TRUE) {
     drupal_goto('node/'.$device['nid']);
   }
 
-  $node = node_load(array('nid' => $device['nid']));
+  $node = node_load($device['nid']);
   drupal_set_breadcrumb(guifi_location_ariadna($node));
 
   $output = drupal_get_form('guifi_device_delete_confirm',
@@ -2179,9 +2179,9 @@ function guifi_device_print_data($device) {
   }
 
   if ($device['graph_server']>0)
-    $gs = node_load(array('nid' => $device['graph_server']));
+    $gs = node_load($device['graph_server']);
   else
-    $gs = node_load(array('nid' => guifi_graphs_get_server($device['id'],'device')));
+    $gs = node_load(guifi_graphs_get_server($device['id'],'device'));
 
   $rows[] = array(t('graphs provided from'),array(
     'data' => l(guifi_service_str($device['graph_server']),
@@ -2359,7 +2359,7 @@ function guifi_device_print($device = NULL) {
 
   $output = '<div id="guifi">';
 
-  $node = node_load(array('nid' => $device[nid]));
+  $node = node_load($device[nid]);
   $title = t('Node:').' <a href="'.url('node/'.$node->nid).'">'.$node->nick.'</a> &middot; '.t('Device:').'&nbsp;'.$device[nick];
 
   drupal_set_breadcrumb(guifi_location_ariadna($node));

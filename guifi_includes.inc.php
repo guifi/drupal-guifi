@@ -181,7 +181,7 @@ function guifi_validate_types($type, $text, $relations = NULL) {
   else {
     $query = db_query("SELECT COUNT(*) AS count FROM {guifi_types} WHERE type='%s' AND text = '%s' AND relations LIKE '%s' ORDER BY id", $type, $text, "%$relations%" );
   }
-  $count = db_fetch_object($query);
+  $count = $query->fetchObject();
 
   return $count->count > 0;
 }
@@ -294,7 +294,7 @@ function _set_value($device,$node,&$var,$id,$rid,$search) {
   if ($device->clients_accepted == 'No')
     $backhaul = '**'.t('backbone').'**';
 
-  $zone = db_fetch_object(db_query('SELECT title FROM {guifi_zone} WHERE id=%d',$device->zone_id));
+  $zone = db_query('SELECT title FROM {guifi_zone} WHERE id = :zid', array(':zid' => $device->zone_id))->fetchObject();
   if ($device->distance) {
     $value= $zone->title.', '.$device->ssid.$backhaul.
       '<a href="http://www.heywhatsthat.com/bin/profile.cgi?axes=1&curvature=0&metric=1' .
@@ -363,10 +363,10 @@ function guifi_devices_select($filters, $action = '') {
         r.radiodev_counter, r.ssid, r.mode, r.antenna_mode,
         r.fund_required, r.fund_amount, r.fund_currency
       FROM {guifi_radios} r,{guifi_location} l, {guifi_zone} z
-      WHERE l.id<>%d
+      WHERE l.id <> :from
         AND r.nid=l.id
         AND l.zone_id=z.id",
-        $filters['from_node']);
+        array(':from' => $filters['from_node']));
   }
 
   $devdist = array();
@@ -374,16 +374,16 @@ function guifi_devices_select($filters, $action = '') {
   $k = 0;
   $devsq = db_query($query);
 
-  while ($device = db_fetch_object($devsq)) {
+  while ($device = $devsq->fetchObject()) {
     $k++;
     $l = FALSE;
     if ($filters['type']!='cable') {
       $oGC = new GeoCalc();
-      $node = db_fetch_object(db_query('
+      $node = db_query('
         SELECT lat, lon
         FROM {guifi_location}
-        WHERE id=%d',
-        $filters['from_node']));
+        WHERE id = :from',
+        array(':from' => $filters['from_node']))->fetchObject();
       $distance = round( $oGC->EllipsoidDistance($device->lat, $device->lon, $node->lat, $node->lon), 3);
       if (($distance > $filters['dmax']) or ($distance < $filters['dmin'])) {
         continue;
@@ -488,7 +488,7 @@ function guifi_devices_select($filters, $action = '') {
 
 function guifi_get_all_interfaces($id,$type = 'radio', $db = TRUE) {
   if (($db) and ($type == 'radio'))
-    $model = db_fetch_array(db_query('SELECT m.interfaces FROM {guifi_radios} r LEFT JOIN {guifi_model_specs} m ON m.mid=r.model_id WHERE r.id=%d',$id));
+    $model = db_query('SELECT m.interfaces FROM {guifi_radios} r LEFT JOIN {guifi_model_specs} m ON m.mid=r.model_id WHERE r.id = :id', array(':id' => $id))->fetchAssoc();
   else
     $model[interfaces] = 'Lan';
   return explode('|',$model[interfaces]);
@@ -497,11 +497,11 @@ function guifi_get_all_interfaces($id,$type = 'radio', $db = TRUE) {
 
 function guifi_get_possible_interfaces($edit = array()) {
   if ($edit['type'] == 'radio')
-    $model = db_fetch_array(db_query('
+    $model = db_query('
       SELECT m.interfaces
       FROM {guifi_model_specs} m
-      WHERE mid=%d',
-    $edit['variable']['model_id']));
+      WHERE mid = :mid',
+    array(':mid' => $edit['variable']['model_id']))->fetchAssoc();
   else
     $model['interfaces'] = 'Lan';
   $possible = explode('|',$model['interfaces']);
@@ -548,7 +548,7 @@ function guifi_get_device_interfaces($id,$iid = NULL) {
 
   $qi = db_query($sql_i);
 
-  while ($i = db_fetch_object($qi)) {
+  while ($i = $qi->fetchObject()) {
     if ( ((empty($i->connto_did)) and (empty($i->connto_iid)) ) or ($i->id == $iid)) {
       $trimmed_itype = trim($i->interface_type);
       if (!empty($trimmed_itype))
@@ -587,7 +587,7 @@ function guifi_get_device_allinterfaces($id) {
       
   $qi = db_query($sql_i);
 
-  while ($i = db_fetch_object($qi)) 
+  while ($i = $qi->fetchObject()) 
     $allinterfaces[$i->id] = $i->interface_type;
 
   return $allinterfaces;
@@ -598,9 +598,9 @@ function guifi_get_firmware($id) {
   $sql= db_query('
       SELECT *
       FROM {guifi_firmware}
-      WHERE id = %d
-       OR nom="%s"', $id, $id);
-  $firmware = db_fetch_object($sql);
+      WHERE id = :id
+       OR nom = :name', array(':id' => $id,':name' => $id));
+  $firmware = $sql->fetchObject();
   guifi_log(GUIFILOG_TRACE,'function guifi_get_firmware(firmware)',$firmware);
   if (!empty($firmware->managed)) {
     $m = explode('|',$firmware->managed);
@@ -622,10 +622,10 @@ function guifi_get_free_interfaces($id,$edit = array()) {
   $qi = db_query('
     SELECT interface_type
     FROM {guifi_interfaces}
-    WHERE device_id=%d',
-    $id);
+    WHERE device_id = :id',
+    array(':id' => $id));
   $used = array();
-  while ($i = db_fetch_object($qi)) {
+  while ($i = $qi->fetchObject()) {
     $used[] = $i->interface_type;
   }
   if ($edit != NULL)
@@ -817,11 +817,11 @@ function _guifi_set_namelocation($location) {
   $prefix = '';
   foreach (array_reverse(guifi_zone_get_parents($location->zone_id)) as $parent) {
     if ($parent > 0) {
-      $result = db_fetch_array(db_query(
+      $result = db_query(
         'SELECT z.id, z.title, z.master ' .
         'FROM {guifi_zone} z ' .
-        'WHERE z.id = %d',
-        $parent));
+        'WHERE z.id = :parent',
+        array(':parent' => $parent))->fetchAssoc();
       if ($result['master']) {
         $prefix .= $result['title'].', ';
       }
@@ -835,16 +835,16 @@ function guifi_services_select($stype) {
   $var = array();
   $found = FALSE;
 
-  $query = db_query(sprintf(
+  $query = db_query(
     'SELECT s.id, n.title nick, z.id zone_id ' .
     'FROM {node} n,{guifi_services} s, {guifi_zone} z ' .
     'WHERE s.id=n.nid ' .
-    '  AND s.service_type="%s" ' .
+    '  AND s.service_type = :stype ' .
     '  AND s.zone_id=z.id ' .
     'ORDER BY z.id, s.id, s.nick',
-    $stype));
+    array(':stype' => $stype));
 
-  while ($service = db_fetch_object($query)) {
+  while ($service = $query-fetchObject()) {
     $var[$service->id] = _guifi_set_namelocation($service,$new_pointer,$found);
   } // eof while query service,zone
 
@@ -998,18 +998,18 @@ function guifi_get_devicename($id, $format = 'nick') {
 
   switch ($format) {
   case 'large':
-    $device = db_fetch_object(db_query(
+    $device = db_query(
       'SELECT
         CONCAT(d.id,"-",d.nick,", ",l.nick,", ",z.title) str
       FROM {guifi_location} l, {guifi_zone} z, {guifi_devices} d
-      WHERE d.id=%d AND l.id=d.nid AND l.zone_id=z.id',$id));
+      WHERE d.id = :id AND l.id=d.nid AND l.zone_id=z.id', array(':id' => $id))->fetchObject();
     break;
   case 'nick':
   default:
-    $device = db_fetch_object(db_query(
+    $device = db_query(
       'SELECT d.nick str
       FROM {guifi_location} l, {guifi_zone} z, {guifi_devices} d
-      WHERE d.id=%d AND l.id=d.nid AND l.zone_id=z.id',$id));
+      WHERE d.id=%d AND l.id=d.nid AND l.zone_id=z.id', array(':id' => $id))->fetchObject();
   }
   return $device->str;
 }
@@ -1219,10 +1219,10 @@ function guifi_ipcalc_get_subnet_by_nid(
     $result = db_query(
         'SELECT n.id, n.base, n.mask ' .
         'FROM {guifi_networks} n ' .
-        'WHERE n.zone = "%s" ' .
-        '  AND network_type="%s" ' .
+        'WHERE n.zone = :zid ' .
+        '  AND network_type = :ntype ' .
         'ORDER BY n.id',
-        $zone->id,$network_type);
+        array(':zid' => $zone->id, ':ntype' => $network_type));
 
     if ($verbose)
       drupal_set_message(t(
@@ -1236,7 +1236,7 @@ function guifi_ipcalc_get_subnet_by_nid(
 
     $tnets = 0;
 
-    while ($net = db_fetch_object($result)) {
+    while ($net = $result->fetchObject()) {
       $tnets++;
       $item = _ipcalc($net->base,$net->mask);
 
@@ -1317,7 +1317,7 @@ function guifi_ipcalc_get_subnet_by_nid(
                                    'WHERE zone NOT IN ('.
                                    implode(',',guifi_zone_get_parents($root_zone)).
                                    ')');
-      while ($nip = db_fetch_array($query)) {
+      while ($nip = $query->fetchAssoc()) {
         $ips_allocated[ip2long($nip['ipv4']) + 1] =
         guifi_ipcalc_get_maskbits($nip['mask']);
       }
@@ -1458,7 +1458,7 @@ function guifi_ipcalc_find_ip($base_ip = '0.0.0.0',
 // EOF ipcalc funtions
 
 function guifi_get_interface($ipv4) {
-  $if = db_fetch_object(db_query("SELECT i.*,a.ipv4, a.netmask FROM {guifi_interfaces} i LEFT JOIN {guifi_ipv4} a ON i.id=a.interface_id WHERE ipv4='%s'",$ipv4));
+  $if = db_query("SELECT i.*,a.ipv4, a.netmask FROM {guifi_interfaces} i LEFT JOIN {guifi_ipv4} a ON i.id=a.interface_id WHERE ipv4 = :ipv4", array(':ipv4' => $ipv4))->fetchObject();
   if (!empty($if))
     return $if;
   else
@@ -1469,7 +1469,7 @@ function guifi_get_existent_interface($device_id, $interface_type) {
   if (preg_match('(wds|vlan|vwan|vwlan)',$interface_type))
     return 0;
 
-  $if = db_fetch_object(db_query("SELECT * FROM {guifi_interfaces} WHERE device_id=%d AND interface_type='%s'",$device_id,$interface_type));
+  $if = db_query("SELECT * FROM {guifi_interfaces} WHERE device_id = :did AND interface_type = :itype", array(':did' => $device_id, ':itype' => $interface_type))->fetchObject();
   if (!empty($if))
     return $if;
   else
@@ -1584,8 +1584,7 @@ function guifi_cnml_call_service($target,$service,$params=array(),$extra=NULL) {
 //    print_r($target);
 //    print "\n<br />Key: ".key($target)."\n";
     if  (in_array(key($target),array('zone','node','device')))
-      $gs = guifi_service_load(
-        guifi_graphs_get_server($target[key($target)],key($target)));
+      $gs = node_load(guifi_graphs_get_server($target[key($target)],key($target)));
   }
 
   if (is_object($target))
@@ -1654,7 +1653,7 @@ function guifi_cnml_args($args,$extra=NULL) {
 function guifi_cnml_availability($args,$gs = NULL) {
 
   if (is_null($gs))
-    $gs = guifi_service_load(guifi_graphs_get_server($args['device'],'device'));
+    $gs = node_load(guifi_graphs_get_server($args['device'],'device'));
 
   $url = guifi_cnml_call_service($gs,'availability',$args);
   if ($url != '') {
@@ -1703,9 +1702,9 @@ function guifi_cnml_tree($zid) {
       z.maxy,z.timestamp_created, z.timestamp_changed,
       r.body
     FROM {guifi_zone} z, {node} n, {node_revisions} r
-    WHERE z.id=n.nid AND n.vid=r.vid
+    WHERE z.id = n.nid AND n.vid = r.vid
     ORDER BY z.title');
-  while ($zone = db_fetch_object($result)) {
+  while ($zone = $result->fetchObject()) {
     $zones[$zone->id] = $zone;
   }
   $result = db_query('
@@ -1713,7 +1712,7 @@ function guifi_cnml_tree($zid) {
     FROM {guifi_location} l, {node} n, {node_revisions} r
     WHERE l.id=n.nid AND n.vid=r.vid
     ORDER BY l.nick');
-  while ($node = db_fetch_object($result)) {
+  while ($node = $result->fetchObject()) {
     $zones[$node->zone_id]->nodes[] = $node;
   }
 
@@ -1778,12 +1777,11 @@ function guifi_count_radio_links($radio) {
       SELECT l1.link_type type,count(*) c
       FROM {guifi_links} l1
         LEFT JOIN {guifi_links} l2 ON l1.id = l2.id
-      WHERE l1.device_id=%d
-        AND l2.device_id != %d
+      WHERE l1.device_id = :radio
+        AND l2.device_id != :radio2
       GROUP BY l1.link_type',
-      $radio,
-      $radio);
-    while ($c = db_fetch_object($qc)) {
+      array(':radio' => $radio, ':radios2' => $radio));
+    while ($c = $qc->fetchObject()) {
       switch ($c->type) {
       case 'ap/client': $ret[ap]++; break;
       case 'wds/p2p': $ret[wds]++; break;
@@ -1806,9 +1804,9 @@ function guifi_count_radio_links($radio) {
 
 function guifi_next_interface($edit = NULL) {
    $next = 0;
-   $int = db_fetch_object(db_query('
+   $int = db_query('
     SELECT max(id)+1 id
-    FROM {guifi_interfaces}'));
+    FROM {guifi_interfaces}')->fetchObject();
    $next=$int->id;
 
    if (isset($edit))

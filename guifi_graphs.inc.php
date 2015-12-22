@@ -18,33 +18,33 @@ function guifi_graph_detail() {
       $query = db_query(
         "SELECT r.id, r.nick, n.title, r.nid, l.zone_id " .
         "FROM {guifi_devices} r, {node} n, {guifi_location} l " .
-        "WHERE r.id=%d " .
+        "WHERE r.id = :did " .
         "  AND n.nid=r.nid " .
         "  AND n.nid = l.id",
-        $device_id);
-      $radio = db_fetch_object($query);
+        array(':did' => $device_id));
+      $radio = $query->fetchObject();
       $zid = $radio->zone_id;
   }
 
   if ($type=='supernode') {
-    $node = node_load(array('nid' => $_GET['node']));
+    $node = node_load($_GET['node']);
     if ($node->graph_server == -1) {
       $rows[] = array(t('This node has the graphs disabled.'));
       return array_merge($rows);
     }
     if (!empty($node->graph_server))
-      $gs = node_load(array('nid' => $node->graph_server));
+      $gs = node_load($node->graph_server);
     else
-      $gs = node_load(array('nid' => guifi_graphs_get_server($node->id,'node')));
+      $gs = node_load(guifi_graphs_get_server($node->id,'node'));
   } else {
     if ($radio->graph_server == -1) {
       $rows[] = array(t('This device has the graphs disabled.'));
       return array_merge($rows);
     }
     if (!empty($radio->graph_server))
-      $gs = node_load(array('nid' => $radio->graph_server));
+      $gs = node_load($radio->graph_server);
     else
-      $gs = node_load(array('nid' => guifi_graphs_get_server($radio->id,'device')));
+      $gs = node_load(guifi_graphs_get_server($radio->id,'device'));
   }
 
   $help = t('Here you have a detailed view of the available information for several periods of time (daily, weekly, monthly and yearly). You can obtain a detailed graph for a given period of time by entering the period in the boxes below.');
@@ -125,8 +125,8 @@ src="'.base_path(). drupal_get_path('module', 'guifi').'/contrib/calendar.gif" a
 
 
 function get_SSID_radio($radio) {
-  $querySSID = db_query("SELECT r.ssid FROM {guifi_radios} r WHERE r.id=%d",$radio);
-  $SSID = db_fetch_object($querySSID);
+  $querySSID = db_query("SELECT r.ssid FROM {guifi_radios} r WHERE r.id = :radio", array(':radio' => $radio));
+  $SSID = $querySSID->fetchObject();
    return $SSID->ssid;
 }
 
@@ -142,13 +142,13 @@ function get_SSID_radio($radio) {
 function guifi_graphs_get_server($id, $type='device') {
 	switch ($type) {
     case 'node':
-      $n = node_load(array('nid' => $id));
+      $n = node_load($id);
       if ($n->graph_server)
         return $n->graph_server;
       else
         return guifi_graphs_get_server($n->zone_id,'zone');
     case 'zone':
-      $z = node_load(array('nid' => $id));
+      $z = node_load($id);
       if ($z->graph_server)
         return $z->graph_server;
       else
@@ -207,9 +207,9 @@ function guifi_device_graph_overview($radio) {
  }
 
  if (empty($radio['graph_server']))
-   $gs = guifi_service_load(guifi_graphs_get_server($radio['id'],'device'));
+   $gs = node_load(guifi_graphs_get_server($radio['id'],'device'));
  else
-   $gs = guifi_service_load($radio['graph_server']);
+   $gs = node_load($radio['graph_server']);
 
  if (substr($server_mrtg,0,3) == "fot")
     {
@@ -223,12 +223,12 @@ function guifi_device_graph_overview($radio) {
     }
  else
     {
-      $clients = db_fetch_object(db_query(
+      $clients = db_query(
         "SELECT count(c.id) count " .
         "FROM {guifi_links} c " .
-        "WHERE c.device_id=%d " .
+        "WHERE c.device_id = :rid " .
         "  AND c.link_type IN ('wds','ap/client','bridge')",
-        $radio['id']));
+        array(':rid' => $radio['id']))->fetchObject();
       $args = array('type' => 'clients',
           'node' => $radio['nid'],
           'device' => $radio['id']);

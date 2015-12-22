@@ -79,7 +79,7 @@ function guifi_ahah_select_server(){
   $qry = db_query('SELECT ' .
                   '  CONCAT(d.id,\'-\',z.nick,\', \',l.nick,\' \',d.nick) str '.
                   'FROM {guifi_devices} d, {guifi_location} l, {guifi_zone} z ' .
-                  'WHERE d.type IN ("server","cam","cloudy") ' .
+                  'WHERE d.type IN (\'server\',\'cam\',\'cloudy\') ' .
                   '  AND d.nid=l.id AND l.zone_id=z.id ' .
                   '  AND (UPPER(CONCAT(d.id,\'-\',z.nick,\', \',l.nick,\' \',d.nick) ' .
                   '  LIKE :string) ' .

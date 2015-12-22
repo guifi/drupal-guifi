@@ -576,7 +576,7 @@ function theme_guifi_service_data($node) {
   $rows[] = array(t('service'),$node->nid .'-' .$node->nick,'<b>' .$node->title .'</b>');
   $rows[] = array(t('type'),$node->service_type,t($type->description));
   if ($node->device_id > 0) {
-    $device = db_query('SELECT nick FROM {guifi_devices} WHERE id = :did', array(':did' => $node->device_id));
+    $device = db_query('SELECT nick FROM {guifi_devices} WHERE id = :did', array(':did' => $node->device_id))->fetchObject();
     $url = url('guifi/device/'.$node->device_id);
     $rows[] = array(t('device & status'),'<a href='.$url.'>'.$device->nick.'</a>',
               array('data' => t($node->status_flag),'class' => $node->status_flag));

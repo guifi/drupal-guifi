@@ -20,10 +20,10 @@ function guifi_cnml($cnmlid,$action = 'help') {
     return;
 
   if ($action == "help") {
-     $zone = db_fetch_object(db_query(
+     $zone = db_query(
        'SELECT title, nick ' .
        'FROM {guifi_zone} ' .
-       'WHERE id = %d',$cnmlid));
+       'WHERE id = :id', array(':id' => $cnmlid))->fetchObject();
      drupal_set_breadcrumb(guifi_zone_ariadna($cnmlid));
 
      $output = '<div id="guifi">';
@@ -43,8 +43,9 @@ function guifi_cnml($cnmlid,$action = 'help') {
 
     $links->count = 0;
     $links->xml = "";
-    $qlinks = db_query("SELECT l2.* FROM {guifi_links} l1 LEFT JOIN {guifi_links} l2 ON l1.id=l2.id WHERE l1.device_id<>l2.device_id AND l1.interface_id=%d AND l1.ipv4_id=%d",$iid,$iipv4_id);
-     while ($l = db_fetch_object($qlinks)) {
+    $qlinks = db_query("SELECT l2.* FROM {guifi_links} l1 LEFT JOIN {guifi_links} l2 ON l1.id=l2.id WHERE l1.device_id<>l2.device_id AND l1.interface_id = :iid AND l1.ipv4_id = :ipv4id", 
+                        array (':iid' => $iid, ':ipv4id' => $iipv4_id));
+     while ($l = $qlinks->fetchObject()) {
       $links->count++;
       $links->xml .= xmlopentag($ident,'link',array(
         'id' => $l->id,
@@ -79,16 +80,16 @@ function guifi_cnml($cnmlid,$action = 'help') {
        'SELECT l.*,r.body body ' .
        'FROM {guifi_location} l, {node} n, {node_revisions} r ' .
        'WHERE l.id=n.nid AND n.vid=r.vid ' .
-       '  AND l.id in (%s)',
-       $cnmlid));
-     while ($node = db_fetch_object($qnode)) {
+       '  AND l.id in (:id)',
+       array(':id' => $cnmlid)));
+     while ($node = $qnode->fetchObject()) {
        $tree[] = $node;
      }
-     $sql_devices = sprintf('SELECT * FROM {guifi_devices} d WHERE nid in (%s)',$cnmlid);
-     $sql_radios = sprintf('SELECT r.* FROM {guifi_radios} r, {guifi_devices} d WHERE d.nid in (%s) AND d.id=r.id ORDER BY r.radiodev_counter ASC',$cnmlid);
-     $sql_interfaces = sprintf('SELECT i.*,a.ipv4,a.id ipv4_id, a.netmask FROM {guifi_devices} d, {guifi_interfaces} i, {guifi_ipv4} a WHERE d.nid in (%s) AND d.id=i.device_id AND i.id=a.interface_id',$cnmlid);
-     $sql_links = sprintf('SELECT l1.id, l1.device_id, l1.interface_id, l1.ipv4_id, l2.device_id linked_device_id, l2.nid linked_node_id, l2.interface_id linked_interface_id, l2.ipv4_id linked_radiodev_counter, l1.link_type, l1.flag status FROM {guifi_links} l1, {guifi_links} l2 WHERE l1.nid in (%s) AND l1.id=l2.id AND l1.device_id != l2.device_id',$cnmlid);
-     $sql_services = sprintf('SELECT s.*, r.body FROM {guifi_devices} d, {guifi_services} s, {node} n, {node_revisions} r WHERE d.nid in (%s) AND d.id=s.device_id AND n.nid=s.id AND n.vid=r.vid',$cnmlid);
+     $sql_devices = sprintf('SELECT * FROM {guifi_devices} d WHERE nid in (:id)', array(':id' => $cnmlid));
+     $sql_radios = sprintf('SELECT r.* FROM {guifi_radios} r, {guifi_devices} d WHERE d.nid in (:id) AND d.id=r.id ORDER BY r.radiodev_counter ASC', array(':id' => $cnmlid));
+     $sql_interfaces = sprintf('SELECT i.*,a.ipv4,a.id ipv4_id, a.netmask FROM {guifi_devices} d, {guifi_interfaces} i, {guifi_ipv4} a WHERE d.nid in (:id) AND d.id=i.device_id AND i.id=a.interface_id', array(':id' => $cnmlid));
+     $sql_links = sprintf('SELECT l1.id, l1.device_id, l1.interface_id, l1.ipv4_id, l2.device_id linked_device_id, l2.nid linked_node_id, l2.interface_id linked_interface_id, l2.ipv4_id linked_radiodev_counter, l1.link_type, l1.flag status FROM {guifi_links} l1, {guifi_links} l2 WHERE l1.nid in (:id) AND l1.id=l2.id AND l1.device_id != l2.device_id', array(':id' => $cnmlid));
+     $sql_services = sprintf('SELECT s.*, r.body FROM {guifi_devices} d, {guifi_services} s, {node} n, {node_revisions} r WHERE d.nid in (:id) AND d.id=s.device_id AND n.nid=s.id AND n.vid=r.vid', array(':id' => $cnmlid));
      break;
    case 'nodecount':
      $CNML=fnodecount($cnmlid);
@@ -132,7 +133,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
   global $devices;
 
   $qdevices = db_query($sql_devices);
-  while ($device = db_fetch_object($qdevices)) {
+  while ($device = $qdevices->fetchObject()) {
       $devices[$device->nid][$device->id] = $device;
   }
 
@@ -140,7 +141,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
   global $radios;
 
   $qradios = db_query($sql_radios);
-  while ($radio = db_fetch_object($qradios)) {
+  while ($radio = $qradios->fetchObject()) {
       $radios[$radio->nid][$radio->id][$radio->radiodev_counter] = $radio;
   }
 
@@ -148,7 +149,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
   global $interfaces;
 
   $qinterfaces = db_query($sql_interfaces);
-  while ($interface = db_fetch_object($qinterfaces)) {
+  while ($interface = $qinterfaces->fetchObject()) {
       $interfaces[$interface->device_id][$interface->radiodev_counter][$interface->interface_id][] = $interface;
   }
 
@@ -156,7 +157,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
   global $links;
 
   $qlinks = db_query($sql_links);
-  while ($link = db_fetch_object($qlinks)) {
+  while ($link = $qlinks->fetchObject()) {
       $links[$link->device_id][$link->interface_id][$link->id] = $link;
   }
 
@@ -164,14 +165,14 @@ function guifi_cnml($cnmlid,$action = 'help') {
   global $services;
 
   $qservices = db_query($sql_services);
-  while ($service = db_fetch_object($qservices)) {
+  while ($service = $qservices->fetchObject()) {
       $services[$service->device_id][$service->id] = $service;
   }
 
   // load radio models in memory for faster execution
   global $models;
   $qmodel = db_query("SELECT mid, fid, model FROM guifi_model_specs ORDER BY mid");
-  while ($model = db_fetch_object($qmodel)) {
+  while ($model = $qmodel->fetchObject()) {
      $models[$model->mid] = $model->model;
   }
 
@@ -314,7 +315,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
                    }
                 }
                 else {
-                  $snmp = db_fetch_object(db_query('SELECT snmp_id FROM guifi_configuracioUnSolclic WHERE id=%d', $device->usc_id));
+                  $snmp = db_query('SELECT snmp_id FROM guifi_configuracioUnSolclic WHERE id = :uid', array(':uid' => $device->usc_id))->fetchObject();
                   list($modeap,$modesta) = explode("|",$snmp->snmp_id);
                   if (empty($modesta))
                     $modesta = $modeap;
@@ -627,7 +628,7 @@ function fnodecount($cnmlid){
     $result=db_query("select COUNT(*) as num, YEAR(FROM_UNIXTIME(timestamp_created)) as ano from {guifi_location} GROUP BY YEAR(FROM_UNIXTIME(timestamp_created)) ");
     $classXML = $CNML->addChild('nodesxyear');
     $nreg=0;
-    while ($record=db_fetch_object($result)){
+    while ($record = $result->fetchObject()){
       $nreg++;
       $reg = $classXML->addChild('rec');
       $reg->addAttribute('year',$record->ano);
@@ -641,7 +642,7 @@ function fnodecount($cnmlid){
     $nreg=0;
     $nyear=0;
     $vyear='';
-    while ($record=db_fetch_object($result)){
+    while ($record = $result->fetchObject()){
       $nreg++;
       if($record->ano!=$vyear){
         $vyear=$record->ano;
@@ -659,7 +660,7 @@ function fnodecount($cnmlid){
     $result=db_query("select COUNT(*) as num, status_flag from {guifi_location} GROUP BY status_flag ");
     $classXML = $CNML->addChild('nodesxstatus');
     $nreg=0;
-    while ($record=db_fetch_object($result)){
+    while ($record = $result->fetchObject()){
       $nreg++;
       $reg = $classXML->addChild('rec');
       $reg->addAttribute('nodes',$record->num);
@@ -671,7 +672,7 @@ function fnodecount($cnmlid){
     $result=db_query("select COUNT(*) as num from {guifi_location} where status_flag='Working'");
     $classXML = $CNML->addChild('totalactivenodes');
     $nreg=0;
-    if ($record=db_fetch_object($result)){
+    if ($record = $result->fetchObject()){
         $nreg++;
         $classXML->addAttribute('nodes',$record->num);
     };
@@ -690,7 +691,7 @@ function fnodecount($cnmlid){
         LEFT JOIN guifi_location n2 ON l2.nid=n2.id
       WHERE l1.nid != l2.nid AND l1.device_id != l2.device_id');
     unset($listed);
-    while ($link = db_fetch_object($qlinks)) {
+    while ($link = $qlinks->fetchObject()) {
       if (!isset($listed[$link->id]) ){
         $listed[$link->id] = $link;
         $d = round($oGC->EllipsoidDistance($link->lat1,$link->lon1,$link->lat2,$link->lon2),1);
@@ -703,8 +704,8 @@ function fnodecount($cnmlid){
           $dTotals[$type]['dTotal'] += $d;
           $dTotals[$type]['count'] ++;
         }else{
-          guifi_log(GUIFILOG_BASIC,sprintf('Probable DISTANCE error between nodes (%d and %d) %d kms.',
-            $link->nid1, $link->nid2, $d));
+          guifi_log(GUIFILOG_BASIC,sprintf('Probable DISTANCE error between nodes (:nid1 and :nid2) :d kms.',
+            array(':nid1' => $link->nid1, ':nid2' => $link->nid2, ':d' => $d)));
         }
       }
     }
@@ -729,7 +730,7 @@ function fnodecount($cnmlid){
 
     $classXML = $CNML->addChild('nodesxzonexyearxstatus');
     $nreg=0;
-    while ($record=db_fetch_object($result)){
+    while ($record = $result->fetchObject()){
       $nreg++;
       $reg = $classXML->addChild('rec');
       $reg->addAttribute('nodes',$record->num);
@@ -748,8 +749,8 @@ function fnodecount($cnmlid){
     $result2=db_query("select COUNT(*) as num from {guifi_location} where timestamp_created>".$tiempomin." and timestamp_created<=".$tiempomax."");
     $classXML = $CNML->addChild('totalnodes');
     $nreg=0;
-    if ($record=db_fetch_object($result)){
-        if ($record2=db_fetch_object($result2)){
+    if ($record = $result->fetchObject()){
+        if ($record2 = $result2->fetchObject()){
             $nreg++;
             $classXML->addAttribute('nodes',$record->num);
             $classXML->addAttribute('nodeslastmin',$record2->num);
@@ -774,7 +775,7 @@ function dump_guifi_ips(){
   // 172.x.x.x
   $result=db_query("SELECT t1.ipv4, t2.device_id, t3.nick FROM guifi_ipv4 AS t1 JOIN guifi_interfaces AS t2 ON t1.interface_id = t2.id JOIN guifi_devices AS t3 ON t2.device_id = t3.id WHERE t1.ipv4 LIKE '172%' ");
   $classXML = $CNML->addChild('subnet');
-	while ($record=db_fetch_object($result)){
+	while ($record = $result->fetchObject()){
 	  $reg = $classXML->addChild('IP');
 	  $reg->addAttribute('address',$record->ipv4);
 	  $reg->addAttribute('device_id',$record->device_id);
@@ -785,7 +786,7 @@ function dump_guifi_ips(){
   // 10.x.x.x
   $result=db_query("SELECT t1.ipv4, t2.device_id, t3.nick FROM guifi_ipv4 AS t1 JOIN guifi_interfaces AS t2 ON t1.interface_id = t2.id JOIN guifi_devices AS t3 ON t2.device_id = t3.id WHERE t1.ipv4 LIKE '10%' ");
   $classXML = $CNML->addChild('subnet');
-	while ($record=db_fetch_object($result)){
+	while ($record = $result->fetchObject()){
 	  $reg = $classXML->addChild('IP');
 	  $reg->addAttribute('address',$record->ipv4);
 	  $reg->addAttribute('device_id',$record->device_id);
@@ -836,8 +837,8 @@ function ospf_net($cnmlid){
       $result=db_query(sprintf("SELECT t1.nick as nnick, t1.zone_id as zid, t2.nick as znick
                FROM guifi_location as t1
                join guifi_zone as t2 on t1.zone_id = t2.id
-               where t1.id = (%s)",$nodes[$n]));
-      if ($record=db_fetch_object($result)){
+               where t1.id = (:id)", array(':id' => $nodes[$n])));
+      if ($record = $result->fetchObject()){
          $nodesid["$nodes[$n]"]=Array("nnick" => $record->nnick,"zid" => $record->zid);
          if (!isset($azones[$record->zid])){
             $azones[$record->zid]=$record->znick;
@@ -851,8 +852,8 @@ function ospf_net($cnmlid){
    if (count($azones)) foreach ($azones as $key => $azone){
       $result=db_query(sprintf("SELECT t1.base as netid, t1.mask as mask
                FROM guifi_networks as t1
-               where t1.zone = (%s)",$key));
-      while ($record=db_fetch_object($result)){
+               where t1.zone = (:zone)", array(':zone' => $key)));
+      while ($record= $result->fetchObject()){
          $a = _ipcalc($record->netid,$record->mask);
          $splitip=explode(".",$a["netid"]);
          $c=$splitip[0]*pow(256,3)+$splitip[1]*pow(256,2)+$splitip[2]*256+$splitip[3];
@@ -866,7 +867,7 @@ function ospf_net($cnmlid){
    ksort($aznets);
    //verifica que les xarxes de zona estiguin als nodes de la zona ospf
    $result=db_query("SELECT ipv4, netmask FROM {guifi_ipv4} where ipv4_type = 1");
-   while ($ip=db_fetch_array($result)){
+   while ($ip = $resul->fetchAssoc()){
       if ( ($ip['ipv4'] != 'dhcp') and (!empty($ip['ipv4'])) )  {
         $ip_dec = ip2long($ip['ipv4']);
         $min = FALSE; $max = FALSE;
@@ -960,10 +961,10 @@ function ospf_net($cnmlid){
 
 function ospf_net_search_links(&$nodes,&$nodesid,$nid){
    $n=0;
-   $resultlinks=db_query(sprintf('SELECT id FROM guifi_links where nid = (%s) and routing="OSPF" and (link_type="cable" or link_type="wds")',$nid));
-   while ($recordlink=db_fetch_object($resultlinks)){
-      $result=db_query(sprintf("SELECT nid, routing, link_type FROM guifi_links where id = (%s) and nid != (%s)",$recordlink->id,$nid));
-      if ($record=db_fetch_object($result)){
+   $resultlinks=db_query(sprintf('SELECT id FROM guifi_links where nid = (:nid) and routing="OSPF" and (link_type="cable" or link_type="wds")', array(':nid' => $nid)));
+   while ($recordlink = $resultlinks->fetchObject()){
+      $result=db_query(sprintf("SELECT nid, routing, link_type FROM guifi_links where id = (:id) and nid != (:nid)", array(':id' => $recordlink->id, ':nid' => $nid)));
+      if ($record = $result->fetchObject()){
          if (!isset($nodesid["$record->nid"]) && $record->routing="OSPF" && ($record->link_type="cable" || $record->link_type="wds")){
             $nodesid["$record->nid"]="";
             $nodes[]=$record->nid;
@@ -980,8 +981,8 @@ function ospf_net_add_node_networks(&$networks,$nid){
                FROM guifi_devices as t1
                join guifi_interfaces as t2 on t1.id = t2.device_id
                join guifi_ipv4 as t3 on t2.id = t3.interface_id
-               where t1.nid = (%s) and t3.ipv4_type=1",$nid));
-   while ($record=db_fetch_object($result)){
+               where t1.nid = (:nid) and t3.ipv4_type=1", array(':nid' => $nid)));
+   while ($record = $result->fetchObject()){
       $a = _ipcalc($record->ipv4,$record->netmask);
       $c=ip2long($a["netid"]);
       if (!isset($networks[$c])){
@@ -1006,15 +1007,15 @@ function dump_guifi_domains($cnmlid, $action){
   foreach ( $scopedef as $key => $scope) {
     $classXML = $CNML->addChild('domains');
     $classXML->addAttribute('network_domains',$action);
-    $qryservice=db_query("SELECT notification FROM {guifi_services} WHERE id = '%s'", $cnmlid);
-    $qrydname=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid = '%s' AND scope ='%s' AND management = 'automatic'", $cnmlid, $scope);
-    $domainname = db_fetch_object($qrydname);
-    $qrymaster=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid = '%s' AND scope ='%s' AND management = 'automatic'", $cnmlid, $scope);
-    $qryslavemas=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid != '%s' AND scope ='%s' AND mname != '%s' AND allow = 'slave'", $cnmlid,$scope,$domainname->name);
-    $qryslavefor=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid != '%s' AND scope ='%s' AND mname != '%s' AND allow = 'forward'", $cnmlid,$scope,$domainname->name);
+    $qryservice = db_query("SELECT notification FROM {guifi_services} WHERE id = :id", array(':id' => $cnmlid));
+    $qrydname = db_query("SELECT * FROM {guifi_dns_domains} WHERE sid = :sid AND scope = :scope AND management = 'automatic'", array(':sid' => $cnmlid, ':scope' => $scope));
+    $domainname = $qrydname->fetchObject();
+    $qrymaster = db_query("SELECT * FROM {guifi_dns_domains} WHERE sid = :sid AND scope = :scope AND management = 'automatic'", array(':sid' => $cnmlid, ':scope' => $scope));
+    $qryslavemas = db_query("SELECT * FROM {guifi_dns_domains} WHERE sid != :sid AND scope = :scope AND mname != :mname AND allow = 'slave'", array(':sid' => $cnmlid, ':scope' => $scope, ':mname' => $domainname->name));
+    $qryslavefor = db_query("SELECT * FROM {guifi_dns_domains} WHERE sid != :sid AND scope = :scope AND mname != :mname AND allow = 'forward'", array(':sid' => $cnmlid, ':scope' => $scope, ':mname' => $domainname->name));
     $scopex = $classXML->addChild($scope);
-    $notification= db_fetch_object($qryservice);
-    while ($record = db_fetch_object($qrymaster)){
+    $notification = $qryservice->fetchObject();
+    while ($record = $qrymaster->fetchObject()){
       $domain = $scopex->addChild('master');
       $domain->addAttribute('zone',$record->name);
       $domain->addAttribute('IPv4',$record->ipv4);
@@ -1031,17 +1032,17 @@ function dump_guifi_domains($cnmlid, $action){
       $domain->addAttribute('contact',$notification->notification);
       $domain->addAttribute('domain_id',$record->id);
       $domain->addAttribute('service_id',$record->sid);
-      $qrydelegation=db_query("SELECT * FROM {guifi_dns_domains} WHERE mname = '%s' AND scope = '%s'", $record->name,$scope);
-      while ($delegation = db_fetch_object($qrydelegation)) {
-        $qrydomd=db_query("SELECT * FROM {guifi_dns_hosts} WHERE id = '%d'",$delegation->id);
-        $hostd = db_fetch_object($qrydomd);
+      $qrydelegation=db_query("SELECT * FROM {guifi_dns_domains} WHERE mname = :mname AND scope = :scope", array(':mname' => $record->name, ':scope' => $scope));
+      while ($delegation = $qrydelegation->fetchObject()) {
+        $qrydomd = db_query("SELECT * FROM {guifi_dns_hosts} WHERE id = '%d'",$delegation->id);
+        $hostd = $qrydom->fetchObject();
         $host = $domain->addChild('delegation');
         $host->addAttribute('name',strtolower($delegation->name));
         $host->addAttribute('IPv4',$hostd->ipv4);
         $host->addAttribute('NS',strtolower($hostd->host).'.'.$delegation->name);
       }
-      $qryhost=db_query("SELECT * FROM {guifi_dns_hosts} WHERE id = '%d' ORDER BY counter",$record->id);
-       while( $host = db_fetch_object($qryhost)) {
+      $qryhost = db_query("SELECT * FROM {guifi_dns_hosts} WHERE id = :id ORDER BY counter", array(':id' => $record->id));
+       while( $host = $qryhost->fetchObject()) {
         $hostname = $domain->addChild('host');
         $hostname->addAttribute('name',strtolower($host->host));
         $hostname->addAttribute('IPv4',$host->ipv4);
@@ -1060,12 +1061,12 @@ function dump_guifi_domains($cnmlid, $action){
         }
       }
     }
-    while ($record=db_fetch_object($qryslavemas)){
+    while ($record = $qryslavemas->fetchObject()){
       $domain = $scopex->addChild('slave');
       $domain->addAttribute('zone',$record->name);
       $domain->addAttribute('master',$record->ipv4);
     }
-    while ($record=db_fetch_object($qryslavefor)){
+    while ($record = $qryslavefor->fetchObject()){
       $domain = $scopex->addChild('forward');
       $domain->addAttribute('zone',$record->name);
       $domain->addAttribute('forwarder',$record->ipv4);
@@ -1086,7 +1087,7 @@ function plot_guifi(){
     $mes=5;
     $items=2004;
     $label="";
-    while ($record=db_fetch_object($result)){
+    while ($record = $result->fetchObject()){
       if($record->ano>=2004){
         if($mes==12){
             $mes=1;
@@ -1202,9 +1203,9 @@ function growth_map($plat1,$plon1,$plat2,$plon2){
             FROM guifi_location as t3
             inner join guifi_devices as t1 on t1.nid = t3.id
             left join guifi_links as t2 on t1.id = t2.device_id
-            where t1.type='radio' and t1.flag='Working' and t3.lat between (%s) and (%s) and t3.lon between (%s) and (%s)
-            order by t2.id;",$plat1,$plat2,$plon1,$plon2));
-   while ($record=db_fetch_object($result)){
+            where t1.type='radio' and t1.flag='Working' and t3.lat between (:plat1) and (:plat2) and t3.lon between (:plon1) and (:plon2)
+            order by t2.id;", array(' :plat1' => $plat1, ':plat2' => $plat2, ':plon1' => $plon1, ':plon2' => $plon2)));
+   while ($record = $result->fetchObject()){
       if($record->link_type=="wds"){
          $v=2;
       }elseif ($record->link_type=="ap/client"){
@@ -1286,7 +1287,7 @@ function guifi_cnml_home($cnmlid){
     $btime = microtime(TRUE);
     $result=db_query("select COUNT(*) as num from {guifi_location} where status_flag='Working'");
     $classXML = $CNML->addChild('total_working_nodes');
-    if ($record=db_fetch_object($result)){
+    if ($record = $result->fetchObject()){
         $classXML->addAttribute('nodes',number_format($record->num,0,',','.'));
     };
 
@@ -1304,7 +1305,7 @@ function guifi_cnml_home($cnmlid){
       LEFT JOIN guifi_location n2 ON l2.nid=n2.id
     WHERE l1.nid != l2.nid AND l1.device_id != l2.device_id');
     unset($listed);
-    while ($link = db_fetch_object($qlinks)) {
+    while ($link = $qlinks->fetchObject()) {
       if (!isset($listed[$link->id]) )
         $listed[$link->id] = $link;
       else
@@ -1338,14 +1339,14 @@ function guifi_cnml_home($cnmlid){
       and timestamp_created>".$tiempomin." and timestamp_created<=".$tiempomax;
     $result=db_query($qnodes);
     $classXML = $CNML->addChild('nodes_last_week');
-    if ($record=db_fetch_object($result)){
+    if ($record = $result->fetchObject()){
       $classXML->addAttribute('total_nodes',number_format($record->num,0,',','.'));
     }
     $qnodes="select COUNT(*) as num from {guifi_location}
       where status_flag='Working'
       and timestamp_created>".$tiempomin." and timestamp_created<=".$tiempomax;
     $result=db_query($qnodes);
-    if ($record=db_fetch_object($result)){
+    if ($record = $result->fetchObject()){
       $classXML->addAttribute('working_nodes',number_format($record->num,0,',','.'));
     }
     $etime = microtime(TRUE);
@@ -1361,7 +1362,7 @@ function guifi_cnml_home($cnmlid){
     $classXML = $CNML->addChild('working_services');
     $num_type_services=0;
     $total_services=0;
-    while ($record=db_fetch_object($result)){
+    while ($record = $result->fetchObject()){
       $num_type_services++;
       $total_services += $record->num;
       $classXML2 = $classXML->addChild('service');
@@ -1381,8 +1382,8 @@ function guifi_cnml_home($cnmlid){
         "FROM {budgets} b " .
         "WHERE b.budget_status = 'Open' and b.zone_id = 3671 and b.expires >= " . $today[0] . " " .
         "ORDER BY b.id DESC");
-      while ($budget = db_fetch_object($qbudgets)) {
-        $b = node_load(array('nid' => $budget->id));
+      while ($budget = $qbudgets->fetchObject()) {
+        $b = node_load($budget->id);
         $classXML2 = $classXML->addChild('budget');
         $classXML2->addAttribute("id",$budget->id);
         $classXML2->addAttribute("title",$b->title);

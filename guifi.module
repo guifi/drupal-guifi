@@ -11,24 +11,24 @@ include_once 'guifi_devices.inc.php';   // device management
 include_once 'guifi_maintainers.inc.php'; // maintainers
 include_once 'guifi_funders.inc.php';   // funders
 include_once 'guifi_ipv4.inc.php';      // ipv4 network management
-//include_once 'guifi_radios.inc.php';    // radios management
+include_once 'guifi_radios.inc.php';    // radios management
 //include_once 'guifi_switch.inc.php';    // switch management
-//include_once 'guifi_interfaces.inc.php';// interfaces management
-//include_once 'guifi_links.inc.php';     // links management
+include_once 'guifi_interfaces.inc.php';// interfaces management
+include_once 'guifi_links.inc.php';     // links management
 include_once 'guifi_users.inc.php';     // user management
 include_once 'guifi_graphs.inc.php';    // graphs management
 //include_once 'guifi_unsolclic.inc.php'; // unsolclic generator
 include_once 'guifi_domains.inc.php';   // Domain name server management
 include_once 'guifi_hosts.inc.php';     // Host name server management
 // include_once 'guifi_nodexchange.inc.php';// nodeXchange (XML) generator
-//include_once 'guifi_cnml.inc.php';      // CNML (XML) generator
+include_once 'guifi_cnml.inc.php';      // CNML (XML) generator
 //include_once 'guifi_gml.inc.php';       // gml (geographic XML export) generator
 //include_once 'guifi_maps.inc.php';      // maps management
   // misc. routines
 include_once 'guifi_networkutils.inc.php';  // network calc routines
 include_once 'guifi_sql.inc.php';       // database changes
 include_once 'guifi_ahah.inc.php';      // AHAH functions
-//include_once 'GeoCalc.class.php';       // geographic routines
+include_once 'GeoCalc.class.php';       // geographic routines
 //include_once 'guifi_spatial.inc.php';   // spatial searches
 
 //include_once 'guifi_api.inc.php';       // Guifi public API includes
@@ -2090,7 +2090,7 @@ function guifi_cron() {
   $last_stats = variable_get('guifi_loadstats_last', array());
   $qry = db_query('SELECT id FROM {guifi_services} WHERE service_type="SNPgraphs"');
   while ($graph_server = db_fetch_object($qry)) {
-    $gs = guifi_service_load($graph_server->id);
+    $gs = node_load($graph_server->id);
     if ($gs->var['version'] >= 2.0) {
       if (is_null($last_stats[$graph_server->id]))
         $last_stats[$graph_server->id] = 0;
