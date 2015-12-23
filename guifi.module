@@ -12,12 +12,12 @@ include_once 'guifi_maintainers.inc.php'; // maintainers
 include_once 'guifi_funders.inc.php';   // funders
 include_once 'guifi_ipv4.inc.php';      // ipv4 network management
 include_once 'guifi_radios.inc.php';    // radios management
-//include_once 'guifi_switch.inc.php';    // switch management
+include_once 'guifi_switch.inc.php';    // switch management
 include_once 'guifi_interfaces.inc.php';// interfaces management
 include_once 'guifi_links.inc.php';     // links management
 include_once 'guifi_users.inc.php';     // user management
 include_once 'guifi_graphs.inc.php';    // graphs management
-//include_once 'guifi_unsolclic.inc.php'; // unsolclic generator
+include_once 'guifi_unsolclic.inc.php'; // unsolclic generator
 include_once 'guifi_domains.inc.php';   // Domain name server management
 include_once 'guifi_hosts.inc.php';     // Host name server management
 // include_once 'guifi_nodexchange.inc.php';// nodeXchange (XML) generator
@@ -1332,8 +1332,8 @@ function guifi_search_result($node = FALSE) {
         l(guifi_img_icon('globe.png'), 'node/'. $node->zone_id .'/view/map',
         array('html' => TRUE,
           'attributes' => array('title' => t('View map for %zone', array('%zone' => guifi_get_zone_name($node->zone_id))))));
-      $qry = db_query('SELECT s.service_type, s.id, s.nick FROM {guifi_services} s, {guifi_devices} d WHERE d.nid=%d AND s.device_id=d.id', $node->nid);
-      while ($s = db_fetch_object($qry)) {
+      $qry = db_query('SELECT s.service_type, s.id, s.nick FROM {guifi_services} s, {guifi_devices} d WHERE d.nid :nid AND s.device_id=d.id', array(':nid' => $node->nid));
+      while ($s = $qry->fetchObject()) {
         $sextra[] = l(strtoupper($s->service_type), 'node/'. $s->id .'/view', array('attributes' => array('title' => $s->nick)));
       }
       if (count($sextra))
@@ -1348,8 +1348,8 @@ function guifi_search_result($node = FALSE) {
       $extra = l(guifi_img_icon('globe.png'), 'node/'. $node->nid .'/view/map',
         array('html' => TRUE,
           'attributes' => array('title' => t('View map of %zone', array('%zone' => $node->title)))));
-      $qry = db_query('SELECT s.service_type, s.id FROM {guifi_services} s WHERE s.zone_id=%d', $node->zone_id);
-      while ($s = db_fetch_object($qry)) {
+      $qry = db_query('SELECT s.service_type, s.id FROM {guifi_services} s WHERE s.zone_id = :zid', array(':zid' => $node->zone_id));
+      while ($s = $qry->fetchObject()) {
         $sextra[] = l(strtoupper($s->service_type), 'node/'. $s->id .'/view', array('attributes' => array('title' => $s->nick)));
       }
       if (count($sextra))
@@ -1376,8 +1376,8 @@ function guifi_update_index($node = FALSE) {
 
   $index = '<h1>'. $node->nid .'</h1><h1>'. $node->nick .'</h1><h3>'. $node->title .'</h3>';
   if ($node->type == 'guifi_location') {
-    $qry = db_query('SELECT * FROM {guifi_users} WHERE nid=%d', $node->nid);
-    while ($u = db_fetch_object($qry))
+    $qry = db_query('SELECT * FROM {guifi_users} WHERE nid = :nid', array(':nid' => $node->nid));
+    while ($u = $qry->fetchObject())
       $index .= '<h2>'. $u->username .'</h2>'.
         '<h2>'. $u->firstname .'</h2>'.
         '<h2>'. $u->lastname .'</h2>';
@@ -1708,7 +1708,7 @@ function guifi_counters_block() {
   $str = '';
   $rows = array();
   $totals = 0;
-  while ($summary = db_fetch_object($tnodes)) {
+  while ($summary = $tnodes->fetchObject()) {
     $rows[] = array(
       t($summary->status_flag),
       array(
@@ -1754,7 +1754,7 @@ function guifi_counters_block() {
     LEFT JOIN guifi_location n2 ON l2.nid=n2.id
   WHERE l1.nid != l2.nid AND l1.device_id != l2.device_id');
   unset($listed);
-  while ($link = db_fetch_object($qlinks)) {
+  while ($link = $qlinks->fetchObject()) {
     if (!isset($listed[$link->id]) )
       $listed[$link->id] = $link;
     else
@@ -1848,7 +1848,7 @@ function guifi_display_block_1() {
     $str = '';
     $rows = array();
     $totals = 0;
-    while ($summary = db_fetch_object($tnodes)) {
+    while ($summary = $tnodes->fetchObject()) {
       $rows[] = array(
         t($summary->status_flag),
         array(
@@ -1890,7 +1890,7 @@ function guifi_display_block_1() {
         LEFT JOIN guifi_location n2 ON l2.nid=n2.id
       WHERE l1.nid != l2.nid AND l1.device_id != l2.device_id');
     unset($listed);
-    while ($link = db_fetch_object($qlinks)) {
+    while ($link = $qlinks->fetchObject()) {
       if (!isset($listed[$link->id]) )
         $listed[$link->id] = $link;
       else
@@ -2088,8 +2088,8 @@ function guifi_cron() {
 
   // Check for loading statistics
   $last_stats = variable_get('guifi_loadstats_last', array());
-  $qry = db_query('SELECT id FROM {guifi_services} WHERE service_type="SNPgraphs"');
-  while ($graph_server = db_fetch_object($qry)) {
+  $qry = db_query('SELECT id FROM {guifi_services} WHERE service_type = \'SNPgraphs\'');
+  while ($graph_server = $qry->fetchObject()) {
     $gs = node_load($graph_server->id);
     if ($gs->var['version'] >= 2.0) {
       if (is_null($last_stats[$graph_server->id]))
@@ -2118,7 +2118,7 @@ function guifi_overlap_check ( $verbose = FALSE) {
   $array = array();
   $query = db_query("SELECT ipv4, netmask FROM guifi_ipv4 WHERE ipv4_type = '2' ORDER BY ipv4 ASC");
 
-  while ( $ipv4 = db_fetch_array($query) ) {
+  while ( $ipv4 = $query->fetchAssoc()) {
     $net = _ipcalc($ipv4['ipv4'],$ipv4['netmask']);
     $array[] = array($net['netid'],$net['netmask']);
   }
@@ -2172,7 +2172,7 @@ function guifi_purge($verbose = FALSE) {
                   LEFT JOIN {guifi_location} n ON d.nid=n.id
                 WHERE n.id IS NULL');
   $ndel = 0;
-  while ($r = db_fetch_object($q) ) {
+  while ($r = $q->fetchObject()) {
     $to_mail = '';
 
     $log = _guifi_db_delete('guifi_devices',
@@ -2200,7 +2200,7 @@ function guifi_purge($verbose = FALSE) {
 
   $q = db_query('SELECT r.id FROM {guifi_radios} r  LEFT JOIN {guifi_devices} d ON r.id=d.id WHERE d.id IS NULL;');
   $rdel = 0;
-  while ($r = db_fetch_object($q) ) {
+  while ($r = $q->fetchObject() ) {
 _guifi_db_delete('guifi_devices', array('id' => $r->id));
     $subject = t('The Radio id: %id has been DELETED by purge process because was orphan of device.',
       array('%id' => $r->id));
@@ -2220,7 +2220,7 @@ _guifi_db_delete('guifi_devices', array('id' => $r->id));
   // deleting orphan interfaces
   $q = db_query('SELECT i.id FROM {guifi_interfaces} i LEFT JOIN {guifi_devices} d ON i.device_id=d.id WHERE d.id IS NULL;');
   $idel = 0;
-  while ($r = db_fetch_object($q) ) {
+  while ($r = $q->fetchObject() ) {
 _guifi_db_delete('guifi_interfaces', array('id' => $r->id));
     $subject = t('The Interface id: %id has been DELETED by purge process because was orphan of device/radio.',
       array('%id' => $r->id));
@@ -2240,7 +2240,7 @@ _guifi_db_delete('guifi_interfaces', array('id' => $r->id));
   // deleting orphan ip addresses
   $q = db_query('SELECT a.id, a.interface_id FROM {guifi_ipv4} a LEFT JOIN {guifi_interfaces} i ON a.interface_id=i.id WHERE i.id IS NULL;');
   $ipdel = 0;
-  while ($r = db_fetch_object($q) ) {
+  while ($r = $q->fetchObject() ) {
 _guifi_db_delete('guifi_ipv4', array('id' => $r->id, 'interface_id' => $r->interface_id));
     $subject = t('The IPV4 address: %address has been DELETED by purge process because was orphan of device/radio.',
       array('%address' => $r->ipv4));
@@ -2263,7 +2263,7 @@ LEFT JOIN {guifi_devices} d ON l.device_id = d.id
 LEFT JOIN {guifi_devices} d2 ON l2.device_id = d2.id
 WHERE l.device_id != l2.device_id AND (d.id IS NULL OR d2.id IS NULL);');
   $lpdel = 0;
-  while ($r = db_fetch_object($q) ) {
+  while ($r = $q->fetchObject() ) {
 _guifi_db_delete('guifi_links', array('id' => $r->id, 'device_id' => $r->device_id));
     $subject = t('The UNPAIRED link id: %link has been DELETED by purge process because was orphan of device id %device.',
       array('%link' => $r->id, '%device' => $r->device_id));
@@ -2281,7 +2281,7 @@ _guifi_db_delete('guifi_links', array('id' => $r->id, 'device_id' => $r->device_
   // deleting orphan links
   $q = db_query('SELECT l.id, l.device_id FROM {guifi_links} l LEFT JOIN {guifi_devices} d ON l.device_id=d.id WHERE d.id IS NULL;');
   $ldel = 0;
-  while ($r = db_fetch_object($q) ) {
+  while ($r = $q->fetchObject() ) {
 _guifi_db_delete('guifi_links', array('id' => $r->id, 'device_id' => $r->device_id));
     $subject = t('The link id: %link has been DELETED by purge process because was orphan of device id %device.',
       array('%link' => $r->id, '%device' => $r->device_id));
@@ -2304,7 +2304,7 @@ _guifi_db_delete('guifi_links', array('id' => $r->id, 'device_id' => $r->device_
                   LEFT JOIN {guifi_location} n ON u.nid=n.id
                 WHERE n.id IS NULL');
   $udel = 0;
-  while ($r = db_fetch_object($q) ) {
+  while ($r = $q->fetchObject() ) {
     $to_mail = '';
     $log = _guifi_db_delete('guifi_users',
         array('id' => $r->id),
@@ -2346,7 +2346,7 @@ function guifi_update_devices_fromExtraInfo ( $verbose = FALSE) {
   $to_mail = $user->mail;
   $log ='';
 
-  while ( $device = db_fetch_object($query) ) {
+  while ( $device = $query->fetchObject() ) {
 
     $extraInfo = unserialize($device->extra);
     // comprovem que el nom que tinc a extra correspon amb un id de la taula de firms
@@ -2380,7 +2380,7 @@ function guifi_get_AllfirmwaresByName($firmwareName=null) {
   $query = db_query('select id, nom from guifi_firmware order by id asc');
 
   $firms_tots = null;
-  while ($firmware = db_fetch_array($query)) {
+  while ($firmware = $query->fetchAssoc()) {
     // si no em demanen un concret
     if (!$firmwareName) {
       $firms_tots[$firmware['nom']] = $firmware['id'];
@@ -2543,7 +2543,7 @@ function guifi_check_unsolclics( $verbose = FALSE) {
                         inner join guifi_firmware f on f.id = usc.fid
                     where usc.enabled = 1
                     order by usc.id asc ");
-    while ($configuracio = db_fetch_object($sql)) {
+    while ($configuracio = $sql->fetchObject()) {
       $unsolclics[$configuracio->id]['mid'] = $configuracio->mid;
       $unsolclics[$configuracio->id]['fid'] = $configuracio->fid;
       $unsolclics[$configuracio->id]['model'] = $configuracio->model;
@@ -2570,9 +2570,9 @@ function guifi_check_unsolclics( $verbose = FALSE) {
                            inner join guifi_devices d on d.mid = usc.mid and d.fid = usc.fid and d.flag = 'Working'
                            inner join guifi_model_specs mo on mo.mid = usc.mid
                            inner join guifi_manufacturer mf on mf.fid = mo.fid
-                      where usc.id = %d", $confkey); //
+                      where usc.id = :uid", array(':uid' => $confkey)); //
 
-      while ($configuracio = db_fetch_object($sql)) {
+      while ($configuracio = $sql->fetchObject()) {
         if ($partialdevices >= $maxdevices)  break;
 
         if ($configuracio->name=='Ubiquiti') $trustedURL = $trustedSite . '/files/nanostation/'. $configuracio->nick .'.cfg';
@@ -2694,12 +2694,12 @@ function guifi_menu_block_page() {
 function guifi_menu_block($item) {
   $content = array();
   if (!isset($item['mlid'])) {
-    $item += db_fetch_array(db_query(
+    $item += db_query(
       "SELECT mlid, menu_name " .
       "FROM {menu_links} ml " .
-      "WHERE ml.router_path = '%s' " .
+      "WHERE ml.router_path = :path " .
       " AND module = 'system'",
-      $item['path']));
+      array(':path' => $item['path']))->fetchAssoc();
   }
   $result = db_query("
     SELECT m.load_functions, m.to_arg_functions, m.access_callback
@@ -2707,9 +2707,9 @@ function guifi_menu_block($item) {
       m.title_callback, m.title_arguments, m.type, m.description, ml.*
     FROM {menu_links} ml
     LEFT JOIN {menu_router} m ON ml.router_path = m.path
-    WHERE ml.plid = %d AND ml.menu_name = '%s' AND hidden = 0",
-    $item['mlid'], $item['menu_name']);
-  while ($item = db_fetch_array($result)) {
+    WHERE ml.plid = :mlid AND ml.menu_name = :mname AND hidden = 0",
+    array(':mlid' => $item['mlid'], ':mname' => $item['menu_name']));
+  while ($item = $result->fetchAssoc()) {
     _menu_link_translate($item);
     if (!$item['access']) {
       continue;

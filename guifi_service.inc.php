@@ -709,12 +709,11 @@ function guifi_list_services_query($param, $typestr = 'by zone', $service = '%')
  */
 function theme_guifi_services_list($node, $service = '%') {
 
-  if (empty($node->id))
-    $node = node_load($node);
-
   if (is_numeric($node)) {
     $typestr = t('by device');
   } else {
+    if (empty($node->id))
+    $node = node_load($node);
     if ($node->type == 'guifi_location')
       $typestr = t('by node');
     else
@@ -747,9 +746,8 @@ function theme_guifi_services_list($node, $service = '%') {
       break;
     case t('by device'):
       $device = guifi_device_load($node);
-      drupal_set_title(t('View device %dname',
-        array('%dname' => $device['nick'],
-              '%nid' => $device['nid'])));
+      drupal_set_title(t('View device @dname',
+        array('@dname' => $device['nick'])));
       $node = node_load($device['nid']);
       drupal_set_breadcrumb(guifi_location_ariadna($node));
       $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
@@ -757,7 +755,7 @@ function theme_guifi_services_list($node, $service = '%') {
   }
 
   $output .= '<div>' . $table . '</div>';
-  return $output;
+ return $output;
 }
 /**
  * outputs the node information

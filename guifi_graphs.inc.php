@@ -211,18 +211,6 @@ function guifi_device_graph_overview($radio) {
  else
    $gs = node_load($radio['graph_server']);
 
- if (substr($server_mrtg,0,3) == "fot")
-    {
-    $ssid=get_SSID_radio($radio['id']);
-    $ssid=strtolower($ssid);
-    $mrtg_url=substr($server_mrtg,3);
-    $rows[] = array('<a href="'.$mrtg_url.'/14all.cgi?log='.$ssid.'_6&cfg=mrtg.cfg" target="_blank" > <img src="'.$mrtg_url.'/14all.cgi?log='.$ssid.'_6&cfg=mrtg.cfg&png=weekly"></a>');
-    $rows[] = array('<a href="'.$mrtg_url.'/14all.cgi?log='.$ssid.'_ping&cfg=mrtg.cfg" target="_blank" > <img src="'.$mrtg_url.'/14all.cgi?log='.$ssid.'_ping&cfg=mrtg.cfg&png=weekly"></a>');
-
-    return array_merge($rows);
-    }
- else
-    {
       $clients = db_query(
         "SELECT count(c.id) count " .
         "FROM {guifi_links} c " .
@@ -269,7 +257,6 @@ function guifi_device_graph_overview($radio) {
                    '"></a>',
         'align' => 'center'));
       return array_merge($rows);
-    }
 }
 
 /**

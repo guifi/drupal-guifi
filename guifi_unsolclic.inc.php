@@ -338,7 +338,8 @@ function _out($value = '', $end = '') {
 }
 
 function guifi_unsolclic_if($id, $itype) {
-  return db_fetch_object(db_query("SELECT i.id, a.ipv4, a.netmask FROM {guifi_interfaces} i LEFT JOIN {guifi_ipv4} a ON i.id=a.interface_id AND a.id=0 WHERE device_id = %d AND interface_type = '%s' LIMIT 1",$id,$itype));
+  return db_query("SELECT i.id, a.ipv4, a.netmask FROM {guifi_interfaces} i LEFT JOIN {guifi_ipv4} a ON i.id=a.interface_id AND a.id=0 WHERE device_id = :id AND interface_type = :itype LIMIT 1",
+                  array(':id' => $id, ':itype' => $itype))->fetchObject();
 }
 
 function guifi_get_dns($zone,$max = 3) {
@@ -347,7 +348,7 @@ function guifi_get_dns($zone,$max = 3) {
   if (!empty($zone->dns_servers))
     $dns = explode(",",$zone->dns_servers);
   while (count($dns) < $max) {
-    $zone = db_fetch_object(db_query("SELECT dns_servers, master FROM {guifi_zone} WHERE id=%d",$zone->master));
+    $zone = db_query("SELECT dns_servers, master FROM {guifi_zone} WHERE id = :master", array(':master' => $zone->master))->fetchObject();
     if (!empty($zone->dns_servers))
       $dns = array_merge($dns,explode(",",$zone->dns_servers));
     if ($zone->master == 0) {
@@ -366,7 +367,7 @@ function guifi_get_ospf_zone($zone) {
   if (!empty($zone->ospf_zone))
     return $zone->ospf_zone;
   do {
-    $zone = db_fetch_object(db_query("SELECT dns_servers, master FROM {guifi_zone} WHERE id=%d",$zone->master));
+    $zone = db_query("SELECT dns_servers, master FROM {guifi_zone} WHERE id = :master", array(':master' => $zone->master))->fetchObject();
     if (!empty($zone->ospf_zone))
       return $zone->ospf_zone;
   } while ($zone->master > 0);
@@ -379,7 +380,7 @@ function guifi_get_ntp($zone,$max = 3) {
   if (!empty($zone->ntp_servers))
     $ntp = explode(",",$zone->ntp_servers);
   while (count($ntp) < $max) {
-    $zone = db_fetch_object(db_query("SELECT ntp_servers, master FROM {guifi_zone} WHERE id=%d",$zone->master));
+    $zone = db_query("SELECT ntp_servers, master FROM {guifi_zone} WHERE id = :master", array(':master' => $zone->master))->fetchObject();
     if (!empty($zone->ntp_servers))
       $ntp = array_merge($ntp,explode(",",$zone->ntp_servers));
     if ($zone->master == 0) {
@@ -394,7 +395,7 @@ function guifi_get_ntp($zone,$max = 3) {
 
 function guifi_get_model($mid) {
 
-    $modelInfo = db_fetch_array(db_query("select * from {guifi_model_specs} where mid=%d limit 1",$mid));
+    $modelInfo = db_query("select * from {guifi_model_specs} where mid = :mid limit 1", array(':mid' => $mid))->fetchAssoc();
     if (!empty($modelInfo)){
       //var_dump($modelInfo);
     }
@@ -403,7 +404,7 @@ function guifi_get_model($mid) {
 
 function guifi_get_caractmodel($mid) {
 
-  $caractModelInfo = db_fetch_array(db_query("select * from {guifi_caracteristiquesModel} where mid=%d limit 1",$mid));
+  $caractModelInfo = db_query("select * from {guifi_caracteristiquesModel} where mid = :mid limit 1", array(':mid' => $mid))->fetchAssoc();
   if (!empty($caractModelInfo)){
     //var_dump(caractModelInfo);
   }
@@ -412,7 +413,7 @@ function guifi_get_caractmodel($mid) {
 
 function guifi_get_paramsFirmware($fid) {
 
-  $paramsFirmwareInfo = db_fetch_array(db_query("select * from {guifi_parametresFirmware} where fid='%d'",$fid));
+  $paramsFirmwareInfo = db_query("select * from {guifi_parametresFirmware} where fid = :fid", array(':fid' => $fid))->fetchAssoc();
   if (!empty($paramsFirmwareInfo)){
     //var_dump($paramsFirmwareInfo);
   }
@@ -422,7 +423,8 @@ function guifi_get_paramsFirmware($fid) {
 function guifi_get_configuracioUSC($mid, $fid, $uscid) {
 
   //var_dump("Call guifi_get_configuracioUSC($mid, $fid, $uscid)");
-  $configuracioUSCInfo = db_fetch_array(db_query("select id, mid, fid, enabled, tipologia, plantilla, template_file from {guifi_configuracioUnSolclic} where mid=%d and fid=%d and id = %d limit 1",$mid, $fid, $uscid));
+  $configuracioUSCInfo = db_query("select id, mid, fid, enabled, tipologia, plantilla, template_file from {guifi_configuracioUnSolclic} where mid = :mid and fid = :fid and id = :uid limit 1",
+                                   array(':mid' => $mid, ':fid' => $fid, ':uid' => $uscid))->fetchAssoc();
   if (!empty($configuracioUSCInfo)){
   } else {
     unsolclic_todo($dev);die;
@@ -434,8 +436,8 @@ function guifi_get_paramsconfiguracioUSC($uscid) {
   $qry = db_query("select p.nom, c.valor, c.dinamic, p.origen
                    from {guifi_parametresConfiguracioUnsolclic} c,
                         {guifi_parametres} p
-                   where c.pid = p.id and c.uscid= %d",$uscid);
-  while ($param = db_fetch_array($qry)) {
+                   where c.pid = p.id and c.uscid = :uid", array(':uid' => $uscid));
+  while ($param = $qry->fetchAssoc()) {
     $params[] = $param;
   }
   //w($params);
@@ -459,8 +461,8 @@ function guifi_get_paramsMMF($devId) {
                         JOIN guifi_manufacturer mf on mf.fid = m.fid
                         JOIN guifi_firmware f on f.id = usc.fid
 
-                    where d.id = %d",$devId);
-  $param = db_fetch_array($qry);
+                    where d.id = :did", array(':did' => $devId));
+  $param = $qry->fetchAssoc();
   return $param;
 }
 
@@ -489,10 +491,10 @@ function guifi_get_paramsDevice($device_id) {
     JOIN guifi_ipv4 ip ON ip.interface_id = i.id
     JOIN guifi_links l ON l.interface_id = i.id
     where
-    d.id = %d
-    order by radio_order asc, interface_type asc",$device_id);
+    d.id = :did
+    order by radio_order asc, interface_type asc", array(':did' => $device_id));
 
-  while ($param = db_fetch_array($qry)) {
+  while ($param = $qry->fetchAssoc()) {
     $params[] = $param;
   }
   //var_dump($params);
@@ -534,10 +536,10 @@ function guifi_get_paramsClientDevice($device_id) {
           JOIN guifi_ipv4 ip2 ON ip2.interface_id = i2.id
 
           WHERE
-            d.id = %d
-          order by radio_order asc, interface_type asc",$device_id);
+            d.id = :did
+          order by radio_order asc, interface_type asc", array(':did' => $device_id));
 
-  while ($param = db_fetch_array($qry)) {
+  while ($param = $qry->fetchAssoc()) {
     $params[] = $param;
   }
   //var_dump($params);die;
@@ -602,7 +604,7 @@ function guifi_usc_comprova_clau_prefix($clau, $paramPrefixes) {
 }
 
 function isValidConfiguracioUSC($uscid){
-  $result = db_fetch_object(db_query("SELECT id, enabled FROM {guifi_configuracioUnSolclic} WHERE  id = %d AND enabled = 1 LIMIT 1",$uscid));
+  $result = db_query("SELECT id, enabled FROM {guifi_configuracioUnSolclic} WHERE  id = :id AND enabled = 1 LIMIT 1", array(':id' => $uscid))->fetchObject();
   if (!empty($result->enabled)) return true;
 
   return false;

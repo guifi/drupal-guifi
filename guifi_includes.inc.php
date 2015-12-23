@@ -844,7 +844,7 @@ function guifi_services_select($stype) {
     'ORDER BY z.id, s.id, s.nick',
     array(':stype' => $stype));
 
-  while ($service = $query-fetchObject()) {
+  while ($service = $query->fetchObject()) {
     $var[$service->id] = _guifi_set_namelocation($service,$new_pointer,$found);
   } // eof while query service,zone
 
