@@ -609,6 +609,8 @@ function guifi_zone_service_validate($element, &$form_state) {
       $s = &$form_state['values']['graph_server']; break;
     case 'master_auto':
       $s = &$form_state['values']['master']; break;
+    case 'zone_did':
+      $s = &$form_state['values']['zone_id']; break;
   }
   switch ($element['#value']) {
   case t('No service'):
@@ -1073,11 +1075,6 @@ function guifi_zone_totals($zones) {
   }
 
   return $summary;
-}
-
-function guifi_zone_childs_and_parents($zid) {
-  return array_merge(guifi_zone_childs($zid),
-           guifi_zone_get_parents($zid));
 }
 
 function guifi_zone_childs($zid) {

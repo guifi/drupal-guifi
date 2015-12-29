@@ -574,16 +574,14 @@ function guifi_device_form_submit($form, &$form_state) {
 
 
 /* guifi_device_form(): Present the guifi device main editing form. */
-function guifi_device_form($form_state, $params = array()) {
+function guifi_device_form($form_id, &$form_state, $device) {
   global $user;
 
-  $form=array();
+  $form = array();
 
   //$form['#suffix'] = '<script type="text/javascript">'
   //               . 'jQuery(\'input#edit-funders-0-user\').focus();'
   //               . '</script>';
-
-  guifi_log(GUIFILOG_TRACE,'function guifi_device_form()',$params);
 
   // Local javascript validations not actve because of bug in Firefox
   // Errors are not displayed when fieldset folder is collapsed
@@ -591,17 +589,17 @@ function guifi_device_form($form_state, $params = array()) {
 
   // $form['#attributes'] = array('onsubmit' => 'kk');
   if (empty($form_state['values']))
-    $form_state['values'] = $params;
+    $form_state['values'] = $device;
 
   $form_state['#redirect'] = FALSE;
 
 
 
   // if new device, initializing variables
-  if (($form_state['values']['nid'] == NULL) && ($params['add'] != NULL)) {
-    $form_state['values']['nid'] = $params['add'];
+  if (($form_state['values']['nid'] == NULL) && ($device['add'] != NULL)) {
+    $form_state['values']['nid'] = $device['add'];
     $form_state['values']['new'] = TRUE;
-    $form_state['values']['type'] = $params['type'];
+    $form_state['values']['type'] = $device['type'];
     $form_state['values']['links'] = array();
     $form_state['values']['netmask'] = '255.255.255.224';
     if ($form_state['values']['type'] == 'radio') {
@@ -613,8 +611,8 @@ function guifi_device_form($form_state, $params = array()) {
   drupal_set_breadcrumb(guifi_location_ariadna($form_state['values']['nid']));
 
   // Check permissions
-  if ($params['edit']){
-    if (!guifi_device_access('update',$params['edit'])){
+  if ($device['edit']){
+    if (!guifi_device_access('update',$device['edit'])){
       drupal_set_message(t('You are not authorized to edit this device','error'));
       return;
     }
@@ -626,7 +624,6 @@ function guifi_device_form($form_state, $params = array()) {
 
   // Setting the breadcrumb
   drupal_set_breadcrumb(guifi_location_ariadna($form_state['values']['nid']));
-
   // if contact is NULL, then get it from the node or the user logged in drupal
   if (is_null($form_state['values']['notification']))
     if (guifi_notification_validate($node->notification)) {
@@ -672,14 +669,13 @@ function guifi_device_form($form_state, $params = array()) {
     '#weight'=> $form_weight++,
     '#value'=> $form_state['values']['type']
   );
-
-  if ($params['add'] != NULL){
-    drupal_set_title(t('adding a new %device at %node',
-      array('%node' => $node->nick,
-            '%device' => $form_state['values']['type']
+  if ($device['add'] != NULL){
+    drupal_set_title(t('adding a new @device at @node',
+      array('@node' => $node->nick,
+            '@device' => $form_state['values']['type']
            )));
   } else {
-    drupal_set_title(t('edit device %dname',array('%dname' => $form_state['values']['nick'])));
+    drupal_set_title(t('edit device @dname',array('@dname' => $form_state['values']['nick'])));
   }
 
   // All preprocess is complete, now going to create the form
@@ -689,8 +685,8 @@ function guifi_device_form($form_state, $params = array()) {
       $form_state['values']['nick'].') - '.$form_state['values']['flag'],
     '#weight'      => $form_weight++,
     '#collapsible' => TRUE,
-    '#attributes'  => array('class'=>'fieldset-device-main'),
-    '#collapsed'   => (is_null($params['edit'])),
+    '#attributes'  => array('class' => array('fieldset-device-main')),
+    '#collapsed'   => (is_null($device['edit'])),
   );
 
   $form['main']['movenode'] = array(
@@ -717,14 +713,13 @@ function guifi_device_form($form_state, $params = array()) {
     '#weight'=> $form_weight++,
     '#value' => $form_state['values']['nid'],
   );
-
   $form['main']['nick'] = array(
     '#type'          => 'textfield',
     '#size'          => 20,
     '#maxlength'     => 128,
     '#title'         => t('nick'),
     '#required'      => TRUE,
-    '#attributes'    => array('class' => 'required'),
+    '#attributes'    => array('class' => array('required')),
     '#default_value' => $form_state['values']['nick'],
     '#weight'        => $form_weight++,
     '#description'   =>  t('The name of the device.<br />Used as a hostname, SSID, etc...'),
@@ -751,7 +746,6 @@ function guifi_device_form($form_state, $params = array()) {
     		'if many, separated by \',\'<br />' .
     		'used for network administration.'),
   );
-
   if (!(empty($form_state['values']['ipv4'])))
   $form['main']['mainipv4'] = array(
     '#type'            => 'select',
@@ -761,7 +755,6 @@ function guifi_device_form($form_state, $params = array()) {
     '#weight'          => $form_weight++,
     '#description'     => t('Used for monitoring.<br>Save and continue to refresh available addresses'),
   );
-  
   $form['main']['logserver'] = array(
     '#type'        => 'textfield',
     '#size'        => 60,
@@ -788,18 +781,18 @@ function guifi_device_form($form_state, $params = array()) {
     $form['main']['graph_server']['#description'] .= '<br>'.t('To change the value, you are required for maintainer privilege.');
   }
 
+  //TODO MIQUEL
   /*
-   * maintainers fieldset
-   */
+  // * maintainers fieldset
+
   $form['maintainers'] = guifi_maintainers_form(array2object($form_state['values']),$form_weight);
   guifi_log(GUIFILOG_TRACE,'function guifi_device_form(maintainers)',$form_state['values']['maintainers']);
-  /*
-   * funders fieldset
-   */
+
+  // * funders fieldset
   $form['funders'] = guifi_funders_form(array2object($form_state['values']),$form_weight);
   guifi_log(GUIFILOG_TRACE,'function guifi_device_form(funders)',$form_state['values']['funders']);
 
-
+ */
 
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans type)'),$form_weight);
   // create the device-type depenedent form
@@ -809,7 +802,7 @@ function guifi_device_form($form_state, $params = array()) {
       call_user_func_array('guifi_'.$form_state['values']['type'].'_form',
         array(
           $form_state['values'],
-          &$form_weight)
+          $form_weight)
       ));
   }
 
@@ -829,7 +822,7 @@ function guifi_device_form($form_state, $params = array()) {
     $form['interfaces']['#weight'] = $form_weight++;
   }
 
-  // VLANs (VLans, VRRPs, WDS...)
+// VLANs (VLans, VRRPs, WDS...)
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans if vLANs)'),$form_weight);
   $form['vlans'] = guifi_vinterfaces_form('vlans',$form_state['values'],$form_weight);
   $form['vlans']['#weight'] = $form_weight++;
@@ -865,6 +858,7 @@ function guifi_device_form($form_state, $params = array()) {
   $form['dbuttons']['#weight'] = $form_weight++;
 
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(form_final)'),$form);
+
   return $form;
 
 }
@@ -1521,10 +1515,10 @@ function guifi_device_delete($device, $notify = TRUE, $verbose = TRUE) {
 function guifi_device_add() {
   guifi_log(GUIFILOG_TRACE,'function guifi_device_add()');
 
-  $output = drupal_get_form('guifi_device_form',array('add' => arg(3),
-                                                    'type' => arg(4)));
+  $output = drupal_render(drupal_get_form('guifi_device_form',array('add' => arg(3),
+                                                    'type' => arg(4))));
   // To gain space, save bandwith and CPU, omit blocks
-  print theme('page', $output, FALSE);
+  return $output;
 }
 
 function guifi_device_add_ipv4s_submit($form, &$form_state) {
@@ -1561,7 +1555,7 @@ function guifi_device_add_ipv4s_submit($form, &$form_state) {
 /* guifi_device_create_form(): generates html output form with a listbox,
  * choose the device type to create
  */
-function guifi_device_create_form($form_state, $node) {
+function guifi_device_create_form($form_state, $form2, $node) {
   guifi_log(GUIFILOG_TRACE,'function guifi_device_create_form()', $node);
 
   $types = guifi_types('device');
@@ -1576,6 +1570,7 @@ function guifi_device_create_form($form_state, $node) {
    );
    return $form;
   }
+
   $form['nid'] = array(
     '#type' => 'hidden',
     '#value' => $node->id
@@ -1604,11 +1599,6 @@ function guifi_device_create_form_submit($form, &$form_state) {
   $form_state['redirect'] =
     'guifi/device/add/'.$form_state['values']['nid'].
     '/'.$form_state['values']['device_type'];
-}
-
-function guifi_device_create($nid) {
-  $form = drupal_get_form('guifi_device_create_form',$nid);
-  print theme('page',$form);
 }
 
 /* guifi_ADSL_form(): Create form for editiong DSL devices */
@@ -1695,7 +1685,7 @@ function guifi_ups_form($edit, &$form_weight) {
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#weight' => $form_weight++,
-    '#attributes'  => array('class'=>'fieldset-device-main'),
+    '#attributes'  => array('class' => array('fieldset-device-main')),
     '#tree' => TRUE
   );
   $form['variable']['modelDescr'] = array(
@@ -1737,7 +1727,7 @@ function guifi_generator_form($edit, &$form_weight) {
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#weight' => $form_weight++,
-    '#attributes'  => array('class'=>'fieldset-device-main'),
+    '#attributes'  => array('class' => array('fieldset-device-main')),
     '#tree' => TRUE
   );
   $form['variable']['modelDescr'] = array(
@@ -1772,7 +1762,7 @@ function guifi_battery_form($edit, &$form_weight) {
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#weight' => $form_weight++,
-    '#attributes'  => array('class'=>'fieldset-device-main'),
+    '#attributes'  => array('class' => array('fieldset-device-main')),
     '#tree' => TRUE
   );
   $form['variable']['modelDescr'] = array(
@@ -1819,7 +1809,7 @@ function guifi_solar_form($edit, &$form_weight) {
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#weight' => $form_weight++,
-    '#attributes'  => array('class'=>'fieldset-device-main'),
+    '#attributes'  => array('class' => array('fieldset-device-main')),
     '#tree' => TRUE
   );
   $form['variable']['modelDescr'] = array(
@@ -1882,7 +1872,7 @@ function guifi_rack_form($edit, &$form_weight) {
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#weight' => $form_weight++,
-    '#attributes'  => array('class'=>'fieldset-device-main'),
+    '#attributes'  => array('class' => array('fieldset-device-main')),
     '#tree' => TRUE
   );
   $form['variable']['modelDescr'] = array(
@@ -1952,7 +1942,7 @@ function guifi_breaker_form($edit, &$form_weight) {
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#weight' => $form_weight++,
-    '#attributes'  => array('class'=>'fieldset-device-main'),
+    '#attributes'  => array('class' => array('fieldset-device-main')),
     '#tree' => TRUE
   );
   $form['variable']['modelDescr'] = array(
@@ -2286,7 +2276,7 @@ function guifi_device_print($device = NULL) {
   switch (arg(4)) {
   case 'all': case 'data': default:
     //$table = theme_table(null, guifi_device_print_data($device),array('class'=>'device-data'));
-    $output .= theme('table', array('header' => $title, 'rows' => guifi_device_print_data($device)),array('class'=>'device-data'));
+    $output .= theme('table', array('header' => $title, 'rows' => guifi_device_print_data($device), 'attributes' => array('class' => array('device-data'))));
     if (arg(4) == 'data') break;
   case 'comment':
     if (!empty($device['comment']))
@@ -2313,7 +2303,7 @@ function guifi_device_print($device = NULL) {
                   theme('table', 
                     array('header' => $header, 
                           'rows' => guifi_device_print_interfaces($device),
-                          'attributes' => array(array('class' => 'device-data'))))))));
+                          'attributes' => array('class' => array('device-data'))))))));
 
     foreach(array('vlans','aggregations','tunnels') as $iClass){
       $rows = guifi_device_print_iclass($iClass,$device);
@@ -2476,7 +2466,7 @@ function guifi_device_links_print($device, $ltype = '%') {
   $header_wireless[3] = t('node');
 
   $output = '';
-  $attr[] = array('class' => 'list-links');
+  $attr = array('class' => array('list-links'));
   if ($rows_ap_client)
     $output .= theme('table',
                  array('header' => array('<hr>'.t('ap/client')),
@@ -2608,10 +2598,10 @@ function guifi_device_ipv4s($device) {
 
 function guifi_device_edit($device) {
 
-  $output = drupal_get_form('guifi_device_form',$device);
+  $output = drupal_render(drupal_get_form('guifi_device_form',$device));
 
   // To gain space, save bandwith and CPU, omit blocks
-  print theme('page', $output, FALSE);
+  return $output;
 }
 
 function guifi_device_get_service($id, $type ,$path = FALSE) {

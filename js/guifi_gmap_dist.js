@@ -2,12 +2,10 @@ var map = null;
 var markers = Array();
 var cloakControl = null;
 
-if(Drupal.jsEnabled) {
-    $(document).ready(function(){
+    jQuery(document).ready(function($) {
         draw_map();
-    }); 
-}
-	
+    });
+
 var lat2;
 var lon2;
 var marker;

@@ -801,9 +801,6 @@ function guifi_domain_add() {
   return $output;
 }
 
-function ajax_domain_type_form($form, $form_state) {
-  return $form['domain_type_form'];
-}
 /* guifi_domain_create_form(): generates html output form with a listbox,
  * choose the domain type to create
  */

@@ -1,19 +1,17 @@
 var map = null;
 var marcador = null;
 
-if(Drupal.jsEnabled) {
-    $(document).ready(function(){
+    jQuery(document).ready(function($) {
         draw_map();
-    }); 
-}
+    });
 
 function draw_map() 
 {
 
     var divmap = document.getElementById("map");
-    var lat = document.getElementById("edit-lat").value;
-    var lon = document.getElementById("edit-lon").value;
-    var baseURL=document.getElementById("edit-guifi-wms").value;
+    var lat = document.getElementById("lat").value;
+    var lon = document.getElementById("lon").value;
+    var baseURL=document.getElementById("guifi-wms").value;
 
     var node  = new google.maps.LatLng(lat, lon);
 
@@ -54,10 +52,14 @@ function draw_map()
 
     google.maps.event.addListener(autocomplete, 'place_changed', function() {
         var place = autocomplete.getPlace();
+        if (!place.geometry) {
+            return;
+        }
         map.setOptions({ center: place.geometry.location, zoom: 12 });
         marcador.setPosition(place.geometry.location);
     });
 
+    jQuery(function($) {
     $("input#mapSearch").bind("keypress", function(e) {
         if ( e.keyCode == 13 ) {
             e.preventDefault();
@@ -68,18 +70,38 @@ function draw_map()
                     var result = results[0].geometry.location;
                     map.setOptions({ center: result, zoom: 12 });
                     marcador.setPosition(result);
+   	    document.getElementById("edit-latdeg").value = result.lat();
+   	    document.getElementById("edit-londeg").value = result.lng();
+   	    document.getElementById("edit-latmin").value = "";
+   	    document.getElementById("edit-lonmin").value = "";
+   	    document.getElementById("edit-latseg").value = "";
+   	    document.getElementById("edit-lonseg").value = "";
+   	    if (map.getZoom() <= 15 ) {
+   	        map.setCenter(result);
+            map.setZoom(map.getZoom()+3);	
+   	    }
                 }
             });
         }
         return true;
     });
-
+    });
     //Detect the actual position, if possible
     if (navigator.geolocation) {
           navigator.geolocation.getCurrentPosition(function(position) {
             var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
             map.setOptions({ center: latlng, zoom: 10 });
             marcador.setPosition(latlng);
+   	    document.getElementById("edit-latdeg").value = latlng.lat();
+   	    document.getElementById("edit-londeg").value = latlng.lng();
+   	    document.getElementById("edit-latmin").value = "";
+   	    document.getElementById("edit-lonmin").value = "";
+   	    document.getElementById("edit-latseg").value = "";
+   	    document.getElementById("edit-lonseg").value = "";
+   	    if (map.getZoom() <= 15 ) {
+   	        map.setCenter(latlng);
+            map.setZoom(map.getZoom()+3);	
+   	    }
           });
     }
 

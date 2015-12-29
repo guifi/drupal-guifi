@@ -28,7 +28,7 @@ function guifi_interfaces_form(&$interface,$ptree) {
     '#collapsible' => TRUE,
     '#collapsed' => !isset($interface['unfold']),
     '#description'   => t('Go to Port connections section to rename interfaces or edit physical links'),
-    '#attributes'=> array('class'=>'fieldset-interface-port'),
+    '#attributes' => array(array('class'=>'fieldset-interface-port')),
   );
 
   $f['interface'] = guifi_form_hidden_var(
@@ -50,7 +50,7 @@ function guifi_interfaces_form(&$interface,$ptree) {
         '#size'          => 10,
         '#maxlength'     => 60,
         '#value'         => $interface['interface_type'],
-        '#attributes'    => array('class'=>'interface-item'),
+        '#attributes'    => array(array('class'=>'interface-item')),
     );
     if (!empty($interface['connto_did'])) {
       $dname = guifi_get_devicename($interface['connto_did']);
@@ -64,7 +64,7 @@ function guifi_interfaces_form(&$interface,$ptree) {
         '#value'        => ($interface['connto_iid']) ?
            $dname.' / '.$dinterfaces[$interface['connto_iid']] :
            $dname,
-        '#attributes'   => array('class'=>'interface-item'),
+        '#attributes'   => array(array('class'=>'interface-item')),
       );
     }
 

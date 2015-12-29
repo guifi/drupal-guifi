@@ -156,7 +156,7 @@ function guifi_types($type, $start = 24, $end = 0, $relations = NULL) {
           guifi_firmware f
           inner join
         guifi_configuracioUnSolclic usc ON usc.fid = f.id  and usc.mid = :relations
-        order by name asc", array(':relations' => $relations))->fetchAssoc();
+        order by name asc", array(':relations' => $relations));
         while ($type = $query->fetchAssoc()) {
           $values[] = $type;
         }
@@ -260,12 +260,12 @@ function guifi_url($url,$text = NULL) {
 }
 
 function guifi_server_descr($did) {
-  $server = db_query("SELECT CONCAT(d.id,'-',z.nick,', ',l.nick,' ',d.nick) descr " .
-      "FROM {guifi_devices} d, {guifi_location} l, {guifi_zone} z " .
-      "WHERE d.id = :id " .
-      " AND d.type IN ('server','cam','cloudy') ".
-      " AND d.nid=l.id" .
-      " AND l.zone_id=z.id",
+  $server = db_query('SELECT CONCAT(d.id,\'-\',z.nick,\', \',l.nick,\' \',d.nick) descr ' .
+      'FROM {guifi_devices} d, {guifi_location} l, {guifi_zone} z ' .
+      'WHERE d.id = :id ' .
+      ' AND d.type IN (\'server\',\'cam\',\'cloudy\') '.
+      ' AND d.nid=l.id' .
+      ' AND l.zone_id=z.id',
       array(':id' => $did))->fetchObject();
 
   return $server->descr;
@@ -1000,7 +1000,7 @@ function guifi_get_devicename($id, $format = 'nick') {
   case 'large':
     $device = db_query(
       'SELECT
-        CONCAT(d.id,"-",d.nick,", ",l.nick,", ",z.title) str
+        CONCAT(d.id,\'-\',d.nick,\', \',l.nick,\', \',z.title) str
       FROM {guifi_location} l, {guifi_zone} z, {guifi_devices} d
       WHERE d.id = :id AND l.id=d.nid AND l.zone_id=z.id', array(':id' => $id))->fetchObject();
     break;
@@ -1009,13 +1009,14 @@ function guifi_get_devicename($id, $format = 'nick') {
     $device = db_query(
       'SELECT d.nick str
       FROM {guifi_location} l, {guifi_zone} z, {guifi_devices} d
-      WHERE d.id=%d AND l.id=d.nid AND l.zone_id=z.id', array(':id' => $id))->fetchObject();
+      WHERE d.id = :id AND l.id=d.nid AND l.zone_id=z.id', array(':id' => $id))->fetchObject();
   }
   return $device->str;
 }
 
 function guifi_get_nodename($id) {
-  $node = db_query("SELECT d.nick FROM {guifi_location} d WHERE d.id = :id", array(':id' => $id))->fetchObject();
+  $node = db_query("SELECT nick FROM {guifi_location} WHERE id = :id", array(':id' => $id))->fetchObject();
+  return($node->nick);
 }
 
 function guifi_get_location($id) {

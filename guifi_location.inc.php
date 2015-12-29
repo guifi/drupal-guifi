@@ -118,7 +118,7 @@ function guifi_location_load($nodes) {
  foreach ($nodes as $node) {
    $location = db_query("SELECT * FROM {guifi_location} WHERE id = :nid", array(':nid' => $node->nid))->fetchObject();
      foreach ($location as $k => $value) {
-    if ($k != 'body')
+
       $nodes[$node->nid]->$k = $value;
 // TODO MIQUEL
 /*
@@ -181,8 +181,6 @@ function guifi_location_prepare(&$node){
 function guifi_location_form($node, $form_state) {
   global $user;
 
-  $form_weight = 0;
-
   $type = node_type_get_type($node);
 
   if (!empty($node->zone_id))
@@ -201,19 +199,8 @@ function guifi_location_form($node, $form_state) {
       '#default_value' => $node->title,
     );
   }
-  $form_weight=2;
-   /*
-   * maintainers fieldset
-   */
-  $form_weight=-3;
-  $form['maintainers'] = guifi_maintainers_form($node,$form_weight);
-   /*
-   * funders fieldset
-   */
-  $form_weight=-4;
- // $form['funders'] = guifi_funders_form($node,$form_weight);
 
-  $form_weight=0;
+  $form_weight = 0;
   $form['nick'] = array(
     '#type' => 'textfield',
     '#title' => t('Nick'),
@@ -237,12 +224,23 @@ function guifi_location_form($node, $form_state) {
     '#weight' => $form_weight++,
   );
 
+   /*
+   * maintainers fieldset
+   */
+  $form['maintainers'] = guifi_maintainers_form($node,$form_weight);
+   /*
+   * funders fieldset
+   */
+  //TODO MIQUEL
+ // $form['funders'] = guifi_funders_form($node,$form_weight);
+
   $form['settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Node settings'),
     '#weight' => $form_weight++,
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
+    '#weight' => $form_weight++,
   );
     // Si ets administrador pots definir el servidor de dades
   if (user_access('administer guifi zones')){
@@ -282,9 +280,9 @@ function guifi_location_form($node, $form_state) {
     $form['license'] = array(
       '#type' => 'item',
       '#title' => t('License and usage agreement'),
-      '#value' => t(variable_get('guifi_license', NULL)),
+      '#markup' => t(variable_get('guifi_license', NULL)),
       '#description' => t('You must accept this agreement to be authorized to create new nodes.'),
-      '#weight' => 1,
+      '#weight' => $form_weight++,
     );
     if (empty($node->agreement))
       $agreement = 'No';
@@ -296,7 +294,7 @@ function guifi_location_form($node, $form_state) {
       '#default_value' =>$agreement,
       '#options' => array('Yes' => t('Yes, I have read this and accepted')),
       '#element_validate' => array('guifi_location_agreement_validate'),
-      '#weight' => 2,
+      '#weight' => $form_weight++,
     );
   } else {
     $form['agreement']= array(
@@ -321,12 +319,13 @@ function guifi_location_form($node, $form_state) {
     $zone_id = $node->zone_id;
   }
 
-  $form['zone_id'] = guifi_zone_autocomplete_field($zone_id,'zone_id');
+  $form['zone_did'] = guifi_zone_autocomplete_field($zone_id,'zone_id');
+  $form['zone_did']['#weight'] = $form_weight++;
 
-//  $form['zone_id'] = guifi_zone_select_field($zone_id,'zone_id');
-  $form['zone_id']['#weight'] = 3;
-
-
+  $form['zone_id'] = array(
+    '#type' => 'hidden',
+    '#value'=> $zone_id,
+  );
   // ----
   // position
   // ------------------------------------------------
@@ -334,12 +333,14 @@ function guifi_location_form($node, $form_state) {
   $form['position'] = array(
     '#type' => 'fieldset',
     '#title' => t('Node position settings'),
-    '#weight' => 4,
+    '#weight' => $form_weight++,
     '#collapsible' => FALSE,
+    '#weight' => $form_weight++,
   );
 
+  
   if (guifi_gmap_key()) {
-    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_node.js','module');
+    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_node.js');
     $form['position']['GMAP'] = array(
       '#type' => 'item',
       '#title' => t('Map'),
@@ -350,14 +351,17 @@ function guifi_location_form($node, $form_state) {
     $form['guifi_wms'] = array(
       '#type' => 'hidden',
       '#value' => variable_get('guifi_wms_service',''),
+      '#attributes' => array('id' => 'guifi-wms'),
     );
     $form['lat'] = array(
       '#type' => 'hidden',
       '#value' => $node->lat,
+      '#attributes' => array('id' => 'lat'),
     );
     $form['lon'] = array(
       '#type' => 'hidden',
       '#value' => $node->lon,
+      '#attributes' => array('id' => 'lon'),
     );
   }
   $form['position']['longitude'] = array(
@@ -382,6 +386,7 @@ function guifi_location_form($node, $form_state) {
     '#prefix' => '<td>',
     '#suffix' => '</td>',
     '#weight' => 2,
+    '#attributes' => array('id' => 'edit-londeg'),
   );
   $form['position']['lonmin'] = array(
     '#type' => 'textfield',
@@ -391,6 +396,7 @@ function guifi_location_form($node, $form_state) {
     '#prefix' => '<td>',
     '#suffix' => '</td>',
     '#weight' => 3,
+    '#attributes' => array('id' => 'edit-lonmin'),
   );
   $form['position']['lonseg'] = array(
     '#type' => 'textfield',
@@ -400,6 +406,7 @@ function guifi_location_form($node, $form_state) {
     '#prefix' => '<td>',
     '#suffix' => '</td></tr>',
     '#weight' => 4,
+    '#attributes' => array('id' => 'edit-lonseg'),
   );
   $form['position']['latitude'] = array(
     '#type' => 'item',
@@ -417,6 +424,7 @@ function guifi_location_form($node, $form_state) {
     '#prefix' => '<td>',
     '#suffix' => '</td>',
     '#weight' => 6,
+    '#attributes' => array('id' => 'edit-latdeg'),
   );
   $form['position']['latmin'] = array(
     '#type' => 'textfield',
@@ -426,6 +434,7 @@ function guifi_location_form($node, $form_state) {
     '#prefix' => '<td>',
     '#suffix' => '</td>',
     '#weight' => 7,
+    '#attributes' => array('id' => 'edit-latmin'),
   );
   $form['position']['latseg'] = array(
     '#type' => 'textfield',
@@ -435,6 +444,7 @@ function guifi_location_form($node, $form_state) {
     '#prefix' => '<td>',
     '#suffix' => '</td></tr></table>',
     '#weight' => 8,
+    '#attributes' => array('id' => 'edit-latseg'),
   );
 
   $form['position']['zone_description'] = array(
@@ -461,17 +471,15 @@ function guifi_location_form($node, $form_state) {
     '#weight' => 10,
   );
 
-  if (($type->has_body)) {
-    $form['body_field'] = node_body_field(
-      $node,
-      $type->body_label,
-      $type->min_word_count
-    );
+  if ( !empty($node->id) ) {
+    $radios = array();
+    $query = db_query("SELECT * FROM {guifi_radios} WHERE nid = :nid", array(':nid' => $node->id));
+    while ($radio = $query->fetchAssoc()) {
+      $radios[] = $radio;
+    }
   }
-  $radios = array();
-  $query = db_query("SELECT * FROM {guifi_radios} WHERE nid = :nid", array(':nid' => $node->id));
-  while ($radio = $query->fetchAssoc()) {
-    $radios[] = $radio;
+  else {
+    $radios = '';
   }
 
   if (count($radios) < 1) {
@@ -481,11 +489,13 @@ function guifi_location_form($node, $form_state) {
       '#default_value' => ( $node->status_flag ? $node->status_flag : 'Planned') ,
       '#required' => FALSE,
       '#options' => array('Reserved' => t('Reserved'),'Inactive' => t('Inactive'),'Planned' => t('Planned')),
+    '#weight' => $form_weight++,
     );
   } else {
     $form['status_flag'] = array(
       '#type' => 'hidden',
       '#default_value' => $node->status_flag,
+    '#weight' => $form_weight++,
     );
   }
   return $form;
@@ -508,9 +518,9 @@ function guifi_location_nick_validate($element, &$form_state) {
   }
   guifi_validate_nick($element['#value']);
 
-  $query = db_query("SELECT nick FROM {guifi_location} WHERE lcase(nick)='%s' AND id <> %d",
-    strtolower($element['#value']),$form_state['values']['nid']);
-  if (db_result($query)){
+  $query = db_query("SELECT nick FROM {guifi_location} WHERE lcase(nick) = :nick AND id <> :id",
+    array(':nick' => strtolower($element['#value']), ':id' => $form_state['values']['nid']));
+  if ($query->fetchField()){
     form_set_error('nick', t('Nick already in use.'));
   }
 }
@@ -540,13 +550,14 @@ function guifi_location_get_service($id, $type ,$path = FALSE) {
 function guifi_location_validate($node,$form) {
   guifi_validate_nick($node->nick);
 
+  $zone_id = explode('-',$node->zone_id);
   // not at root zone
-  if (($node->zone_id == 0) or ($node->zone_id == guifi_zone_root())){
+  if (($zone_id[0] == 0) or ($zone_id[0] == guifi_zone_root())){
     form_set_error('zone_id',
       t('Can\'t be assigned to root zone, please assign the node to an appropiate zone.'));
   }else{
     $nz=0;
-    guifi_zone_childs_tree($node->zone_id, 3, $nz);
+    guifi_zone_childs_tree($zone_id[0], 3, $nz);
     if($nz>2){
       form_set_error('zone_id',
         t('Can\'t be assigned to parent zone, please assign the node to an final zone.'));
@@ -702,7 +713,7 @@ function guifi_location_view($node, $view_mode, $langcode = NULL) {
     return $node;
 
   drupal_set_breadcrumb(guifi_location_ariadna($node));
-  
+
   $node->content['data'] = array(
     '#type' => 'markup',
     '#weight' => 1,
@@ -764,6 +775,10 @@ function guifi_location_hidden_map_fileds($node) {
 
 **/
 function guifi_location_distances_map($node) {
+
+  if (empty($node->id))
+    $node = node_load($node);
+
   $rows = array();
 
   $lat2='';
@@ -786,13 +801,17 @@ function guifi_location_distances_map($node) {
     guifi_get_zone_nick($node->zone_id).
     '-'.$node->nick);
   if (guifi_gmap_key()) {
-    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_dist.js','module');
+    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_dist.js');
+
 
     $rows[] = array(array('data' => t('Click on the map to get a new path profile ( Thanks to <a href="http://www.heywhatsthat.com">HeyWhatsThat</a> ) to check the Line Of Sight<br />Click on the path profile to see the point on the map'),'align' => 'center'));
-    $rows[] = array(array('data' => 'Profile graph and Countour Layer provided by: <a href="http://www.heywhatsthat.com">HeyWhatsThat</a> Copyright 2012 Michael Kosowsky. <b>All rights reserved</b><br>Visit <a href="http://wisp.heywhatsthat.com">HeyWhatsThat WISP</a> for tools for planning wireless networks.<br><a href="javascript:;" onclick="profileclick(event)"><img id="profile" src="'.drupal_get_path('module', 'guifi').'/js/marker_start.png" /></a>','align' => "center"));
+    $rows[] = array(array('data' => 'Profile graph and Countour Layer provided by: <a href="http://www.heywhatsthat.com">HeyWhatsThat</a> Copyright 2012 Michael Kosowsky. <b>All rights reserved</b><br>Visit <a href="http://wisp.heywhatsthat.com">HeyWhatsThat WISP</a> for tools for planning wireless networks.<br><a href="javascript:;" onclick="profileclick(event)"><img id="profile" src="'.base_path().drupal_get_path('module', 'guifi').'/js/marker_start.png" /></a>','align' => "center"));
+    
     $rows[] = array('<div id="map" style="width: 100%; height: 600px; margin:5px;"></div>');
+    
     $rows[] = array(array('data' => '<div style="float:left;">'.t('Distance:').'&nbsp;</div>'.'<div id="tdistance" style="float:left;">0</div>'.'<div style="float:left;">&nbsp;Km.&nbsp;&nbsp;&nbsp;&nbsp;'.t('Azimuth:').'&nbsp;</div>'.'<div id="tazimut" style="float:left;">0</div>&nbsp;'.t('degrees')));
-    $output = theme('table', NULL,$rows);
+    $output = theme('table', array('header' => NULL, 'rows' => $rows));
+
     $output .=  '<form>' .
       '<input type="hidden" value="'.$node->lat.'" id="lat" />'.
       '<input type="hidden" value="'.$node->lon.'" id="lon" />' .
@@ -806,27 +825,27 @@ function guifi_location_distances_map($node) {
 
   $node = node_load($node->id);
   drupal_set_breadcrumb(guifi_location_ariadna($node));
-  $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
-  print theme('page',$output, FALSE);
-  return;
+
+  return $output;
+
 }
 
 function guifi_location_distances($node) {
+  if (empty($node->id))
+    $node = node_load($node);
+
   drupal_set_title(t('distances from').' '.
     guifi_get_zone_nick($node->zone_id).
     '-'.$node->nick);
-  $output .= drupal_get_form('guifi_location_distances_form',$node);
-  $node = node_load($node->id);
+  $output .= drupal_render(drupal_get_form('guifi_location_distances_form',$node));
   drupal_set_breadcrumb(guifi_location_ariadna($node));
-  $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
-  print theme('page',$output, FALSE);
-  return;
+
+  return $output;
 }
 
-function guifi_location_distances_form($form_state,$node) {
+function guifi_location_distances_form($none ,$form_state, $node) {
   global $base_url;
 
-  guifi_log(GUIFILOG_TRACE,'function guifi_location_distances_form()',$form_state);
 
   $form = array();
   $form_state['#redirect'] = FALSE;
@@ -1076,7 +1095,7 @@ function guifi_location_distances_list($filters,$node) {
     $form['z'][$nc]['d_status'] = array(
       '#type'=> 'item',
       '#parents'=> array('z',$nc,'d_status'),
-      '#value'=> '<a href="'.$height_url_long.'" alt="'.t('Click to view in large format').'" target="_blank">' .
+      '#markup'=> '<a href="'.$height_url_long.'" alt="'.t('Click to view in large format').'" target="_blank">' .
 //          '<img src="'.$height_url_small.'"></a>',
           '<img src="'.$height_url_small.'"></a>',
 
@@ -1212,7 +1231,7 @@ function theme_guifi_location_data($node) {
 function theme_guifi_location_map($node) {
 
   drupal_set_breadcrumb(guifi_location_ariadna($node->id,'node/%d/view/map'));
-  
+
   if (guifi_gmap_key()) {
     $output ='<div id="map" style="width: 100%; height: 340px; margin:5px;"></div>';
     $output .= guifi_location_hidden_map_fileds($node);

@@ -5,7 +5,7 @@
  */
 
 /* guifi_radio_form(): Main radio form (Common parameters)*/
-function guifi_radio_form($edit, &$form_weight) {
+function guifi_radio_form($edit, $form_weight) {
   global $hotspot;
   global $bridge;
   global $user;
@@ -17,9 +17,9 @@ function guifi_radio_form($edit, &$form_weight) {
     SELECT mid, model, f.name manufacturer
     FROM guifi_model_specs m, guifi_manufacturer f
     WHERE f.fid = m.fid
-    AND supported='Yes'
+    AND supported = 'Yes'
     ORDER BY manufacturer, model ASC");
-  while ($model = db_fetch_array($querymid)) {
+  while ($model = $querymid->fetchAssoc()) {
      $models_array[$model["mid"]] = $model["manufacturer"] .", " .$model["model"];
   }
 
@@ -46,7 +46,7 @@ function guifi_radio_form($edit, &$form_weight) {
     '#description' => t('Select the radio model that do you have.'),
     '#prefix' => '<table><tr><td>',
     '#suffix' => '</td>',
-    '#ahah' => array(
+    '#ajax' => array(
       'path' => 'guifi/js/firmware_by_model',
       'wrapper' => 'select-firmware',
       'method' => 'replace',
@@ -221,16 +221,15 @@ function guifi_radio_form($edit, &$form_weight) {
       $rc++;
 
     } // radio not deleted
-
   } // foreach radio
 
     // Add radio?
   if ($rc) {
-    $dradios = db_fetch_object(db_query(
+    $dradios = db_query(
        'SELECT radiodev_max max ' .
        'FROM {guifi_model_specs} ' .
-       'WHERE mid=%s',
-       $edit['variable']['model_id']));
+       'WHERE mid = :mid',
+       array(':mid' => $edit['variable']['model_id']))->fetchObject();
 
     if ($rc < $dradios->max)
       $form['r']['addRadio'] = array(
@@ -238,7 +237,7 @@ function guifi_radio_form($edit, &$form_weight) {
         '#src'=> drupal_get_path('module', 'guifi').'/icons/addwifi.png',
         '#parents' => array('addRadio'),
         '#attributes' => array('title' => t('Add wireless radio to this device')),
-        '#ahah' => array(
+        '#ajax' => array(
           'path' => 'guifi/js/add-radio',
           'wrapper' => 'add-radio',
           'method' => 'replace',
@@ -257,7 +256,7 @@ function guifi_radio_add_radio_form($edit) {
 
   // Edit radio form or add new radio
   $cr = 0; $tr = 0; $firewall=FALSE;
-  $maxradios = db_fetch_object(db_query('SELECT radiodev_max FROM {guifi_model_specs} WHERE mid=%d',$edit[variable][model_id]));
+  $maxradios = db_query('SELECT radiodev_max FROM {guifi_model_specs} WHERE mid = :mid', array(':mid' => $edit[variable][model_id]))->fetchObject();
 
   if (isset($edit[radios]))
   foreach ($edit[radios] as $k => $radio) {
@@ -310,11 +309,11 @@ function guifi_radio_add_radio_form($edit) {
 
 function guifi_radio_firmware_field($fid,$mid) {
 /* Consulta anterior al  PFC */
-  $model=db_fetch_object(db_query(
+  $model = db_query(
         "SELECT model as name, mid as id " .
         "FROM {guifi_model_specs} " .
-        "WHERE mid=%d",
-    $mid));
+        "WHERE mid = :mid",
+    array(':mid' => $mid))->fetchObject();
 
   $options = array();
   $firm = guifi_types('firmware', NULL, NULL,$model->id);
@@ -429,141 +428,133 @@ function guifi_radio_radio_form($radio, $key, &$form_weight = -200) {
     );
 
     switch ($radio['mode']) {
-	    case 'ap':
-	    case 'mesh':
-		    $f['s']['ssid'] = array(
-			    '#type' => 'textfield',
-					'#title' => t('SSID'),
-					'#parents' => array('radios',$key,'ssid'),
-					'#required' => TRUE,
-					// ssid: gufi.net-XXXXXXXX suffix is always guifi.net-,10 characters, 32 maximum.
-					'#size' => 22,
-					'#maxlength' => 22,
-					'#default_value' => $radio["ssid"],
-					'#description' => t("SSID to identify this radio signal."),
-//                    '#prefix' => '<div class="form-newline">',
-//                    '#suffix' => '</div>',
-		    );
-		    $f['s']['protocol'] = array(
-			    '#type' => 'select',
-					'#title' => t("Protocol"),
-					'#parents' => array('radios',$key,'protocol'),
-					'#default_value' =>  $radio["protocol"],
-					'#options' => guifi_types('protocol'),
-					'#description' => t('Select the protocol where this radio will operate.'),
-					'#ahah' => array(
-						'path' => 'guifi/js/channel/'.$key,
-						'wrapper' => 'select-channel-'.$key,
-						'method' => 'replace',
-						'effect' => 'fade',
-					),
-		    );
+      case 'ap':
+      case 'mesh':
+        $f['s']['ssid'] = array(
+          '#type' => 'textfield',
+          '#title' => t('SSID'),
+          '#parents' => array('radios',$key,'ssid'),
+          '#required' => TRUE,
+          // ssid: gufi.net-XXXXXXXX suffix is always guifi.net-,10 characters, 32 maximum.
+          '#size' => 22,
+          '#maxlength' => 22,
+          '#default_value' => $radio["ssid"],
+          '#description' => t("SSID to identify this radio signal."),
+        );
+        $f['s']['protocol'] = array(
+          '#type' => 'select',
+          '#title' => t("Protocol"),
+          '#parents' => array('radios',$key,'protocol'),
+          '#default_value' =>  $radio["protocol"],
+          '#options' => guifi_types('protocol'),
+          '#description' => t('Select the protocol where this radio will operate.'),
+          '#ajax' => array(
+            'path' => 'guifi/js/channel/'.$key,
+            'wrapper' => 'select-channel-'.$key,
+            'method' => 'replace',
+            'effect' => 'fade',
+          ),
+        );
 
-		    $f['s']['channel'] =
-                            guifi_radio_channel_field($key, $radio["channel"], $radio['protocol']);
-                    $f['s']['chbandwith'] =
-                            guifi_radio_channel_bwith_field($key, $radio["chbandwith"]);
+        $f['s']['channel'] = guifi_radio_channel_field($key, $radio["channel"], $radio['protocol']);
+        $f['s']['chbandwith'] = guifi_radio_channel_bwith_field($key, $radio["chbandwith"]);
 
-             if ($radio['mode'] == 'ap') {
-              $f['ap'] = array(
-                '#type' => 'fieldset',
-                '#title' => t('Connection acceptance policy'),
-                '#description' => t('Please specify if this radio do accept simple client connections and if a funding is required to contribute for the coverage infrastructure'),
-                '#collapsible' => TRUE,
-                '#collapsed' => ($radio["clients_accepted"]=='Yes')?false:true,
-                '#tree'=> TRUE,
-                '#attributes' => array('class' => 'fieldset-radio'),
-                //                '#weight' => $form_weight++,
-              );
-			  $f['ap']['clients_accepted'] = array(
-			    '#type' => 'select',
-				'#title' => t("Clients accepted?"),
-				'#parents' => array('radios',$key,'clients_accepted'),
-				'#default_value' =>  $radio["clients_accepted"],
-				'#options' => drupal_map_assoc(array( 0 => 'Yes',1 => 'No')),
-				'#description' => t('Do this radio accept connections from clients?'),
-			  );
-			  $f['ap']['fund_required'] = array(
-			    '#type' => 'select',
-				'#title' => t("Policy"),
-				'#parents' => array('radios',$key,'fund_required'),
-				'#default_value' =>  $radio["fund_required"],
-				'#options' => guifi_types('contribution'),
-				'#description' => t('Funding required?'),
-			  );
-			  $f['ap']['fund_amount'] = array(
-			    '#type' => 'textfield',
-			    '#size'  => 12,
-                '#maxlength' => 15,
-                '#required' => false,
-				'#title' => t("Amount"),
-				'#parents' => array('radios',$key,'fund_amount'),
-				'#default_value' =>  $radio["fund_amount"],
-                '#attributes' => array('' .
-                  'class' => 'number required',
-                  'min' => 1),
-				'#description' => t('Funding if required'),
-			  );
-			  $f['ap']['fund_currency'] = array(
-			    '#type' => 'select',
-				'#title' => t("Currency"),
-				'#parents' => array('radios',$key,'fund_currency'),
-				'#default_value' =>  $radio["fund_currency"],
-				'#options' => drupal_map_assoc(array( '€' => 'Euros','$' => 'US Dollar')),
-			  );
-		    } else {
-              $f['s']['clients_accepted'] = array(
-                '#type' => 'hidden',
-                '#parents' => array('radios',$key,'clients_accepted'),
-                '#value' =>  $radio["clients_accepted"],
-              );
-              $f['s']['fund_required'] = array(
-                '#type' => 'hidden',
-                '#parents' => array('radios',$key,'fund_required'),
-                '#value' =>  $radio["fund_required"],
-              );
-              $f['s']['fund_amount'] = array(
-                '#type' => 'hidden',
-                '#parents' => array('radios',$key,'fund_amount'),
-                '#value' =>  $radio["fund_amount"],
-              );
-              $f['s']['fund_currency'] = array(
-                '#type' => 'hidden',
-                '#parents' => array('radios',$key,'fund_currency'),
-                '#value' =>  $radio["fund_currency"],
-              );
-		    }
-		    break;
-	    case 'client':
-		    $inherit_msg = t('Will take it from the connected AP.');
-		    $f['s']['ssid'] = array(
-			    '#type' => 'hidden',
-					'#parents' => array('radios',$key,'ssid'),
-					'#title' => t('SSID'),
-					'#default_value' => $radio["ssid"],
-					'#description' => $inherit_msg,
-		    );
-		    $f['s']['protocol'] = array(
-			    '#type' => 'hidden',
-					'#title' => t("Protocol"),
-					'#parents' => array('radios',$key,'protocol'),
-					'#value' =>  $radio["protocol"],
-					'#description' => $inherit_msg,
-		    );
-		    $f['s']['channel'] = array(
-			    '#type' => 'hidden',
-					'#title' => t("Channel"),
-					'#parents' => array('radios',$key,'channel'),
-					'#default_value' =>  $radio["channel"],
-					'#options' => guifi_types('channel', NULL, NULL,$radio['protocol']),
-					'#description' => $inherit_msg,
-		    );
-		    $f['s']['clients_accepted'] = array(
-			    '#type' => 'hidden',
-					'#parents' => array('radios',$key,'clients_accepted'),
-					'#value' =>  $radio["clients_accepted"],
-		    );
-		    break;
+        if ($radio['mode'] == 'ap') {
+          $f['ap'] = array(
+            '#type' => 'fieldset',
+            '#title' => t('Connection acceptance policy'),
+            '#description' => t('Please specify if this radio do accept simple client connections and if a funding is required to contribute for the coverage infrastructure'),
+            '#collapsible' => TRUE,
+            '#collapsed' => ($radio["clients_accepted"]=='Yes')?false:true,
+            '#tree'=> TRUE,
+            '#attributes' => array('class' => array('fieldset-radio')),
+          );
+          $f['ap']['clients_accepted'] = array(
+            '#type' => 'select',
+            '#title' => t("Clients accepted?"),
+            '#parents' => array('radios',$key,'clients_accepted'),
+            '#default_value' =>  $radio["clients_accepted"],
+            '#options' => drupal_map_assoc(array( 0 => 'Yes',1 => 'No')),
+            '#description' => t('Do this radio accept connections from clients?'),
+          );
+          $f['ap']['fund_required'] = array(
+            '#type' => 'select',
+            '#title' => t("Policy"),
+            '#parents' => array('radios',$key,'fund_required'),
+            '#default_value' =>  $radio["fund_required"],
+            '#options' => guifi_types('contribution'),
+            '#description' => t('Funding required?'),
+          );
+          $f['ap']['fund_amount'] = array(
+            '#type' => 'textfield',
+            '#size'  => 12,
+            '#maxlength' => 15,
+            '#required' => false,
+            '#title' => t("Amount"),
+            '#parents' => array('radios',$key,'fund_amount'),
+            '#default_value' =>  $radio["fund_amount"],
+            '#description' => t('Funding if required'),
+          );
+          $f['ap']['fund_currency'] = array(
+          '#type' => 'select',
+          '#title' => t("Currency"),
+          '#parents' => array('radios',$key,'fund_currency'),
+          '#default_value' =>  $radio["fund_currency"],
+          '#options' => drupal_map_assoc(array( '€' => 'Euros','$' => 'US Dollar')),
+          );
+      } else {
+          $f['s']['clients_accepted'] = array(
+            '#type' => 'hidden',
+            '#parents' => array('radios',$key,'clients_accepted'),
+            '#value' =>  $radio["clients_accepted"],
+          );
+          $f['s']['fund_required'] = array(
+            '#type' => 'hidden',
+            '#parents' => array('radios',$key,'fund_required'),
+            '#value' =>  $radio["fund_required"],
+          );
+          $f['s']['fund_amount'] = array(
+            '#type' => 'hidden',
+            '#parents' => array('radios',$key,'fund_amount'),
+            '#value' =>  $radio["fund_amount"],
+          );
+          $f['s']['fund_currency'] = array(
+            '#type' => 'hidden',
+            '#parents' => array('radios',$key,'fund_currency'),
+            '#value' =>  $radio["fund_currency"],
+          );
+      }
+      break;
+      case 'client':
+        $inherit_msg = t('Will take it from the connected AP.');
+        $f['s']['ssid'] = array(
+          '#type' => 'hidden',
+          '#parents' => array('radios',$key,'ssid'),
+          '#title' => t('SSID'),
+          '#default_value' => $radio["ssid"],
+          '#description' => $inherit_msg,
+        );
+        $f['s']['protocol'] = array(
+          '#type' => 'hidden',
+          '#title' => t("Protocol"),
+          '#parents' => array('radios',$key,'protocol'),
+          '#value' =>  $radio["protocol"],
+          '#description' => $inherit_msg,
+          );
+        $f['s']['channel'] = array(
+          '#type' => 'hidden',
+          '#title' => t("Channel"),
+          '#parents' => array('radios',$key,'channel'),
+          '#default_value' =>  $radio["channel"],
+          '#options' => guifi_types('channel', NULL, NULL,$radio['protocol']),
+          '#description' => $inherit_msg,
+        );
+        $f['s']['clients_accepted'] = array(
+        '#type' => 'hidden',
+        '#parents' => array('radios',$key,'clients_accepted'),
+        '#value' =>  $radio["clients_accepted"],
+        );
+      break;
     }
 
     // Antenna settings group
@@ -573,7 +564,7 @@ function guifi_radio_radio_form($radio, $key, &$form_weight = -200) {
       '#collapsible' => TRUE,
       '#collapsed' => !(isset($radio['unfold_antenna'])),
       '#tree' => FALSE,
-      '#attributes' => array('class' => 'fieldset-radio'),
+      '#attributes' => array('class' => array('fieldset-radio')),
 //      '#weight' => $fw2++,
     );
     $fw2 = 0;
@@ -632,11 +623,11 @@ function guifi_radio_validate($form,$edit) {
 
   if (($edit['variable']['firmware'] != 'n/a') and
     ($edit['variable']['firmware'] != NULL)) {
-    $radiof = db_fetch_object(db_query("
+    $radiof = db_query("
       SELECT model
       FROM {guifi_model_specs}
-      WHERE mid='%d'",
-      $edit['variable']['model_id']));
+      WHERE mid = :mid",
+      array(':mid' => $edit['variable']['model_id']))-fetchObject();
     if (!guifi_type_relation(
       'firmware',
       $edit['variable']['firmware'],
@@ -981,15 +972,15 @@ function _guifi_radio_add_link2ap($nid, $device_id, $radiodev_counter, $ipv4 = N
   $queryAP = db_query(
     'SELECT i.id, i.radiodev_counter, i.mac, a.ipv4, a.netmask, a.id aid ' .
     'FROM {guifi_interfaces} i, {guifi_ipv4} a ' .
-    'WHERE i.device_id = %d ' .
-    '  AND i.interface_type in ("wLan/Lan","wLan") ' .
-    '  AND i.radiodev_counter=%d ' .
+    'WHERE i.device_id = :did ' .
+    '  AND i.interface_type in (\'wLan/Lan\',\'wLan\') ' .
+    '  AND i.radiodev_counter = :rc ' .
     '  AND a.interface_id=i.id',
-    $device_id, $radiodev_counter);
+    array(':did' => $device_id, ':rc' => $radiodev_counter));
 
   $link = array();
 
-  while ($ipAP = db_fetch_array($queryAP)) {
+  while ($ipAP = $queryAP->fetchAssoc()) {
     $item = _ipcalc($ipAP['ipv4'], $ipAP['netmask']);
 
     if( $ipv4 ) {
@@ -1093,15 +1084,15 @@ function guifi_radio_add_link2ap_confirm_submit(&$form,&$form_state) {
   $qAP = db_query(
     'SELECT i.id, i.radiodev_counter, i.mac, a.ipv4, a.netmask, a.id aid ' .
     'FROM {guifi_interfaces} i, {guifi_ipv4} a ' .
-    'WHERE i.device_id = %d ' .
-    '  AND i.interface_type in ("wLan/Lan","wLan") ' .
-    '  AND i.radiodev_counter=%d ' .
-    '  AND a.interface_id=i.id',
-    $device_id,$radiodev_counter);
+    'WHERE i.device_id = :did ' .
+    '  AND i.interface_type in (\'wLan/Lan\',\'wLan\') ' .
+    '  AND i.radiodev_counter = :rc ' .
+    '  AND a.interface_id = i.id',
+    array(':did' => $device_id, ':rc' => $radiodev_counter));
 
   $link = array();
 
-  while ($ipAP = db_fetch_array($qAP)) {
+  while ($ipAP = $qAP->fetchAssoc()) {
     $item = _ipcalc($ipAP['ipv4'],$ipAP['netmask']);
     $link['ipv4'] = guifi_ipcalc_find_ip($item['netid'],$ipAP['netmask'],$ips_allocated);
     if ($link['ipv4'] != NULL)
@@ -1225,13 +1216,13 @@ function guifi_radio_add_wds_confirm_submit(&$form,&$form_state) {
 
   // getting remote interface
   $remote_interface =
-    db_fetch_array(db_query(
+    db_query(
         "SELECT id " .
         "FROM {guifi_interfaces} " .
-        "WHERE device_id = %d " .
+        "WHERE device_id = :did " .
         "   AND (interface_type = 'wds/p2p' OR interface_class = 'wds/p2p') " .
-        "   AND radiodev_counter = %d",
-        $newLink['device_id'],$newLink['interface']['radiodev_counter']));
+        "   AND radiodev_counter = :rc",
+        array(':did' => $newLink['device_id'], ':rc' => $newLink['interface']['radiodev_counter']))->fetchAssoc();
 
   if ( $remote_interface['id'] == NULL ) {
     drupal_set_message(

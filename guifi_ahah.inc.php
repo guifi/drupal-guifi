@@ -170,26 +170,26 @@ function guifi_ahah_select_user(){
  * URL: http://guifi.net/guifi/js/select-node/%
  */
 function guifi_ahah_select_node(){
+
   $matches = array();
 
   $string = strtoupper(arg(3));
 
   $qry = db_query('SELECT ' .
-                  '  CONCAT(l.id,"-",z.nick,", ",l.nick) str '.
+                  '  CONCAT(l.id,\'-\',z.nick,\', \',l.nick) str '.
                   'FROM {guifi_location} l, {guifi_zone} z ' .
-                  'WHERE l.zone_id=z.id ' .
-                  '  AND (UPPER(CONCAT(l.id,"-",z.nick,", ",l.nick) LIKE "%'.
-                       $string.'%")'.
-                  '  OR (l.id like "%'.$string.'%"'.
-                  '  OR l.nick like "%'.$string.'%"'.
-                  '  OR z.nick like "%'.$string.'%"))'
-                 );
+                  'WHERE l.zone_id = z.id ' .
+                  '  AND (UPPER(CONCAT(l.id,\'-\',z.nick,\', \',l.nick) ' .
+                  '  LIKE :string)'.
+                  '  OR (l.id like :string'.
+                  '  OR l.nick like :string'.
+                  '  OR z.nick like :string))',array(':string' => '%' . db_like($string) .'%'));
   $c = 0;
-  while (($value = db_fetch_array($qry)) and ($c < 50)) {
+  while (($value = $qry->fetchAssoc()) and ($c < 50)) {
     $c++;
     $matches[$value['str']] = $value['str'];
   }
-  print drupal_to_js($matches);
+  print drupal_json_encode($matches);
   exit();
 }
 
@@ -219,7 +219,7 @@ function guifi_ahah_select_node_device(){
     $c++;
     $matches[$value['str']] = $value['str'];
   }
-  print drupal_to_js($matches);
+  print drupal_json_encode($matches);
   exit();
 }
 
@@ -1302,14 +1302,15 @@ function guifi_ahah_select_firmware_by_model(){
       $form['#post'] = array();
       $form = form_builder($form['form_id']['#value'] , $form, $form_state);
       $output = drupal_render($form['radio_settings']['variable']['firmware_id']);
-      drupal_json(array('status' => TRUE, 'data' => $output));
+
+      drupal_json_output(array('status' => TRUE, 'data' => $output));
     }
     else {
-      drupal_json(array('status' => FALSE, 'data' => ''));
+      drupal_json_output(array('status' => FALSE, 'data' => ''));
     }
   }
   else {
-    drupal_json(array('status' => FALSE, 'data' => ''));
+    drupal_json_output(array('status' => FALSE, 'data' => ''));
   }
   exit;
 }

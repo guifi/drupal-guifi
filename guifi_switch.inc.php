@@ -21,9 +21,9 @@ function guifi_ports_form($edit,&$form_weight) {
       SELECT mid, model, etherdev_max, optoports_max, m.opto_interfaces, f.name manufacturer
       FROM guifi_model_specs m, guifi_manufacturer f
       WHERE f.fid = m.fid
-      AND m.mid = ".$edit['mid']);
+      AND m.mid = :mid", array(':mid' => $edit['mid']));
 
-    $swmodel = db_fetch_object($querymid);
+    $swmodel = $querymid->fetchObject();
   }
 
   switch ($edit['type']) {
@@ -99,7 +99,7 @@ function guifi_ports_form($edit,&$form_weight) {
 
     $form[$port] = array(
       '#type'         => 'fieldset',
-      '#attributes'   => array('class'=>'fieldset-interface-port'),
+      '#attributes'   => array('class' => array('fieldset-interface-port')),
       '#prefix'       => '<div id="fieldset-port-'.$port.'">',
       '#suffix'       => '</div>',
       '#tree'         => TRUE,
@@ -111,7 +111,7 @@ function guifi_ports_form($edit,&$form_weight) {
       '#title'        => ($first_port) ? t('#') : false,
       '#options'	  => $eCountOpts,
       '#default_value'=> $port_count-1,
-      '#attributes'   => array('class'=>'interface-item'),
+      '#attributes'   => array('class' => array('interface-item')),
       '#weight'       => $form_weight++,
     );
 
@@ -127,12 +127,12 @@ function guifi_ports_form($edit,&$form_weight) {
       '#disabled'     => ($interface['deleted'])
                          or (in_array($edit['type'],array('switch'))) ?
                            TRUE : FALSE,
-      '#attributes'   => array('class'=>'interface-item'),
+      '#attributes'   => array('class' => array('interface-item')),
       '#weight'       => $form_weight++,
      );
      if ($form[$port]['interface_type']['#disabled'] == true) {
        $form[$port]['interface_type']['#value'] = $interface['interface_type'];
-       $form[$port]['interface_type']['#attributes'] = array('class'=>'interface-item-disabled');
+       $form[$port]['interface_type']['#attributes'] = array('class' => array('interface-item-disabled'));
        if (empty($interface['deleted'])) 
          $form[$port]['iname'] = array('#tree'=>true,'#type'=>'hidden','#value'=>$interface['interface_type']);
      }
@@ -147,7 +147,7 @@ function guifi_ports_form($edit,&$form_weight) {
       '#disabled'     => (in_array($interface['interface_type'],$opto_interfaces)) ? false : true,
       '#default_value'=> $interface['connector_type'],
       '#attributes'   => (in_array($interface['interface_type'],$opto_interfaces)) ?
-         array('class'=>'interface-item') : array('class'=>'interface-item-disabled'),
+         array('class' => array('interface-item')) : array('class' => array('interface-item-disabled')),
       '#weight'       => $form_weight++,
     );
 
@@ -167,8 +167,8 @@ function guifi_ports_form($edit,&$form_weight) {
        '#value'        => ($interface['connto_iid']) ?
           $dname.' / '.$dinterfaces[$interface['connto_iid']] :
           $dname,
-       '#attributes'   => (empty($dname)) ? array('class'=>'interface-item-available') :
-          array('class'=>'interface-item-disabled'),
+       '#attributes'   => (empty($dname)) ? array('class' => array('interface-item-available')) :
+          array('class' => array('interface-item-disabled')),
        '#weight'       => $form_weight++,
      );
      if (!($interface[deleted])) {
@@ -179,7 +179,7 @@ function guifi_ports_form($edit,&$form_weight) {
            drupal_get_path('module', 'guifi').'/icons/edit.png',
          '#attributes' => array(
             'title' => t('Edit dialog for connecting to another device'),
-            'class' => 'interface-item.form-button',
+            array('class' => array('interface-item.form-button')),
           ),
          '#ahah' => array(
            'path' => 'guifi/js/edit_cableconn/'.$port,
@@ -213,7 +213,7 @@ function guifi_ports_form($edit,&$form_weight) {
       '#size'         => 6,
       '#maxlength'    => 10,
       '#default_value'=> $interface['vlan'],
-      '#attributes'   => array('class'=>'interface-item'),
+      '#attributes'   => array('class' => array('interface-item')),
       '#weight'       => $form_weight++,
      );
     $form[$port]['comments'] = array(
@@ -223,7 +223,7 @@ function guifi_ports_form($edit,&$form_weight) {
       '#size'         => 40,
       '#maxlength'    => 60,
       '#default_value'=> $interface['comments'],
-      '#attributes'   => array('class'=>'interface-item'),
+      '#attributes'   => array('class' => array('interface-item')),
       '#weight'       => $form_weight++,
     );
     if ($interface[deleted]) {
@@ -270,7 +270,7 @@ function guifi_ports_form($edit,&$form_weight) {
         '#size'            => 60,
         '#maxlength'       => 128,
         '#element_validate'=> array('guifi_devicename_validate'),
-        '#attributes'   => array('class'=>'interface-item'),
+        '#attributes'   => array('class' => array('interface-item')),
         '#ahah'         => array(
           'path'          => 'guifi/js/select-device-interface/'.$port,
           'wrapper'       => 'fieldset-port-'.$port,
@@ -283,7 +283,7 @@ function guifi_ports_form($edit,&$form_weight) {
         '#parents'      => array('interfaces',$port,'if'),
         '#type'         => 'select',
         '#value'        => $interface['connto_iid'],
-        '#attributes'   => array('class'=>'interface-item'),
+        '#attributes'   => array('class' => array('interface-item')),
         '#options'      => $dinterfaces,
         '#ahah'         => array(
           'path'          => 'guifi/js/select-device-interface/'.$port,
@@ -347,7 +347,7 @@ function guifi_switch_form($edit, &$form_weight) {
     AND (instr(m.model_class,'switch') > 0)
     AND supported='Yes'
     ORDER BY manufacturer ASC");
-  while ($model = db_fetch_array($querymid)) {
+  while ($model = $querymid->fetchAssoc()) {
      $models_array[$model["mid"]] = $model["manufacturer"] .", " .$model["model"];
   }
   guifi_log(GUIFILOG_TRACE,'function guifi_switch_form(models)',$models_array);
@@ -360,7 +360,7 @@ function guifi_switch_form($edit, &$form_weight) {
     '#collapsible' => TRUE,
     '#tree' => FALSE,
     '#collapsed' => !is_null($edit['id']),
-    '#attributes'  => array('class'=>'fieldset-device-main'),
+    '#attributes'  => array('class' => array('fieldset-device-main')),
   );
 
   $form['settings']['variable'] = array('#tree' => TRUE);
@@ -406,28 +406,27 @@ function guifi_vinterface_save($iid,$did,$nid,&$to_mail) {
   guifi_log(GUIFILOG_TRACE,"function guifi_vinterface_save()",$ports);
 
   foreach ($ports as $kport => $vport) {
+    $dev = explode('-',$vport['did']);
+    $if = array(
+      'id'               => $vport['iid'],
+      'device_id'        => $did,
+      'etherdev_counter' => trim($vport['id']),
+      'interface_type'   => trim($vport['id']),
+      'connector_type'   => $vport['type'],
+      'vlan'             => $vport['vlan'],
+      'comments'         => $vport['comment'],
+      'connto_did'       => (is_numeric($dev[0])) ? $dev[0] : 0,
+      'connto_iid'       => (is_numeric($dev[0])) ? $vport['if'] : 0,
+    );
 
-  	$dev = explode('-',$vport['did']);
-
-  	$if = array(
-  	  'id'               => $vport['iid'],
-  	  'device_id'        => $did,
-  	  'etherdev_counter' => trim($vport['id']),
-  	  'interface_type'   => trim($vport['id']),
-  	  'connector_type'   => $vport['type'],
-  	  'vlan'             => $vport['vlan'],
-  	  'comments'         => $vport['comment'],
-  	  'connto_did'       => (is_numeric($dev[0])) ? $dev[0] : 0,
-  	  'connto_iid'       => (is_numeric($dev[0])) ? $vport['if'] : 0,
-  	);
-
-  	// retrieve existing values to $if_current
-  	$sql_if_exists =
+    // retrieve existing values to $if_current
+    $sql_if_exists = db_query(
       'SELECT id, device_id, etherdev_counter, interface_type, connector_type, vlan, comments, connto_did, connto_iid ' .
       'FROM {guifi_interfaces} i ' .
-      'WHERE id = ' .$if['id'] .
-      ' AND device_id = '.$did;
-  	$if_current = db_fetch_array(db_query($sql_if_exists));
+      'WHERE id = :id' .
+      ' AND device_id = :did',
+      array(':id' => $if['id'], ':did' => $did));
+    $if_current = $sql_if_exists->fetchAssoc();
 
     // if new interface, insert
     if (!$if_current)
@@ -636,7 +635,7 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
   $form = array(
     '#type'         => 'fieldset',
     '#parents'      => array($iClass,$vinterface[id]),
-    '#attributes'   => array('class'=>'fieldset-interface-port'),
+    '#attributes'   => array('class' => array('fieldset-interface-port')),
     '#prefix'       => '<div id="fieldset-port-'.$vinterface[id].'">',
     '#suffix'       => '</div>',
     '#tree'         => TRUE,
@@ -651,7 +650,7 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
     '#options'      => guifi_types($iType),
     '#default_value'=> $vinterface[interface_class],
     '#disabled'     => (($vlan_wds) ? TRUE : FALSE) OR (($vinterface['deleted']) ? TRUE : FALSE),
-    '#attributes'   => array('class'=>'interface-item'),
+    '#attributes'   => array('class' => array('interface-item')),
   );
 
 
@@ -663,12 +662,12 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
     '#size'         => 20,
     '#maxlength'    => 40,
 //    '#disabled'     => (($vlan_wds) ? TRUE : FALSE) OR (($vinterface['deleted']) ? TRUE : FALSE),
-    '#attributes'   => array('class'=>'interface-item'),
+    '#attributes'   => array('class' => array('interface-item')),
    );
 
    if ($form['interface_type']['#disabled']) {
      $form['interface_type']['#value'] = $vinterface[interface_type];
-     $form['interface_type']['#attributes'] = array('class'=>'interface-item-disabled');
+     $form['interface_type']['#attributes'] = array('class' => array('interface-item-disabled'));
      if (empty($vinterface['deleted'])) 
        $form['iname'] = 
          array('#type'=>'hidden','#value'=>$vinterface['interface_type']);
@@ -683,7 +682,7 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
     '#options'      => array_diff($eInterfaces,array($vinterface[interface_type])),
     '#default_value'=> $vinterface['related_interfaces'],
     '#disabled'     => (($vlan_wds) ? TRUE : FALSE) OR (($vinterface['deleted']) ? TRUE : FALSE),
-    '#attributes'   => array('class'=>'interface-item'),
+    '#attributes'   => array('class' => array('interface-item')),
   );  
   if ($iType == 'aggregation') {
   // if ($iClass == 'vlans') {
@@ -703,7 +702,7 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
     '#maxlength'    => 10,
     '#default_value'=> $vinterface[vlan],
     '#disabled'     => (($vlan_wds) ? TRUE : FALSE) OR (($vinterface['deleted']) ? TRUE : FALSE),
-    '#attributes'   => array('class'=>'interface-item'),
+    '#attributes'   => array('class' => array('interface-item')),
   );
 
   $form['comments'] = array(
@@ -714,8 +713,8 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
     '#disabled'     => ($vinterface['deleted']) ? TRUE : FALSE,
     '#default_value'=> $vinterface[comments],
     '#attributes'   => ($vinterface['deleted']) ?
-      array('class'=>'interface-item-disabled') :
-      array('class'=>'interface-item'),
+      array('class' => array('interface-item-disabled')) :
+      array('class' => array('interface-item')),
   );
   if ($vinterface[deleted])
     $form['comments']['#value'] = t('will be deleted. press "reset" to cancel');

@@ -29,9 +29,8 @@ function guifi_ipv4_add($zone) {
 function guifi_ipv4_delete($id) {
   $result = db_query('SELECT *
                       FROM {guifi_networks}
-                      WHERE id = %d',
-            $id);
-  $edit = db_fetch_array($result);
+                      WHERE id = :id', array(':id' => $id));
+  $edit = $result->fetchAssoc();
 
   if ($_POST['confirm']) {
     $msg = t('The network %base/%mask (%type) has been DELETED by %user.',
@@ -87,65 +86,54 @@ function guifi_ipv4_form($form_state, $params = array()) {
                          'mesh' => t('mesh - for any device in Mesh'),
                          'reserved' => t('reserved - used for reserved addressing'));
 
-  // $network_types = array_merge($network_types,guifi_types('adhoc'));
-
   if (empty($form_state['values'])) {
     // first execution, initializing the form
 
     // if new network, initialize the zone
-	  if ($params['add']) {
-		  $zone_id=$params['add'];
+    if ($params['add']) {
+      $zone_id=$params['add'];
       $zone = node_load($zone_id);
 
-		  // if is root zone, don't find next value'
-		  if ($zone_id != guifi_zone_root()) {
+      // if is root zone, don't find next value'
+      if ($zone_id != guifi_zone_root()) {
+        // not root zone, fill default values looking to next available range
+        $zone = node_load($zone_id);
+        $ndefined = db_query('SELECT count(*) c FROM guifi_networks WHERE zone = :zid', array(':zid' => $zone_id))->fetchObject();
 
+        switch ($ndefined->c) {
+          case 0: $mask='255.255.255.0'; break;
+          case 1: $mask='255.255.254.0'; break;
+          case 2: $mask='255.255.252.0'; break;
+          case 3: $mask='255.255.248.0'; break;
+          default: $mask='255.255.240.0';
+        }
 
-			  // not root zone, fill default values looking to next available range
-			  $zone = node_load($zone_id);
+        $form_state['values']['zone'] = $zone_id;
+        $ips_allocated = guifi_ipcalc_get_ips('0.0.0.0','0.0.0.0', NULL,1);
+        $network_type='public';
+        $allocate = 'No';
+        $net = guifi_ipcalc_get_subnet_by_nid($zone->master,
+        $mask,
+        $network_type,
+        $ips_allocated,
+        $allocate,   // never allocate the obtained range at guifi_networks
+        TRUE);   // verbose output
 
-			  $ndefined = db_fetch_object(db_query('SELECT count(*) c FROM guifi_networks WHERE zone=%d',$zone_id));
-
-			  switch ($ndefined->c) {
-				  case 0: $mask='255.255.255.0'; break;
-				  case 1: $mask='255.255.254.0'; break;
-				  case 2: $mask='255.255.252.0'; break;
-				  case 3: $mask='255.255.248.0'; break;
-				  default: $mask='255.255.240.0';
-			  }
-
-			  $form_state['values']['zone'] = $zone_id;
-
-			  $ips_allocated = guifi_ipcalc_get_ips('0.0.0.0','0.0.0.0', NULL,1);
-			  $network_type='public';
-			  $allocate = 'No';
-
-			  $net = guifi_ipcalc_get_subnet_by_nid($zone->master,
-				  $mask,
-					$network_type,
-					$ips_allocated,
-					$allocate,   // never allocate the obtained range at guifi_networks
-					TRUE);   // verbose output
-
-			  if ($net) {
-				  $item=_ipcalc($net,$mask);
-				  $form_state['values']['base']=$net;
-				  $form_state['values']['mask']=$mask;
-			  } else
-				  drupal_set_message(t('It was not possible to find %type space for %mask',
-					  array('%type' => $network_type,
-						  '%mask' => $mask)),
-				  'error');
-		  } // if is not the root zone
-
+        if ($net) {
+          $item=_ipcalc($net,$mask);
+          $form_state['values']['base']=$net;
+          $form_state['values']['mask']=$mask;
+        } else
+          drupal_set_message(t('It was not possible to find @type space for @mask',
+          array('@type' => $network_type, '@mask' => $mask)),'error');
+        } // if is not the root zone
     }
 
     // if existent network, get the network and edit
     if ($params['edit'])
-      $form_state['values'] = db_fetch_array(db_query('SELECT *
-                                                       FROM {guifi_networks}
-                                                       WHERE id = %d',
-          $params['edit']));
+      $form_state['values'] = db_query('SELECT *
+                                        FROM {guifi_networks}
+                                        WHERE id = :id', array(':id' => $params['edit']))->fetchAssoc();
   }
 
   $form['base'] = array(
@@ -560,7 +548,7 @@ function guifi_ipv4i_form($ipv4, $k, $first_port = true, $eInterfaces) {
   foreach ($eInterfaces as $key => $iface) {
     if (strpos($key,','))
       continue;
-    $radio_iid = db_fetch_array(db_query("SELECT * FROM {guifi_interfaces} WHERE id = %d",$key));
+    $radio_iid = db_query("SELECT * FROM {guifi_interfaces} WHERE id = :id", array(':id' => $key))->fetchAssoc();
     if ( $radio_iid['interface_type'] === 'wds/p2p')
       if ( empty($radio_iid['interface_class']))
         $iface = 'WDS-wlan'.($radio_iid['radiodev_counter']+1);
