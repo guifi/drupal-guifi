@@ -154,25 +154,23 @@ function guifi_links_form($link,$ipv4,$tree,$multilink) {
     '#suffix'=>         '</td>',
   );
 
-  // remote interface (cable links)
+  // remote interface dropdown (cable links)
   if ($link['link_type']=='cable') {
     $f['l']['remote_interface_type'] =array(
-      '#type' =>          'textfield',
-      '#parents'=>        array_merge(
-                            $tree,
-                            array('links',
-                              $link['id'],
-                              'interface',
-                              'interface_type'
-                            )
-                          ),
-      '#title' =>         t("Remote interface"),
-      '#default_value' => $link['interface']['interface_type'],
-//      '#options' =>       guifi_get_possible_interfaces($remote_did),
-      '#size'=>           10,
-      '#maxzise'=>        60,
-      '#prefix'=>         '<td>',
-      '#suffix'=>         '</td>',
+      '#type'           =>  'select',
+      '#parents'        =>  array_merge(
+                              $tree,
+                              array('links',
+                                $link['id'],
+                                'interface',
+                                'interface_type'
+                              )
+                            ),
+      '#title'          =>  t("Remote interface"),
+      '#default_value'  =>  $link['interface']['interface_type'],
+      '#options'        =>  guifi_get_possible_interfaces_by_id($link['device_id']),
+      '#prefix'         =>  '<td>',
+      '#suffix'         =>  '</td>',
     );
   }
 
