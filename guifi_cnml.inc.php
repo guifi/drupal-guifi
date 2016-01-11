@@ -13,7 +13,6 @@
  * @return
  */
 function guifi_cnml($cnmlid,$action = 'help') {
-
   guifi_log(GUIFILOG_TRACE,'function guifi_cnml()',$cnmlid);
 
   if (!is_numeric($cnmlid))
@@ -35,7 +34,8 @@ function guifi_cnml($cnmlid,$action = 'help') {
      $output .= '<p>'.t('The <b>C</b>ommunity <b>N</b>etwork <b>M</b>arkup <b>L</b>anguage (<a href="'.base_path().'node/3521">CNML</a>) is a XML format to interchange network information between services or servers.').'</p>';
      $output .= '<p>'.t('<b>IMPORTANT LEGAL NOTE:</b> This network information is under the <a href="http://guifi.net/ComunsSensefils/">Comuns Sensefils</a> license, and therefore, available for any other network under the same licensing. If is not your case, you should ask for permission before using it.</a>').'</p>';
      $output .= "</div>";
-     print theme('page',$output,t('export %zname% in CNML format',array('%zname%' => $z->title)));
+     $output .= t('export %zname% in CNML format',array('%zname%' => $zone->title));
+     return $output;
      exit;
   }
 
@@ -76,20 +76,20 @@ function guifi_cnml($cnmlid,$action = 'help') {
      $sql_services = 'SELECT s.* FROM {guifi_services} s';
      break;
    case 'node':
-     $qnode = db_query(sprintf(
-       'SELECT l.*,r.body body ' .
-       'FROM {guifi_location} l, {node} n, {node_revisions} r ' .
-       'WHERE l.id=n.nid AND n.vid=r.vid ' .
+     $qnode = db_query(
+       'SELECT l.*,r.body_value body ' .
+       'FROM {guifi_location} l, {node} n, {field_revision_body} r ' .
+       'WHERE l.id=n.nid AND n.vid=r.entity_id ' .
        '  AND l.id in (:id)',
-       array(':id' => $cnmlid)));
+       array(':id' => $cnmlid));
      while ($node = $qnode->fetchObject()) {
        $tree[] = $node;
      }
-     $sql_devices = sprintf('SELECT * FROM {guifi_devices} d WHERE nid in (:id)', array(':id' => $cnmlid));
-     $sql_radios = sprintf('SELECT r.* FROM {guifi_radios} r, {guifi_devices} d WHERE d.nid in (:id) AND d.id=r.id ORDER BY r.radiodev_counter ASC', array(':id' => $cnmlid));
-     $sql_interfaces = sprintf('SELECT i.*,a.ipv4,a.id ipv4_id, a.netmask FROM {guifi_devices} d, {guifi_interfaces} i, {guifi_ipv4} a WHERE d.nid in (:id) AND d.id=i.device_id AND i.id=a.interface_id', array(':id' => $cnmlid));
-     $sql_links = sprintf('SELECT l1.id, l1.device_id, l1.interface_id, l1.ipv4_id, l2.device_id linked_device_id, l2.nid linked_node_id, l2.interface_id linked_interface_id, l2.ipv4_id linked_radiodev_counter, l1.link_type, l1.flag status FROM {guifi_links} l1, {guifi_links} l2 WHERE l1.nid in (:id) AND l1.id=l2.id AND l1.device_id != l2.device_id', array(':id' => $cnmlid));
-     $sql_services = sprintf('SELECT s.*, r.body FROM {guifi_devices} d, {guifi_services} s, {node} n, {node_revisions} r WHERE d.nid in (:id) AND d.id=s.device_id AND n.nid=s.id AND n.vid=r.vid', array(':id' => $cnmlid));
+     $sql_devices = 'SELECT * FROM {guifi_devices} d WHERE nid in (:id)';
+     $sql_radios = 'SELECT r.* FROM {guifi_radios} r, {guifi_devices} d WHERE d.nid in (:id) AND d.id=r.id ORDER BY r.radiodev_counter ASC';
+     $sql_interfaces = 'SELECT i.*,a.ipv4,a.id ipv4_id, a.netmask FROM {guifi_devices} d, {guifi_interfaces} i, {guifi_ipv4} a WHERE d.nid in (:id) AND d.id=i.device_id AND i.id=a.interface_id';
+     $sql_links = 'SELECT l1.id, l1.device_id, l1.interface_id, l1.ipv4_id, l2.device_id linked_device_id, l2.nid linked_node_id, l2.interface_id linked_interface_id, l2.ipv4_id linked_radiodev_counter, l1.link_type, l1.flag status FROM {guifi_links} l1, {guifi_links} l2 WHERE l1.nid in (:id) AND l1.id=l2.id AND l1.device_id != l2.device_id';
+     $sql_services = 'SELECT s.*, r.body_value FROM {guifi_devices} d, {guifi_services} s, {node} n, {field_revision_body} r WHERE d.nid in (:id) AND d.id=s.device_id AND n.nid=s.id AND n.vid=r.entity_id';
      break;
    case 'nodecount':
      $CNML=fnodecount($cnmlid);
@@ -132,7 +132,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
   // load devices in memory for faster execution
   global $devices;
 
-  $qdevices = db_query($sql_devices);
+  $qdevices = db_query($sql_devices, array(':id' => $cnmlid));
   while ($device = $qdevices->fetchObject()) {
       $devices[$device->nid][$device->id] = $device;
   }
@@ -140,7 +140,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
   // load radios in memory for faster execution
   global $radios;
 
-  $qradios = db_query($sql_radios);
+  $qradios = db_query($sql_radios, array(':id' => $cnmlid));
   while ($radio = $qradios->fetchObject()) {
       $radios[$radio->nid][$radio->id][$radio->radiodev_counter] = $radio;
   }
@@ -148,7 +148,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
   // load interfaces in memory for faster execution
   global $interfaces;
 
-  $qinterfaces = db_query($sql_interfaces);
+  $qinterfaces = db_query($sql_interfaces, array(':id' => $cnmlid));
   while ($interface = $qinterfaces->fetchObject()) {
       $interfaces[$interface->device_id][$interface->radiodev_counter][$interface->interface_id][] = $interface;
   }
@@ -156,7 +156,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
   // load links in memory for faster execution
   global $links;
 
-  $qlinks = db_query($sql_links);
+  $qlinks = db_query($sql_links, array(':id' => $cnmlid));
   while ($link = $qlinks->fetchObject()) {
       $links[$link->device_id][$link->interface_id][$link->id] = $link;
   }
@@ -164,7 +164,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
   // load services in memory for faster execution
   global $services;
 
-  $qservices = db_query($sql_services);
+  $qservices = db_query($sql_services, array(':id' => $cnmlid));
   while ($service = $qservices->fetchObject()) {
       $services[$service->device_id][$service->id] = $service;
   }
@@ -226,7 +226,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
     if (is_array($devices[$node->id])) if (count($devices[$node->id])) {
       foreach ($devices[$node->id] as $id => $device) {
         if ($action == 'detail') {
-          $deviceXML = $nodeXML->addChild('device',htmlspecialchars($device->comment,ENT_QUOTES));
+          $deviceXML = $nodeXML->addChild('device');
          foreach ($device as $key => $value) {
           if ($value) switch ($key) {
             case 'body': comment;
@@ -263,7 +263,7 @@ function guifi_cnml($cnmlid,$action = 'help') {
         if (is_array($radios[$node->id][$device->id])) if (count($radios[$node->id][$device->id])) {
           foreach ($radios[$node->id][$device->id] as $id => $radio) {
             if ($action == 'detail') {
-              $radioXML = $deviceXML->addChild('radio',htmlspecialchars($radio->comment,ENT_QUOTES));
+              $radioXML = $deviceXML->addChild('radio');
               $radioXML->addAttribute('id',$radio->radiodev_counter);
               $radioXML->addAttribute('device_id',$device->id);
               foreach ($radio as $key => $value) {
@@ -1404,8 +1404,8 @@ function print_pretty_CNML($cnml) {
 
    $output = $dom->saveXML();
 
-   drupal_set_header('Content-Type: application/xml; charset=utf-8');
-   drupal_set_header("Content-length: " . strlen($output));
+   drupal_add_http_header('Content-Type: application/xml; charset=utf-8');
+   drupal_add_http_header("Content-length: " . strlen($output));
 
    echo $output;
 }

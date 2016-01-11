@@ -707,9 +707,9 @@ function guifi_list_services_query($param, $typestr = 'by zone', $service = '%')
 /*
  * guifi_list_services
  */
-function theme_guifi_services_list($node, $service = '%') {
+function theme_guifi_services_list($node, $device = FALSE) {
 
-  if (is_numeric($node)) {
+  if ($device == TRUE) {
     $typestr = t('by device');
   } else {
     if (empty($node->id))
@@ -736,7 +736,7 @@ function theme_guifi_services_list($node, $service = '%') {
 
   switch ($typestr) {
     case t('by node'):
-      drupal_set_title(t('services @ %node',array('%node' => $node->title)));
+      drupal_set_title(t('services @ @node',array('@node' => $node->title)));
       drupal_set_breadcrumb(guifi_location_ariadna($node,'node/%d/view/services'));
       $output .= theme_links(module_invoke_all('link', 'node', $node, FALSE));
       break;

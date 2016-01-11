@@ -25,9 +25,9 @@ function guifi_devel_services($service_id=null, $op=null) {
 
   $headers = array(t('Service ID'), t('Text'), t('Description'), t('Edit'), t('Delete'));
 
-  $sql = db_query('SELECT * FROM {guifi_types} where type="service" ORDER BY id ASC');
+  $sql = db_query('SELECT * FROM {guifi_types} where type = \'service\' ORDER BY id ASC');
 
-  while ($service = db_fetch_object($sql)) {
+  while ($service = $sql->fetchObject()) {
     $rows[] = array($service->id,
                     $service->text,
                     $service->description,
@@ -43,16 +43,16 @@ function guifi_devel_services($service_id=null, $op=null) {
               )));
   }
 
-  $output .= theme('table',$headers,$rows,array('class'=>'device-data-med'));
-  print theme('page',$output, FALSE);
-  return;
+  $output .= theme('table',array('header' => $headers, 'rows' => $rows, 'attributes' => array('class'=> array('device-data-med'))));
+
+  return $output;
 }
 
 // Services Form
 function guifi_devel_services_form($form_state, $service_id) {
 
-  $sql = db_query('SELECT * FROM {guifi_types} WHERE type = "service" and id = %d', $service_id);
-  $service = db_fetch_object($sql);
+  $sql = db_query('SELECT * FROM {guifi_types} WHERE type = \'service\' and id = :id', array(':id' => $service_id));
+  $service = $sql->fetchObject();
 
   if ($service_id == 'New' ) {
    $form['new'] = array('#type' => 'hidden', '#value' => TRUE);
@@ -112,7 +112,7 @@ function guifi_devel_services_delete_confirm($form_state,$id) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_service_delete_confirm()',$id);
 
   $form['id'] = array('#type' => 'hidden', '#value' => $id);
-  $qry= db_fetch_object(db_query("SELECT text FROM {guifi_types} WHERE type = 'service' and id = %d", $id));
+  $qry = db_query("SELECT text FROM {guifi_types} WHERE type = 'service' and id = :id", array(':id' => $id))->fetchObject();
   return confirm_form(
     $form,
     t('Are you sure you want to delete the service " %service "?',
@@ -149,14 +149,14 @@ function guifi_devel_devices($devid=null, $op=null) {
     case 'add':
      $devid = 'New';
      $jquery1 = HelperMultipleSelect('guifi-devel-devices-form','firmwaresCompatibles', 'firmwaresTots');
-     drupal_add_js("if (Drupal.jsEnabled) { $jquery1 }", 'inline');
+      drupal_add_js('jQuery(document).ready(function ()  { $jquery1 });', 'inline');
      return drupal_get_form('guifi_devel_devices_form',$devid);
   }
   switch($op) {
     case 'edit':
 
       $jquery1 = HelperMultipleSelect('guifi-devel-devices-form','firmwaresCompatibles', 'firmwaresTots');
-      drupal_add_js("if (Drupal.jsEnabled) { $jquery1 }", 'inline');
+      drupal_add_js('jQuery(document).ready(function ()  { $jquery1 });', 'inline');
       return drupal_get_form('guifi_devel_devices_form',$devid);
 
     case 'duplicate':
@@ -195,7 +195,7 @@ function guifi_devel_devices($devid=null, $op=null) {
 
   $manufacturer = 'none';
   $manufacturers = array();
-  while ($dev = db_fetch_object($sql)) {
+  while ($dev = $sql->fetchObject()) {
 
   	$aclass = array();
   	if (!empty($dev->model_class)) {
@@ -243,16 +243,15 @@ function guifi_devel_devices($devid=null, $op=null) {
   foreach ($manufacturers as $k => $v)
     $output .= '<a href="#M'.($k + 1).'">'.$v.'</a> - ';
 
-  $output .= '<hr>'.theme('table',$headers,$rows,array('class' => 'device-data'));
-  print theme('page',$output, FALSE);
-  return;
+  $output .= '<hr>'.theme('table', array('header' => $headers, 'rows' => $rows, ));
+  return $output;
 }
 
 // Duplicate Device Form
 function guifi_devel_devices_duplicate_form($form_state, $devid) {
 
-  $sql = db_query('SELECT * FROM {guifi_model_specs} WHERE mid = %d', $devid);
-  $dev = db_fetch_object($sql);
+  $sql = db_query('SELECT * FROM {guifi_model_specs} WHERE mid = :did', array(':did' => $devid));
+  $dev = $sql->fetchObject();
 
   // indicador de new pq volem insertar
   $form['new'] = array('#type' => 'hidden', '#value' => TRUE);
@@ -280,21 +279,21 @@ function guifi_devel_devices_duplicate_form($form_state, $devid) {
 }
 
 // Device Models Form
-function guifi_devel_devices_form($form_state, $devid) {
+function guifi_devel_devices_form($form_state, $formx, $devid) {
   global $user;
 
   if ($devid == 'New' ) {
     $form['new'] = array('#type' => 'hidden', '#value' => TRUE);
 
   } else {
-    $sql = db_query('SELECT * FROM {guifi_model_specs} WHERE mid = %d', $devid);
-    $dev = db_fetch_object($sql);
+    $sql = db_query('SELECT * FROM {guifi_model_specs} WHERE mid = :mid', array(':mid' => $devid));
+    $dev = $sql->fetchObject();
     $dev->arr_model_class = explode('|',$dev->model_class);
     $form['mid'] = array('#type' => 'hidden','#value' => $devid);
   }
 
   $query = db_query('SELECT * FROM {guifi_manufacturer}');
-  while ($manufacturers = db_fetch_array($query)) {
+  while ($manufacturers = $query->fetchAssoc()) {
      $manuf_array[$manufacturers["fid"]] = $manufacturers["name"];
   }
   $form_weight=0;
@@ -303,7 +302,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#type'        => 'fieldset',
     '#title'       => (isset($form['new'])) ? t('General'):
       t('General').' ('.$dev->model.' - '.implode(', ',$dev->arr_model_class).')',
-    '#attributes'  => array('class'=>"model-item"),
+    '#attributes'  => array('class' => array("model-item")),
     '#collapsible' => TRUE,
     '#collapsed'   => (isset($form['new'])) ? FALSE : TRUE,
  );
@@ -390,7 +389,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#title'       => ($dev->etherdev_max) ?
       t('Ethernet').' ('.$dev->etherdev_max.' ports)' :
       t('Ethernet'),
-    '#attributes'  => array('class'=>"model-item"),
+    '#attributes'  => array('class' => array("model-item")),
     '#collapsible' => TRUE,
     '#collapsed'   => ($dev->etherdev_max) ? TRUE: FALSE,
     '#weight' => $form_weight++,
@@ -422,7 +421,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#title'       => ($dev->optoports_max) ?
       t('Fiber Optics').' ('.$dev->optoports_max.' ports)' :
       t('Fiber Optics'),
-    '#attributes'  => array('class'=>"model-item"),
+    '#attributes'  => array('class' => array("model-item")),
     '#collapsible' => TRUE,
     '#collapsed'   => ($dev->optoports_max) ? TRUE : FALSE,
     '#weight' => $form_weight++,
@@ -456,7 +455,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#title'       => ($dev->radiodev_max) ?
       t('Wireless').' ('.$dev->radiodev_max.' ports)' :
       t('Wireless'),
-    '#attributes'  => array('class'=>"model-item"),
+    '#attributes'  => array('class' => array("model-item")),
     '#collapsible' => TRUE,
     '#collapsed'   => ($dev->radiodev_max) ? TRUE : FALSE,
     '#weight' => $form_weight++,
@@ -518,7 +517,7 @@ function guifi_devel_devices_form($form_state, $devid) {
     '#type'        => 'fieldset',
     '#access'      => in_array('wireless' ,$dev->arr_model_class) || in_array('router',$dev->arr_model_class),
     '#title'       => t('Firmware'),
-    '#attributes'  => array('class'=>"model-item"),
+    '#attributes'  => array('class' => array("model-item")),
     '#collapsible' => TRUE,
     '#collapsed'   => FALSE,
     '#weight' => $form_weight++,
@@ -540,10 +539,10 @@ function guifi_devel_devices_form($form_state, $devid) {
                     from
                     guifi_firmware f
                     left join
-                    guifi_configuracioUnSolclic usc ON usc.fid = f.id  and usc.mid = %d order by nom asc", $devid);
+                    guifi_configuracioUnSolclic usc ON usc.fid = f.id  and usc.mid = :did order by nom asc", array(':did' => $devid));
 
 
-  while ($firmwares = db_fetch_array($query)) {
+  while ($firmwares = $query->fetchAssoc()) {
     //echo "<hr>firmwares[fid]=". $firmwares["fid"] ."firmwares[mid]=". $firmwares["mid"]. " firmwares[nom]=". $firmwares["nom"];
     //echo "<br>firmwares[fid]=". firmwares["fid"];
     if ($firmwares["mid"]==$devid)
@@ -566,7 +565,7 @@ function guifi_devel_devices_form($form_state, $devid) {
       '#prefix' => '<tr><td class="mselects" align="left" colspan="2"><table style="width:575px"><tr><td style="width:250px">',
       '#suffix' => '</td><td  style="width:50px">',
       '#weight' => $form_weight++,
-      '#attributes'=>array('style'=>'width:250px;height:350px')
+      '#attributes'=>array('style' => array('width:250px;height:350px'))
   );
 
   $disponiblesButtonOne = '<input type="button" value=">" id="associatsButtonOne" class="selectButtons" style="width:40px;margin:5px 0;">';
@@ -592,7 +591,7 @@ function guifi_devel_devices_form($form_state, $devid) {
         '#prefix' => $botons. '</td><td  style="width:250px">',
         '#suffix' => '</td></tr></table></td></tr>',
         '#weight' => $form_weight++,
-        '#attributes'=>array('style'=>'width:250px;height:350px')
+        '#attributes'=>array('style' => array('width:250px;height:350px'))
   );
 
   return $form;
@@ -619,8 +618,8 @@ function guifi_devel_devices_duplicate_form_submit($form, &$form_state) {
 
   $originalmid = $form_state['values']['originalmid'];
 
-  $sql = db_query('SELECT * FROM {guifi_model_specs} WHERE mid = %d', $originalmid);
-  $originaldev = db_fetch_object($sql);
+  $sql = db_query('SELECT * FROM {guifi_model_specs} WHERE mid = :mid', array(':mid' => $originalmid));
+  $originaldev = $sql->fetchObject();
 
   foreach($originaldev as $property => $value)  {
 
@@ -637,8 +636,8 @@ function guifi_devel_devices_duplicate_form_submit($form, &$form_state) {
   unset($form_state['values']['form_id']);
 
   // recuperar els firmwares suportats del model original
-  $sql= db_query("SELECT distinct(fid) FROM {guifi_configuracioUnSolclic} WHERE mid = %d order by fid asc", $originalmid);
-  while ($originalFirms = db_fetch_object($sql)) {
+  $sql= db_query("SELECT distinct(fid) FROM {guifi_configuracioUnSolclic} WHERE mid = :mid order by fid asc", array(':mid' => $originalmid));
+  while ($originalFirms = $sql->fetchObject()) {
     $form_state['values']['firmwaresCompatibles'][$originalFirms->fid] = $originalFirms->fid;
   }
 
@@ -670,8 +669,8 @@ function guifi_devel_devices_save($edit, $originalmid=null) {
   }
 
   // recollida de parametresFirmware actuals
-  $sql= db_query("SELECT distinct(fid), plantilla FROM {guifi_configuracioUnSolclic} WHERE mid = %d order by fid asc", $midFirms);
-  while ($oldFirms = db_fetch_object($sql)) {
+  $sql= db_query("SELECT distinct(fid), plantilla FROM {guifi_configuracioUnSolclic} WHERE mid = :mid order by fid asc", array(':mid' => $midFirms));
+  while ($oldFirms = $sql->fetchObject()) {
     $alreadyPresent[] = $oldFirms->fid;
     $plantilles[$oldFirms->fid] =  $oldFirms->plantilla;
   }
@@ -699,7 +698,7 @@ function guifi_devel_devices_save($edit, $originalmid=null) {
 
          // TODO si fem el params = de sobre aleshores no cal tornar a el ultim mid, ja em ve del insert!
          // recuperem el id del uscid que acabem de crear
-         $uscid = db_fetch_array(db_query("SELECT max(id) mid FROM {guifi_configuracioUnSolclic} "));
+         $uscid = db_query("SELECT max(id) mid FROM {guifi_configuracioUnSolclic} ")->fetchAssoc();
 
          // aqui cal agafar tots els parametres del firmware i entrarlos a la taula guifi_parametresConfiguracioUnsolclic
          crearParametresConfiguracioUSC($uscid['mid'], $firmware, $to_mail, $user->id);
@@ -714,8 +713,8 @@ function guifi_devel_devices_save($edit, $originalmid=null) {
       if (!in_array($firmware, $edit['firmwaresCompatibles'])) {
         // IMPORTANT abans de esborrar comprovar que no tinguin configuracions USC validades
 
-        $sql = db_query('SELECT id as uscid, enabled  FROM {guifi_configuracioUnSolclic} WHERE mid=%d and fid=%d ', $edit['mid'], $firmware);
-        $configuracions = db_fetch_object($sql);
+        $sql = db_query('SELECT id as uscid, enabled  FROM {guifi_configuracioUnSolclic} WHERE mid = :mid and fid = :fid ', array(':mid' => $edit['mid'], ':fid' => $firmware));
+        $configuracions = $sql->fetchObject();
 
         // si la configuracion USC no esta enabled la borrem
         if (!$configuracions->enabled) {
@@ -946,7 +945,7 @@ function guifi_devel_firmware_form($form_state, $firmid) {
     '#prefix' => '<table style="width:575px"><tr><td style="width:250px">',
     '#suffix' => '</td><td  style="width:50px">',
     '#weight' => $form_weight++,
-    '#attributes'=>array('style'=>'width:250px;height:350px')
+    '#attributes'=>array('style' => array('width:250px;height:350px'))
   );
 
   $disponiblesButtonOne = '<input type="button" value=">" id="associatsButtonOne" class="selectButtons" style="width:40px;margin:5px 0;">';
@@ -971,7 +970,7 @@ function guifi_devel_firmware_form($form_state, $firmid) {
     '#prefix' => $botons. '</td><td>',
     '#suffix' => '</td></tr></table>',
     '#weight' => $form_weight++,
-    '#attributes'=>array('style'=>'width:250px;height:350px')
+    '#attributes'=>array('style' => array('width:250px;height:350px'))
   );
 
   $form['submit'] = array(

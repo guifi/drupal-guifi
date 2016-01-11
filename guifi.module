@@ -1733,7 +1733,7 @@ function guifi_counters_block() {
       NULL,
       variable_get('guifi_thousand', '.')
     ) .'</p>');
-  $content = theme('table', $header, $rows);
+  $content = theme('table', array('header' => $header, 'rows' => $rows));
   $content .= '<div class="more-link">'.
     l(t('node list and maps...'),
       'node/'. guifi_zone_root(),
@@ -1826,8 +1826,8 @@ function guifi_counters_block() {
     );
   $content .= theme(
     'table',
-    array(t('Wireless<br />links'),
-      '<p align="right">#</p>', t('kms.')), $rows);
+    array('header' => array(t('Wireless<br />links'),
+      '<p align="right">#</p>', t('kms.')), 'rows' => $rows));
 
   $content .= t('Link counters obtained in %secs seconds',
     array('%secs' => number_format((microtime(TRUE) - $ntime), 4)));
@@ -1974,7 +1974,6 @@ function guifi_display_block_1() {
 function guifi_node_view($node, $view_mode, $langcode) {
 
   switch ($node->type) {
-    case 'node':
     case 'guifi_zone':
     $links['cnml'] = array(
               'title' => t('CNML'),
@@ -2006,12 +2005,11 @@ function guifi_node_view($node, $view_mode, $langcode) {
               );
     }
       break;
-    case 'node':
     case 'guifi_location':
     $links['cnml'] = array(
               'title' => t('CNML'),
               'attributes' => array('title' => t('export zone in CNML format')),
-              'href' => "guifi/cnml/$node->nid",
+              'href' => "guifi/cnml/$node->nid/node",
             );
       break;
   }
@@ -2064,10 +2062,10 @@ function guifi_page($full = FALSE) {
   if ($blocks) {
     ksort($blocks);
     if ($full) {
-      print theme('page', theme_guifi_menu_page($blocks), FALSE);
+      return theme_guifi_menu_page($blocks);
       return;
     }
-    return theme_guifi_menu_page($blocks);
+    return drupal_redner(theme_guifi_menu_page($blocks));
   }
   else {
     return t('You do not have any active items.');

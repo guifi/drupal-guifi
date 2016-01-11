@@ -1701,17 +1701,17 @@ function guifi_cnml_tree($zid) {
     SELECT z.id, z.master parent_id, z.title, z.nick, z.time_zone, z.ntp_servers,
       z.dns_servers, z.graph_server, z.homepage, z.minx, z.miny, z.maxx,
       z.maxy,z.timestamp_created, z.timestamp_changed,
-      r.body
-    FROM {guifi_zone} z, {node} n, {node_revisions} r
-    WHERE z.id = n.nid AND n.vid = r.vid
+      r.body_value
+    FROM {guifi_zone} z, {node} n, {field_revision_body} r
+    WHERE z.id = n.nid AND n.vid = r.entity_id
     ORDER BY z.title');
   while ($zone = $result->fetchObject()) {
     $zones[$zone->id] = $zone;
   }
   $result = db_query('
-    SELECT l.*, r.body
-    FROM {guifi_location} l, {node} n, {node_revisions} r
-    WHERE l.id=n.nid AND n.vid=r.vid
+    SELECT l.*, r.body_value
+    FROM {guifi_location} l, {node} n, {field_revision_body} r
+    WHERE l.id=n.nid AND n.vid=r.entity_id
     ORDER BY l.nick');
   while ($node = $result->fetchObject()) {
     $zones[$node->zone_id]->nodes[] = $node;

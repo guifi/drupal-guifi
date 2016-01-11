@@ -2324,7 +2324,7 @@ function guifi_device_print($device = NULL) {
     break;
     
   case 'services':
-    $output .= theme('table', array('header' => array(t('services information')), 'rows' => array(array(theme_guifi_services_list($device['id'])))));
+    $output .= theme('table', array('header' => array(t('services information')), 'rows' => array(array(theme_guifi_services_list($device['id'], TRUE)))));
     break;
   }
 

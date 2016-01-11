@@ -1,9 +1,9 @@
 var map = null;
 
 
-$(document).ready(function(){
-    draw_map();
-});
+    jQuery(document).ready(function($) {
+        draw_map();
+    });
 
 
 var init_widget;

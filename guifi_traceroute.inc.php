@@ -16,14 +16,15 @@ function guifi_live_ping($device_id) {
     $ipf = guifi_main_ip($gs->device_id);
   }
 
-  $title = t('Live ping from %from (%ipf) to %dest (%ipd)',
-    array('%ipd' => $ipd['ipv4'],
-      '%dest' => guifi_get_hostname($device_id),
-      '%ipf' => $ipf['ipv4'],
-      '%from' => guifi_get_hostname($gs->device_id),
+  $title = t('Live ping from @from (@ipf) to @dest (@ipd)',
+    array('@ipd' => $ipd['ipv4'],
+      '@dest' => guifi_get_hostname($device_id),
+      '@ipf' => $ipf['ipv4'],
+      '@from' => guifi_get_hostname($gs->device_id),
       ));
   drupal_set_title($title);
-  print theme('page',guifi_cnml_live('liveping',$device_id,$ipd['ipv4'],$gs), FALSE);
+  $output .= guifi_cnml_live('liveping',$device_id,$ipd['ipv4'],$gs);
+  print $output;
   exit;
 }
 
@@ -43,7 +44,9 @@ function guifi_live_traceroute($device_id) {
       '%from' => guifi_get_hostname($gs->device_id),
       ));
   drupal_set_title($title);
-  print theme('page',guifi_cnml_live('livetraceroute',$device_id,$ipd['ipv4'],$gs), FALSE);
+  
+  $output .= guifi_cnml_live('liveping',$device_id,$ipd['ipv4'],$gs);
+  print $output;
   exit;
 }
 
@@ -68,9 +71,9 @@ function guifi_cnml_live($cmd,$device_id,$ipv4,$gs) {
     fclose($handle);
     $output .= '<pre>'.$pings.'</pre>';
   } else
-    $output = t('%cmd failed.',array('%cmd' => $cmd_str));
+    $output = t('@cmd failed.',array('@cmd' => $cmd_str));
 
-  return theme('box',t('output'),$output);
+  return theme('table', array('header' => array(t('output')), 'rows' => array(array($output))));
 }
 
 function guifi_traceroute($path, $to, &$routes, $maxhops = 10,$cost = 0, $alinks = array()) {
@@ -84,8 +87,8 @@ function guifi_traceroute($path, $to, &$routes, $maxhops = 10,$cost = 0, $alinks
   // if links array not loaded, fill the array
   if (!count($alinks)) {
     $lbegin = microtime(TRUE);
-    $qry = db_query('SELECT * FROM {guifi_links} WHERE flag != "Dropped"');
-    while ($link = db_fetch_array($qry)) {
+    $qry = db_query('SELECT * FROM {guifi_links} WHERE flag != \'Dropped\'');
+    while ($link = $qry->fetchAssoc()) {
 
       // alinks[devices] will contain all the links for every device
       $alinks['devices'][$link['device_id']][] = $link['id'];
@@ -215,7 +218,7 @@ function guifi_traceroute_search($params = NULL) {
     $from = array_shift($to);
   }
 
-  $output = drupal_get_form('guifi_traceroute_search_form',$from,$to);
+  $output = drupal_render(drupal_get_form('guifi_traceroute_search_form',$from,$to));
 
   if (!count($to))
     return $output;
@@ -224,10 +227,9 @@ function guifi_traceroute_search($params = NULL) {
     $dto=guifi_get_devicename($to[0],'nick');
   } else {
     $dto=$to[0];
-    $qry = db_query('SELECT device_id FROM {guifi_services} WHERE service_type="%s"',
-      $to[0]);
+    $qry = db_query('SELECT device_id FROM {guifi_services} WHERE service_type = :type', array(':type' => $to[0]));
     $nto = array();
-    while ($service = db_fetch_object($qry))
+    while ($service = $qry->fetchObject())
       $nto[] = $service->device_id;
     $to = $nto;
   }
@@ -273,7 +275,7 @@ function guifi_traceroute_search($params = NULL) {
   }
 
   if (guifi_gmap_key()) {
-    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_traceroute.js','module');
+    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_traceroute.js');
     $datalinks = guifi_export_arraytojs($linkslist);
     $datanodes = guifi_export_arraytojs($nodeslist);
     $lat1=99;$lon1=190;$lat2=-99;$lon2=-190;
@@ -295,19 +297,19 @@ function guifi_traceroute_search($params = NULL) {
         '<input type=hidden value='.variable_get('guifi_wms_service','').' id=guifi-wms />' .
         '</form>';
 
-    $tracetit .= drupal_get_form('guifi_traceroute_map_form');
+    $tracetit .= drupal_render(drupal_get_form('guifi_traceroute_map_form'));
     $tracetit .= '<div id="map" style="width: 100%; height: 600px; margin:5px;"></div>';
   }
 
-  $output .= theme('box',t('Software traceroute result from %from to %to',
-    array('%from' => guifi_get_devicename($from,'nick'),'%to' => $dto)),$tracetit.$trace);
+  $output .= theme('table', array('header' => array(t('Software traceroute result from @from to @to',
+    array('@from' => guifi_get_devicename($from,'nick'),'@to' => $dto))), 'rows' => array(array($tracetit.$trace))));
 
   guifi_log(GUIFILOG_TRACE,'Routes',$routes);
 
   return $output;
 }
  
-function guifi_traceroute_map_form($form_state) { //Eduard
+function guifi_traceroute_map_form($none, $form_state) { //Eduard
   $vtext = t('Route Level: Importance of the route depending on the cost and proximity to the main route').'<br />';
   $vtext .= t('main').':<img src="'.base_path().drupal_get_path('module','guifi').'/js/marker_traceroute_icon1.png"/>';  
   for($i=2;$i<=10;$i++){
@@ -345,7 +347,7 @@ function guifi_traceroute_map_form($form_state) { //Eduard
 }
 
 // IP search
-function guifi_traceroute_search_form($form_state, $from = NULL, $to = array()) {
+function guifi_traceroute_search_form($none, $form_state, $from = NULL, $to = array()) {
 
   $ftitle = t('From:');
   if ($from) {
@@ -456,9 +458,9 @@ function theme_guifi_traceroute($route) {
     $cols[] = l(guifi_get_devicename($did,'nick'),'guifi/device/'.$did);
     if (isset($hop['to'])) {
       $cols[] = l(guifi_get_nodename($hop['to'][0]),'node/'.$hop['to'][0]);
-      $ip = db_fetch_object(db_query(
-        'SELECT ipv4, netmask FROM {guifi_ipv4} WHERE id=%d AND interface_id=%d',
-        $hop['to'][2],$hop['to'][1]));
+      $ip = db_query(
+        'SELECT ipv4, netmask FROM {guifi_ipv4} WHERE id = :id AND interface_id = :iid',
+        array(':id' => $hop['to'][2], ':iid' => $hop['to'][1]))->fetchObject();
       $cols[] = $ip->ipv4.'/'.guifi_ipcalc_get_maskbits($ip->netmask);
     } else {
       $cols[] = array('data' => NULL,'colspan' => 2);
@@ -466,9 +468,9 @@ function theme_guifi_traceroute($route) {
 
 
     if (isset($hop['from'])) {
-      $ip = db_fetch_object(db_query(
-        'SELECT ipv4, netmask FROM {guifi_ipv4} WHERE id=%d AND interface_id=%d',
-        $hop['from'][4],$hop['from'][3]));
+      $ip = db_query(
+        'SELECT ipv4, netmask FROM {guifi_ipv4} WHERE id = :id AND interface_id = :iid',
+        array(':id' => $hop['from'][4], ':iid' => $hop['from'][3]))->fetchObject();
       $cols[] = $ip->ipv4.'/'.guifi_ipcalc_get_maskbits($ip->netmask);
       $cols[] = $hop['from'][1];     // type
                                      // status
@@ -482,12 +484,12 @@ function theme_guifi_traceroute($route) {
       $qry = db_query(
         'SELECT n.id nid, lat, lon
          FROM {guifi_location} n, {guifi_links} l
-         WHERE l.id=%d
-           AND l.nid=n.id',
-         $hop['from'][0]);
-      $loc1 = db_fetch_object($qry);
-      $loc2 = db_fetch_object($qry);
-      $gDist = round($oGC->EllipsoidDistance($loc1->lat, $loc1->lon, $loc2->lat, $loc2->lon),3);
+         WHERE l.id = :id
+           AND l.nid = n.id',
+         array(':id' => $hop['from'][0]));
+      $loc = $qry->fetchObject();
+      //$loc2 = $qry->fetchObject();
+      $gDist = round($oGC->EllipsoidDistance($loc->lat, $loc->lon, $loc->lat, $loc->lon),3);
 
       if ($gDist) {
         $cols[] = array('data' => $gDist,'align' => right);
@@ -513,7 +515,7 @@ function theme_guifi_traceroute($route) {
     t('Status'),
     t('Kms')
   );
-  return theme('table',$header,$rows);
+  return theme('table',array('header' => $header, 'rows' => $rows));
 
 }
 
@@ -529,9 +531,9 @@ function guifi_traceroute_dataexport($route,$nRoute,&$linkslist,&$nodeslist) {
       $linkslist[$nReg]['todevicename'] = guifi_get_devicename($did,'nick');
       $linkslist[$nReg]['todevicelink'] = 'guifi/device/'.$did;
       $linkslist[$nReg]['tonode'] = $hop['to'][0];
-      $ip = db_fetch_object(db_query(
-        'SELECT ipv4, netmask FROM {guifi_ipv4} WHERE id=%d AND interface_id=%d',
-        $hop['to'][2],$hop['to'][1]));
+      $ip = db_query(
+        'SELECT ipv4, netmask FROM {guifi_ipv4} WHERE id = :id AND interface_id = :iid',
+        array(':id' => $hop['to'][2], ':iid' => $hop['to'][1]))->fetchObject();
       $linkslist[$nReg]['toipv4'] = $ip->ipv4.'/'.guifi_ipcalc_get_maskbits($ip->netmask);
       if (!isset($nodeslist[$hop['to'][0]])) {
         $nodeslist[$hop["to"][0]]=guifi_get_location($hop["to"][0]);
@@ -550,9 +552,9 @@ function guifi_traceroute_dataexport($route,$nRoute,&$linkslist,&$nodeslist) {
       $linkslist[$nReg]['fromdevicename'] = guifi_get_devicename($did,'nick');
       $linkslist[$nReg]['fromdevicelink'] = 'guifi/device/'.$did;
       $linkslist[$nReg]['fromnode'] = $hop['from'][5];
-      $ip = db_fetch_object(db_query(
-        'SELECT ipv4, netmask FROM {guifi_ipv4} WHERE id=%d AND interface_id=%d',
-        $hop['from'][4],$hop['from'][3]));
+      $ip = db_query(
+        'SELECT ipv4, netmask FROM {guifi_ipv4} WHERE id = :id AND interface_id = :iid',
+        array(':id' => $hop['from'][4], ':iid' => $hop['from'][3]))->fetchObject();
       $linkslist[$nReg]['fromipv4'] = $ip->ipv4.'/'.guifi_ipcalc_get_maskbits($ip->netmask);
       $linkslist[$nReg]['type'] = $hop['from'][1];
       $linkslist[$nReg]['status'] = $hop['from'][2];
@@ -568,12 +570,12 @@ function guifi_traceroute_dataexport($route,$nRoute,&$linkslist,&$nodeslist) {
       $qry = db_query(
         'SELECT n.id nid, lat, lon
          FROM {guifi_location} n, {guifi_links} l
-         WHERE l.id=%d
-           AND l.nid=n.id',
-         $hop['from'][0]);
-      $loc1 = db_fetch_object($qry);
-      $loc2 = db_fetch_object($qry);
-      $gDist = round($oGC->EllipsoidDistance($loc1->lat, $loc1->lon, $loc2->lat, $loc2->lon),3);
+         WHERE l.id = :id
+           AND l.nid = n.id',
+         array(':id' => $hop['from'][0]));
+      $loc = $qry->fetchObject();
+      //$loc2 = db_fetch_object($qry);
+      $gDist = round($oGC->EllipsoidDistance($loc->lat, $loc->lon, $loc->lat, $loc->lon),3);
 
       if ($gDist) {
         $linkslist[$nReg]['distance'] = $gDist;

@@ -204,18 +204,16 @@ function guifi_ahah_select_node_device(){
   $string = strtoupper(arg(3));
 
   $qry = db_query('SELECT
-                     CONCAT(d.id,"-",d.nick,", ",l.nick,", ",z.title) str
+                     CONCAT(d.id,\'-\',d.nick,\', \',l.nick,\', \',z.title) str
                   FROM {guifi_location} l, {guifi_zone} z, {guifi_devices} d
-                  WHERE l.zone_id=z.id AND l.id=d.nid
-                    AND (UPPER(CONCAT(d.id,"-",d.nick,", ",l.nick,", ",z.title) LIKE "%'.
-                       $string.'%")'.
-                  '  OR (d.id like "%'.$string.'%"'.
-                  '  OR l.nick like "%'.$string.'%"'.
-                  '  OR d.nick like "%'.$string.'%"'.
-                  '  OR z.title like "%'.$string.'%"))'
-                 );
+                  WHERE l.zone_id = z.id AND l.id = d.nid
+                    AND (UPPER(CONCAT(d.id,\'-\',d.nick,\', \',l.nick,\', \',z.title) LIKE :string)'.
+                  '  OR (d.id like :string'.
+                  '  OR l.nick like :string'.
+                  '  OR d.nick like :string'.
+                  '  OR z.title like :string))',array(':string' => '%' . db_like($string) .'%'));
   $c = 0;
-  while (($value = db_fetch_array($qry)) and ($c < 50)) {
+  while (($value = $qry->fetchAssoc()) and ($c < 50)) {
     $c++;
     $matches[$value['str']] = $value['str'];
   }

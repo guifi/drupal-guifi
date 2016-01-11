@@ -60,6 +60,8 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 	    $data['mid'] = $next_id['mid'];
 	    $data['user_created'] = $user->uid;
 	    $data['timestamp_created'] = time();
+	    $data['user_changed'] = $user->uid;
+	    $data['timestamp_changed'] = time();
             break;
 	  case 'guifi_manufacturer':
 	    $next_id = db_query("SELECT max(fid)+1 fid FROM {$table} ")->fetchAssoc();

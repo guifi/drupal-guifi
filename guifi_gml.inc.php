@@ -6,7 +6,7 @@
 function guifi_gml($zid,$action = "help",$type = 'gml') {
 
   if ($action == "help") {
-     $zone = db_fetch_object(db_query('SELECT title, nick FROM {guifi_zone} WHERE id = %d',$zid));
+     $zone = db_query('SELECT title, nick FROM {guifi_zone} WHERE id = :id', array(':id' => $zid))->fetchObject();
      drupal_set_breadcrumb(guifi_zone_ariadna($zid));
      $output = '<div id="guifi">';
      $output .= '<h2>'.t('Zone %zname%',array('%zname%' => $zone->title)).'</h2>';
@@ -16,8 +16,8 @@ function guifi_gml($zid,$action = "help",$type = 'gml') {
      $output .= '<p>'.t('The <a href="http://opengis.net/gml/">GML</a> is a Markup Language XML for Geography described at the <a href="http://www.opengeospatial.org/">Open Geospatial Consortium</a>').'</p>';
      $output .= '<p>'.t('<b>IMPORTANT LEGAL NOTE:</b> This network information is under the <a href="http://guifi.net/ComunsSensefils/">Comuns Sensefils</a> license, and therefore, available for any other network under the same licensing. If is not your case, you should ask for permission before using it.</a>').'</p>';
      $output .= "</div>";
-     print theme('page',$output,t('export %zname% in GML format',array('%zname%' => $z->title)));
-     return;
+     $output .= t('export %zname% in GML format',array('%zname%' => $zone->title));
+     return $output;
   }
 
   switch ($action) {
@@ -39,17 +39,17 @@ function guifi_gml_nodes($zid,$type) {
     "SELECT id,nick,lat,lon,zone_id,status_flag " .
     "FROM {guifi_location}");
 
-  while ($row = db_fetch_object($res)) {
+  while ($row = $res->fetchObject()) {
     if (($row->zone_id != $zid) and (!in_array($row->zone_id,$zchilds)))
       continue;
     $rsql = db_query(
        "SELECT mode " .
        "FROM {guifi_radios} " .
-       "WHERE nid = %d",
-       $row->id);
+       "WHERE nid = :nid",
+       array(':nid' => $row->id));
     $rcount = 0;
     $node_type = 'N_A';
-    while ($r = db_fetch_object($rsql)) {
+    while ($r = $rsql->fetchObject()) {
       $rcount++;
       if ($rcount == 1)
         $node_type = $r->mode;
@@ -79,7 +79,7 @@ function guifi_gml_nodes($zid,$type) {
     if ($row->lat < $miny) $miny = $row->lat;
   } // while nodes
 
-  drupal_set_header('Content-Type: application/xml; charset=utf-8');
+  drupal_add_http_header('Content-Type: application/xml; charset=utf-8');
   if ($type == 'gml') print '<?xml version="1.0" encoding="utf-8" ?>
 <ogr:FeatureCollection
      xmlns:xsi="http://www.w3c.org/2001/XMLSchema-instance"
@@ -111,15 +111,15 @@ function guifi_gml_links($zid,$type) {
   $zchilds = guifi_zone_childs($zid);
   $zchilds[$zid] = 'Top';
 
-  while ($row = db_fetch_object($res)) {
+  while ($row = $res->fetchObject()) {
     
     $resnode = db_query(
       "SELECT n.id, n.zone_id, n.nick,n.lat, n.lon, n.status_flag " .
       "FROM {guifi_links} l, {guifi_location} n " .
-      "WHERE l.id = %d AND l.nid=n.id",
-      $row->id);
+      "WHERE l.id = :lid AND l.nid=n.id",
+      array(':lid' => $row->id));
     $nl = array();
-    while ($n = db_fetch_object($resnode)) {
+    while ($n = $resnode->fetchObject()) {
       $nl[] = $n;
     }
     if (count($nl) == 2)
@@ -153,7 +153,7 @@ function guifi_gml_links($zid,$type) {
         if ($nl[1]->lat < $miny) $miny = $nl[1]->lat;
       }   
   }
-  drupal_set_header('Content-Type: application/xml; charset=utf-8');
+  drupal_add_http_header('Content-Type: application/xml; charset=utf-8');
   if ($type == 'gml') print '<?xml version="1.0" encoding="utf-8" ?>
 <ogr:FeatureCollection
      xmlns:xsi="http://www.w3c.org/2001/XMLSchema-instance"
