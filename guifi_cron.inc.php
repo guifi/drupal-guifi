@@ -127,10 +127,9 @@ function to_date($str) {
  * @return
  *   theme() if $verbose==TRUE
  */
-function guifi_cron_loadCNMLstats($graph_server,$verbose=FALSE) {
-  if (is_null($gs))
-    $gs = guifi_service_load($graph_server);
+function guifi_cron_loadCNMLstats($graph_server, $verbose=FALSE) {
 
+    $gs = node_load($graph_server);
   if ($gs->var['version'] >= 2.0)
     $handle = fopen(
       guifi_cnml_call_service($gs,'stats',
@@ -159,11 +158,11 @@ function guifi_cron_loadCNMLstats($graph_server,$verbose=FALSE) {
       if (!$tlaststat)
         continue;
 
-      $dev = db_fetch_object(db_query(
+      $dev = db_query(
         'SELECT last_stats,last_online,last_flag,ly_availability ' .
         'FROM {guifi_devices} ' .
-        'WHERE id=%d',
-        $device_id));
+        'WHERE id = :id',
+        array(':id' => $device_id))->fetchObject();
 
       if ($tlaststat <= $dev->last_stats)
         continue;
@@ -172,33 +171,33 @@ function guifi_cron_loadCNMLstats($graph_server,$verbose=FALSE) {
 
       $tlastonline = to_date($lastonline);
       if ($tlastonline > $dev->last_online)
-        $updatestr[] = 'last_online='.$tlastonline;
+        $updatestr[] = 'last_online = '.$tlastonline;
 
       if (($lastavailability <= 100) and ($lastavailability >= 0)) {
         if ($lastavailability == 0)
-          $updatestr[] = 'last_flag="Down"';
+          $updatestr[] = "last_flag = 'Down'";
         else
-          $updatestr[] = 'last_flag="Up"';
+          $updatestr[] = "last_flag = 'Up'";
       }
 
-      $updatestr[] = 'last_stats='.$tlaststat;
+      $updatestr[] = 'last_stats = '.$tlaststat;
       if ($availability <= 100 and $availability >= 0)
-        $updatestr[] = 'ly_availability='.$availability;
+        $updatestr[] = 'ly_availability = '.$availability;
       if ($latavg)
-        $updatestr[] = 'latency_avg='.$latavg;
+        $updatestr[] = 'latency_avg = '.$latavg;
       if ($latmax)
-        $updatestr[] = 'latency_max='.$latmax;
+        $updatestr[] = 'latency_max = '.$latmax;
 
       // Update availability statistics
       db_query('UPDATE {guifi_devices} SET '.
         implode(', ',$updatestr).
-        ' WHERE id=%d',$device_id);
+        ' WHERE id = :did', array(':did' => $device_id));
 
       // Now going to update traffic statistics
-      $nradios = db_fetch_object(db_query(
+      $nradios = db_query(
         'SELECT count(*) count ' .
         'FROM {guifi_radios} ' .
-        'WHERE id=%d',$device_id));
+        'WHERE id = :did', array(':did' => $device_id))->fetchObject();
 
       if ($nradios->count == 1) {
         // if just one radio, sum all values
@@ -208,19 +207,21 @@ function guifi_cron_loadCNMLstats($graph_server,$verbose=FALSE) {
           $in += $traffic[1];
           $out += $traffic[2];
         }
+
         if ($in or $out)
           db_query(
             'UPDATE {guifi_radios} ' .
-            'SET ly_mb_in=%d, ly_mb_out=%d ' .
-            'WHERE id=%d',$in,$out,$device_id);
+            'SET ly_mb_in= :in, ly_mb_out = :out ' .
+            'WHERE id = :did', array(':in' => $in, ':out' => $out, ':did' => $device_id));
       } else {
       	// more than one radio, give the value to each radio
         foreach ($vstats as $value)
+         	$traffic = explode(',',$value);
           db_query(
             'UPDATE {guifi_radios} ' .
-            'SET ly_mb_in=%d, ly_mb_out=%d ' .
-            'WHERE id=%d AND radiodev_counter=%d',
-            $traffic[1],$traffic[2],$device_id,$traffic[0]);
+            'SET ly_mb_in = :in, ly_mb_out = :out ' .
+            'WHERE id = :did AND radiodev_counter = :rdc',
+            array(':in' => $traffic[1], ':out' => $traffic[2], ':did' => $device_id, ':rdc' => $traffic[0]));
       }
 
 
@@ -236,9 +237,7 @@ function guifi_cron_loadCNMLstats($graph_server,$verbose=FALSE) {
     $output .= t('Get stats failed.');
 
   if ($verbose)
-    return theme('box',t("Load statistics from '%server'",
-      array('%server' => guifi_service_str($graph_server))),
-      $output);
+    return theme('table', array('header' => t("Load statistics from '%server'", array('%server' => guifi_service_str($graph_server))), 'rows' => array(array($output))));
 }
 
 ?>

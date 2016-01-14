@@ -2,11 +2,9 @@ var map = null;
 var initControl = null;
 var overlays = Array();
 
-if(Drupal.jsEnabled) {
-    $(document).ready(function(){
+    jQuery(document).ready(function($) {
         draw_map();
     });
-}
 
 var init_widget;
 var swinit = 0;
@@ -102,7 +100,7 @@ function draw_map(){
         }
     });
  
-    $("#topmap").text("Find a supernode ospf area and click the init button");
+    jQuery("#topmap").text("Find a supernode ospf area and click the init button");
     swinit = 1;
 }
 
@@ -119,12 +117,12 @@ function init(p){
         }
     });
     swinit=1;
-    $("#topmap").text("Click on the initial node");
+    jQuery("#topmap").text("Click on the initial node");
 }
 
 function init_search(platlng){
     if(swinit==1){
-        $("#topmap").text("Searching");
+        jQuery("#topmap").text("Searching");
         google.maps.event.clearListeners(map,"click");
         swinit=2;
         loaddata(platlng.lat(),platlng.lng());
@@ -154,7 +152,7 @@ function build_routing(pdata){
     initControl.disable();
     return;
   }else{
-    $("#topmap").text("You've selected the supernode " + vnodeinit + ". Drawing....");
+    jQuery("#topmap").text("You've selected the supernode " + vnodeinit + ". Drawing....");
   }
 
   anodes = adata[1];
@@ -197,8 +195,8 @@ function build_routing(pdata){
     output += aznets[znet]["netid"] + "/" + aznets[znet]["maskbits"]+"&nbsp;&nbsp;broadcast:"+aznets[znet]["broadcast"]+"&nbsp;&nbsp;zone:"+aznets[znet]["zid"]+"&nbsp;"+aznets[znet]["znick"]+"<br />";
   }
 
-  $("#topmap").text("Completed");
-  $("#bottommap").text(output);
+  jQuery("#topmap").text("Completed");
+  jQuery("#bottommap").text(output);
 
   // Disable the init button
   initControl.disable();
@@ -218,7 +216,7 @@ function exec_or_value(f, o) {
 //httprequest
 // REQUEST
 function loadXMLDoc(url) {
-    var r = $.ajax({
+    var r = jQuery.ajax({
                      url: url,
                      async: false,
                    }).responseText;

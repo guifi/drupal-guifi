@@ -49,7 +49,7 @@ function guifi_devel_services($service_id=null, $op=null) {
 }
 
 // Services Form
-function guifi_devel_services_form($form_state, $service_id) {
+function guifi_devel_services_form($none, $form_state, $service_id,$kk) {
 
   $sql = db_query('SELECT * FROM {guifi_types} WHERE type = \'service\' and id = :id', array(':id' => $service_id));
   $service = $sql->fetchObject();
@@ -93,7 +93,7 @@ function guifi_devel_services_form_submit($form, &$form_state) {
 
 function guifi_devel_services_save($edit) {
   global $user;
-
+dsm($edit);
   $to_mail = $edit->notification;
   $log ='';
 
@@ -108,7 +108,7 @@ function guifi_devel_services_save($edit) {
     $log);
 }
 
-function guifi_devel_services_delete_confirm($form_state,$id) {
+function guifi_devel_services_delete_confirm($form_state,$id2, $id) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_service_delete_confirm()',$id);
 
   $form['id'] = array('#type' => 'hidden', '#value' => $id);
@@ -149,14 +149,14 @@ function guifi_devel_devices($devid=null, $op=null) {
     case 'add':
      $devid = 'New';
      $jquery1 = HelperMultipleSelect('guifi-devel-devices-form','firmwaresCompatibles', 'firmwaresTots');
-      drupal_add_js('jQuery(document).ready(function ()  { $jquery1 });', 'inline');
+      drupal_add_js($jquery1, 'inline');
      return drupal_get_form('guifi_devel_devices_form',$devid);
   }
   switch($op) {
     case 'edit':
 
       $jquery1 = HelperMultipleSelect('guifi-devel-devices-form','firmwaresCompatibles', 'firmwaresTots');
-      drupal_add_js('jQuery(document).ready(function ()  { $jquery1 });', 'inline');
+      drupal_add_js($jquery1, 'inline');
       return drupal_get_form('guifi_devel_devices_form',$devid);
 
     case 'duplicate':
@@ -543,8 +543,6 @@ function guifi_devel_devices_form($form_state, $formx, $devid) {
 
 
   while ($firmwares = $query->fetchAssoc()) {
-    //echo "<hr>firmwares[fid]=". $firmwares["fid"] ."firmwares[mid]=". $firmwares["mid"]. " firmwares[nom]=". $firmwares["nom"];
-    //echo "<br>firmwares[fid]=". firmwares["fid"];
     if ($firmwares["mid"]==$devid)
       $firms_compatibles[$firmwares["firmware_id"]] = $firmwares["nom"];
     else
@@ -552,12 +550,13 @@ function guifi_devel_devices_form($form_state, $formx, $devid) {
   }
 
   $form['firmware']['firmwaresCompatibles'] = array(
+      '#id' => 'edit-firmwaresCompatibles',
       '#type' => 'select',
       '#access'      => in_array('wireless' ,$dev->arr_model_class) || in_array('router',$dev->arr_model_class),
-      '#title' => t('firmwares compatibles'),
+      '#title' => t('Compatible firmware'),
       '#default_value' => 0,
       '#options' => $firms_compatibles,
-      '#description' => t('firmwares compatibles amb aquest model.'),
+      '#description' => t('Compatible firmwares with this model.'),
       '#size' => 10,
       '#multiple' => true,
       '#required' => false,
@@ -578,12 +577,13 @@ function guifi_devel_devices_form($form_state, $formx, $devid) {
   $botons .= $associatsButtonAll.'<br>';
 
   $form['firmware']['firmwaresTots'] = array(
+        '#id' => 'edit-firmwaresTots',
         '#type' => 'select',
         '#access'      => in_array('wireless' ,$dev->arr_model_class) || in_array('router',$dev->arr_model_class),
-        '#title' => t('Tots els firmwares'),
+        '#title' => t('All firmwares'),
         '#default_value' => 0,
         '#options' => $firms_tots,
-        '#description' => t('Tots els firmwares.'),
+        '#description' => t('All firmwares.'),
         '#size' => 10,
         '#multiple' => true,
         '#required' => false,
@@ -649,7 +649,7 @@ function guifi_devel_devices_duplicate_form_submit($form, &$form_state) {
 }
 
 // El parametre OPCIONAL $originalmid serveix per si estem copiant un model , poder aplicar al nou model algunes de les seves propietats
-function guifi_devel_devices_save($edit, $originalmid=null) {
+function guifi_devel_devices_save($edit, $originalmid = NULL) {
   global $user;
 
   $edit['model_class'] = implode('|',$edit['arr_model_class']);
@@ -720,10 +720,10 @@ function guifi_devel_devices_save($edit, $originalmid=null) {
         if (!$configuracions->enabled) {
 
           // si esborrem la configuracio USC tambe hauriem d'esborrarli els parametres associats
-          db_query("DELETE FROM {guifi_configuracioUnSolclic} WHERE mid=%d and fid=%d ", $edit['mid'], $firmware);
+          db_query("DELETE FROM {guifi_configuracioUnSolclic} WHERE mid = :mid and fid = :fid ", array(':mid' => $edit['mid'], ':fid' => $firmware));
 
           // si esborrem la configuracio USC tambe hauriem d'esborrarli els parametres associats
-          db_query("DELETE FROM {guifi_parametresConfiguracioUnsolclic} WHERE uscid=%d", $configuracions->uscid);
+          db_query("DELETE FROM {guifi_parametresConfiguracioUnsolclic} WHERE uscid = :uid", array(':uid' => $configuracions->uscid));
 
           $deleted[] = $firmware;
         } else {
@@ -758,7 +758,7 @@ function guifi_devel_devices_delete_confirm($form_state,$mid) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_device_delete_confirm()',$mid);
 
   $form['mid'] = array('#type' => 'hidden', '#value' => $mid);
-  $qry= db_fetch_object(db_query("SELECT model FROM {guifi_model_specs} WHERE mid = %d", $mid));
+  $qry= db_query("SELECT model FROM {guifi_model_specs} WHERE mid = :mid", array(':mid' => $mid))->fetchObject();
   return confirm_form(
     $form,
     t('Are you sure you want to delete the device model " %model "?',
@@ -794,13 +794,13 @@ function guifi_devel_firmware($firmid=null, $op=null) {
     case 'add':
      $firmid = 'New';
      $jquery1 = HelperMultipleSelect('guifi-devel-firmware-form', 'parametres-associats', 'parametres-disponibles');
-     drupal_add_js("if (Drupal.jsEnabled) { $jquery1 }", 'inline');
+      drupal_add_js('jQuery(document).ready(function ()  { '.$jquery1.' });', 'inline');
      return drupal_get_form('guifi_devel_firmware_form',$firmid);
   }
   switch($op) {
     case 'edit':
       $jquery1 = HelperMultipleSelect('guifi-devel-firmware-form', 'parametres-associats', 'parametres-disponibles');
-      drupal_add_js("if (Drupal.jsEnabled) { $jquery1 }", 'inline');
+      drupal_add_js('jQuery(document).ready(function ()  { '.$jquery1.' });', 'inline');
       $sortida = drupal_get_form('guifi_devel_firmware_form',$firmid);
       return $sortida;
     case 'delete':
@@ -828,7 +828,7 @@ function guifi_devel_firmware($firmid=null, $op=null) {
                   group by f.id, f.nom, f.descripcio, f.relations, f.enabled
                   order by enabled desc ,nom asc');
 
-  while ($firmware = db_fetch_object($sql)) {
+  while ($firmware = $sql->fetchObject()) {
     ($firmware->enabled) ? $enabled='Enabled' : $enabled='Disabled';
     $rows[] = array($firmware->id,
                     $firmware->nom,
@@ -922,10 +922,10 @@ function guifi_devel_firmware_form($form_state, $firmid) {
                       from
                           guifi_parametres p
                               left join
-                          guifi_parametresFirmware pf ON pf.pid = p.id and pf.fid = %d
-                      order by p.nom asc",$firmid);
+                          guifi_parametresFirmware pf ON pf.pid = p.id and pf.fid = :fid
+                      order by p.nom asc", array(':fid' => $firmid));
 
-  while ($parametres = db_fetch_array($query)) {
+  while ($parametres = $query->fetchAssoc()) {
     if ($parametres["pid"])
       $params_associats[$parametres["pid"]] = $parametres["nom"];
     else
@@ -1007,8 +1007,8 @@ function guifi_devel_firmware_save($edit) {
   $edit[managed] = implode('|',$newManaged);
 
   // recollida de parametresFirmware actuals
-  $sql= db_query("SELECT distinct(pid) FROM {guifi_parametresFirmware} WHERE fid = %d order by pid asc", $edit['id']);
-  while ($oldParamsFirm = db_fetch_object($sql)) {
+  $sql= db_query("SELECT distinct(pid) FROM {guifi_parametresFirmware} WHERE fid = :fid order by pid asc", array(':fid' => $edit['id']));
+  while ($oldParamsFirm = $sql->fetchObject()) {
     $alreadyPresent[] = $oldParamsFirm->pid;
   }
 
@@ -1027,8 +1027,8 @@ function guifi_devel_firmware_save($edit) {
         _guifi_db_sql('guifi_parametresFirmware',array('mid' => $params['mid']),$params,$log,$to_mail);
 
         // busquem les propietats d'aquest nou parametre, dinamic i default_value
-        $sql = db_query('SELECT id, dinamic, default_value FROM {guifi_parametres} WHERE id = %d',$parametre);
-        $paramInfo = db_fetch_array($sql);
+        $sql = db_query('SELECT id, dinamic, default_value FROM {guifi_parametres} WHERE id = :id', array(':id' => $parametre));
+        $paramInfo = $sql->fetchAssoc();
 
         // aqui cal agafar tots els unsolclic que funcionen amb aquest firmware i a cadascun afegir-li el parametre nou.
         afegirParametreConfiguracionsUSC($edit['id'], $paramInfo, $to_mail, $user->id);
@@ -1044,9 +1044,9 @@ function guifi_devel_firmware_save($edit) {
                               from
                                   {guifi_parametresConfiguracioUnsolclic} pusc
                                   inner join {guifi_configuracioUnSolclic} usc on usc.id = pusc.uscid
-                              where usc.fid = %d and pusc.pid = %d ', $edit['id'], $parametre);
+                              where usc.fid = :fid and pusc.pid = :pid ', array(':fid' => $edit['id'], ':pid' => $parametre));
 
-        $configuracions = db_fetch_object($sql);
+        $configuracions = $sql->fetchObject();
 
         if (!$configuracions->enabled) {
 
@@ -1087,7 +1087,7 @@ function guifi_devel_firmware_delete_confirm($form_state,$id) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_device_delete_confirm()',$id);
 
   $form['id'] = array('#type' => 'hidden', '#value' => $id);
-  $qry= db_fetch_object(db_query("SELECT text FROM {guifi_types} WHERE type='firmware' AND id=%d", $id));
+  $qry= db_query("SELECT text FROM {guifi_types} WHERE type='firmware' AND id = :id", array(':id' => $id))->fetchObject();
   return confirm_form(
     $form,
     t('Are you sure you want to delete the firmware " %firmware "?',
@@ -1143,7 +1143,7 @@ function guifi_devel_manufacturer($mid=null, $op=null) {
 
   $sql = db_query('SELECT * FROM {guifi_manufacturer} order by name asc	');
 
-  while ($mfr = db_fetch_object($sql)) {
+  while ($mfr = $sql->fetchObject()) {
     $rows[] = array($mfr->fid,
                     $mfr->name,
                     '<a href="'.$mfr->url.'">'.$mfr->url.'</a>',
@@ -1167,8 +1167,8 @@ function guifi_devel_manufacturer($mid=null, $op=null) {
 // Device Manufacturers Form
 function guifi_devel_manufacturer_form($form_state, $mid) {
 
-  $sql = db_query('SELECT * FROM {guifi_manufacturer} WHERE fid = %d', $mid);
-  $mfr = db_fetch_object($sql);
+  $sql = db_query('SELECT * FROM {guifi_manufacturer} WHERE fid = :fid', array(':fid' => $mid));
+  $mfr = $sql->fetchObject();
 
   if ($mid == 'New' ) {
    $form['new'] = array('#type' => 'hidden', '#value' => TRUE);
@@ -1248,7 +1248,7 @@ function guifi_devel_manufacturer_delete_confirm($form_state,$mid) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_device_delete_confirm()',$mid);
 
   $form['fid'] = array('#type' => 'hidden', '#value' => $mid);
-  $qry= db_fetch_object(db_query("SELECT name FROM {guifi_manufacturer} WHERE fid = %d", $mid));
+  $qry= db_query("SELECT name FROM {guifi_manufacturer} WHERE fid = :fid", array(':fid' => $mid))->fetchObject();
   return confirm_form(
     $form,
     t('Are you sure you want to delete the device manufacturer " %manufacturer "?',
@@ -1302,7 +1302,7 @@ function guifi_devel_parameter($id=null, $op=null) {
   $headers = array(t('ID'), t('Parameter'), t('Default Value'), t('Dynamic'), t('Origen'), t('Edit'), t('Delete'));
 
   $sql = db_query('SELECT * FROM {guifi_parametres} order by nom ASC');
-  while ($parameter = db_fetch_object($sql)) {
+  while ($parameter = $sql->fetchObject()) {
     $rows[] = array($parameter->id,
                     $parameter->nom,
                     $parameter->default_value,
@@ -1328,8 +1328,8 @@ function guifi_devel_parameter($id=null, $op=null) {
 // FirmWare Parameter Form
 function guifi_devel_parameter_form($form_state, $id) {
 
-  $sql = db_query('SELECT * FROM {guifi_parametres} WHERE id = %d', $id);
-  $parameter = db_fetch_object($sql);
+  $sql = db_query('SELECT * FROM {guifi_parametres} WHERE id = :id', array(':id' => $id));
+  $parameter = $sql->fetchObject();
 
   if ($id == 'New' ) {
     $form['new'] = array('#type' => 'hidden', '#value' => TRUE);
@@ -1420,7 +1420,7 @@ function guifi_devel_parameter_delete_confirm($form_state,$id) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_parameter_delete_confirm()',$id);
 
   $form['id'] = array('#type' => 'hidden', '#value' => $id);
-  $qry= db_fetch_object(db_query("SELECT nom FROM {guifi_parametres} WHERE id = %d", $id));
+  $qry= db_query("SELECT nom FROM {guifi_parametres} WHERE id = :id", array(':id' => $id))->fetchObject();
   return confirm_form(
   $form,
   t('Are you sure you want to delete the firmware parameter " %parameter "?',
@@ -1474,7 +1474,7 @@ function guifi_devel_modelfeature($id=null, $op=null) {
   $headers = array(t('ID'), t('name'), t('type'));
 
   $sql = db_query('SELECT * FROM {guifi_caracteristica}');
-  while ($feature = db_fetch_object($sql)) {
+  while ($feature = $sql->fetchObject()) {
     $rows[] = array($feature->id,
     $feature->nom,
     $feature->tipus,
@@ -1498,8 +1498,8 @@ function guifi_devel_modelfeature($id=null, $op=null) {
 // Model Feature Form
 function guifi_devel_modelfeature_form($form_state, $id) {
 
-  $sql = db_query('SELECT * FROM {guifi_caracteristica} WHERE id = %d', $id);
-  $feature = db_fetch_object($sql);
+  $sql = db_query('SELECT * FROM {guifi_caracteristica} WHERE id = :id', array(':id' => $id));
+  $feature = $sql->fetchObject();
 
   if ($id == 'New' ) {
     $form['new'] = array('#type' => 'hidden', '#value' => TRUE);
@@ -1565,7 +1565,7 @@ function guifi_devel_modelfeature_delete_confirm($form_state,$id) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_modelfeature_delete_confirm()',$id);
 
   $form['id'] = array('#type' => 'hidden', '#value' => $id);
-  $qry= db_fetch_object(db_query("SELECT nom FROM {guifi_caracteristica} WHERE id = %d", $id));
+  $qry= db_query("SELECT nom FROM {guifi_caracteristica} WHERE id = :id", array(':id' => $id))->fetchObject();
   return confirm_form(
   $form,
   t('Are you sure you want to delete the Model Feature %modelfeature "?',
@@ -1635,7 +1635,7 @@ function guifi_devel_configuracio_usc($id=null, $op=null) {
                       1 => "Wireless Client",
                       2 => "Wireless Bridge",
                       3 => "Routed Client");
-  while ($configuraciousc = db_fetch_object($sql)) {
+  while ($configuraciousc = $sql->fetchObject()) {
     $rows[] = array(
       $configuraciousc->fabricant,
       $configuraciousc->model,
@@ -1670,8 +1670,8 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
       inner join guifi_firmware f on f.id = usc.fid
       inner join guifi_model_specs m on m.mid = usc.mid
       inner join guifi_manufacturer mf on mf.fid = m.fid
-   where usc.id= %d', $id);
-  $configuraciousc = db_fetch_object($sql);
+   where usc.id= :uid', array(':uid' => $id));
+  $configuraciousc = $sql->fetchObject();
 
   if ($id == 'New' ) {
     $form['new'] = array('#type' => 'hidden', '#value' => TRUE);
@@ -1722,10 +1722,10 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
                         guifi_parametresConfiguracioUnsolclic usc
                         inner join guifi_parametres p on p.id = usc.pid
                     where
-                        usc.uscid = %d
-                    order by usc.dinamic asc, p.nom asc', $id);
+                        usc.uscid = :uid
+                    order by usc.dinamic asc, p.nom asc', array(':uid' => $id));
   $totalParams = 0;
-  while ($paramUSC = db_fetch_object($sql)) {
+  while ($paramUSC = $sql->fetchObject()) {
     $rows[] = array(
     $paramUSC->nom,
     ($paramUSC->dinamic)?$paramUSC->origen:' - ',
@@ -1815,7 +1815,7 @@ function guifi_devel_configuracio_usc_delete_confirm($form_state,$id) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_configuracio_usc_delete_confirm()',$id);
 
   $form['id'] = array('#type' => 'hidden', '#value' => $id);
-  $qry= db_fetch_object(db_query("SELECT plantilla FROM {guifi_configuracioUnSolclic} WHERE id = %d", $id));
+  $qry= db_query("SELECT plantilla FROM {guifi_configuracioUnSolclic} WHERE id = :id", array(':id' => $id))->fetchObject();
   return confirm_form(
   $form,
   t('Are you sure you want to delete the Configuracio Unsolclic " %configuraciousc "?',
@@ -1870,7 +1870,7 @@ function guifi_devel_paramusc($id=null, $op=null) {
   $headers = array(t('ID'), t('Parameter'), t('Origen'), t('Edit'), t('Delete'));
 
   $sql = db_query('SELECT * FROM {guifi_parametres}');
-  while ($parameter = db_fetch_object($sql)) {
+  while ($parameter = $sql->fetchObject()) {
     $rows[] = array($parameter->id,
     $parameter->nom,
     $parameter->origen,
@@ -1904,8 +1904,8 @@ function guifi_devel_paramusc_form($form_state, $id) {
                       inner join guifi_model_specs d on d.mid = usc.mid
                       inner join guifi_manufacturer mf on mf.fid = d.fid
                   where
-                      pusc.id = %d', $id);
-  $parameter = db_fetch_object($sql);
+                      pusc.id = :id', array(':id' => $id));
+  $parameter = $sql->fetchObject();
 
   $manufacturerLink = '<a href="'.base_path().'guifi/menu/devel/device/'.$parameter->mfid.'/edit">'.$parameter->manufacturer.'</a>';
   $modelLink = '<a href="'.base_path().'guifi/menu/devel/model/'.$parameter->mid.'/edit">'.$parameter->model.'</a>';
@@ -1968,13 +1968,13 @@ function guifi_devel_paramusc_delete_confirm($form_state,$id) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_parameter_delete_confirm()',$id);
 
   $form['id'] = array('#type' => 'hidden', '#value' => $id);
-  $qry= db_fetch_object(db_query("SELECT
+  $qry= db_query("SELECT
                                       p.nom, pusc.uscid as uscid
                                   FROM
                                       guifi_parametresConfiguracioUnsolclic pusc
                                       inner join guifi_parametres p on p.id = pusc.pid
                                   WHERE
-                                      pusc.id = %d", $id));
+                                      pusc.id = :id", array(':id' => $id))->fetchObject();
 
   return confirm_form(
   $form,
@@ -2008,23 +2008,23 @@ function guifi_devel_paramusc_delete_confirm_submit($form, &$form_state) {
 function HelperMultipleSelect($formName, $nomSelectAssignats='assignats', $nomSelectDisponibles='disponibles') {
 
   $jquery1 = '
-        $().ready(function() {
-          $("#disponiblesButtonOne").click(function() {
-            return !$("#edit-'.$nomSelectDisponibles.' option:selected").remove().appendTo("#edit-'.$nomSelectAssignats.'");
+        jQuery(document).ready(function() {
+          jQuery("#disponiblesButtonOne").click(function() {
+            return !jQuery("#edit-'.$nomSelectDisponibles.' option:selected").remove().appendTo("#edit-'.$nomSelectAssignats.'");
           });
-          $("#associatsButtonOne").click(function() {
-            return !$("#edit-'.$nomSelectAssignats.' option:selected").remove().appendTo("#edit-'.$nomSelectDisponibles.'");
+          jQuery("#associatsButtonOne").click(function() {
+            return !jQuery("#edit-'.$nomSelectAssignats.' option:selected").remove().appendTo("#edit-'.$nomSelectDisponibles.'");
           });
-          $("#disponiblesButtonAll").click(function() {
-            return !$("#edit-'.$nomSelectDisponibles.' option").remove().appendTo("#edit-'.$nomSelectAssignats.'");
+          jQuery("#disponiblesButtonAll").click(function() {
+            return !jQuery("#edit-'.$nomSelectDisponibles.' option").remove().appendTo("#edit-'.$nomSelectAssignats.'");
           });
-          $("#associatsButtonAll").click(function() {
-            return !$("#edit-'.$nomSelectAssignats.' option").remove().appendTo("#edit-'.$nomSelectDisponibles.'");
+          jQuery("#associatsButtonAll").click(function() {
+            return !jQuery("#edit-'.$nomSelectAssignats.' option").remove().appendTo("#edit-'.$nomSelectDisponibles.'");
           });
 
-          $("#'.$formName.'").submit(function() {
-            $("#edit-'.$nomSelectAssignats.' option").each(function(i) {
-              $(this).attr("selected", "selected");
+          jQuery("#'.$formName.'").submit(function() {
+            jQuery("#edit-'.$nomSelectAssignats.' option").each(function(i) {
+              jQuery(this).attr("selected", "selected");
             });
           });
         });';
@@ -2032,13 +2032,11 @@ function HelperMultipleSelect($formName, $nomSelectAssignats='assignats', $nomSe
 }
 
 function crearParametresConfiguracioUSC($uscid, $fid, $notification, $userid) {
-  $sql = db_query("SELECT
-                        p.id, %d, p.nom, dinamic, default_value
-                     FROM
-                      guifi_parametres p
-                     INNER JOIN guifi_parametresFirmware pf ON pf.pid = p.id  AND pf.fid = %d", $uscid,  $fid);
+  $sql = db_query("SELECT p.id, :uid, p.nom, dinamic, default_value
+                   FROM guifi_parametres p
+                   INNER JOIN guifi_parametresFirmware pf ON pf.pid = p.id  AND pf.fid = :fid", array(':uid' => $uscid,  ':fid' => $fid));
 
-  while ($paramsFirmware = db_fetch_object($sql)) {
+  while ($paramsFirmware = $sql->fetchObject()) {
 
 
     $params = array(
@@ -2068,8 +2066,8 @@ function crearParametresConfiguracioUSC($uscid, $fid, $notification, $userid) {
  * @param int $userid
  */
 function afegirParametreConfiguracionsUSC($fid, $parametre, $notification, $userid) {
-  $sql = db_query("select id , enabled from guifi_configuracioUnSolclic where fid = %d", $fid);
-  while ($configuracioUSC = db_fetch_object($sql)) {
+  $sql = db_query("select id , enabled from guifi_configuracioUnSolclic where fid = :fid", array(':fid' => $fid));
+  while ($configuracioUSC = $sql->fetchObject()) {
     $params = array(
               'pid' => $parametre['id'],
               'uscid' => $configuracioUSC->id,
@@ -2079,7 +2077,7 @@ function afegirParametreConfiguracionsUSC($fid, $parametre, $notification, $user
               'user_created' => $userid,
               'new' => true
     );
-    _guifi_db_sql('guifi_parametresConfiguracioUnsolclic',array('id' => $params['id']),$params,$log,$notification);
+    _guifi_db_sql('guifi_parametresConfiguracioUnsolclic',array('id' => $params['id']),$params, $log, $notification);
   }
   return true;
 }
@@ -2098,8 +2096,8 @@ function getUSCid($model, $firmware){
                           inner join
                       guifi_configuracioUnSolclic usc ON usc.id = pusc.uscid
                   where
-                      pusc.pid = %d and usc.fid = %d', $model, $firmware);
-  $usc = db_fetch_object($sql);
+                      pusc.pid = :model and usc.fid = :firm', array(':model' => $model, ':firm' => $firmware));
+  $usc = $sql->fetchObject();
 
   return $uscId->id;
 }

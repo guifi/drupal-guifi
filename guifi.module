@@ -115,7 +115,7 @@ function guifi_menu() {
     'title' => 'Create a node',
     'description' => 'Join to the network by creating your node',
     'page callback' => 'drupal_goto',
-    'page arguments' => array('node/add/guifi-node'),
+    'page arguments' => array('node/add/guifi-location'),
     'access arguments' => array('access content'),
   );
   if (variable_get('guifi_faq', '') != '')
@@ -2065,7 +2065,7 @@ function guifi_page($full = FALSE) {
       return theme_guifi_menu_page($blocks);
       return;
     }
-    return drupal_redner(theme_guifi_menu_page($blocks));
+    return theme_guifi_menu_page($blocks);
   }
   else {
     return t('You do not have any active items.');

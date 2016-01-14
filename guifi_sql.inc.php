@@ -70,14 +70,14 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 	    $data['timestamp_created'] = time();
             break;
 	  case 'guifi_types':
-	    $next_id = db_query("SELECT max(id)+1 id FROM {$table}WHERE type = '%s'",$data['type'])->fetchAssoc();
+	    $next_id = db_query("SELECT max(id)+1 id FROM {$table} WHERE type = :type", array(':type' => $data['type']))->fetchAssoc();
 	    $data['id'] = $next_id['id'];
             break;
 	  case 'budget_funds':
 	    $data['timestamp_created'] = time();
 	  case 'budget_items':
 	    $next_id = db_query("SELECT max(id)+1 id FROM {$table} " .
-	        "WHERE budget_id = %d",$data['budget_id'])->fetchAssoc();
+	        "WHERE budget_id = :bid", array(':bid' => $data['budget_id']))->fetchAssoc();
 	    if (is_null($next_id['id']))
 	      $next_id['id'] = 1;
 	    $data['id'] = $next_id['id'];
@@ -139,6 +139,9 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 	    $data['id']=$new_id['id'];
 	    $data['user_created'] = $user->uid;
 	    $data['timestamp_created'] = time();
+	    // default values
+	    $data['user_changed'] = $user->uid;
+	    $data['timestamp_changed'] = time();
 	    break;
 	  } // insert triggers switch table
   }

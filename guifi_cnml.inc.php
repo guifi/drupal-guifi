@@ -1198,13 +1198,13 @@ function growth_map($plat1,$plon1,$plat2,$plon2){
    $v=0;
    $numnodes=0;
    $numlinks=0;
-   $result=db_query(sprintf("SELECT t1.nid as nid,t1.timestamp_created as ldate, t2.id as lid,
+   $result=db_query("SELECT t1.nid as nid,t1.timestamp_created as ldate, t2.id as lid,
             t3.lat,t3.lon,t3.timestamp_created as ndate, t2.link_type
             FROM guifi_location as t3
             inner join guifi_devices as t1 on t1.nid = t3.id
             left join guifi_links as t2 on t1.id = t2.device_id
             where t1.type='radio' and t1.flag='Working' and t3.lat between (:plat1) and (:plat2) and t3.lon between (:plon1) and (:plon2)
-            order by t2.id;", array(' :plat1' => $plat1, ':plat2' => $plat2, ':plon1' => $plon1, ':plon2' => $plon2)));
+            order by t2.id;", array(':plat1' => $plat1, ':plat2' => $plat2, ':plon1' => $plon1, ':plon2' => $plon2));
    while ($record = $result->fetchObject()){
       if($record->link_type=="wds"){
          $v=2;
@@ -1264,7 +1264,7 @@ function growth_map($plat1,$plon1,$plat2,$plon2){
       }
    }
    asort($objects);
-   $vjson=json_encode(array($objects,$nodes,$links));
+   $vjson = drupal_json_encode(array($objects,$nodes,$links));
 
    return $vjson;
 }

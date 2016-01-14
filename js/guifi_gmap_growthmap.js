@@ -13,11 +13,9 @@ var fastControl = null;
 var normalControl = null;
 var slowControl = null;
 
-if(Drupal.jsEnabled) {
-    $(document).ready(function(){
+    jQuery(document).ready(function($) {
         draw_map();
-    }); 
-}
+    });
 
 var http_request;
 var adata;  //carga el json de la web en el array
@@ -75,7 +73,8 @@ var speed = nfast;;
 function draw_map() {
 
     var divmap = document.getElementById("map");
-
+    var baseURL = document.getElementById("guifi-wms").value;
+    
     opts = {
         center: new google.maps.LatLng(41.83, 2.30),
         zoom: 9,
@@ -105,11 +104,12 @@ function draw_map() {
     //map.mapTypes.set('osm', openStreet);
     //initCopyrights();
 
-    // Add the guifi layer
-    var guifi = new GuifiLayer(map);
-    //map.overlayMapTypes.insertAt(0, guifi.overlay);
+    // Guifi control
+    var guifi = new GuifiLayer(map, baseURL);
+    map.overlayMapTypes.push(null);
+    map.overlayMapTypes.setAt(0, guifi.overlay);
 
-    var guifiControl = new Control("guifi", true);
+    var guifiControl = new Control("guifi");
     guifiControl.div.index = 1;
     map.controls[google.maps.ControlPosition.TOP_RIGHT].push(guifiControl.div);
 
@@ -633,7 +633,7 @@ function loaddata(){
     document.getElementById("edit-formmap2").value="Loading...";
     var vurl='/guifi/cnml/0/growthmap?lat1='+lat1+'&lon1='+lon1+'&lat2='+lat2+'&lon2='+lon2;
 
-    $.ajax({
+    jQuery.ajax({
              url: vurl,
              success: function(data) {
                  build_history(data);
@@ -661,10 +661,10 @@ function init(){
       document.getElementById("edit-formmap2").value="";
       aobjects.length=0;
       if(supportsCanvas){
-            canvassupernodes = $("#canvassupernodes")[0].getContext('2d');
-            canvasbackbone = $("#canvasbackbone")[0].getContext('2d');
-            canvasnodes = $("#canvasnodes")[0].getContext('2d');
-            canvaslinks = $("#canvaslinks")[0].getContext('2d');
+            canvassupernodes = jQuery("#canvassupernodes")[0].getContext('2d');
+            canvasbackbone = jQuery("#canvasbackbone")[0].getContext('2d');
+            canvasnodes = jQuery("#canvasnodes")[0].getContext('2d');
+            canvaslinks = jQuery("#canvaslinks")[0].getContext('2d');
             canvassupernodes.clearRect(0,0,800,600);
             canvasbackbone.clearRect(0,0,800,600);
             canvasnodes.clearRect(0,0,800,600);

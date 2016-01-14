@@ -699,12 +699,12 @@ function guifi_admin_notify($view = 'FALSE') {
  */
 function guifi_admin_loadstats($server_id) {
 
-  $output = drupal_get_form('guifi_admin_loadstats_form',$server_id);
+  $output = drupal_render(drupal_get_form('guifi_admin_loadstats_form',$server_id));
 
   if (is_null($server_id))
     return $output;
 
-  include_once('guifi_cron.inc.php');
+  include_once 'guifi_cron.inc.php';
 
   $output .= guifi_cron_loadCNMLstats($server_id, TRUE);
 
@@ -722,7 +722,6 @@ function guifi_admin_loadstats_form($form_state, $params = array()) {
     '#title' => t('CNML Graph server'),
     '#maxlength' => 60,
     '#required' => FALSE,
-    '#default_value' => guifi_service_str($params),
     '#autocomplete_path'=> 'guifi/js/select-service/SNPgraphs',
     '#element_validate' => array('guifi_service_name_validate',
       'guifi_zone_service_validate'),

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file guifi_zone.inc.php
  * Created on 1/08/2009 by Eduard
@@ -61,7 +62,7 @@ function guifi_stats_growthmap() {
         '<input type=hidden value='.base_path().drupal_get_path('module','guifi').'/js/'.' id=edit-jspath />' .
         '<input type=hidden value='.variable_get('guifi_wms_service','').' id=guifi-wms />' .
         '</form>';
-    $output .= drupal_get_form('guifi_growthmap_map_form');
+    $output .= drupal_render(drupal_get_form('guifi_growthmap_map_form'));
     $output .= '<div id="map" style="width: 800px; height: 600px; margin:5px;"></div>';
     $output .= '<div id="footmap" style="margin:5px;">'.t('Mode:').'</div>';
     $output .= '<canvas id="testcanvas" width="1px" height="1px"></canvas>';
@@ -77,14 +78,15 @@ function guifi_stats_growthmap() {
   return $output;
 }
  
-function guifi_growthmap_map_form($form_state) { 
+function guifi_growthmap_map_form() {
+
   $form['#action'] = '';
   $form['formmap2'] = array(
     '#type' => 'textfield',
     '#name' => 'formmap2',
     '#default_value' => '',
     '#size' => 63,
-    '#attributes' => array('style' => 'margin:5px;text-align:center;font-size:24px'),
+    '#attributes' => array('style' => array('margin:5px;text-align:center;font-size:24px')),
     '#prefix' => '<div style="align:center">',
     '#suffix' => '</div>'
   );
@@ -101,9 +103,10 @@ function guifi_stats_nodes() {
     $vid=$_GET['id'];
     if(isset($_GET['zone'])){
       $zone_id=$_GET['zone'];
-      if($zone_id=="3671") $zone_id="0";
+      if($zone_id=="3671")
+        $zone_id="0-guifi.net World";
     }else{
-      $zone_id="0";
+      $zone_id="0-guifi.net World";
     }
     if($zone_id!="0")
       $vz="?zone=".$zone_id;
@@ -135,14 +138,15 @@ function guifi_stats_nodes() {
     $vid='0';
     if(isset($_GET['zone'])){
       $zone_id=$_GET['zone'];
-      if($zone_id=="3671") $zone_id="0";
+      if($zone_id=="3671")
+        $zone_id="0-guifi.net World";
     }else{
-      $zone_id="0";
+      $zone_id = '0-guifi.net World';
     }
   }
-  
+
   if($vid=='0'){
-    $output .= drupal_get_form('guifi_stats_nodes_form',$zone_id);
+    $output .= drupal_render(drupal_get_form('guifi_stats_nodes_form',$zone_id));
     $output .= '<div id="sep" style="height: 5px; border-style:none; float:none; margin:5px;"></div>';
     $output .= '<div id="plot" style="width: 500px; border-style:none; float:right; margin:5px;"></div>';
     $output .= '<div id="menu" style="width: 230px; margin:5px;">';
@@ -169,9 +173,10 @@ function guifi_stats_nodes() {
 
   return $output;
 }
-function guifi_stats_nodes_form($form_state,$zone_id) {
+function guifi_stats_nodes_form($null, $form_state,$zone_id) {
+
     $form['#action'] = '';
-    $form['zone_id'] = guifi_zone_select_field((int)$zone_id,'zone_id');
+    $form['zone_id'] = guifi_zone_select_field($zone_id,'zone_id');
     $form['zone_id']['#weight'] = 1;
     return $form;
 }
@@ -214,7 +219,7 @@ function guifi_stats_chart() {
 
 //create gif working nodes
 function guifi_stats_chart01(){ //growth_chart
-    include drupal_get_path('module','guifi').'/contrib/phplot/phplot.php';
+    include 'contrib/phplot/phplot.php';
     $gDirTTFfonts=drupal_get_path('module','guifi').'/contrib/fonts/';  
     if(isset($_GET['width'])){
       $gwidth=$_GET['width'];
@@ -227,7 +232,8 @@ function guifi_stats_chart01(){ //growth_chart
       $gheight=450;
     }
     if(isset($_GET['zone'])){
-      $zone_id=$_GET['zone'];
+    $zone = explode('-',$_GET['zone']);
+      $zone_id = $zone[0];
       if($zone_id=="3671") $zone_id="0";
     }else{
       $zone_id="0";
@@ -381,7 +387,8 @@ function guifi_stats_chart02(){
       $gheight=450;
     }
     if(isset($_GET['zone'])){
-      $zone_id=$_GET['zone'];
+    $zone = explode('-',$_GET['zone']);
+      $zone_id = $zone[0];
       if($zone_id=="3671") $zone_id="0";
     }else{
       $zone_id="0";
@@ -476,7 +483,8 @@ function guifi_stats_chart03(){
       $gheight=450;
     }
     if(isset($_GET['zone'])){
-      $zone_id=$_GET['zone'];
+    $zone = explode('-',$_GET['zone']);
+      $zone_id = $zone[0];
       if($zone_id=="3671") $zone_id="0";
     }else{
       $zone_id="0";
@@ -579,10 +587,12 @@ function guifi_stats_chart04(){
     $datemin=mktime(0,0,0,$month,1,$year);
     
     if(isset($_GET['zone'])){
-      $zone_id=$_GET['zone'];
-      if($zone_id=="3671") $zone_id="0";
-    }else{
-      $zone_id="0";
+    $zone = explode('-',$_GET['zone']);
+      $zone_id = $zone[0];
+      if($zone_id == "3671")
+        $zone_id = "0";
+    } else {
+      $zone_id = "0";
     }
     $vsql="select COUNT(*) as num, max(timestamp_created) as fecha, max(month(FROM_UNIXTIME(timestamp_created))) as mes,max(year(FROM_UNIXTIME(timestamp_created))) as year
       from {guifi_location}
@@ -668,7 +678,8 @@ function guifi_stats_chart05($nmonths){
       $gheight=450;
     }
     if(isset($_GET['zone'])){
-      $zone_id=$_GET['zone'];
+    $zone = explode('-',$_GET['zone']);
+      $zone_id = $zone[0];
       if($zone_id=="3671") $zone_id="0";
     }else{
       $zone_id="0";
@@ -871,7 +882,8 @@ function guifi_stats_chart06(){
     $datemin=mktime(0,0,0,$month,1,$year);
     
     if(isset($_GET['zone'])){
-      $zone_id=$_GET['zone'];
+    $zone = explode('-',$_GET['zone']);
+      $zone_id = $zone[0];
       if($zone_id=="0") $zone_id="3671";
     }else{
       $zone_id="3671";
@@ -982,7 +994,8 @@ function guifi_stats_chart07(){
     $datemin=mktime(0,0,0,$month,1,$year);
     
     if(isset($_GET['zone'])){
-      $zone_id=$_GET['zone'];
+    $zone = explode('-',$_GET['zone']);
+      $zone_id = $zone[0];
       if($zone_id=="0") $zone_id="0"; //"3671";
     }else{
       $zone_id="0";
@@ -1034,7 +1047,7 @@ function guifi_stats_chart07(){
     arsort($avalue);
     foreach ($avalue as $key => $value) {
       if($value!=0){
-        $data[]=array(substr(guifi_get_zone_name($key),0,20)."   ",$value);
+        $data[]=array(substr(guifi_get_zone_name($key),0,20)."   ",$value);
       }
     }
 

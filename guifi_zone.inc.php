@@ -204,10 +204,10 @@ function guifi_zone_autocomplete_field($zid,$fname) {
   );
 }
 
-function guifi_zone_select_field($zid,$fname) {
+function guifi_zone_select_field($zid, $fname) {
 
   $parents = array();
-  $parent=$zid;
+  $parent = $zid;
   $c = 1;
   while ($parent > 0) {
     $result = db_query('
@@ -238,9 +238,11 @@ function guifi_zone_select_field($zid,$fname) {
 
   ob_start();
   print "<br />Zid: $zid Master: $master <br />";
-  print_r($lzones);
   $txt = ob_get_clean();
   ob_end_clean();
+
+  if (empty($master))
+    $master = '0';
 
   $has_peers = FALSE;
   $has_childs = FALSE;
@@ -249,18 +251,18 @@ function guifi_zone_select_field($zid,$fname) {
     'FROM {guifi_zone} z ' .
     'WHERE z.master = :master '.
     'ORDER BY z.title',
-    array(':master' => $master))->fetchObject();
+    array(':master' => $master));
   $qchilds = db_query(
     'SELECT z.id, z.title ' .
     'FROM {guifi_zone} z ' .
     'WHERE z.master = :zid '.
     'ORDER BY z.title',
-    array(':zid' => $zid))->fetchObject();
+    array(':zid' => $zid));
 
-  foreach ($qpeer as $peer) {
+  while ($peer = $qpeer->fetchObject()) {
     $lzones[$peer->id] = str_repeat('-',$c).$peer->title;
     if ($peer->id == $zid) {
-      foreach ($qchilds as $child) {
+      while ($child = $qchilds->fetchObject()) {
         $has_childs = TRUE;
         $lzones[$child->id] = str_repeat('-',$c+1).$child->title;
       }
@@ -296,21 +298,18 @@ function guifi_zone_select_field($zid,$fname) {
 //      " var[0]: $var[0] count(var): ".count($var));
 
   return array(
-    '#type' => 'select',
-    '#title' => $title,
-    '#parents' => array($zidFn),
-    '#default_value' => $zid,
-    '#options' => $lzones,
-    '#description' => $msg,
-    '#prefix' => '<div id="select-zone">',
-    '#suffix' => '</div>',
-    '#ahah' => array(
-      'path' => 'guifi/js/select-zone/'.$fname.'/select',
-      'wrapper' => 'select-zone',
-      'method' => 'replace',
-      'effect' => 'fade',
-     ),
-    );
+     '#type' => 'textfield',
+     '#title' => t($title),
+     '#parents' => array($zidFn),
+     '#description' => $msg,
+     '#size' => 80,
+     '#default_value'=> $zid,
+     '#maxsize'=> 256,
+     '#autocomplete_path' => 'guifi/js/select-zone',
+     '#element_validate' => array('guifi_zone_service_validate'),
+  );
+
+
 //'#weight' => $form_weight++,
 
 }

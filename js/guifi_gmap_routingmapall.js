@@ -14,11 +14,9 @@ var icons = new Array();
 var picspath = new Array();
 var narea;
 
-if(Drupal.jsEnabled) {
-    $(document).ready(function(){
+    jQuery(document).ready(function($) {
         draw_map();
     });
-}
 
 function draw_map(){
 
@@ -154,7 +152,7 @@ function draw_map(){
     }); 
 
     disable_widgets();
-    $("#topmap").text("Find routing area and click the init button");
+    jQuery("#topmap").text("Find routing area and click the init button");
     swinit = 1;
 
 }
@@ -165,7 +163,7 @@ function init(){
     }
     overlays.length = 0;
 
-    $("#topmap").text("Loading...");
+    jQuery("#topmap").text("Loading...");
     swinit = 2;
 
     var vbounds=map.getBounds();
@@ -178,7 +176,7 @@ function init(){
     var vurl='/guifi/routingmap/allsearch/0?lat1='+lat1+'&lon1='+lon1+'&lat2='+lat2+'&lon2='+lon2;
     //var vurl='/guifi/routingmap/allsearch/0?lat1=41.21378767703215&lon1=0.97503662109375&lat2=42.44170109062157&lon2=3.6199951171874996';
 
-    var r = $.ajax({
+    var r = jQuery.ajax({
                      url: vurl,
                      success: function(data) {
                          build_routing(data);
@@ -222,7 +220,7 @@ function build_routing(pdata) {
     }
   }
 
-  $("#topmap").html("<img src='"+picspath[1]+"'>&nbsp;BGP&nbsp;&nbsp;&nbsp;<img src='"+picspath[3]+"'>&nbsp;BGP/OSPF&nbsp;&nbsp;&nbsp;<img src='"+picspath[2]+"'>&nbsp;OSPF");
+  jQuery("#topmap").html("<img src='"+picspath[1]+"'>&nbsp;BGP&nbsp;&nbsp;&nbsp;<img src='"+picspath[3]+"'>&nbsp;BGP/OSPF&nbsp;&nbsp;&nbsp;<img src='"+picspath[2]+"'>&nbsp;OSPF");
   initControl.disable();
   enable_widgets();
 }

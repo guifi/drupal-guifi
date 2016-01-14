@@ -228,32 +228,6 @@ function guifi_ahah_select_node_device(){
  */
 function guifi_ahah_select_zone() {
 
-  if ( arg(4) == 'select' ) {
-    $cid = 'form_'. $_POST['form_build_id'];
-    $cache = cache_get($cid, 'cache_form');
-
-    $fname = arg(3);
-    $zid = $_POST[$fname];
-
-    if ($cache) {
-      $form = $cache->data;
-      $form[$fname] =
-        guifi_zone_select_field($zid,$fname);
-
-      cache_set($cid, $form, 'cache_form', $cache->expire);
-      // Build and render the new select element, then return it in JSON format.
-      $form_state = array();
-      $form['#post'] = array();
-      $form = form_builder($form['form_id']['#value'] , $form, $form_state);
-      $output = drupal_render($form[$fname]);
-
-      drupal_json(array('status' => TRUE, 'data' => $output));
-    } else {
-      drupal_json(array('status' => FALSE, 'data' => ''));
-    }
-    exit();
-    
-  } else {
     $matches = array();
     $string = strtoupper(arg(3));
     $query =
@@ -273,7 +247,6 @@ function guifi_ahah_select_zone() {
     }
     print drupal_json_encode($matches);
     exit();
-  }
 }
 
 function guifi_ahah_delete_ipv4()

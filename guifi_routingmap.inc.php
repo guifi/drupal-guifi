@@ -29,7 +29,7 @@ function guifi_routingmap($action = 'init',$actionid) {
 function guifi_routingmap_init(){
   $output = "";
   if (guifi_gmap_key()) {
-    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_routingmap.js','module');
+    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_routingmap.js');
     $output .=  '<form>' .
         '<input type=hidden value='.base_path().drupal_get_path('module','guifi').'/js/'.' id=edit-jspath />' .
         '<input type=hidden value='.variable_get('guifi_wms_service','').' id=guifi-wms />' .
@@ -45,14 +45,14 @@ function guifi_routingmap_init(){
 }
 function guifi_routingmap_search($plat1,$plon1,$plat2,$plon2){
 
-   $result=db_query(sprintf("SELECT t1.id as nid,t1.lat,t1.lon
+   $result = db_query('SELECT t1.id as nid,t1.lat,t1.lon
             FROM guifi_location as t1
-            where t1.status_flag='Working' and t1.lat between (%s) and (%s) and
-						t1.lon between (%s) and (%s);",$plat1,$plat2,$plon1,$plon2));
+            where t1.status_flag=\'Working\' and t1.lat between (:plat1) and (:plat2) and t1.lon between (:plon1) and (:plon2)', 
+            array(':plat1' => $plat1, ':plat2' => $plat2, ':plon1' => $plon1, ':plon2' => $plon2));
 
 	$cnmlid=0;
-  while ($record=db_fetch_object($result)){
-    $cnmlid=$record->nid;
+  while ($record = $result->fetchObject()){
+    $cnmlid = $record->nid;
 	  break;
 	}
 	
@@ -105,11 +105,12 @@ function guifi_routingmap_search($plat1,$plon1,$plat2,$plon2){
   //search node data, zone list
   $nreg=count($nodes);
   for($n=0;$n<$nreg;$n++){
-    $result=db_query(sprintf("SELECT t1.nick as nnick, t1.zone_id as zid, t1.lat, t1.lon, t2.nick as znick
+    $result = db_query('SELECT t1.nick as nnick, t1.zone_id as zid, t1.lat, t1.lon, t2.nick as znick
                FROM guifi_location as t1
                join guifi_zone as t2 on t1.zone_id = t2.id 
-               where t1.id = (%s)",$nodes[$n]));
-    if ($record=db_fetch_object($result)){
+               where t1.id = (:node)', array(':node' => $nodes[$n]));
+
+    if ($record = $result->fetchObject()){
       $nodesid["$nodes[$n]"]=Array("nnick" => $record->nnick,"zid" => $record->zid,"lat" => $record->lat,"lon" => $record->lon);
       if (!isset($azones[$record->zid])){
         $azones[$record->zid]=$record->znick;
@@ -119,10 +120,10 @@ function guifi_routingmap_search($plat1,$plon1,$plat2,$plon2){
 
   //search zone subnets
   if (count($azones)) foreach ($azones as $key => $azone){
-    $result=db_query(sprintf("SELECT t1.base as netid, t1.mask as mask
+    $result=db_query('SELECT t1.base as netid, t1.mask as mask
                FROM guifi_networks as t1
-               where t1.zone = (%s)",$key));
-    while ($record=db_fetch_object($result)){
+               where t1.zone = (:zone)', array(':zone' => $key));
+    while ($record = $result->fetchObject()){
       $a = _ipcalc($record->netid,$record->mask);
       $splitip=explode(".",$a["netid"]);
       $c=$splitip[0]*pow(256,3)+$splitip[1]*pow(256,2)+$splitip[2]*256+$splitip[3];
@@ -220,8 +221,8 @@ function guifi_routingmap_search($plat1,$plon1,$plat2,$plon2){
 
 function guifi_routingmap_search_firstdevice($nid){
   $k=0;
-  $result=db_query(sprintf('SELECT id, device_id FROM guifi_links where nid = (%s) and routing="OSPF" and (link_type="cable" or link_type="wds")',$nid));
-  if ($record=db_fetch_object($result)){
+  $result = db_query('SELECT id, device_id FROM guifi_links where nid = (:nid) and routing=\'OSPF\' and (link_type =\'cable\' or link_type =\'wds\')', array(':nid' => $nid));
+  if ($record = $result->fetchObject() ){
     $k=$record->device_id;  
   };
   return $k;
@@ -229,10 +230,10 @@ function guifi_routingmap_search_firstdevice($nid){
 
 function guifi_routingmap_search_links(&$nodes,&$nodesid,&$devices,&$devicesid,&$alinks,$deviceid){
   $k=0;
-  $resultlinks=db_query(sprintf('SELECT id FROM guifi_links where device_id = (%s) and routing="OSPF" and (link_type="cable" or link_type="wds") and flag="Working"',$deviceid));
-  while ($recordlink=db_fetch_object($resultlinks)){
-    $result=db_query(sprintf("SELECT nid, device_id, routing, link_type FROM guifi_links where id = (%s) and device_id != (%s)",$recordlink->id,$deviceid));
-    if ($record=db_fetch_object($result)){
+  $resultlinks = db_query('SELECT id FROM guifi_links where device_id = (:did) and routing=\'OSPF\' and (link_type=\'cable\' or link_type=\'wds\') and flag=\'Working\'', array(':did' => $deviceid));
+  while ($recordlink = $resultlinks->fetchObject()){
+    $result = db_query('SELECT nid, device_id, routing, link_type FROM guifi_links where id = (:lid) and device_id != (:did)', array(':lid' => $recordlink->id, ':did' => $deviceid));
+    if ($record = $result->fetchObject()){
       if (!isset($devicesid["$record->device_id"])){
         $devicesid["$record->device_id"]=$record->nid;
         $devices[]=$record->device_id;
@@ -252,11 +253,11 @@ function guifi_routingmap_search_links(&$nodes,&$nodesid,&$devices,&$devicesid,&
 
 function guifi_routingmap_add_device_networks(&$networks,$deviceid,$nid){
    $v="";
-   $result=db_query(sprintf("SELECT t3.ipv4, t3.netmask
+   $result = db_query('SELECT t3.ipv4, t3.netmask
                FROM guifi_interfaces as t2
                join guifi_ipv4 as t3 on t2.id = t3.interface_id
-               where t2.device_id = (%s) and t3.ipv4_type=1",$deviceid));
-   while ($record=db_fetch_object($result)){
+               where t2.device_id = (:did) and t3.ipv4_type=1', array(':did' => $deviceid));
+   while ($record = $result->fetchObject()){
       $a = _ipcalc($record->ipv4,$record->netmask);
       $c=ip2long($a["netid"]);
       if (!isset($networks[$c])){
@@ -272,7 +273,7 @@ function guifi_routingmap_add_device_networks(&$networks,$deviceid,$nid){
 function guifi_routingmap_all_init(){
   $output = "";
   if (guifi_gmap_key()) {
-    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_routingmapall.js','module');
+    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_routingmapall.js');
     $output .=  '<form>' .
         '<input type=hidden value='.base_path().drupal_get_path('module','guifi').'/js/'.' id=edit-jspath />' .
         '<input type=hidden value='.variable_get('guifi_wms_service','').' id=guifi-wms />' .
@@ -288,13 +289,13 @@ function guifi_routingmap_all_init(){
 } 
 function guifi_routingmap_all_search($plat1,$plon1,$plat2,$plon2){
 
-   $result=db_query(sprintf("SELECT t1.nid as nid,t2.id as lid, t2.link_type, t2.routing, t3.lat, t3.lon
+   $result = db_query('SELECT t1.nid as nid,t2.id as lid, t2.link_type, t2.routing, t3.lat, t3.lon
             FROM guifi_location as t3
             inner join guifi_devices as t1 on t1.nid = t3.id
             left join guifi_links as t2 on t1.id = t2.device_id
-            where (t2.routing='OSPF' or t2.routing='BGP') and (t2.link_type='cable' or t2.link_type='wds') and t2.flag='Working'
-            and t3.lat between (%s) and (%s) and t3.lon between (%s) and (%s)
-            order by t1.nid;",$plat1,$plat2,$plon1,$plon2));
+            where (t2.routing=\'OSPF\' or t2.routing=\'BGP\') and (t2.link_type=\'cable\' or t2.link_type=\'wds\') and t2.flag=\'Working\'
+            and t3.lat between (:plat1) and (:plat2) and t3.lon between (:plon1) and (:plon2)
+            order by t1.nid', array(':plat1' => $plat1, ':plat2' => $plat2, ':plon1' => $plon1, ':plon2' => $plon2));
 	
   $nmax=600;   //max nodes
   $nodes=Array(); //array node data + repetition control
@@ -303,7 +304,7 @@ function guifi_routingmap_all_search($plat1,$plon1,$plat2,$plon2){
   $vospf=0;
   $vbgp=0;
 
-  while ($record=db_fetch_object($result)){
+  while ($record = $result->fetchObject()){
     if($record->routing=="OSPF") $vospf=1; else $vospf=0;
     if($record->routing=="BGP") $vbgp=1; else $vbgp=0;
     if(!isset($nodes[$record->nid])){
@@ -382,8 +383,8 @@ function guifi_routingmap_all_search_ospfarea($pnode){
 
 function guifi_routingmap_all_search_firstdevice($nid){
   $k=0;
-  $result=db_query(sprintf('SELECT id, device_id FROM guifi_links where nid = (%s) and routing="OSPF" and (link_type="cable" or link_type="wds")',$nid));
-  if ($record=db_fetch_object($result)){
+  $result = db_query('SELECT id, device_id FROM guifi_links where nid = (:nid) and routing=\'OSPF\' and (link_type=\'cable\' or link_type=\'wds\')', array(':nid' => $nid));
+  if ($record = $result->fetchObject()){
     $k=$record->device_id;  
   };
   return $k;
@@ -391,10 +392,10 @@ function guifi_routingmap_all_search_firstdevice($nid){
 
 function guifi_routingmap_all_search_links(&$nodesid,&$devices,&$devicesid,&$alinks,$deviceid){
   $k=0;
-  $resultlinks=db_query(sprintf('SELECT id FROM guifi_links where device_id = (%s) and routing="OSPF" and (link_type="cable" or link_type="wds") and flag="Working"',$deviceid));
-  while ($recordlink=db_fetch_object($resultlinks)){
-    $result=db_query(sprintf("SELECT nid, device_id, routing, link_type FROM guifi_links where id = (%s) and device_id != (%s)",$recordlink->id,$deviceid));
-    if ($record=db_fetch_object($result)){
+  $resultlinks = db_query('SELECT id FROM guifi_links where device_id = (:did) and routing=\'OSPF\' and (link_type=\'cable\' or link_type=\'wds\') and flag=\'Working\'', array(':did' => $deviceid));
+  while ($recordlink = $resultlinks->fetchObject()){
+    $result = db_query('SELECT nid, device_id, routing, link_type FROM guifi_links where id = (:lid) and device_id != (:did)', array(':lid' => $recordlink->id, ':did' => $deviceid));
+    if ($record = $result->fetchObject()){
       if (!isset($devicesid["$record->device_id"])){
         $devicesid["$record->device_id"]=$record->nid;
         $devices[]=$record->device_id;

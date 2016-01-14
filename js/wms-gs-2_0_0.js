@@ -300,7 +300,7 @@ Control.prototype = {
 
     enable: function(text) {
             if (this.loading_icon) {
-                $("img#" + this.name.replace(/ /g, "") + "-loading").hide();
+                jQuery("img#" + this.name.replace(/ /g, "") + "-loading").hide();
             }
 
             if (text) {
@@ -314,12 +314,12 @@ Control.prototype = {
     },
 
     loading: function() {
-            $("#" + this.imgid).show();
+            jQuery("#" + this.imgid).show();
     },
 
     disable: function(text) {
             if (this.loading_icon) {
-                $("img#" + this.name.replace(/ /g, "") + "-loading").hide();
+                jQuery("img#" + this.name.replace(/ /g, "") + "-loading").hide();
             }
 
             if (text) {
@@ -334,7 +334,7 @@ Control.prototype = {
 
     block: function() {
             if (this.loading_icon) {
-                $("img#" + this.name.replace(/ /g, "") + "-loading").hide();
+                jQuery("img#" + this.name.replace(/ /g, "") + "-loading").hide();
             }
             this.blocked = true;
             this.ui.style.backgroundColor = 'white';
@@ -344,7 +344,7 @@ Control.prototype = {
 
     unblock: function() {
             if (this.loading_icon) {
-                $("img#" + this.name.replace(/ /g, "") + "-loading").hide();
+                jQuery("img#" + this.name.replace(/ /g, "") + "-loading").hide();
             }
             this.blocked = false;
             this.ui.style.backgroundColor = 'white';
