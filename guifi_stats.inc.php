@@ -8,7 +8,7 @@
  function guifi_stats($action,$statsid = 0) {
  if (!is_numeric($statsid))
     return;
-    
+
   switch ($action) {
   case 'chart':
     guifi_stats_chart();
@@ -76,8 +76,8 @@ function guifi_stats_growthmap() {
 
   return $output;
 }
- 
-function guifi_growthmap_map_form($form_state) { 
+
+function guifi_growthmap_map_form($form_state) {
   $form['#action'] = '';
   $form['formmap2'] = array(
     '#type' => 'textfield',
@@ -140,7 +140,7 @@ function guifi_stats_nodes() {
       $zone_id="0";
     }
   }
-  
+
   if($vid=='0'){
     $output .= drupal_get_form('guifi_stats_nodes_form',$zone_id);
     $output .= '<div id="sep" style="height: 5px; border-style:none; float:none; margin:5px;"></div>';
@@ -164,7 +164,7 @@ function guifi_stats_nodes() {
     $output .= '<br />'.t('image:').' &lt;img src="http://guifi.net/guifi/stats/chart?id=N&sid=M"&gt;';
     $output .= '<br />'.t('options:').' &zone=nnnn&width=nnn&height=nnn&title=';
     $output .= '</div>';
-  }    
+  }
   guifi_log(GUIFILOG_TRACE,'stats_nodes',1);
 
   return $output;
@@ -215,7 +215,7 @@ function guifi_stats_chart() {
 //create gif working nodes
 function guifi_stats_chart01(){ //growth_chart
     include drupal_get_path('module','guifi').'/contrib/phplot/phplot.php';
-    $gDirTTFfonts=drupal_get_path('module','guifi').'/contrib/fonts/';  
+    $gDirTTFfonts=drupal_get_path('module','guifi').'/contrib/fonts/';
     if(isset($_GET['width'])){
       $gwidth=$_GET['width'];
     }else{
@@ -329,7 +329,7 @@ function guifi_stats_chart01(){ //growth_chart
     $plot->SetSkipBottomTick(TRUE);
     $plot->SetSkipLeftTick(TRUE);
     $plot->SetXAxisPosition(0);
-    $plot->SetPointShapes($shapes); 
+    $plot->SetPointShapes($shapes);
     $plot->SetPointSizes(10);
     $plot->SetTickLength(3);
     $plot->SetDrawXGrid(TRUE);
@@ -369,7 +369,7 @@ function guifi_stats_chart01_LabelFormat($value){
 //create gif annual increment
 function guifi_stats_chart02(){
     include drupal_get_path('module','guifi').'/contrib/phplot/phplot.php';
-    $gDirTTFfonts=drupal_get_path('module','guifi').'/contrib/fonts/';  
+    $gDirTTFfonts=drupal_get_path('module','guifi').'/contrib/fonts/';
     if(isset($_GET['width'])){
       $gwidth=$_GET['width'];
     }else{
@@ -400,8 +400,8 @@ function guifi_stats_chart02(){
       $vsql .= "AND (".$v.") ";
     }
     $vsql .= "GROUP BY YEAR(FROM_UNIXTIME(timestamp_created)) ";
-    
-    $result=db_query($vsql);    
+
+    $result=db_query($vsql);
     $tot=0;
     $max=0;
 	while ($record=db_fetch_object($result)){
@@ -427,7 +427,7 @@ function guifi_stats_chart02(){
     $plot->SetFileFormat('png');
     $plot->SetDataType("text-data");
     $plot->SetDataValues($data);
-    $plot->SetPlotType("bars"); 
+    $plot->SetPlotType("bars");
     $plot->SetYTickIncrement($inc);
     $plot->SetSkipBottomTick(TRUE);
     $plot->SetSkipLeftTick(TRUE);
@@ -444,7 +444,7 @@ function guifi_stats_chart02(){
         $plot->SetTitle("guifi.net      \n".t('Annual increment'));
       else
         $plot->SetTitle("guifi.net    ".t('zone').": ".guifi_get_zone_name($zone_id)."\n".t('Annual increment'));
-    }    
+    }
     $plot->SetXTitle(t('Years'));
     $plot->SetYTitle(t('Working nodes'));
     $plot->SetXDataLabelPos('plotdown');
@@ -464,7 +464,7 @@ function guifi_stats_chart02(){
 //create gif monthly average
 function guifi_stats_chart03(){
     include drupal_get_path('module','guifi').'/contrib/phplot/phplot.php';
-    $gDirTTFfonts=drupal_get_path('module','guifi').'/contrib/fonts/';  
+    $gDirTTFfonts=drupal_get_path('module','guifi').'/contrib/fonts/';
     if(isset($_GET['width'])){
       $gwidth=$_GET['width'];
     }else{
@@ -496,9 +496,9 @@ function guifi_stats_chart03(){
     }
 
     $vsql .= "GROUP BY MONTH(FROM_UNIXTIME(timestamp_created)) ";
-    
-    $result=db_query($vsql);        
-    
+
+    $result=db_query($vsql);
+
     $tot=0;
     $valor=0;
 	while ($record=db_fetch_object($result)){
@@ -514,7 +514,7 @@ function guifi_stats_chart03(){
     $plot->SetFileFormat('png');
     $plot->SetDataType("text-data");
     $plot->SetDataValues($data);
-    $plot->SetPlotType("bars"); 
+    $plot->SetPlotType("bars");
     //$plot->SetYTickIncrement(10);
     $plot->SetSkipBottomTick(TRUE);
     $plot->SetSkipLeftTick(TRUE);
@@ -555,7 +555,7 @@ function guifi_stats_chart03(){
 //create gif last year
 function guifi_stats_chart04(){
     include drupal_get_path('module','guifi').'/contrib/phplot/phplot.php';
-    $gDirTTFfonts=drupal_get_path('module','guifi').'/contrib/fonts/';  
+    $gDirTTFfonts=drupal_get_path('module','guifi').'/contrib/fonts/';
     if(isset($_GET['width'])){
       $gwidth=$_GET['width'];
     }else{
@@ -577,7 +577,7 @@ function guifi_stats_chart04(){
       $month=12+$month;
     }
     $datemin=mktime(0,0,0,$month,1,$year);
-    
+
     if(isset($_GET['zone'])){
       $zone_id=$_GET['zone'];
       if($zone_id=="3671") $zone_id="0";
@@ -600,9 +600,9 @@ function guifi_stats_chart04(){
     }
 
     $vsql .= "GROUP BY Year(FROM_UNIXTIME(timestamp_created)), month(FROM_UNIXTIME(timestamp_created)) ";
-    
-    $result=db_query($vsql);        
-    
+
+    $result=db_query($vsql);
+
     while ($record=db_fetch_object($result)){
       $data[]=array("$record->mes".'/'.substr("$record->year",2,2),$record->num);
       if($record->mes!=$today[mon] || $record->year!=$today[year]){
@@ -619,7 +619,7 @@ function guifi_stats_chart04(){
     $plot->SetFileFormat('png');
     $plot->SetDataType("text-data");
     $plot->SetDataValues($data);
-    $plot->SetPlotType("bars"); 
+    $plot->SetPlotType("bars");
     $plot->SetYTickIncrement($tot);
     $plot->SetSkipBottomTick(TRUE);
     $plot->SetSkipLeftTick(TRUE);
@@ -654,9 +654,9 @@ function guifi_stats_chart04(){
     $plot->DrawGraph();
 }
 //Nodes per month, average of 6 months
-function guifi_stats_chart05($nmonths){ 
+function guifi_stats_chart05($nmonths){
     include drupal_get_path('module','guifi').'/contrib/phplot/phplot.php';
-    $gDirTTFfonts=drupal_get_path('module','guifi').'/contrib/fonts/';  
+    $gDirTTFfonts=drupal_get_path('module','guifi').'/contrib/fonts/';
     if(isset($_GET['width'])){
       $gwidth=$_GET['width'];
     }else{
@@ -673,7 +673,7 @@ function guifi_stats_chart05($nmonths){
     }else{
       $zone_id="0";
     }
-    $vsql="select COUNT(*) as num, MONTH(FROM_UNIXTIME(timestamp_created)) as mes, YEAR(FROM_UNIXTIME(timestamp_created)) as ano 
+    $vsql="select COUNT(*) as num, MONTH(FROM_UNIXTIME(timestamp_created)) as mes, YEAR(FROM_UNIXTIME(timestamp_created)) as ano
       from {guifi_location}
       where status_flag='Working' ";
     if($zone_id!="0"){
@@ -689,9 +689,9 @@ function guifi_stats_chart05($nmonths){
     }
 
     $vsql .= "GROUP BY YEAR(FROM_UNIXTIME(timestamp_created)),MONTH(FROM_UNIXTIME(timestamp_created)) ";
-    
+
     $result=db_query($vsql);
-    
+
     $inicial=5;
     $nreg=$inicial;
     $tot=0;
@@ -786,13 +786,13 @@ function guifi_stats_chart05($nmonths){
     $plot->SetFileFormat('png');
     $plot->SetDataType("data-data");
     $plot->SetDataValues($data);
-    $plot->SetPlotType("linepoints"); 
+    $plot->SetPlotType("linepoints");
     $plot->SetYTickIncrement($inc);
     $plot->SetXTickIncrement(12);
     $plot->SetSkipBottomTick(TRUE);
     $plot->SetSkipLeftTick(TRUE);
     $plot->SetXAxisPosition(0);
-    $plot->SetPointShapes($shapes); 
+    $plot->SetPointShapes($shapes);
     $plot->SetPointSizes(10);
     $plot->SetTickLength(3);
     $plot->SetDrawXGrid(TRUE);
@@ -847,7 +847,7 @@ function fmediacalc($tot,&$datos,&$n,$nmonths){
 //create gif pie zones
 function guifi_stats_chart06(){
     include drupal_get_path('module','guifi').'/contrib/phplot/phplot.php';
-    $gDirTTFfonts=drupal_get_path('module','guifi').'/contrib/fonts/';  
+    $gDirTTFfonts=drupal_get_path('module','guifi').'/contrib/fonts/';
     if(isset($_GET['width'])){
       $gwidth=$_GET['width'];
     }else{
@@ -869,14 +869,14 @@ function guifi_stats_chart06(){
       $month=12+$month;
     }
     $datemin=mktime(0,0,0,$month,1,$year);
-    
+
     if(isset($_GET['zone'])){
       $zone_id=$_GET['zone'];
       if($zone_id=="0") $zone_id="3671";
     }else{
       $zone_id="3671";
     }
-    
+
     $azone=array();
     $avalue=array();
     $azone[$zone_id]=array($zone_id);
@@ -906,8 +906,8 @@ function guifi_stats_chart06(){
       $vsql .= "AND (".$v.") ";
     }
     $vsql .= "GROUP BY zone_id ";
-    
-    $result=db_query($vsql);        
+
+    $result=db_query($vsql);
     while ($record=db_fetch_object($result)){
       foreach ($azone as $key => $grupzone) {
         if (in_array($record->zone_id,$grupzone)){
@@ -927,7 +927,7 @@ function guifi_stats_chart06(){
     $plot->SetPlotAreaWorld(0, 0, NULL, NULL);
     $plot->SetImageBorderType('plain');
     $plot->SetFileFormat('png');
-    $plot->SetPlotType("pie"); 
+    $plot->SetPlotType("pie");
     $plot->SetDataType("text-data-single");
     $plot->SetDataValues($data);
     $plot->SetDataColors(array('red', 'green', 'blue', 'yellow', 'cyan',
@@ -958,7 +958,7 @@ function guifi_stats_chart06(){
 //Largest annual increase
 function guifi_stats_chart07(){
     include drupal_get_path('module','guifi').'/contrib/phplot/phplot.php';
-    $gDirTTFfonts=drupal_get_path('module','guifi').'/contrib/fonts/';  
+    $gDirTTFfonts=drupal_get_path('module','guifi').'/contrib/fonts/';
     if(isset($_GET['width'])){
       $gwidth=$_GET['width'];
     }else{
@@ -980,14 +980,14 @@ function guifi_stats_chart07(){
       $month=12+$month;
     }
     $datemin=mktime(0,0,0,$month,1,$year);
-    
+
     if(isset($_GET['zone'])){
       $zone_id=$_GET['zone'];
       if($zone_id=="0") $zone_id="0"; //"3671";
     }else{
       $zone_id="0";
     }
-    
+
     $avalue=array();
     $adata=array();
     for($i=0;$i<10;$i++){
@@ -1008,8 +1008,8 @@ function guifi_stats_chart07(){
       $vsql .= "AND (".$v.") ";
     }
     $vsql .= "GROUP BY zone_id ";
-    
-    $result=db_query($vsql);        
+
+    $result=db_query($vsql);
     while ($record=db_fetch_object($result)){
       if($record->total>=20){
         $vn=$record->num/$record->total*100;
@@ -1025,7 +1025,7 @@ function guifi_stats_chart07(){
         }
       }
     }
-    
+
     for($i=0;$i<10;$i++){
       if($adata[$i][1]!=0){
         $avalue[$adata[$i][0]]=$adata[$i][1];
@@ -1046,7 +1046,7 @@ function guifi_stats_chart07(){
     $plot->SetFileFormat('png');
     $plot->SetDataType("text-data");
     $plot->SetDataValues($data);
-    $plot->SetPlotType("bars"); 
+    $plot->SetPlotType("bars");
     $plot->SetXTickIncrement(1);
     $plot->SetSkipBottomTick(TRUE);
     $plot->SetSkipLeftTick(TRUE);

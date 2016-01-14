@@ -719,7 +719,7 @@ function _guifi_radio_add_wlan($radio, $nid, $edit = NULL) {
 
 function _guifi_radio_add_wdsiface($radio, $nid, $edit = NULL) {
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_radio_add_wdsiface(%d)',$radio));
-  
+
   $interface = array();
   $interface['new'] = TRUE;
   $interface['unfold'] = TRUE;

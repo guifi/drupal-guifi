@@ -31,7 +31,7 @@
 //  function xmlsummary($ident = 0, $summary = NULL, $nl = "\r\n") {
 //    $output = $nl.str_repeat(' ',$ident*2).'<!-- ';
 //    if (!empty($summary)) {
-//      foreach ($summary as $key => $num) 
+//      foreach ($summary as $key => $num)
 //        $output .= ' '.$key.'="'.$num.'"';
 //    }
 //    return $output.' -->'.$nl;
@@ -40,7 +40,7 @@
 //  function xmlopentag($ident = 0, $tag, $attributes = NULL, $nl = "\r\n") {
 //    $output = $nl.str_repeat(' ',$ident*2).'<'.$tag;
 //    if (!empty($attributes)) {
-//      foreach ($attributes as $key => $attr) 
+//      foreach ($attributes as $key => $attr)
 //        $output .= ' '.$key.'="'.htmlspecialchars($attr,ENT_QUOTES).'"';
 //    }
 //    return $output.'>'.$nl;
@@ -49,7 +49,7 @@
 //  function xmlclosetag($ident = 0, $tag, $nl = "\r\n") {
 //    return str_repeat(' ',2*$ident).'</'.$tag.'>'.$nl;
 //  }
-// 
+//
 //  function xmldate($timestamp) {
 //    if (empty($timestamp) or ($timestamp == 0))
 //      return;
@@ -71,15 +71,15 @@
 //    $qservices = db_query("SELECT * FROM {guifi_services} s WHERE s.device_id=%d",$did);
 //    while ($s = db_fetch_object($qservices)) {
 //      $services->count++;
-//      $services->xml .= xmlopentag($ident,'service',array('id' => $did,'title' => $device->title),$nl); 
+//      $services->xml .= xmlopentag($ident,'service',array('id' => $did,'title' => $device->title),$nl);
 //      $ident++;
-//      $services->xml .= xmltag($ident,'service_type',$s->service_type); 
-//      $services->xml .= xmltag($ident,'service_status',$s->status_flag); 
+//      $services->xml .= xmltag($ident,'service_type',$s->service_type);
+//      $services->xml .= xmltag($ident,'service_status',$s->status_flag);
 //      $ident--;
-//      $services->xml .= xmlclosetag($ident,'service',$nl); 
-//      
+//      $services->xml .= xmlclosetag($ident,'service',$nl);
+//
 //    }
-//   
+//
 //    return $services;
 //  }
 //
@@ -95,11 +95,11 @@
 //                                                    'linked_node_id' => $l->nid,
 //						    'linked_interface_id' => $l->interface_id,
 //                                                    'link_type' => $l->link_type,
-//                                                    'link_status' => $l->flag)); 
-//      $links->xml .= xmlclosetag($ident,'link',$nl); 
-//      
+//                                                    'link_status' => $l->flag));
+//      $links->xml .= xmlclosetag($ident,'link',$nl);
+//
 //    }
-//   
+//
 //    return $links->xml;
 //  }
 //
@@ -116,13 +116,13 @@
 ////      print_r($i);
 ////      print "\n<br />";
 //      $interfaces->count++;
-//      $interfaces->xml .= xmlopentag($ident,'interface',array('id' => $i->id,'ipv4' => $i->ipv4,'mask' => $i->netmask),$nl); 
+//      $interfaces->xml .= xmlopentag($ident,'interface',array('id' => $i->id,'ipv4' => $i->ipv4,'mask' => $i->netmask),$nl);
 //      $links=links($i->id,$i->ipv4_id,$ident+1,$nl);
 //      $interfaces->xml .= $links;
-//      $interfaces->xml .= xmlclosetag($ident,'interface',$nl); 
-//      
+//      $interfaces->xml .= xmlclosetag($ident,'interface',$nl);
+//
 //    }
-//   
+//
 //    return $interfaces;
 //  }
 //
@@ -145,7 +145,7 @@
 //                                                           'rrd_traffic' => guifi_rrdfile($d->nick).'_'.$variable['mrtg_index'],
 //                                                           'created' => xmldate($d->timestamp_created),
 //                                                           'updated' => xmldate($d->timestamp_changed)),
-//                                                           $nl); 
+//                                                           $nl);
 //         } else
 //          $devices->xml .= xmlopentag($ident,'device',array('id' => $d->id,'title' => $d->nick,
 //                                                           'device_type' => $d->type,
@@ -153,9 +153,9 @@
 //                                                           'rrd_ping' => guifi_rrdfile($d->nick).'_ping',
 //                                                           'created' => xmldate($d->timestamp_created),
 //                                                           'updated' => xmldate($d->timestamp_changed)),
-//                                                           $nl); 
+//                                                           $nl);
 //         $ident++;
-//         $devices->xml .= xmlsummary($ident,array('interfaces' => $interfaces->count,'links' => $links->count,'services' => $services->count),$nl); 
+//         $devices->xml .= xmlsummary($ident,array('interfaces' => $interfaces->count,'links' => $links->count,'services' => $services->count),$nl);
 //         $devices->xml .= xmltag($ident,'device_description',$d->comment);
 //         $devices->xml .= xmltag($ident,'device_status',$r->flag);
 //
@@ -178,9 +178,9 @@
 //                                                           'antenna_gain' => $r->antenna_gain,
 //                                                           'antenna_azimuth' => $r->antenna_azimuth,
 //                                                           'rrd_traffic' => $rrdtraf),
-//                                                           $nl); 
-//             $devices->id = $d->id; 
-//             if ($r->mode == 'ap')  
+//                                                           $nl);
+//             $devices->id = $d->id;
+//             if ($r->mode == 'ap')
 //               $devices->aps++;
 //
 //             // graphs
@@ -189,7 +189,7 @@
 //                  'wLan In&Out',$nl);
 //             $devices->xml .= $interfaces_radio->xml;
 //             $ident--;
-//             $devices->xml .= xmlclosetag($ident,"radio",$nl); 
+//             $devices->xml .= xmlclosetag($ident,"radio",$nl);
 //           }
 //         }
 //         // availability graph
@@ -202,7 +202,7 @@
 //         $devices->xml .= $services->xml;
 //
 //         $ident--;
-//         $devices->xml .= xmlclosetag($ident,"device",$nl); 
+//         $devices->xml .= xmlclosetag($ident,"device",$nl);
 //    }
 //
 //    return $devices;
@@ -227,9 +227,9 @@
 //       if ($n->lat > $nodes->maxy) $nodes->maxy = $n->lat;
 //       if ($n->lat < $nodes->miny) $nodes->miny = $n->lat;
 //       switch ($devices->aps) {
-//         case 0:  $ntype = 'Client'; break; 
-//         case 1:  $ntype = 'AP'; break; 
-//         default: $ntype = 'Backbone'; break; 
+//         case 0:  $ntype = 'Client'; break;
+//         case 1:  $ntype = 'AP'; break;
+//         default: $ntype = 'Backbone'; break;
 //       }
 //       $nodes->xml .= xmlopentag($ident,'node',array('id' => $n->id,
 //                                                     'title' => $n->nick,
@@ -240,9 +240,9 @@
 //                                                     'url' => '/node/'.$n->id,
 //                                                     'created' => xmldate($n->timestamp_created),
 //                                                     'updated' => xmldate($n->timestamp_changed),
-//                                                    ),$nl); 
+//                                                    ),$nl);
 //       $ident++;
-//       $nodes->xml .= xmlsummary($ident,array('devices' => $devices->count),$nl); 
+//       $nodes->xml .= xmlsummary($ident,array('devices' => $devices->count),$nl);
 //       $nodes->xml .= htmlspecialchars($n->body,ENT_QUOTES);
 //
 //       // going to list node devices
@@ -273,7 +273,7 @@
 //       }
 //
 //       $ident--;
-//       $nodes->xml .=  xmlclosetag($ident,"node",$nl); 
+//       $nodes->xml .=  xmlclosetag($ident,"node",$nl);
 //    }
 //
 //    return $nodes;
@@ -290,9 +290,9 @@
 //     $zones->maxy = $nodes->maxy;
 //     $zones->miny = $nodes->miny;
 //     if (count($tree->childs > 0))
-//     foreach ($tree->childs as $child) {    
+//     foreach ($tree->childs as $child) {
 //       $childs->count++;
-//       $c = zone_recurse($child->id,$child,$ident+1,$action,$nl,$total_nodes); 
+//       $c = zone_recurse($child->id,$child,$ident+1,$action,$nl,$total_nodes);
 //       $childs->xml .= $c->xml;
 //       $zones->nodes = $zones->nodes + $c->nodes;
 //       if ($c->maxx > $zones->maxx) $zones->maxx = $c->maxx;
@@ -336,7 +336,7 @@
 //  }
 //
 //  global $base_url;
-//  
+//
 ////  if (isset($_GET['ascii']))
 ////    $nl = "\n";
 ////  else
@@ -373,7 +373,7 @@
 //  $output .= '</network>';
 //  print $output;
 //  return;
-//  
+//
 //}
 
 ?>

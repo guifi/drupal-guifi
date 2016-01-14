@@ -306,10 +306,10 @@ function guifi_traceroute_search($params = NULL) {
 
   return $output;
 }
- 
+
 function guifi_traceroute_map_form($form_state) { //Eduard
   $vtext = t('Route Level: Importance of the route depending on the cost and proximity to the main route').'<br />';
-  $vtext .= t('main').':<img src="'.base_path().drupal_get_path('module','guifi').'/js/marker_traceroute_icon1.png"/>';  
+  $vtext .= t('main').':<img src="'.base_path().drupal_get_path('module','guifi').'/js/marker_traceroute_icon1.png"/>';
   for($i=2;$i<=10;$i++){
     $vtext .='&nbsp;&nbsp;&nbsp;&nbsp;'.$i.':<img src="'.base_path().drupal_get_path('module','guifi').'/js/marker_traceroute_icon'.$i.'.png"/>';
   }
@@ -336,7 +336,7 @@ function guifi_traceroute_map_form($form_state) { //Eduard
     '#type' => 'button',
     '#name' => 'btnrouteleft',
     '#value' => '<<',
-    '#attributes' => array('onclick' => 'return printroute(-1)'),    
+    '#attributes' => array('onclick' => 'return printroute(-1)'),
     '#prefix' => '<div style="float:right;">',
     '#suffix' => '</div></div><div>'.$vtext.'</div>'
   );

@@ -9,7 +9,7 @@ function guifi_csvproxy($zoneid,$action = 'help') {
   // load nodes and zones in memory for faster execution
   $searchStatusFlag = 'Working';
   $searchServiceType = 'Proxy';
-  
+
   $subzoneIds = implode(guifi_zone_childs($zoneid), ',');
   $sql_services = sprintf("SELECT
                              s.nick,

@@ -133,7 +133,7 @@ function guifi_ports_form($edit,&$form_weight) {
      if ($form[$port]['interface_type']['#disabled'] == true) {
        $form[$port]['interface_type']['#value'] = $interface['interface_type'];
        $form[$port]['interface_type']['#attributes'] = array('class'=>'interface-item-disabled');
-       if (empty($interface['deleted'])) 
+       if (empty($interface['deleted']))
          $form[$port]['iname'] = array('#tree'=>true,'#type'=>'hidden','#value'=>$interface['interface_type']);
      }
 
@@ -613,13 +613,13 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
   if (empty($vinterface[interface_type]))
     if (isset($vinterface[iname]))
       $vinterface[interface_type] = $vinterface[iname];
-    else 
+    else
       $vinterface[interface_type] = substr($iType,0,4).($vinterface[id]);
 
   $prefix = ''; $suffix = '';
   guifi_log(GUIFILOG_TRACE,'function guifi_vinterface_form (vinterface)',$vinterface);
 
- 
+
 /*  if ($vinterface['deleted']) {
     $form['deleted'] = array(
       '#type'         => 'hidden',
@@ -669,8 +669,8 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
    if ($form['interface_type']['#disabled']) {
      $form['interface_type']['#value'] = $vinterface[interface_type];
      $form['interface_type']['#attributes'] = array('class'=>'interface-item-disabled');
-     if (empty($vinterface['deleted'])) 
-       $form['iname'] = 
+     if (empty($vinterface['deleted']))
+       $form['iname'] =
          array('#type'=>'hidden','#value'=>$vinterface['interface_type']);
    }
 
@@ -684,14 +684,14 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
     '#default_value'=> $vinterface['related_interfaces'],
     '#disabled'     => (($vlan_wds) ? TRUE : FALSE) OR (($vinterface['deleted']) ? TRUE : FALSE),
     '#attributes'   => array('class'=>'interface-item'),
-  );  
+  );
   if ($iType == 'aggregation') {
   // if ($iClass == 'vlans') {
     $form['related_interfaces']['#size'] = 4;
     $form['related_interfaces']['#multiple'] = true;
     $form['related_interfaces']['#title'] = ($first_port) ?
       t('parents') : false;
-  } 
+  }
 
   if (!$vinterface[deleted])
   $form['vlan'] = array(
