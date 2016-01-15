@@ -1361,18 +1361,29 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
        * **/
       // links (remote)
       if ($link['interface']) {
+        // Nou interface
+        if ($link['interface']['id'] == '' ){
+          $link['interface']['new'] = true;
+          $link['interface']['interface_type'] = 'other';
+          $link['interface']['interface_class'] = 'ethernet';
+        }
+        else
+          $link['interface']['new'] = false;
+
         if (!isset($link['interface']['device_id']))
           $link['interface']['device_id'] = $link['device_id'];
 
         guifi_log(GUIFILOG_TRACE,sprintf('remote interface (id=%d)',
           $link['interface']['id']),
           $link['interface']);
+
         $rinterface = _guifi_db_sql(
           'guifi_interfaces',
           array('id' => $link['interface']['id'],
             'radiodev_counter' => $link['interface']['radiodev_counter']),
             $link['interface'],$log,$to_mail);
       }
+
       if ($link['interface']['ipv4']) {
         if ($ipv4['netmask'] != $link['interface']['ipv4']['netmask']) {
           $log .= t('Netmask on remote link %nname - %type was adjusted to %mask',
@@ -1382,11 +1393,16 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
           $link['interface']['ipv4']['netmask'] = $ipv4['netmask'];
         }
 
-        // In case the remote link end has been changed to another interface, the IPv4
-        // address must be reassigned to this new interface.
-        // We need to keep the previous interface id in order to update the corresponding
-        // entry in the guifi_ipv4 table before continuing.
-        $link['interface']['ipv4']['interface_id_old'] = $link['interface']['ipv4']['interface_id'];
+        // In case we are changing the link end from one remote interface to another -in the same device-, the
+        // IPv4 address must be reassigned to this new remote interface. Therefore we need to keep the previous
+        // interface id in order to update the corresponding entry in the guifi_ipv4 table before continuing.
+        // However, if we are creating a new link to an existing interface, there will be no "old" remote
+        // interface, so we'll set it to $rinterface['id'] for the next _guifi_db_sql() call
+        if (!empty($link['interface']['ipv4']['interface_id']))
+          $link['interface']['ipv4']['interface_id_old'] = $link['interface']['ipv4']['interface_id'];
+        else
+          $link['interface']['ipv4']['interface_id_old'] = $rinterface['id'];
+
         $link['interface']['ipv4']['interface_id'] = $rinterface['id'];
         $link['interface']['ipv4']['ipv4_type'] = $ipv4['ipv4_type'];
 
@@ -1397,7 +1413,8 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
 
         // If the remote link end has been changed to another interface, the query to the
         // guifi_ipv4 table must be made using the id of the previous interface.
-        // If it has not changed (interface_old_id == interface_id) then nothing is modified
+        // If it has not changed (interface_old_id == interface_id) or the link is a new link
+        // towards an existing interface, nothing will be changed.
         $ripv4 = _guifi_db_sql(
           'guifi_ipv4',
           array('id' => $link['interface']['ipv4']['id'],
