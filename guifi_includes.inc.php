@@ -522,9 +522,10 @@ function guifi_get_possible_interfaces($edit = array()) {
  *   iid: current interface
  * @return list of device free cable interfaces in an array
  */
-function guifi_get_device_interfaces($id,$iid = NULL) {
+function guifi_get_device_interfaces($id,$iid = NULL, $used = NULL) {
 
-  $used = array(''=>t('Not defined'));
+  if (!is_array($used))
+    $used = array(''=>t('Not defined'));
 
   if (empty($id))
     return $used;
