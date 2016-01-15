@@ -163,7 +163,7 @@ function guifi_links_form($link,$ipv4,$tree,$multilink) {
       '#parents'        =>  array_merge($tree,array('links',$link['id'],'interface','id')),
       '#title'          =>  t("Remote interface"),
       '#default_value'  =>  $link['interface']['id'],
-      '#options'        =>  guifi_get_device_interfaces($link['device_id']),
+      '#options'        =>  guifi_get_device_interfaces($link['device_id'],$link['interface']['id']),
       '#prefix'         =>  '<td>',
       '#suffix'         =>  '</td>',
     );
