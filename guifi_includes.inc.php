@@ -515,17 +515,19 @@ function guifi_get_possible_interfaces($edit = array()) {
   return $possible;
 }
 
-/** guifi_get_device_interfaces(): Populates a select list with the available cable interfaces
+/** guifi_get_device_interfaces(): Populates an array that lists the cable interfaces of a device
+ *  adding, by default, an empty interface named "Create new remote interface"
  *
  * prameters:
  *   id: device_id
  *   iid: current interface
- * @return list of device free cable interfaces in an array
+ *   used: an [empty] array with a list of interfaces to avoid receiving an empty interface
+ * @return an array with the list of the device's cable interfaces
  */
 function guifi_get_device_interfaces($id,$iid = NULL, $used = NULL) {
 
   if (!is_array($used))
-    $used = array(''=>t('Not defined'));
+    $used = array(''=>t('Create new remote interface'));
 
   if (empty($id))
     return $used;
@@ -547,8 +549,8 @@ function guifi_get_device_interfaces($id,$iid = NULL, $used = NULL) {
     WHERE device_id = ' .$did[0];
 
   $sql_i .=
-    ' AND ((radiodev_counter is NULL or radiodev_counter = 0) or (upper(interface_type) IN ("WLAN/LAN")))
-      AND (interface_class is NULL or interface_class = "ethernet" )';
+    ' AND ( interface_class = "ethernet" OR
+      ( interface_class is NULL AND (radiodev_counter is NULL OR upper(interface_type) IN ("WLAN/LAN"))))';
 
   guifi_log(GUIFILOG_TRACE,'guifi_get_devicename(sql)',$sql_i);
 
