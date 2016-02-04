@@ -205,17 +205,12 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
    foreach ($key as $k => $value)
      if (is_null($value))
        $where_data[$k] = $k.' is NULL';
-     else
-       if ( $table == 'guifi_types') {
+     else {
          $where_data[$k] = $k.' = \''.$value.'\'';
-         $cond[] = '\''.$k.'\'';
-         $cond[] = '\''.$value.'\'';
-         }
-       else {
-         $where_data[$k] = $k.' = '.$value;
          $cond[] = $k;
          $cond[] = $value;
-       }
+     }
+
    // check what's being changed
    $sqlqc = 'SELECT '.implode(',',array_keys($data)).
            ' FROM {'.$table.'}'.
@@ -277,27 +272,19 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 
    $upd = db_update($table)
      ->fields($new_data);
-     $conds_array = array_chunk($cond, 2);
-     foreach ( $conds_array as $i => $x) {
-       $conda[] = $conds_array[$i][0];
-       $condb[] = $conds_array[$i][1];
-     }
-foreach ($conda as $e => $o) {
-  foreach ($condb as $b => $u) {
-if ($b == $e )
-  $upd->condition($o,$u);
-}
-}
- //   $upd->condition($conda,$condb);
-   // $upd->condition($lleig[2],$lleig[3]);
-   // $upd->condition($lleig[1]);
-    
-      //$lleig[1];
-        dsm((string)$upd);
-dsm($upd->arguments());
-    $upd->execute();
-
+   $conds_array = array_chunk($cond, 2);
+   foreach ( $conds_array as $i => $x) {
+     $conda[] = $conds_array[$i][0];
+     $condb[] = $conds_array[$i][1];
    }
+
+   foreach ($conda as $cak => $field) {
+     foreach ($condb as $cbk => $value) {
+       if ($cbk == $cak )
+         $upd->condition($field,$value);
+     }
+   }
+  }
   return ($data);
 }
 
