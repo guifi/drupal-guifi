@@ -753,20 +753,20 @@ function guifi_tools_datareview() {
 
   $headers = array(t('Working nodes'),t('Total'),t('Dif'),t('Alert'));
   
-  $sql = 'SELECT count(*) as num FROM guifi_location where status_flag="Working";';
-  if ($reg = db_fetch_object(db_query($sql))){
+  $sql = db_query('SELECT count(*) as num FROM guifi_location where status_flag=\'Working\'');
+  if ($reg = $sql->fetchObject()){
     $data['nodeswork']=$reg->num;
   }
-  $sql = 'SELECT count(distinct nid) as num FROM guifi_devices t1
+  $sql = db_query('SELECT count(distinct nid) as num FROM guifi_devices t1
             inner join guifi_location t2 on t1.nid=t2.id
-            where flag="Working" and status_flag="Working";';
-  if ($reg = db_fetch_object(db_query($sql))){
+            where flag=\'Working\' and status_flag=\'Working\'');
+  if ($reg = $sql->fetchObject()){
     $data['nodes_deviceswork']=$reg->num;
   }
-  $sql = 'SELECT count(distinct nid) as num FROM guifi_devices t1
+  $sql = db_query('SELECT count(distinct nid) as num FROM guifi_devices t1
             inner join guifi_location t2 on t1.nid=t2.id
-            where flag="Working" and type="radio" and status_flag="Working";';
-  if ($reg = db_fetch_object(db_query($sql))){
+            where flag=\'Working\' and type=\'radio\' and status_flag=\'Working\'');
+  if ($reg = $sql->fetchObject()){
     $data['nodes_radiowork']=$reg->num;
   }
     
@@ -775,8 +775,8 @@ function guifi_tools_datareview() {
   $rows[] = array(t('nodes with working devices'),$data['nodes_deviceswork'],$data['nodeswork']-$data['nodes_deviceswork'],t('nodes without devices'));
   $rows[] = array(t('nodes with work radio devices'),$data['nodes_radiowork'],$data['nodes_deviceswork']-$data['nodes_radiowork'],t('nodes without radio devices'));
   
-  $output .= theme('table',$headers,$rows);
-  //$output .= theme_pager(NULL, 50);
+  $output .= theme('table', array('header' => $headers, 'rows' => $rows));
+
   return $output;
 }
 
@@ -842,8 +842,8 @@ function guifi_tools_isdevconnect_search($path, $to, &$routes, $maxhops = 50, $a
   // if links array not loaded, fill the array
   if (!count($alinks)) {
     $lbegin = microtime(TRUE);
-    $qry = db_query('SELECT * FROM {guifi_links} WHERE flag = "Working"');
-    while ($link = db_fetch_array($qry)) {
+    $qry = db_query('SELECT * FROM {guifi_links} WHERE flag = \'Working\'');
+    while ($link = $qry->fetchAssoc()) {
       // alinks[devices] will contain all the links for every device
       $alinks['devices'][$link['device_id']][] = $link['id'];
 

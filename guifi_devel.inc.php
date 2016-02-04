@@ -93,7 +93,7 @@ function guifi_devel_services_form_submit($form, &$form_state) {
 
 function guifi_devel_services_save($edit) {
   global $user;
-dsm($edit);
+
   $to_mail = $edit->notification;
   $log ='';
 
