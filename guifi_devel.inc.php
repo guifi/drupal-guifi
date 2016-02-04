@@ -1159,13 +1159,13 @@ function guifi_devel_manufacturer($mid=null, $op=null) {
               )));
   }
 
-  $output .= theme('table',$headers,$rows,array('class'=>'device-data-med'));
-  print theme('page',$output, FALSE);
-  return;
+  $output .= theme('table',array('header' => $headers, 'rows' => $rows, 'attributes' => array('class'=> array('device-data-med'))));
+
+  return $output;
 }
 
 // Device Manufacturers Form
-function guifi_devel_manufacturer_form($form_state, $mid) {
+function guifi_devel_manufacturer_form($none, $form_state, $mid) {
 
   $sql = db_query('SELECT * FROM {guifi_manufacturer} WHERE fid = :fid', array(':fid' => $mid));
   $mfr = $sql->fetchObject();
@@ -1244,7 +1244,7 @@ function guifi_devel_manufacturer_save($edit) {
     $log);
 }
 
-function guifi_devel_manufacturer_delete_confirm($form_state,$mid) {
+function guifi_devel_manufacturer_delete_confirm($none, $form_state, $mid) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_device_delete_confirm()',$mid);
 
   $form['fid'] = array('#type' => 'hidden', '#value' => $mid);
