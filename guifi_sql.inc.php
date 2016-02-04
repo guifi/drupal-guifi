@@ -279,11 +279,12 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
    }
 
    foreach ($conda as $cak => $field) {
-     foreach ($condb as $cbk => $value) {
+     foreach ($condb as $cbk => $newvalue) {
        if ($cbk == $cak )
-         $upd->condition($field,$value);
+         $upd->condition($field,$newvalue);
      }
    }
+   $upd->execute();
   }
   return ($data);
 }
