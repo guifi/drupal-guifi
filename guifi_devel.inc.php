@@ -1244,7 +1244,7 @@ function guifi_devel_manufacturer_save($edit) {
     $log);
 }
 
-function guifi_devel_manufacturer_delete_confirm($form_state,$mid) {
+function guifi_devel_manufacturer_delete_confirm($none, $form_state, $mid) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_device_delete_confirm()',$mid);
 
   $form['fid'] = array('#type' => 'hidden', '#value' => $mid);
