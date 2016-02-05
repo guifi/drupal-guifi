@@ -1466,52 +1466,57 @@ function guifi_devel_parameter_delete_confirm_submit($form, &$form_state) {
 
 // Model Feature output
 function guifi_devel_modelfeature($id=null, $op=null) {
+
   switch($id) {
     case 'add':
       $id = 'New';
       return drupal_get_form('guifi_devel_modelfeature_form',$id);
   }
+
   switch($op) {
     case 'edit':
       return drupal_get_form('guifi_devel_modelfeature_form',$id);
+
     case 'delete':
       guifi_log(GUIFILOG_TRACE,'guifi_devel_modelfeature_delete()',$id);
       return drupal_get_form(
       'guifi_devel_modelfeature_delete_confirm', $id);
       guifi_devel_modelfeature_delete($id);
   }
+
   $rows = array();
   $value = t('Add a new model feature');
-  $output  = '<from>';
+
+  $output  = '<form>';
   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/feature/add\'"/>';
   $output .= '</form>';
 
-  $headers = array(t('ID'), t('name'), t('type'));
+  $headers = array(t('ID'), t('Name'), t('Type'), t('Edit'), t('Delete'));
 
   $sql = db_query('SELECT * FROM {guifi_caracteristica}');
   while ($feature = $sql->fetchObject()) {
     $rows[] = array($feature->id,
-    $feature->nom,
-    $feature->tipus,
-    l(guifi_img_icon('edit.png'),'guifi/menu/devel/feature/'.$feature->id.'/edit',
-    array(
-              'html' => TRUE,
-              'title' => t('edit feature'),
-    )).'</td><td>'.
-    l(guifi_img_icon('drop.png'),'guifi/menu/devel/feature/'.$feature->id.'/delete',
-    array(
-              'html' => TRUE,
-              'title' => t('delete feature'),
-    )));
+      $feature->nom,
+      $feature->tipus,
+      l(guifi_img_icon('edit.png'),'guifi/menu/devel/feature/'.$feature->id.'/edit',
+        array(
+          'html' => TRUE,
+          'title' => t('edit feature'),
+        )).'</td><td>'.
+      l(guifi_img_icon('drop.png'),'guifi/menu/devel/feature/'.$feature->id.'/delete',
+        array(
+          'html' => TRUE,
+          'title' => t('delete feature'),
+        )));
   }
 
-  $output .= theme('table',$headers,$rows,array('class'=>'device-data-med'));
-  print theme('page',$output, FALSE);
-  return;
+  $output .= theme('table',array('header' => $headers, 'rows' => $rows, 'attributes' => array('class'=> array('device-data-med'))));
+
+  return $output;
 }
 
 // Model Feature Form
-function guifi_devel_modelfeature_form($form_state, $id) {
+function guifi_devel_modelfeature_form($none, $form_state, $id) {
 
   $sql = db_query('SELECT * FROM {guifi_caracteristica} WHERE id = :id', array(':id' => $id));
   $feature = $sql->fetchObject();
@@ -1525,14 +1530,14 @@ function guifi_devel_modelfeature_form($form_state, $id) {
     '#type' => 'textfield',
     '#size' => 32,
     '#maxlength' => 32,
-    '#title' => t('name'),
+    '#title' => t('Name'),
     '#required' => TRUE,
     '#default_value' => $feature->nom,
     '#description' =>  t('Feature name.'),
-  	'#prefix' => '<table><tr><td>',
-    '#suffix' => '</td>',
-
+    '#prefix' => '<table><tr><td>',
+    '#suffix' => '</tr></td>',
   );
+
   $form['tipus'] = array(
     '#type' => 'textfield',
     '#title' => t('Feature Type'),
@@ -1540,12 +1545,25 @@ function guifi_devel_modelfeature_form($form_state, $id) {
     '#default_value' => $feature->tipus,
     '#size' => 32,
     '#maxlength' => 32,
-    '#description' => t('Feature type, please, use a clear and short description.'),
-    '#prefix' => '<td>',
-    '#suffix' => '</td></tr></table>',
-    '#weight' => 1,
+    '#description' => t('Feature type, please, use a clear and short description.<br />Valid types: bool, numeric, text, rang'),
+    '#prefix' => '<tr><td>',
+    '#suffix' => '</td></tr>',
+    '#weight' => $form_weight++,
   );
 
+  $form['notification'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Contact'),
+    '#required' => TRUE,
+    '#element_validate' => array('guifi_emails_validate'),
+    '#default_value' => $feature->notification,
+    '#size' => 32,
+    '#maxlength' => 1024,
+    '#description' =>  t('Mailid where changes on the device will be notified, if many, separated by \',\'<br />used for network administration.'),
+    '#prefix' => '<tr><td>',
+    '#suffix' => '</td></tr></table>',
+    '#weight' => $form_weight++,
+  );
 
   $form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
 
@@ -1576,7 +1594,7 @@ function guifi_devel_modelfeature_save($edit) {
   $log);
 }
 
-function guifi_devel_modelfeature_delete_confirm($form_state,$id) {
+function guifi_devel_modelfeature_delete_confirm($none, $form_state, $id) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_modelfeature_delete_confirm()',$id);
 
   $form['id'] = array('#type' => 'hidden', '#value' => $id);
@@ -1585,7 +1603,7 @@ function guifi_devel_modelfeature_delete_confirm($form_state,$id) {
   $form,
   t('Are you sure you want to delete the Model Feature %modelfeature "?',
   array('%modelfeature' => $qry->nom)),
-      'guifi/menu/devel/feature',
+    'guifi/menu/devel/feature',
   t('This action cannot be undone.'),
   t('Delete'),
   t('Cancel'));
