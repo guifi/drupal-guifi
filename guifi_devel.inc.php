@@ -848,13 +848,13 @@ function guifi_devel_firmware($firmid=null, $op=null) {
                     )));
   }
 
-  $output .= theme('table',$headers,$rows,array('class'=>'device-data'));
-  print theme('page',$output, FALSE);
-  return;
+  $output .= theme('table',array('header' => $headers, 'rows' => $rows, 'attributes' => array('class'=> array('device-data'))));
+
+  return $output;
 }
 
 // Firmwares Form
-function guifi_devel_firmware_form($form_state, $firmid) {
+function guifi_devel_firmware_form($none, $form_state, $firmid) {
 
   global $user;
 
@@ -917,13 +917,10 @@ function guifi_devel_firmware_form($form_state, $firmid) {
     '#description' => t('The firmware description, please, use a clear and short description. ex: "FirmwarevXX from creator"'),
   );
 
-  $query = db_query(" select
-                          pf.fid, pf.pid, p.id, p.nom
-                      from
-                          guifi_parametres p
-                              left join
-                          guifi_parametresFirmware pf ON pf.pid = p.id and pf.fid = :fid
-                      order by p.nom asc", array(':fid' => $firmid));
+  $query = db_query("select pf.fid, pf.pid, p.id, p.nom
+      from guifi_parametres p left join guifi_parametresFirmware pf ON pf.pid = p.id and pf.fid = :fid
+      order by p.nom asc",
+    array(':fid' => $firmid));
 
   while ($parametres = $query->fetchAssoc()) {
     if ($parametres["pid"])
@@ -934,10 +931,10 @@ function guifi_devel_firmware_form($form_state, $firmid) {
 
   $form['parametres_associats'] = array(
     '#type' => 'select',
-    '#title' => t('Parametres associats'),
+    '#title' => t('Enabled firmware capabilities'),
     '#default_value' => 0,
     '#options' => $params_associats,
-    '#description' => t('Parametres associats a la definició d\'aquest firmware.'),
+    '#description' => t('Select all the parameters that define capabilities provided by this firmware.'),
     '#size' => 10,
     '#multiple' => true,
     '#required' => false,
@@ -959,10 +956,10 @@ function guifi_devel_firmware_form($form_state, $firmid) {
 
   $form['parametres_disponibles'] = array(
     '#type' => 'select',
-    '#title' => t('Parametres disponibles'),
+    '#title' => t('Disabled firmware capabilities'),
     '#default_value' => 0,
     '#options' => $params_disponibles,
-    '#description' => t('Parametres disponibles per a definir aquest firmware'),
+    '#description' => t('List of parameters that define network capabilities not enabled for this firmware.'),
     '#size' => 10,
     '#multiple' => true,
     '#required' => false,
@@ -977,8 +974,6 @@ function guifi_devel_firmware_form($form_state, $firmid) {
     '#type' => 'submit',
     '#weight' => 99, '#value' => t('Save')
   );
-
-  //$form['submit'] = array('#type' => 'submit',    '#weight' => $form_weight, '#value' => t('Save'));
 
   return $form;
 }
@@ -1037,22 +1032,19 @@ function guifi_devel_firmware_save($edit) {
     // de tots els que tenia a la BD, mirar si me'ls han tret i esborrar-los
     foreach ($alreadyPresent as $parametre) {
       if (!in_array($parametre, $edit['parametres_associats'])) {
-
         // IMPORTANT abans de esborrar comprovar que no formin part de configuracions USC validades
-        $sql = db_query('select
-                                  pusc.pid, usc.enabled, usc.id uscid
-                              from
-                                  {guifi_parametresConfiguracioUnsolclic} pusc
-                                  inner join {guifi_configuracioUnSolclic} usc on usc.id = pusc.uscid
-                              where usc.fid = :fid and pusc.pid = :pid ', array(':fid' => $edit['id'], ':pid' => $parametre));
+        $sql = db_query('select pusc.pid, usc.enabled, usc.id uscid
+            from {guifi_parametresConfiguracioUnsolclic} pusc inner join {guifi_configuracioUnSolclic} usc on usc.id = pusc.uscid
+            where usc.fid = :fid and pusc.pid = :pid ',
+           array(':fid' => $edit['id'], ':pid' => $parametre));
 
         $configuracions = $sql->fetchObject();
 
         if (!$configuracions->enabled) {
-
-          db_query("DELETE FROM {guifi_parametresFirmware} WHERE fid=%d and pid=%d ", $edit['id'], $parametre);
-          db_query("DELETE FROM {guifi_parametresConfiguracioUnsolclic} WHERE uscid=%d and pid=%d ", $configuracions->uscid, $parametre);
-
+          $sql1= db_query("DELETE FROM {guifi_parametresFirmware} WHERE fid = :fid and pid = :pid",
+            array(':fid' => $edit['id'], ':pid' => $parametre));
+          $sql2= db_query("DELETE FROM {guifi_parametresConfiguracioUnsolclic} WHERE uscid = :uscid and pid = :pid",
+            array(':uscid' => $configuracions->uscid, ':pid' => $parametre));
           $deleted[] = $parametre;
         } else {
 
@@ -1083,15 +1075,17 @@ drupal_set_message( $edit['nom'].' Actualitzat : '. $strGuardats . $strBorrats);
     $log);
 }
 
-function guifi_devel_firmware_delete_confirm($form_state,$id) {
+function guifi_devel_firmware_delete_confirm($none, $form_state, $id) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_device_delete_confirm()',$id);
 
   $form['id'] = array('#type' => 'hidden', '#value' => $id);
-  $qry= db_query("SELECT text FROM {guifi_types} WHERE type='firmware' AND id = :id", array(':id' => $id))->fetchObject();
+  $qry= db_query("SELECT * FROM {guifi_firmware} WHERE id = :id", array(':id' => $id))->fetchObject();
+
+
   return confirm_form(
     $form,
-    t('Are you sure you want to delete the firmware " %firmware "?',
-      array('%firmware' => $qry->text)),
+    t('Are you sure you want to delete the firmware "%firmware"?',
+      array('%firmware' => $qry->nom)),
       'guifi/menu/devel/firmware',
     t('This action cannot be undone.'),
     t('Delete'),
@@ -1107,7 +1101,7 @@ function guifi_devel_firmware_delete_confirm_submit($form, &$form_state) {
     return;
 
   $to_mail = explode(',',$node->notification);
-  $log = _guifi_db_delete('guifi_types',array('id' => $form_state['values']['id'], 'type' => 'firmware'),$to_mail,$depth);
+  $log = _guifi_db_delete('guifi_firmware',array('id' => $form_state['values']['id']),$to_mail,$depth);
   drupal_set_message($log);
   guifi_notify(
            $to_mail,

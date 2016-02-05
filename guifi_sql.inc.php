@@ -162,12 +162,18 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
       case 'guifi_caracteristica':
       case 'guifi_caracteristiquesModel':
       case 'guifi_configuracioUnSolclic':
-      case 'guifi_firmware':
       case 'guifi_parametres':
       case 'guifi_parametresConfiguracioUnsolclic':
       case 'guifi_parametresFirmware':
       case 'guifi_maintainers':
       case 'guifi_funders':
+        $data['user_changed'] = $user->uid;
+        $data['timestamp_changed'] = time();
+        drupal_set_message('Data def: <pre>' . print_r($data, true) . '</pre>');
+        break;
+      case 'guifi_firmware':
+        if (empty($data['managed']))
+          $data['managed'] = '';
         $data['user_changed'] = $user->uid;
         $data['timestamp_changed'] = time();
         break;
