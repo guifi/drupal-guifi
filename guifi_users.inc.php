@@ -1162,7 +1162,7 @@ function guifi_users_dump_return($node,$federated = FALSE,$ldif = FALSE) {
   foreach ($passwd as $zid => $zp) {
     $dump .= "#\n";
     $dump .= "# At zone ".$zones[$zid]."\n";
-    $dump .= "# users: ".count($passwd[$zid])."\n";
+    $dump .= "# users: ".count($passwd[$zid])."\n";    
     $dump .= "#\n";
     foreach ($zp as $p)
        $dump .= $p."\n";

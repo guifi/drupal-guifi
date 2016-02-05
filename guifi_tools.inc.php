@@ -742,7 +742,7 @@ function guifi_tools_datareview() {
   $output = '';
 
   $headers = array(t('Working nodes'),t('Total'),t('Dif'),t('Alert'));
-
+  
   $sql = 'SELECT count(*) as num FROM guifi_location where status_flag="Working";';
   if ($reg = db_fetch_object(db_query($sql))){
     $data['nodeswork']=$reg->num;
@@ -759,12 +759,12 @@ function guifi_tools_datareview() {
   if ($reg = db_fetch_object(db_query($sql))){
     $data['nodes_radiowork']=$reg->num;
   }
-
+    
   $row = array();
   $rows[] = array(t('working nodes'),$data['nodeswork'],'','');
   $rows[] = array(t('nodes with working devices'),$data['nodes_deviceswork'],$data['nodeswork']-$data['nodes_deviceswork'],t('nodes without devices'));
   $rows[] = array(t('nodes with work radio devices'),$data['nodes_radiowork'],$data['nodes_deviceswork']-$data['nodes_radiowork'],t('nodes without radio devices'));
-
+  
   $output .= theme('table',$headers,$rows);
   //$output .= theme_pager(NULL, 50);
   return $output;

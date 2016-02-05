@@ -7,7 +7,7 @@
 
 function guifi_routingmap($action = 'init',$actionid) {
   if (!is_numeric($actionid)) return;
-
+		
 	switch ($action) {
 	case 'init':
 		guifi_routingmap_init();
@@ -25,7 +25,7 @@ function guifi_routingmap($action = 'init',$actionid) {
 		break;
 	}
 }
-
+ 
 function guifi_routingmap_init(){
   $output = "";
   if (guifi_gmap_key()) {
@@ -55,7 +55,7 @@ function guifi_routingmap_search($plat1,$plon1,$plat2,$plon2){
     $cnmlid=$record->nid;
 	  break;
 	}
-
+	
   $nmax=200;   //max nodes
   $networks = Array(); //array de subxarxes de la zona
   $nodes = Array(); //array sequential id nodes
@@ -101,13 +101,13 @@ function guifi_routingmap_search($plat1,$plon1,$plat2,$plon2){
     guifi_routingmap_add_device_networks($networks,$devices[$n],$devicesid["$devices[$n]"]);
   }
   ksort($networks);
-
+   
   //search node data, zone list
   $nreg=count($nodes);
   for($n=0;$n<$nreg;$n++){
     $result=db_query(sprintf("SELECT t1.nick as nnick, t1.zone_id as zid, t1.lat, t1.lon, t2.nick as znick
                FROM guifi_location as t1
-               join guifi_zone as t2 on t1.zone_id = t2.id
+               join guifi_zone as t2 on t1.zone_id = t2.id 
                where t1.id = (%s)",$nodes[$n]));
     if ($record=db_fetch_object($result)){
       $nodesid["$nodes[$n]"]=Array("nnick" => $record->nnick,"zid" => $record->zid,"lat" => $record->lat,"lon" => $record->lon);
@@ -134,7 +134,7 @@ function guifi_routingmap_search($plat1,$plon1,$plat2,$plon2){
     }
   }
   ksort($aznets);
-
+  
   //agregate subnets
   $subnets=Array();
   foreach ($networks as $key => $network){
@@ -164,7 +164,7 @@ function guifi_routingmap_search($plat1,$plon1,$plat2,$plon2){
          }
       }
    }
-
+   
   //search networks in zone networks
   $aggregate=Array();
   foreach ($networks as $key => $network){
@@ -189,7 +189,7 @@ function guifi_routingmap_search($plat1,$plon1,$plat2,$plon2){
     $aggregate[$key]=Array("netid" => $znet["netid"],"maskbits" => $znet["maskbits"],"zone" => "zone");
   }
   ksort($aggregate);
-
+  
   for($nmaskbits=30;$nmaskbits>16;$nmaskbits--){
       $net1="";
       $knet1=0;
@@ -212,8 +212,8 @@ function guifi_routingmap_search($plat1,$plon1,$plat2,$plon2){
             $knet1=0;
          }
       }
-   }
-
+   } 
+ 
   return json_encode(array($cnmlid,$nodesid,$alinks,$subnets,$aznets,$aggregate));
    //   $networks[$c]=Array("ipv4" => $record->ipv4,"netmask" => $record->netmask,"netid" => $a["netid"],"maskbits" => $a["maskbits"],"nid" => $nid);
 }
@@ -222,7 +222,7 @@ function guifi_routingmap_search_firstdevice($nid){
   $k=0;
   $result=db_query(sprintf('SELECT id, device_id FROM guifi_links where nid = (%s) and routing="OSPF" and (link_type="cable" or link_type="wds")',$nid));
   if ($record=db_fetch_object($result)){
-    $k=$record->device_id;
+    $k=$record->device_id;  
   };
   return $k;
 }
@@ -267,8 +267,8 @@ function guifi_routingmap_add_device_networks(&$networks,$deviceid,$nid){
    };
    return 0;
 }
-
-//******all routingmap
+ 
+//******all routingmap  
 function guifi_routingmap_all_init(){
   $output = "";
   if (guifi_gmap_key()) {
@@ -285,7 +285,7 @@ function guifi_routingmap_all_init(){
   guifi_log(GUIFILOG_TRACE,'routingmap',1);
 
   return $output;
-}
+} 
 function guifi_routingmap_all_search($plat1,$plon1,$plat2,$plon2){
 
    $result=db_query(sprintf("SELECT t1.nid as nid,t2.id as lid, t2.link_type, t2.routing, t3.lat, t3.lon
@@ -295,7 +295,7 @@ function guifi_routingmap_all_search($plat1,$plon1,$plat2,$plon2){
             where (t2.routing='OSPF' or t2.routing='BGP') and (t2.link_type='cable' or t2.link_type='wds') and t2.flag='Working'
             and t3.lat between (%s) and (%s) and t3.lon between (%s) and (%s)
             order by t1.nid;",$plat1,$plat2,$plon1,$plon2));
-
+	
   $nmax=600;   //max nodes
   $nodes=Array(); //array node data + repetition control
   $links=Array(); //Array links
@@ -348,7 +348,7 @@ function guifi_routingmap_all_search($plat1,$plon1,$plat2,$plon2){
 }
 
 function guifi_routingmap_all_search_ospfarea($pnode){
-
+	
   $nmax=200;   //max nodes
   $nodesid=Array(); //array node data + repetition control
   $devices=Array(); //array sequential id devices
@@ -384,7 +384,7 @@ function guifi_routingmap_all_search_firstdevice($nid){
   $k=0;
   $result=db_query(sprintf('SELECT id, device_id FROM guifi_links where nid = (%s) and routing="OSPF" and (link_type="cable" or link_type="wds")',$nid));
   if ($record=db_fetch_object($result)){
-    $k=$record->device_id;
+    $k=$record->device_id;  
   };
   return $k;
 }

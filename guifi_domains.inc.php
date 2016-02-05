@@ -587,7 +587,7 @@ if (!empty($domainname['name']))
       if (empty($hosts['ipv4']) && empty($hosts['ipv6'])) {
         if (empty($hosts['aliases']['0'])) {
           form_set_error('hosts]['.$host_id.'][host', t('Error!! empty IPv4/6 ADDRESS and ALIAS for hostname: <strong>%hostname</strong>', array('%hostname' => $hosts['host'])));
-        }
+        } 
       }
 
       if (!empty($form_state['values']['hosts'][$host_id]['opt']['mxprior']) AND $form_state['values']['hosts'][$host_id]['opt']['mxprior'] <> '0') {
@@ -825,7 +825,7 @@ function guifi_domain_create_form($form_state, $node) {
       '#value' => t('The server <a href='.$url.'>'.$device->nick.'</a> does not have an IPv4 address, can not create a domain.')
      );
     return $form;
-}
+} 
   $form['domain_type'] = array(
     '#type' => 'select',
     '#title' => t('Select new domain type'),

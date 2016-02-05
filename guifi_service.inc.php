@@ -703,7 +703,7 @@ function guifi_list_services_query($param, $typestr = 'by zone', $service = '%')
 
     $status_url = guifi_cnml_availability(
        array('device' => $service->device_id,'format' => 'short'));
-
+    
     $rows[] = array('<a href="' .base_path() .'node/'.$service->id.'">'.$node->title.'</a>',
                     '<a href="' .base_path() .'node/'.$service->zone_id.'">'.$service->zonename.'</a>',
                     '<a href="' .base_path() .'guifi/device/'.$service->device_id.'">'.guifi_get_hostname($service->device_id).'</a>',
