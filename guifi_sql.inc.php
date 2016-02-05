@@ -169,7 +169,6 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
       case 'guifi_funders':
         $data['user_changed'] = $user->uid;
         $data['timestamp_changed'] = time();
-        drupal_set_message('Data def: <pre>' . print_r($data, true) . '</pre>');
         break;
       case 'guifi_firmware':
         if (empty($data['managed']))
