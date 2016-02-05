@@ -1320,13 +1320,13 @@ function guifi_devel_parameter($id=null, $op=null) {
     )));
   }
 
-  $output .= theme('table',$headers,$rows,array('class'=>'device-data'));
-  print theme('page',$output, FALSE);
-  return;
+  $output .= theme('table',array('header' => $headers, 'rows' => $rows, 'attributes' => array('class'=> array('device-data-med'))));
+
+  return $output;
 }
 
 // FirmWare Parameter Form
-function guifi_devel_parameter_form($form_state, $id) {
+function guifi_devel_parameter_form($none, $form_state, $id) {
 
   $sql = db_query('SELECT * FROM {guifi_parametres} WHERE id = :id', array(':id' => $id));
   $parameter = $sql->fetchObject();
@@ -1340,7 +1340,7 @@ function guifi_devel_parameter_form($form_state, $id) {
     '#type' => 'textfield',
     '#size' => 32,
     '#maxlength' => 32,
-    '#title' => t('nom'),
+    '#title' => t('Name'),
     '#required' => TRUE,
     '#default_value' => $parameter->nom,
     '#description' =>  t('Parameter name.'),
@@ -1383,11 +1383,26 @@ function guifi_devel_parameter_form($form_state, $id) {
     '#suffix' => '</td></tr>',
     '#weight' => $form_weight++
   );
+
+  $form['notification'] = array(
+    '#type' => 'textfield',
+    '#title' => t('contact'),
+    '#required' => true,
+    '#element_validate' => array('guifi_emails_validate'),
+    '#default_value' => $parameter->notification,
+    '#size' => 32,
+    '#maxlength' => 1024,
+    '#description' =>  t('Mailid where changes on the device will be notified, if many, separated by \',\'<br />used for network administration.'),
+    '#prefix' => '<tr><td>',
+    '#suffix' => '</td></tr>',
+    '#weight' => $form_weight++
+  );
+
   $form['submit'] = array(
-      '#type' => 'submit',
-      '#prefix' => '<tr><td>',
-      '#suffix' => '</td></tr></table>',
-      '#weight' => 99, '#value' => t('Save'));
+    '#type' => 'submit',
+    '#prefix' => '<tr><td>',
+    '#suffix' => '</td></tr></table>',
+    '#weight' => 99, '#value' => t('Save'));
 
   return $form;
 }
@@ -1416,7 +1431,7 @@ function guifi_devel_parameter_save($edit) {
   $log);
 }
 
-function guifi_devel_parameter_delete_confirm($form_state,$id) {
+function guifi_devel_parameter_delete_confirm($none, $form_state, $id) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_parameter_delete_confirm()',$id);
 
   $form['id'] = array('#type' => 'hidden', '#value' => $id);
