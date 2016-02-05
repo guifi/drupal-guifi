@@ -812,7 +812,7 @@ function guifi_devel_firmware($firmid=null, $op=null) {
 
   $rows = array();
   $value = t('Add a new firmware');
-  $output  = '<from>';
+  $output  = '<form>';
   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/firmware/add\'"/>';
   $output .= '</form>';
 
@@ -1135,7 +1135,7 @@ function guifi_devel_manufacturer($mid=null, $op=null) {
   }
   $rows = array();
   $value = t('Add a new device manufacturer');
-  $output  = '<from>';
+  $output  = '<form>';
   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/manufacturer/add\'"/>';
   $output .= '</form>';
 
@@ -1295,7 +1295,7 @@ function guifi_devel_parameter($id=null, $op=null) {
   }
   $rows = array();
   $value = t('Add a new firmware parameter');
-  $output  = '<from>';
+  $output  = '<form>';
   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/parameter/add\'"/>';
   $output .= '</form>';
 
@@ -1896,7 +1896,7 @@ function guifi_devel_paramusc($id=null, $op=null) {
   }
   $rows = array();
   $value = t('Add a new firmware parameter');
-  $output  = '<from>';
+  $output  = '<form>';
   $output .= '<input type="button" id="button" value="'.$value.'" onclick="location.href=\'/guifi/menu/devel/parameter/add\'"/>';
   $output .= '</form>';
 
