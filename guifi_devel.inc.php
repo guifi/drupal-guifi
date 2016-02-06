@@ -1639,7 +1639,7 @@ function guifi_devel_configuracio_usc($id=null, $op=null) {
   }
   $rows = array();
 
-  $headers = array(t('Manufacturer'), t('Model'), t('FirmWare'), t('enabled'), t('#parameters'), t('Edit'), t('Delete'));
+  $headers = array(t('Manufacturer'), t('Model'), t('Firmware'), t('Enabled'), t('Parameters'), t('Edit'), t('Delete'));
 
   $sql = db_query('SELECT
         usc.id, usc.mid, usc.fid, usc.enabled, usc.tipologia,
@@ -1655,8 +1655,6 @@ function guifi_devel_configuracio_usc($id=null, $op=null) {
      group by usc.id, usc.mid, usc.fid, usc.enabled, usc.tipologia
      order by usc.enabled desc, fabricant asc, model asc, nomfirmware asc
   ');
-
-
 
   $radioMode  = array(0 => "Ap or AP with WDS",
                       1 => "Wireless Client",
@@ -1682,22 +1680,22 @@ function guifi_devel_configuracio_usc($id=null, $op=null) {
     )));
   }
 
-  $output .= theme('table',$headers,$rows,array('class'=>'device-data'));
-  print theme('page',$output, FALSE);
-  return;
+  $output .= theme('table',array('header' => $headers, 'rows' => $rows, 'attributes' => array('class'=> array('device-data'))));
+
+  return $output;
 }
 
 // Configuracio unsolclic Form
-function guifi_devel_configuracio_usc_form($form_state, $id) {
+function guifi_devel_configuracio_usc_form($none, $form_state, $id) {
 
-  $sql = db_query('SELECT
-      usc.id, usc.mid, usc.fid, usc.enabled, usc.snmp_id, usc.plantilla, mf.fid as mfid, mf.name as manufacturer, m.model, f.nom as nomfirmware
-  FROM
-      guifi_configuracioUnSolclic usc
+  $sql = db_query('SELECT usc.id, usc.mid, usc.fid, usc.enabled, usc.snmp_id, usc.plantilla, mf.fid as mfid, mf.name as manufacturer, m.model, f.nom as nomfirmware
+      FROM guifi_configuracioUnSolclic usc
       inner join guifi_firmware f on f.id = usc.fid
       inner join guifi_model_specs m on m.mid = usc.mid
       inner join guifi_manufacturer mf on mf.fid = m.fid
-   where usc.id= :uid', array(':uid' => $id));
+      WHERE usc.id= :uid',
+    array(':uid' => $id));
+
   $configuraciousc = $sql->fetchObject();
 
   if ($id == 'New' ) {
@@ -1743,14 +1741,13 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
   );
 
 
-  $sql = db_query('select
-                        usc.id, usc.pid, usc.valor, p.dinamic, p.nom, p.origen
-                    from
-                        guifi_parametresConfiguracioUnsolclic usc
-                        inner join guifi_parametres p on p.id = usc.pid
-                    where
-                        usc.uscid = :uid
-                    order by usc.dinamic asc, p.nom asc', array(':uid' => $id));
+  $sql = db_query('select usc.id, usc.pid, usc.valor, p.dinamic, p.nom, p.origen
+      FROM guifi_parametresConfiguracioUnsolclic usc
+      inner join guifi_parametres p on p.id = usc.pid
+      WHERE usc.uscid = :uid
+      ORDER BY usc.dinamic asc, p.nom asc',
+    array(':uid' => $id));
+
   $totalParams = 0;
   while ($paramUSC = $sql->fetchObject()) {
     $rows[] = array(
@@ -1767,8 +1764,8 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
       guifi_img_icon('drop.png'),
       'guifi/menu/devel/paramusc/'.$paramUSC->id.'/delete',
       array(
-                'html' => TRUE,
-                'title' => t('delete paramusc'),
+        'html' => TRUE,
+        'title' => t('delete paramusc'),
       ))
     );
     $totalParams++;
@@ -1790,19 +1787,19 @@ function guifi_devel_configuracio_usc_form($form_state, $id) {
 
   $form['plantilla'] = array(
       '#type' => 'textarea',
-      '#title' => t('Template File'),
+      '#title' => t('Template file'),
       '#required' => TRUE,
       '#default_value' => $configuraciousc->plantilla,
-      '#description' => t('Template File'),
+      '#description' => t('The content of the template file used to generate this USC configuration.'),
       '#prefix' => '<tr><td colspan="4">',
-      '#suffix' => '</td></tr><tr><td colspan="4">Paràmetres Associats al USC : '. $totalParams .'<br>',
+      '#suffix' => '</td></tr><tr><td colspan="4">' . t('Number of parameters associated to this USC') . ': ' . $totalParams . '<br>',
       '#weight' => $form_weight++,
       '#cols' => 60,
       '#rows' => 30,
   );
   //$form['submit'] = array('#type' => 'submit',    '#weight' => 99, '#value' => t('Save'));
-  $headers = array(t('Params'), t('Origin'), t('Fixed Value'),t('Edit'), t('Delete'));
-  $output .= theme('table',$headers,$rows);
+  $headers = array(t('Parameter'), t('Origin'), t('Configured value'),t('Edit'), t('Delete'));
+  $output .= theme('table',array('header'=>$headers,'rows'=>$rows));
   $form['submit'] = array(
     '#type' => 'submit',
     '#prefix' => $output. '</td></tr><tr><td colspan="4">',
@@ -1913,13 +1910,13 @@ function guifi_devel_paramusc($id=null, $op=null) {
     )));
   }
 
-  $output .= theme('table',$headers,$rows);
-  print theme('page',$output, FALSE);
-  return;
+  $output .= theme('table', array('header'=>$headers, 'rows'=>$rows));
+
+  return $output;
 }
 
 // FirmWare Parameter Form
-function guifi_devel_paramusc_form($form_state, $id) {
+function guifi_devel_paramusc_form($none, $form_state, $id) {
 
   $sql = db_query('select
                       pusc.id, pusc.uscid, pusc.valor, pusc.dinamic, p.id as pid, p.nom, f.id, f.nom as nomfirmware, d.mid, d.model,  mf.fid, mf.name as manufacturer
@@ -1991,7 +1988,7 @@ function guifi_devel_paramusc_save($edit) {
   $log);
 }
 
-function guifi_devel_paramusc_delete_confirm($form_state,$id) {
+function guifi_devel_paramusc_delete_confirm($none, $form_state,$id) {
   guifi_log(GUIFILOG_TRACE,'guifi_devel_parameter_delete_confirm()',$id);
 
   $form['id'] = array('#type' => 'hidden', '#value' => $id);
