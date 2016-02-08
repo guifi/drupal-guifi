@@ -526,7 +526,7 @@ function guifi_device_admin_url($d,$ip) {
  * Device edit funcions
  * guifi_device_form_submit(): Performs submit actions
  */
-function guifi_device_form_submit($form, &$form_state) {
+function guifi_device_form_submit($none, $form, &$form_state) {
 
   guifi_log(GUIFILOG_BASIC,'function guifi_device_form_submit()',
     // $form_state['values']);
