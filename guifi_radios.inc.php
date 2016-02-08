@@ -39,25 +39,42 @@ function guifi_radio_form($edit, $form_weight) {
   // '#default_value' => $edit['mid'],
   $form['radio_settings']['variable']['model_id'] = array(
     '#type' => 'select',
-    '#title' => t("Radio Model"),
+    '#title' => t("Device model"),
     '#required' => TRUE,
      '#default_value' => $edit['variable']['model_id'],
     '#options' => $models_array,
-    '#description' => t('Select the radio model that do you have.'),
-    '#prefix' => '<table><tr><td>',
-    '#suffix' => '</td>',
+    '#description' => t('Select the manufacturer and model of your device.'),
     '#ajax' => array(
-      'path' => 'guifi/js/firmware_by_model',
+      'callback' => 'guifi7_ahah_select_firmware_by_model',
       'wrapper' => 'select-firmware',
       'method' => 'replace',
       'effect' => 'fade',
      ),
-    '#weight' => 0,
+    '#weight' => 1,
   );
 
-  $form['radio_settings']['variable']['firmware_id'] =
-  guifi_radio_firmware_field($edit['variable']['firmware_id'],
-      $edit['variable']['model_id']);
+  $fid = $edit['variable']['firmware_id'];
+
+  $options = array();
+  $firm = guifi_types('firmware', NULL, NULL,$edit['variable']['model_id']);
+
+  foreach( $firm as $key => $i) {
+    $options[$firm[$key]['fid']] = t($firm[$key]['description']);
+  }
+
+  $form['radio_settings']['variable']['firmware_id'] = array(
+    '#type' => 'select',
+    '#title' => t('Firmware'),
+    '#parents' => array('variable','firmware_id'),
+    '#required' => TRUE,
+    '#default_value' => $fid,
+    '#prefix' => '<div id="select-firmware">',
+    '#suffix' => '</div>',
+    '#options' => $options,
+    '#description' => t('Select the firmware version used by your device. This is used for automatic configuration.'),
+    '#weight' => 2,
+  );
+
 
   $form['radio_settings']['variable']['firmware'] = array(
     '#type' => 'hidden',
@@ -66,16 +83,14 @@ function guifi_radio_form($edit, $form_weight) {
 
   $form['radio_settings']['mac'] = array(
     '#type' => 'textfield',
-    '#title' => t('Device MAC Address'),
+    '#title' => t('Primary MAC address'),
     '#required' => TRUE,
     '#size' => 20,
     '#maxlength' => 20,
     '#default_value' => $edit['mac'],
     '#element_validate' => array('guifi_mac_validate'),
-    '#description' => t("Base/Main MAC Address.<br />Some configurations won't work if is blank"),
-    '#prefix' => '<td>',
-    '#suffix' => '</td></tr></table>',
-    '#weight' => 4
+    '#description' => t("Write the primary MAC Address of your device in the 00:11:22:33:aa:bb format. Usually it is the MAC address of the first Ethernet interface (e.g. eth0)."),
+    '#weight' => 3
   );
 
   $collapse = TRUE;
@@ -308,6 +323,7 @@ function guifi_radio_add_radio_form($edit) {
 }
 
 function guifi_radio_firmware_field($fid,$mid) {
+//En desús a partir de Drupal 7
 /* Consulta anterior al  PFC */
   $model = db_query(
         "SELECT model as name, mid as id " .
@@ -317,20 +333,21 @@ function guifi_radio_firmware_field($fid,$mid) {
 
   $options = array();
   $firm = guifi_types('firmware', NULL, NULL,$model->id);
+
   foreach( $firm as $key => $i) {
     $options[$firm[$key]['fid']] = t($firm[$key]['description']);
   }
 
   return array(
     '#type' => 'select',
-    '#title' => t("Firmware"),
-    '#parents' => array('variable','firmware_id'),
+    '#title' => t('Firmware'),
+    //'#parents' => array('variable','firmware_id'),
     '#required' => TRUE,
     '#default_value' => $fid,
-    '#prefix' => '<td><div id="select-firmware">',
-    '#suffix' => '</div></td>',
+    '#prefix' => '<div id="select-firmware">',
+    '#suffix' => '</div>',
     '#options' => $options,
-    '#description' => t('Used for automatic configuration.'),
+    '#description' => t('Select the firmware version used by your device. This is used for automatic configuration.'),
     '#weight' => 2,
   );
 }
