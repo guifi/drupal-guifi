@@ -57,11 +57,13 @@ function guifi_radio_form($edit, $form_weight) {
 
   $options = array();
   $firm = guifi_types('firmware', NULL, NULL,$edit['variable']['model_id']);
-
-  foreach( $firm as $key => $i) {
-    $options[$firm[$key]['fid']] = t($firm[$key]['description']);
-  }
-
+  if (empty($firm))
+    $options['1'] = t('n/a');
+  else
+    foreach( $firm as $key => $i) {
+      $options[$firm[$key]['fid']] = t($firm[$key]['description']);
+   }
+  
   $form['radio_settings']['variable']['firmware_id'] = array(
     '#type' => 'select',
     '#title' => t('Firmware'),
