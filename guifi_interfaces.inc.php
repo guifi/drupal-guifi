@@ -70,11 +70,28 @@ function guifi_interfaces_form(&$interface,$ptree) {
 
     if (!$interface['new']) {
       $f['interface']['AddPublicSubnetMask'] = array(
-        '#type' => 'hidden',
-        '#value' => '255.255.255.224',
-        '#parents'=> array_merge($ptree,array('AddPublicSubnetMask')),
-        '#prefix' => '<div>&nbsp</div><div id="editInterface-'.$key.'">',
-        '#suffix' => '</div>'
+        'selectNetmask' => array(
+          '#type' => 'select',
+          '#name' => 'selectAddPublicSubnetMask-'.$key,
+          '#id' => 'selectAddPublicSubnetMask-'.$key,
+          '#parents' => array('interface',$key,'newNetmask'),
+          '#attributes' => array('hidden' => ''),
+          '#default_value' => "255.255.255.224",
+          '#options' => guifi_types('netmask',30,23),
+          '#prefix'=> '<div><table id="editInterface-'.$key.'" style="width: 0"><td style="width: 0" align="LEFT">',
+          '#suffix'=> '</td>',
+        ),
+        'createNetmask' => array(
+          '#type' => 'button',
+          '#value' => t('Create'),
+          '#name' => 'createAddPublicSubnetMask-'.$key,
+          '#attributes' => array('type' => 'button', 'id' => 'createAddPublicSubnetMask-'.$key, 'hidden' => ''),
+          '#parents' => array('interface',$key,'createNetmask'),
+          '#submit' => array('guifi_interfaces_add_subnet_submit'),
+          '#executes_submit_callback' => TRUE,
+          '#prefix' => '<td align="left">',
+          '#suffix' => '</td></table></div>',
+        ),
       );
 
       $f['interface']['AddCableLink'] = array(
@@ -85,7 +102,6 @@ function guifi_interfaces_form(&$interface,$ptree) {
         '#ahah' => array(
           'path' => 'guifi/js/add-cable-link/'.$key,
           'wrapper' => 'editInterface-'.$key,
-//          'wrapper'=> 'jscontainer',
           'method' => 'replace',
           'effect' => 'fade',
         )
@@ -95,8 +111,8 @@ function guifi_interfaces_form(&$interface,$ptree) {
         '#src' => drupal_get_path('module', 'guifi').'/icons/insertwlan.png',
         '#parents' => array_merge($ptree,array('AddPublicSubnet')),
         '#attributes' => array('title' => t('Allocate a Public Subnetwork to the interface')),
-        '#ahah' => array(
-          'path' => 'guifi/js/add-subnet-mask/'.$key,
+        '#ajax' => array(
+          'callback' => 'guifi_ajax_add_subnet_mask',
           'wrapper' => 'editInterface-'.$key,
           'method' => 'replace',
           'effect' => 'fade',
@@ -265,7 +281,7 @@ function guifi_interfaces_cable_form(&$edit,&$form_weight) {
 function guifi_interfaces_add_subnet_submit(&$form,&$form_state) {
   $values = $form_state['clicked_button']['#parents'];
   $iid    = $values[count($values)-2];
-  $mask   = $form_state['values']['interface'][$iid]['newNetmask'];
+  $mask   = $form_state['input']['selectAddPublicSubnetMask-'.$iid];
   guifi_log(GUIFILOG_TRACE,
     sprintf('function guifi_interfaces_add_subnet_submit(%d)',$iid),
     $mask);
