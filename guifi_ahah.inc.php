@@ -1247,7 +1247,7 @@ function guifi_ahah_add_vinterface($iClass) {
 }
 
 /**
- * Select firmware by model for Drupal 6
+ * Select firmware by model
  *
  * URL: http://guifi.net/guifi/js/firmware_by_model
  */
@@ -1285,16 +1285,6 @@ function guifi_ahah_select_firmware_by_model(){
   }
   exit;
 }
-
-/**
- * Select firmware by model for Drupal 7
- *
- * URL: http://guifi.net/guifi/js/firmware_by_model
- */
-function guifi7_ahah_select_firmware_by_model($form, &$form_state){
-  return $form['radio_settings']['variable']['firmware_id'];
-}
-
 
 /**
  * Select channel by protocol

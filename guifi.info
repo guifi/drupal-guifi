@@ -35,6 +35,7 @@ files[] = guifi_includes.inc.php  ;; misc. routines
 ;;files[] = guifi_networkutils.inc.php  ;; network calc routines
 files[] = guifi_sql.inc.php       ;; database changes
 ;;files[] = guifi_ahah.inc.php      ;; AHAH functions
+;;files[] = guifi_ajax.inc.php      ;; AJAX functions
 ;;files[] = GeoCalc.class.php       ;; geographic routines
 ;;files[] = guifi_spatial.inc.php   ;; spatial searches
 
