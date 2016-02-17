@@ -28,6 +28,7 @@ include_once 'guifi_maps.inc.php';      // maps management
 include_once 'guifi_networkutils.inc.php';  // network calc routines
 include_once 'guifi_sql.inc.php';       // database changes
 include_once 'guifi_ahah.inc.php';      // AHAH functions
+include_once 'guifi_ajax.inc.php';      // AJAX functions
 include_once 'GeoCalc.class.php';       // geographic routines
 include_once 'guifi_spatial.inc.php';   // spatial searches
 

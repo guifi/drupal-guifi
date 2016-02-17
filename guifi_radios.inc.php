@@ -45,7 +45,7 @@ function guifi_radio_form($edit, $form_weight) {
     '#options' => $models_array,
     '#description' => t('Select the manufacturer and model of your device.'),
     '#ajax' => array(
-      'callback' => 'guifi7_ahah_select_firmware_by_model',
+      'callback' => 'guifi_ajax_select_firmware_by_model',
       'wrapper' => 'select-firmware',
       'method' => 'replace',
       'effect' => 'fade',
