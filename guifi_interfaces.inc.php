@@ -74,7 +74,7 @@ function guifi_interfaces_form(&$interface,$ptree) {
           '#type' => 'select',
           '#name' => 'selectAddPublicSubnetMask-'.$key,
           '#id' => 'selectAddPublicSubnetMask-'.$key,
-          '#parents' => array('interface',$key,'newNetmask'),
+          '#parents' => array('interface',$key,'selectNetmask'),
           '#attributes' => array('hidden' => ''),
           '#default_value' => "255.255.255.224",
           '#options' => guifi_types('netmask',30,23),
@@ -288,22 +288,22 @@ function guifi_interfaces_add_subnet_submit(&$form,&$form_state) {
 
   $ips_allocated=guifi_ipcalc_get_ips('0.0.0.0','0.0.0.0',$form_state['values'],1);
   $net = guifi_ipcalc_get_subnet_by_nid($form_state['values']['nid'],$mask,'public',$ips_allocated);
-//  guifi_log(GUIFULOG_TRACE,"IPs allocated: ".count($ips_allocated)." Obtained new net: ".$net."/".$edit['newSubnetMask']);
-  drupal_set_message(t('New subnetwork %net/%mask will be allocated.',
-    array('%net' => $net,
-      '%mask' => $mask)));
-  $ipv4['new']=TRUE;
-  $ipv4['ipv4_type']=1;
-  $ipv4['ipv4']=long2ip(ip2long($net) + 1);
-  guifi_log(GUIFILOG_TRACE,"assigned IPv4: ".$ipv4['ipv4']);
-  $ipv4['netmask']=$mask;
+
+  drupal_set_message(t('New subnetwork @net/@mask will be allocated.',
+    array('@net' => $net,
+      '@mask' => $mask)));
+
+  $ipv4['new'] = TRUE;
+  $ipv4['ipv4_type'] = 1;
+  $ipv4['ipv4'] = long2ip(ip2long($net) + 1);
+  $ipv4['netmask'] = $mask;
   $ipv4['interface_id'] = $iid;
   $fipv4 = &$form_state['values']['interfaces'][$iid]['ipv4'];
   $fipv4[] = $ipv4;
   end($fipv4);
-  $delta=key($fipv4);
-  $fipv4[$delta]['id']=$delta;
-  $form_state['values']['interfaces'][$iid]['unfold']=TRUE;
+  $delta = key($fipv4);
+  $fipv4[$delta]['id'] = $delta;
+  $form_state['values']['interfaces'][$iid]['unfold'] = TRUE;
   $form_state['rebuild'] = TRUE;
 
   return TRUE;

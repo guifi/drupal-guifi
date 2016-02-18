@@ -206,11 +206,11 @@ function guifi_ipv4_form_validate($form,$form_state) {
   if (empty($form_state['values']['id'])) {
     $result = db_query('SELECT base, mask
                         FROM {guifi_networks}
-                        WHERE base = "%s"
-                         AND mask = "%s"',
-        $form_state['values']['base'],
-        $form_state['values']['mask']);
-    if (db_affected_rows($result)>0)
+                        WHERE base = :base
+                         AND mask = :mask',
+        array(':base' => $form_state['values']['base'],
+              ':mask' => $form_state['values']['mask']));
+    if (count($result) > 0)
       form_set_error('base', t('Network already in use.'));
   }
 
@@ -357,34 +357,34 @@ function guifi_ipv4subnet_form($ipv4,$k,$view = false) {
 
   guifi_log(GUIFILOG_TRACE,sprintf('guifi_ipv4subnet_form (id=%d)',$k),$ipv4);
 
-  $ipc = _ipcalc($ipv4[ipv4],$ipv4[netmask]);
-  if (!empty($ipv4[subnet]))
-    $subnet = $ipv4[subnet];
+  $ipc = _ipcalc($ipv4['ipv4'],$ipv4['netmask']);
+  if (!empty($ipv4['subnet']))
+    $subnet = $ipv4['subnet'];
   else
-    $subnet = $ipv4[snet];
+    $subnet = $ipv4['snet'];
   guifi_log(GUIFILOG_FULL,sprintf('guifi_ipv4subnet_form (id=%d)',$k),$subnet);
     
-  $ips = array(ip2long($ipv4[ipv4]));
+  $ips = array(ip2long($ipv4['ipv4']));
   
   foreach ($subnet as $ki=>$ip) {
-    if (empty($ip[ipv4]) and !(empty($ip[ipv4value])))
-      $subnet[$ki][ipv4]=$ip[ipv4value];
-    if (ip2long($ip[ipv4]))
-      $ips[] = ip2long($ip[ipv4]);
+    if (empty($ip['ipv4']) and !(empty($ip['ipv4value'])))
+      $subnet[$ki]['ipv4'] = $ip['ipv4value'];
+    if (ip2long($ip['ipv4']))
+      $ips[] = ip2long($ip['ipv4']);
   }
   sort($ips);
 
   $form = array(
     '#type'         => (!$view) ? 'hidden' : 'fieldset',
     '#type'         => 'fieldset',
-//    '#access'       => (!$view) ? false : true,
+//    '#access'       => (!$view) ? false : TRUE,
     '#title'        => t('Subnet'). ' '.$ipc['netid'].'/'.$ipc['maskbits'].' - '.
        (count($ips)).' address(es)',
 //    '#attributes'   => array('class'=>'fieldset-interface-port'),
     '#prefix'       => '<div class="ipv4-subnet" id="fieldset-ipv4subnet-'.$k.'">',
     '#suffix'       => '</div>',
-    '#collapsible'  => true,
-    '#collapsed'    => ($view) ? false : true,
+    '#collapsible'  => TRUE,
+    '#collapsed'    => ($view) ? false : TRUE,
 //    '#parents'      => array('ipv4',$k,'subnet'),
   );
 
@@ -393,44 +393,45 @@ function guifi_ipv4subnet_form($ipv4,$k,$view = false) {
   for ($ks=0; $ks < $ipc['hosts']; $ks++) {
     $snet = $subnet[$ks];
 
+    if (!empty($snet['ipv4'])) {
     $form[$ks] = array(
-      '#type' => (!empty($snet[ipv4])) ? 'fieldset' : 'hidden',
+      '#type' => 'fieldset',
  //     '#type' => 'fieldset',
       '#attributes' => array('class'=>'fieldset-interface-port'),
       '#prefix'     => '<div id="fieldset-ipv4subnet-'.$k.'-'.$ks.'">',
       '#suffix'     => '</div>',
     );
-    
-    $form[$ks][ipv4value] = array('#type'=>'hidden','#value'=>$snet[ipv4]);
+    }
+    $form[$ks]['ipv4value'] = array('#type'=>'hidden','#value'=>$snet['ipv4']);
     
     if (isset($snet['id'])) 
       $form[$ks]['id'] = array('#type'=>'hidden','#value'=>$snet['id']);
     
-    if (isset($snet[interface_id])) 
-      $form[$ks][interface_id] = array('#type'=>'hidden','#value'=>$snet[interface_id]);
+    if (isset($snet['interface_id'])) 
+      $form[$ks]['interface_id'] = array('#type'=>'hidden','#value'=>$snet['interface_id']);
         
-    $form[$ks][ipv4] = array(
+    $form[$ks]['ipv4'] = array(
       '#type'          => 'textfield',
-      '#default_value' => $snet[ipv4],
+      '#default_value' => $snet['ipv4'],
       '#size'          => 24,
       '#maxlength'     => 16,
     );
     
     if ($snet['new']) {
-      $form[$ks][ipv4]['#type'] = 'hidden';
-      $form[$ks][ipv4]['#value'] = $snet[ipv4];
-      $form[$ks][ipv4txt] = array (
-        '#type'=>'textfield','#value'=>$snet[ipv4],'#disabled'=>true, '#size'=>24
+      $form[$ks]['ipv4']['#type'] = 'hidden';
+      $form[$ks]['ipv4']['#value'] = $snet['ipv4'];
+      $form[$ks]['ipv4txt'] = array (
+        '#type'=>'textfield','#value'=>$snet['ipv4'],'#disabled'=>TRUE, '#size'=>24
       );
       $newIps++;
       $form[$ks]['new'] = array(
         '#type' =>'hidden',
-        '#value'=> true,
+        '#value'=> TRUE,
       );
     }
     
-    $form[$ks][did] = array(
-      '#type'              => (($view) and (!empty($snet[ipv4]))) ? 'textfield' : 'hidden',
+    $form[$ks]['did'] = array(
+      '#type'              => (($view) and (!empty($snet['ipv4']))) ? 'textfield' : 'hidden',
       '#type'              => 'textfield',
       '#default_value'     => guifi_get_devicename($snet['did'],'large'),
       '#autocomplete_path' => 'guifi/js/select-node-device',
@@ -451,12 +452,12 @@ function guifi_ipv4subnet_form($ipv4,$k,$view = false) {
     $form[$ks]['iid'] = array(
       '#type'    => 'select',
       '#value'   => $snet['iid'],
-      '#required'=> true,
+      '#required'=> TRUE,
       '#options' => $dinterfaces,
     );
 //    }
 
-    if (!($snet['deleted']==true)) $form[$ks]['deleted'] = array(
+    if (!($snet['deleted'] == TRUE)) $form[$ks]['deleted'] = array(
         '#type'       => 'image_button',
         '#src'        => drupal_get_path('module', 'guifi').'/icons/drop.png',
         '#attributes' => array('title' => t('Delete address')),
@@ -468,14 +469,14 @@ function guifi_ipv4subnet_form($ipv4,$k,$view = false) {
         ),
       ); 
     else {
-        $form[$ks][deleted] = array('#type'=>'hidden','#value'=>true);
-        $form[$ks][ipv4]['#type'] = 'hidden';
-        $form[$ks][ipv4]['#value'] = $snet[ipv4];
-        $form[$ks][did]['#type'] = 'hidden';
-        $form[$ks][iid]['#type'] = 'hidden';
-        $form[$ks][deletedmsg] = array(
+        $form[$ks]['deleted'] = array('#type'=>'hidden','#value' => TRUE);
+        $form[$ks]['ipv4']['#type'] = 'hidden';
+        $form[$ks]['ipv4']['#value'] = $snet['ipv4'];
+        $form[$ks]['did']['#type'] = 'hidden';
+        $form[$ks]['iid']['#type'] = 'hidden';
+        $form[$ks]['deletedmsg'] = array(
           '#type'=>'item',
-          '#value'=>t('Address %addr will be DELETED',array('%addr'=>$snet[ipv4]))
+          '#value'=>t('Address %addr will be DELETED',array('%addr'=>$snet['ipv4']))
         );      
       }
       
@@ -512,7 +513,7 @@ function guifi_ipv4subnet_form($ipv4,$k,$view = false) {
 }
 
 
-function guifi_ipv4i_form($ipv4, $k, $first_port = true, $eInterfaces) {
+function guifi_ipv4i_form($ipv4, $k, $first_port = TRUE, $eInterfaces) {
   
 //  if (empty($ipv4[ipv4]))
 //    return;
@@ -653,7 +654,7 @@ function guifi_ipv4i_form($ipv4, $k, $first_port = true, $eInterfaces) {
 function guifi_ipv4s_form($edit, &$form_weight) {
   if ($edit['new'])
     return;
-    
+
   global $user;
 
 //  if (empty($edit[ipv4]))
@@ -684,10 +685,10 @@ function guifi_ipv4s_form($edit, &$form_weight) {
 
   // Loop across all existing addresses
   $ipv4_count = 0;
-  $total_ipv4 = count($edit[ipv4]);
-  $first = true;
+  $total_ipv4 = count($edit['ipv4']);
+  $first = TRUE;
 
-  foreach ($edit[ipv4] as $k => $ipv4) {
+  foreach ($edit['ipv4'] as $k => $ipv4) {
     if (is_numeric($k)) {
       guifi_log(GUIFILOG_TRACE,'function guifi_ipv4s_form(vint LOOP)',$ipv4);
       $form[$k] =
@@ -707,11 +708,11 @@ function guifi_ipv4s_form($edit, &$form_weight) {
                     t('Get a new IPv4 address').*/
                     '<div id="add-ipv4s-dialog">',
     '#suffix'     => '</div>',
-    '#collapsible'=>true,
-    '#collapsed'  => true,
+    '#collapsible'=> TRUE,
+    '#collapsed'  => TRUE,
     '#attributes' => array('class'=>'fieldset-interface-port'),
     '#weight'     => $form_weight++,
-    '#tree'       => true,
+    '#tree'       => TRUE,
   );
       
   $form['ipv4sdialog']['adddid'] = array(
@@ -726,7 +727,7 @@ function guifi_ipv4s_form($edit, &$form_weight) {
     '#element_validate'  => array('guifi_devicename_validate'),
     '#ahah'              => array(
       'event'            => 'blur',
-      //'keypress'         => true,
+      //'keypress'         => TRUE,
       'path'             => 'guifi/js/select-device-subnets',
       // 'wrapper'          => 'edit-ipv4-ipv4sdialog-snet-wrapper',
       'wrapper'          => 'add-ipv4s-dialog',   

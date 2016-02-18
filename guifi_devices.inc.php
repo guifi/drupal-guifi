@@ -526,11 +526,7 @@ function guifi_device_admin_url($d,$ip) {
  * Device edit funcions
  * guifi_device_form_submit(): Performs submit actions
  */
-function guifi_device_form_submit($none, $form, &$form_state) {
-
-  guifi_log(GUIFILOG_BASIC,'function guifi_device_form_submit()',
-    // $form_state['values']);
-    $form_state['clicked_button']['#value']);
+function guifi_device_form_submit($form, &$form_state) {
 
   if ($form_state['values']['id'])
     if (!guifi_device_access('update',$form_state['values']['id']))
@@ -552,11 +548,7 @@ function guifi_device_form_submit($none, $form, &$form_state) {
   case t('Add IPv4, Save & continue edit'):
   case t('Save & exit'):
     // save
-//    print_r($_POST);
-//    print_r($form_state['values']);
-//    exit;
-//    $id = guifi_device_save($form_state['clicked_button']['#post']);
-//    $id = guifi_device_save($form_state['clicked_button']['#post']);
+
     $id = guifi_device_save($form_state['values']);
 //    exit;
     if ($form_state['clicked_button']['#value'] == t('Save & exit'))
@@ -807,17 +799,14 @@ function guifi_device_form($form_id, &$form_state, $device) {
   }
 
   // Cable interfaces/networking
-  guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans if cable links)'),$form_weight);
+
   $form['if'] = guifi_interfaces_cable_form($form_state['values'],$form_weight);
   $form['if']['#weight'] = $form_weight++;
 
-
   // Cable interfaces/ports
-  guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans if ports)'),$form_weight);
   if (isset($form_state['values']['interfaces'])) {
     foreach ($form_state['values']['interfaces'] as $k => $v)
-      unset($form_state['values']['interfaces'][$k]['ipv4']);
-    guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans if ports)'),$form_state['values']['interfaces']);     
+      unset($form_state['values']['interfaces'][$k]['ipv4']);   
     $form['interfaces'] = guifi_ports_form($form_state['values'],$form_weight);
     $form['interfaces']['#weight'] = $form_weight++;
   }
@@ -832,12 +821,13 @@ function guifi_device_form($form_id, &$form_state, $device) {
   $form['aggregations'] = guifi_vinterfaces_form('aggregations',$form_state['values'],$form_weight);
   $form['aggregations']['#weight'] = $form_weight++;
 
+// TODO MIQUEL
+/*
   // ipv4
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans if ipv4)'),$form_weight);
   $form['ipv4'] = guifi_ipv4s_form($form_state['values'],$form_weight);
   $form['ipv4']['#weight'] = $form_weight++;
-
-  guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_form(abans comments)'),$form_weight);
+*/
 
   // Comments
   $form['comment'] = array(
@@ -1174,10 +1164,8 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
 
   // Interfaces
   if (!empty($edit['interfaces'])) {
-
     // Set etherdev_counter (sort the interfaces by it)
     uasort($edit['interfaces'],'guifi_interfaces_cmp');
-    guifi_log(GUIFILOG_TRACE,'Saving interfaces, interface:',$edit['interfaces']);
     $m = guifi_get_model_specs($edit['variable']['model_id']);
     $iCount = 0;
 
@@ -1189,7 +1177,6 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
         $interface[interface_type] = $m->ethernames[$iCount];
       $interface[interface_class] = 'ethernet';
       $iCount++;
-      guifi_log(GUIFILOG_TRACE,sprintf('iid: %d, edit[nid]: %d, ndevice[id]: %d, interface:',$iid,$edit['nid'],$ndevice['nid'],$ndevice['nid']),$interface);
       if ($iid!='ifs')
         $log .= guifi_device_interface_save($interface,$iid,$edit['id'],$ndevice['nid'],$to_mail);
     }
@@ -1255,7 +1242,6 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
 
 function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
   $log = '';
-
   // if remote device or interface has changed
   $v = explode('-',$interface['did']);
   $new_rdid = $v[0];

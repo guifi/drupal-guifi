@@ -970,9 +970,9 @@ function guifi_radio_add_link2ap_form(&$form,&$form_state) {
     $form_state['values']['filters'] = $form_state['filters'];
 
   drupal_set_title(t(
-    'Choose an AP from the list to link with %hostname',
+    'Choose an AP from the list to link with @hostname',
     array(
-      '%hostname'=> $form_state['values']['nick'])
+      '@hostname'=> $form_state['values']['nick'])
   ));
 
   // Filter form
@@ -1286,9 +1286,9 @@ function guifi_radio_add_wds_form(&$form,&$form_state) {
     $form_state['values']['filters'] = $form_state['filters'];
 
   drupal_set_title(t(
-    'Choose an AP from the list to link with %ssid',
+    'Choose an AP from the list to link with @ssid',
     array(
-      '%ssid'=> $form_state['values']['radios']
+      '@ssid'=> $form_state['values']['radios']
         [$form_state['filters']['from_radio']]['ssid'])));
 
   // Filter form

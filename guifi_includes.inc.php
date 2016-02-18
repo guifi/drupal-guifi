@@ -279,11 +279,11 @@ function _set_value($device,$node,&$var,$id,$rid,$search) {
   $prefix = '';
 
   if (isset($device->radiodev_counter))
-    $ql = db_query('SELECT l1.id FROM {guifi_links} l1 LEFT JOIN {guifi_interfaces} i1 ON l1.interface_id=i1.id LEFT JOIN {guifi_links} l2 ON l1.id=l2.id LEFT JOIN {guifi_interfaces} i2 ON l2.interface_id=i2.id WHERE l1.device_id=%d AND i1.radiodev_counter=%d AND l2.device_id=%d AND i2.radiodev_counter=%d',$device->id, $device->radiodev_counter,$id,$rid);
+    $ql = db_query('SELECT l1.id FROM {guifi_links} l1 LEFT JOIN {guifi_interfaces} i1 ON l1.interface_id=i1.id LEFT JOIN {guifi_links} l2 ON l1.id=l2.id LEFT JOIN {guifi_interfaces} i2 ON l2.interface_id=i2.id WHERE l1.device_id = :did AND i1.radiodev_counter= :rc AND l2.device_id = :2did AND i2.radiodev_counter= :2rc', array(':did' => $device->id, ':rc' => $device->radiodev_counter, ':2did' => $id, ':2rc' => $rid));
   else
-    $ql = db_query('SELECT l1.id FROM {guifi_links} l1 LEFT JOIN {guifi_links} l2 ON l1.id=l2.id WHERE l1.device_id=%d AND l2.device_id=%d',$device->id, $id);
+    $ql = db_query('SELECT l1.id FROM {guifi_links} l1 LEFT JOIN {guifi_links} l2 ON l1.id=l2.id WHERE l1.device_id = :did AND l2.device_id = :2did', array(':did' => $device->id, ':2did' => $id));
 
-  if (db_result($ql) > 0)
+  if ($ql->fetchField() > 0)
     // link already exists
     return;
 
@@ -336,43 +336,40 @@ function guifi_devices_select($filters, $action = '') {
 
   if ($filters['type'] == 'cable') {
     if ($filters['mode'] != 'cable-router') {
-      $query = sprintf("
+      $query = '
         SELECT
           l.lat, l.lon, r.nick ssid, r.id, r.nid, z.id zone_id
         FROM {guifi_devices} r,{guifi_location} l, {guifi_zone} z
         WHERE
-          l.id=%d
+          l.id = :id
           AND r.nid=l.id
-          AND l.zone_id=z.id",
-        $filters['from_node']);
+          AND l.zone_id=z.id';
     } else {
-      $query = sprintf("
+      $query = '
         SELECT
           l.lat, l.lon, r.nick ssid, r.id r.nid, z.id zone_id, r.type,
           r.fund_required, r.fund_amount, r.fund_currency
         FROM {guifi_devices} r,{guifi_location} l, {guifi_zone} z
-        WHERE r.type IN ('radio','nat')
-          AND l.id=%d AND r.nid=l.id
-          AND l.zone_id=z.id",
-        $filters['from_node']);
+        WHERE r.type IN (\'radio\',\'nat\')
+          AND l.id = :id AND r.nid=l.id
+          AND l.zone_id=z.id';
     }
   } else {
-    $query = sprintf("
+    $query = '
       SELECT
         l.lat, l.lon, r.id, r.clients_accepted, r.nid, z.id zone_id,
         r.radiodev_counter, r.ssid, r.mode, r.antenna_mode,
         r.fund_required, r.fund_amount, r.fund_currency
       FROM {guifi_radios} r,{guifi_location} l, {guifi_zone} z
-      WHERE l.id <> :from
+      WHERE l.id <> :id
         AND r.nid=l.id
-        AND l.zone_id=z.id",
-        array(':from' => $filters['from_node']));
+        AND l.zone_id=z.id';
   }
 
   $devdist = array();
   $devarr = array();
   $k = 0;
-  $devsq = db_query($query);
+  $devsq = db_query($query, array(':id' => $filters['from_node']));
 
   while ($device = $devsq->fetchObject()) {
     $k++;
