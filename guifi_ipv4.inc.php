@@ -881,7 +881,9 @@ function guifi_device_ipv4_link_form($ipv4,$tree, $cable = TRUE) {
         '#parents' => array_merge($tree,array('AddCableLink')),
         '#attributes' => array('title' => t('Link to another device using a public IPv4 address')),
         '#ahah' => array(
-          'path' => 'guifi/js/add-cable-link/'.$ipv4['interface_id'].','.$ipv4['id'],
+          // TODO MIQUEL
+          //'path' => 'guifi/js/add-cable-link/'.$ipv4['interface_id'].','.$ipv4['id'],
+          'callback' => 'guifi_ajax_add_cable_local_link',
           'wrapper' => 'editInterface-'.$ipv4['interface_id'].'-'.$ipv4['id'],
           'method' => 'replace',
           'effect' => 'fade',

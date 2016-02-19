@@ -78,8 +78,7 @@ function guifi_interfaces_form(&$interface,$ptree) {
           '#attributes' => array('hidden' => ''),
           '#default_value' => "255.255.255.224",
           '#options' => guifi_types('netmask',30,23),
-          '#prefix'=> '<div><table id="editInterface-'.$key.'" style="width: 0"><td style="width: 0" align="LEFT">',
-          '#suffix'=> '</td>',
+          '#prefix'=> '<div id="editInterface-'.$key.'">',
         ),
         'createNetmask' => array(
           '#type' => 'button',
@@ -89,8 +88,27 @@ function guifi_interfaces_form(&$interface,$ptree) {
           '#parents' => array('interface',$key,'createNetmask'),
           '#submit' => array('guifi_interfaces_add_subnet_submit'),
           '#executes_submit_callback' => TRUE,
-          '#prefix' => '<td align="left">',
-          '#suffix' => '</td></table></div>',
+          '#suffix' => '</div>',
+        ),
+      );
+      $f['interface']['CreateCableLink'] = array(
+        'to_did' => array(
+          '#type' => 'select',
+          '#name' => 'selectCreateCableLink-'.$key,
+          '#id' => 'selectCreateCableLink-'.$key,
+          '#parents'=> array('interface',$key,'to_did'),
+          '#attributes' => array('hidden' => ''),
+          '#prefix'=> '<div id="editInterface-'.$key.'">',
+        ),
+        'createLink' => array(
+          '#type' => 'button',
+          '#value' => t('Create'),
+          '#name' => 'createCreateCableLink-'.$key,
+          '#attributes' => array('type' => 'button', 'id' => 'createCreateCableLink-'.$key, 'hidden' => ''),
+          '#parents' => array('interface',$key,'createLink'),
+          '#submit' => array('guifi_interfaces_add_cable_p2p_link_submit'),
+          '#executes_submit_callback' => TRUE,
+          '#suffix' => '</div>',
         ),
       );
 
@@ -99,8 +117,8 @@ function guifi_interfaces_form(&$interface,$ptree) {
         '#src' => drupal_get_path('module', 'guifi').'/icons/addprivatecablelink.png',
         '#parents' => array_merge($ptree,array('AddCableLink')),
         '#attributes' => array('title' => t('Link to another device at the node using a private network')),
-        '#ahah' => array(
-          'path' => 'guifi/js/add-cable-link/'.$key,
+        '#ajax' => array(
+          'callback' => 'guifi_ajax_add_cable_local_link',
           'wrapper' => 'editInterface-'.$key,
           'method' => 'replace',
           'effect' => 'fade',
@@ -312,21 +330,16 @@ function guifi_interfaces_add_subnet_submit(&$form,&$form_state) {
 function guifi_interfaces_add_cable_p2p_link_submit(&$form,&$form_state) {
   $values = $form_state['clicked_button']['#parents'];
   $iid    = $values[1];
-  $to_did = $form_state['values']['interfaces'][$iid]['to_did'];
+  $to_did   = $form_state['input']['selectCreateCableLink-'.$iid];
   $rdevice = guifi_device_load($to_did);
-  guifi_log(GUIFILOG_TRACE,
-    sprintf('function guifi_interfaces_add_cable_p2p_link_submit(%d)',$iid),
-//      $to_did);
-      $form_state['values']['interfaces'][$iid]);
 
-  $dlinked = db_fetch_array(db_query(
-    "SELECT d.id, d.type " .
-    "FROM {guifi_devices} d " .
-    "WHERE d.id=%d AND type not IN ('switch','rack','torpedo','splitter') " .
-    "ORDER BY ",
-    $to_did));
+  $dlinked = db_query(
+    'SELECT d.id, d.type ' .
+    'FROM {guifi_devices} d ' .
+    'WHERE d.id = :to_did AND type not IN (\'switch\',\'rack\',\'torpedo\',\'splitter\') ',
+    array(':to_did' => $to_did))->fetchAssoc();
 
-  $ips_allocated=guifi_ipcalc_get_ips('0.0.0.0','0.0.0.0',$form_state['values'],2);
+  $ips_allocated = guifi_ipcalc_get_ips('0.0.0.0','0.0.0.0',$form_state['values'],2);
 
   // get backbone /30 subnet
   $mask = '255.255.255.252';

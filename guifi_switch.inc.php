@@ -171,6 +171,8 @@ function guifi_ports_form($edit,&$form_weight) {
           array('class' => array('interface-item-disabled')),
        '#weight'       => $form_weight++,
      );
+     // TODO MIQUEL
+     /*
      if (!($interface[deleted])) {
        $form[$port]['addLink'] = array(
          '#type' => 'image_button',
@@ -191,18 +193,8 @@ function guifi_ports_form($edit,&$form_weight) {
           '#suffix' => '</div>',
           '#weight' => $form_weight++,
        );
-       /* If onclick is wanted to edit, uncomment this
-       $form[$port]['dname']['#disabled'] = false;
-       $form[$port]['dname']['#ahah'] = array(
-           'event' => 'mousedown',
-           'path' => 'guifi/js/edit_cableconn/'.$port,
-           'wrapper' => 'interface-cableconn-'.$port,
-           'method' => 'replace',
-           'effect' => 'fade',
-       );
-       */
      }
-
+       */
     $form[$port]['vlan'] = array(
       '#tree'         => TRUE,
       '#type'         => 'textfield',

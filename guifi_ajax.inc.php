@@ -26,15 +26,76 @@ function guifi_ajax_add_subnet_mask(&$form, &$form_state, $moreinfo) {
   $int_name = $form_state['triggering_element']['#array_parents'][3];
   $int_id = $form_state['triggering_element']['#array_parents'][4];
 
-  $form['if']['interfaces']['ifs'][$int_name][$int_id]['interface']['AddPublicSubnetMask']['selectNetmask']['#title']
-    = t("Network mask");
-  $form['if']['interfaces']['ifs'][$int_name][$int_id]['interface']['AddPublicSubnetMask']['selectNetmask']['#description']
-    = t('Size of the next available set of addresses to be allocated');
-  unset($form['if']['interfaces']['ifs'][$int_name][$int_id]['interface']['AddPublicSubnetMask']['selectNetmask']['#attributes']['hidden']);
+  $f = $form['if']['interfaces']['ifs'][$int_name][$int_id]['interface']['AddPublicSubnetMask'];
+  $f['selectNetmask']['#title'] = t("Network mask");
+  $f['selectNetmask']['#description'] = t('Size of the next available set of addresses to be allocated');
+  $f['selectNetmask']['#prefix'] = '<div id="editInterface-'.$int_id.'"><table style="width: 0"><td align="left">';
+  $f['selectNetmask']['#suffix'] = '</td>';
+  unset($f['selectNetmask']['#attributes']['hidden']);
 
-  unset($form['if']['interfaces']['ifs'][$int_name][$int_id]['interface']['AddPublicSubnetMask']['createNetmask']['#attributes']['hidden']);
+  $f['createNetmask']['#prefix'] = '<td align="left">';
+  $f['createNetmask']['#suffix'] = '</td></table></div>';
+  unset($f['createNetmask']['#attributes']['hidden']);
 
-  return $form['if']['interfaces']['ifs'][$int_name][$int_id]['interface']['AddPublicSubnetMask'];
+  return $f;
+}
+
+/**
+ * Function function guifi_ajax_add_cable_local_link
+ */
+function guifi_ajax_add_cable_local_link(&$form, &$form_state, $moreinfo) {
+
+  $int_name = $form_state['triggering_element']['#array_parents'][3];
+  $int_id = $form_state['triggering_element']['#array_parents'][4];
+  $values = $form_state['values'];
+  $orig_device_id = $values['id'];
+  $node = explode('-',$values['movenode']);
+  $qry = db_query('SELECT id, nick ' .
+                  'FROM {guifi_devices} ' .
+                  'WHERE nid = :nid',
+                  array(':nid' => $node[0]));
+
+  while ($value = $qry->fetchAssoc()) {
+    if (!($value['id'] == $orig_device_id))
+      $list[$value['id']] = $value['nick'];
+  }
+  if (count($values['interfaces'])) foreach ($values['interfaces'] as $iid => $intf)
+    if (count($intf['ipv4'])) foreach ($intf['ipv4'] as $i => $ipv4)
+      if (count($ipv4['links'])) foreach ($ipv4['links'] as $l => $link) {
+        if (isset($list[$link['device_id']]))
+          unset($list[$link['device_id']]);
+      }
+
+  $f = $form['if']['interfaces']['ifs'][$int_name][$int_id]['interface']['CreateCableLink'];
+
+  if ($node[0] != $values['nid']) {
+    $f['msg'] = array(
+      '#type' => 'item',
+      '#title' => t('Device node changed. Option not available'),
+      '#description' => t('Can\'t link this device to another device ' .
+      'since has been changed the assigned node.<br />' .
+      'To link the device to a device defined at another node, ' .
+      'you should save the node of this device before proceeding.')
+    );
+  } else if (count($list)) {
+    $f['to_did']['#description'] = t('Select the device which you want to link with');
+    $f['to_did']['#options'] = $list;
+    $f['to_did']['#prefix'] = '<div id="editInterface-'.$int_id.'"><table style="width: 0"><td align="left">';
+    $f['to_did']['#suffix'] = '</td>';
+    unset($f['to_did']['#attributes']['hidden']);
+
+    $f['createLink']['#prefix'] = '<td align="left">';
+    $f['createLink']['#suffix'] = '</td></table></div>';
+    unset($f['createLink']['#attributes']['hidden']);
+  } else {
+    $f['msg'] = array(
+      '#type' => 'item',
+      '#title' => t('No devices available'),
+      '#description' => t('Can\'t link this device to another device ' .
+      'since there are no other devices defined on this node.'),
+    );
+  }
+  return $f;
 }
 
 /**

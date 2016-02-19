@@ -730,6 +730,8 @@ function guifi_ahah_add_remoteipv4() {
  *
  * URL: http://guifi.net/guifi/js/add-cable-link/%
  */
+// REMOVE?
+/* 
 function guifi_ahah_add_cable_link() {
   $cid = 'form_'. $_POST['form_build_id'];
   $cache = cache_get($cid, 'cache_form');
@@ -826,12 +828,15 @@ function guifi_ahah_add_cable_link() {
   }
   exit;
 }
+*/
 
 /**
  * Add public subnetwork mask
  *
  * URL: http://guifi.net/guifi/js/add-subnet-mask/%
  */
+// REMOVE?
+/* 
 function guifi_ahah_add_subnet_mask() {
   $cid = 'form_'. $_POST['form_build_id'];
   $cache = cache_get($cid, 'cache_form');
@@ -873,6 +878,7 @@ function guifi_ahah_add_subnet_mask() {
   }
   exit;
 }
+*/
 
 /**
  * Move device
@@ -1251,6 +1257,8 @@ function guifi_ahah_add_vinterface($iClass) {
  *
  * URL: http://guifi.net/guifi/js/firmware_by_model
  */
+// REMOVE?
+/* 
 function guifi_ahah_select_firmware_by_model(){
 
   $cid = 'form_'. $_POST['form_build_id'];
@@ -1285,6 +1293,7 @@ function guifi_ahah_select_firmware_by_model(){
   }
   exit;
 }
+*/
 
 /**
  * Select channel by protocol
