@@ -31,7 +31,9 @@ function guifi_links_form($link,$ipv4,$tree,$multilink) {
   // remote interface hidden vars
   $f['interface'] = guifi_form_hidden_var(
     $link['interface'],
-    array('id','interface_type','radiodev_counter'),
+//  interface_type is no longer needed, apparently
+//  array('id','interface_type','radiodev_counter'),
+    array('id','radiodev_counter'),
     array_merge($tree,array('links',$link['id'],'interface'))
   );
 
@@ -154,25 +156,16 @@ function guifi_links_form($link,$ipv4,$tree,$multilink) {
     '#suffix'=>         '</td>',
   );
 
-  // remote interface (cable links)
+  // Remote cable interface dropdown list
   if ($link['link_type']=='cable') {
-    $f['l']['remote_interface_type'] =array(
-      '#type' =>          'textfield',
-      '#parents'=>        array_merge(
-                            $tree,
-                            array('links',
-                              $link['id'],
-                              'interface',
-                              'interface_type'
-                            )
-                          ),
-      '#title' =>         t("Remote interface"),
-      '#default_value' => $link['interface']['interface_type'],
-//      '#options' =>       guifi_get_possible_interfaces($remote_did),
-      '#size'=>           10,
-      '#maxzise'=>        60,
-      '#prefix'=>         '<td>',
-      '#suffix'=>         '</td>',
+    $f['l']['remote_interface_type'] = array(
+      '#type'           =>  'select',
+      '#parents'        =>  array_merge($tree,array('links',$link['id'],'interface','id')),
+      '#title'          =>  t("Remote interface"),
+      '#default_value'  =>  $link['interface']['id'],
+      '#options'        =>  guifi_get_device_interfaces($link['device_id'],$link['interface']['id']),
+      '#prefix'         =>  '<td>',
+      '#suffix'         =>  '</td>',
     );
   }
 
