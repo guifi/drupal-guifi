@@ -63,7 +63,7 @@ function guifi_radio_form($edit, $form_weight) {
     foreach( $firm as $key => $i) {
       $options[$firm[$key]['fid']] = t($firm[$key]['description']);
    }
-  
+
   $form['radio_settings']['variable']['firmware_id'] = array(
     '#type' => 'select',
     '#title' => t('Firmware'),
@@ -466,9 +466,9 @@ function guifi_radio_radio_form($radio, $key, &$form_weight = -200) {
           '#parents' => array('radios',$key,'protocol'),
           '#default_value' =>  $radio["protocol"],
           '#options' => guifi_types('protocol'),
-          '#description' => t('Select the protocol where this radio will operate.'),
+          '#description' => t('Select the protocol used by this radio.'),
           '#ajax' => array(
-            'path' => 'guifi/js/channel/'.$key,
+            'callback' => 'guifi_ajax_select_channel',
             'wrapper' => 'select-channel-'.$key,
             'method' => 'replace',
             'effect' => 'fade',
@@ -729,7 +729,7 @@ function _guifi_radio_add_wlan($radio, $nid, $edit = NULL) {
 
 function _guifi_radio_add_wdsiface($radio, $nid, $edit = NULL) {
   guifi_log(GUIFILOG_TRACE,sprintf('function guifi_radio_add_wdsiface(%d)',$radio));
-  
+
   $interface = array();
   $interface['new'] = TRUE;
   $interface['unfold'] = TRUE;
