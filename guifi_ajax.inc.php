@@ -37,6 +37,29 @@ function guifi_ajax_add_subnet_mask(&$form, &$form_state, $moreinfo) {
   return $form['if']['interfaces']['ifs'][$int_name][$int_id]['interface']['AddPublicSubnetMask'];
 }
 
+
+/**
+ * Function guifi_ajax_select_channel
+ *
+ * This function returns the channel selection dropdown that allows choosing a
+ * specific channel/frequency for a radio in the radio edition form. The
+ * function is called after changing the protocol (e.g. 802.11a, 802.11b) of a
+ * radio, so that the form is refreshed and shows the list of valid channels forms
+ * the newly selected protocol.
+ *
+ * @param  array  $form        The form generated for the device edition
+ * @param  array  $form_state  The current state of the form
+ * @return array               The channel selection item in the form
+ */
+function guifi_ajax_select_channel($form, &$form_state, $moreinfo){
+  $radio_number = $form_state['triggering_element']['#array_parents'][2];
+  return $form['r']['radios'][$radio_number]['s']['channel'];
+}
+
+
+
+
+
 /**
  * Function guifi_ajax_select_firmware_by_model
  *
