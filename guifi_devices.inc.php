@@ -1434,7 +1434,7 @@ function guifi_device_buttons($continue = FALSE,$action = '', $nopts = 0, &$form
   return $form;
 }
 /* guifi_device_delete(): Delete a device */
-function guifi_device_delete_confirm($form_state,$params) {
+function guifi_device_delete_confirm($none, $form_state, $params) {
 
   $form['help'] = array(
     '#type' => 'item',
@@ -1456,7 +1456,7 @@ function guifi_device_delete_confirm($form_state,$params) {
     '#name'  => 'confirm',
     '#weight' => 1,
   );
-  drupal_set_title(t('Delete device: (%name)',array('%name' => $params['name'])));
+  drupal_set_title(t('Delete device @dname',array('@dname' => $params['name'])));
 
   return $form;
 }
@@ -1491,10 +1491,9 @@ function guifi_device_delete($device, $notify = TRUE, $verbose = TRUE) {
   $node = node_load($device['nid']);
   drupal_set_breadcrumb(guifi_location_ariadna($node));
 
-  $output = drupal_get_form('guifi_device_delete_confirm',
-    array('name' => $device['nick'],'id' => $device['id']));
-  print theme('page',$output, FALSE);
-  return;
+  $output = drupal_get_form('guifi_device_delete_confirm', array('name' => $device['nick'],'id' => $device['id']));
+
+  return $output;
 }
 
 /* guifi_device_add(): Provides a form to create a new device */
