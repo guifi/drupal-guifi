@@ -78,7 +78,7 @@ function guifi_interfaces_form(&$interface,$ptree) {
           '#attributes' => array('hidden' => ''),
           '#default_value' => "255.255.255.224",
           '#options' => guifi_types('netmask',30,23),
-          '#prefix'=> '<div id="editInterface-'.$key.'">',
+          '#prefix' => '<div id="editInterface-'.$key.'">',
         ),
         'createNetmask' => array(
           '#type' => 'button',
@@ -96,9 +96,9 @@ function guifi_interfaces_form(&$interface,$ptree) {
           '#type' => 'select',
           '#name' => 'selectCreateCableLink-'.$key,
           '#id' => 'selectCreateCableLink-'.$key,
-          '#parents'=> array('interface',$key,'to_did'),
+          '#parents' => array('interface',$key,'to_did'),
           '#attributes' => array('hidden' => ''),
-          '#prefix'=> '<div id="editInterface-'.$key.'">',
+          '#prefix' => '<div id="editInterface-'.$key.'">',
         ),
         'createLink' => array(
           '#type' => 'button',
@@ -112,10 +112,10 @@ function guifi_interfaces_form(&$interface,$ptree) {
         ),
       );
 
-      $f['interface']['AddCableLink'] = array(
+      $f['interface']['AddCablePrivateLocalLink'] = array(
         '#type' => 'image_button',
         '#src' => drupal_get_path('module', 'guifi').'/icons/addprivatecablelink.png',
-        '#parents' => array_merge($ptree,array('AddCableLink')),
+        '#parents' => array_merge($ptree,array('AddCablePrivateLocalLink')),
         '#attributes' => array('title' => t('Link to another device at the node using a private network')),
         '#ajax' => array(
           'callback' => 'guifi_ajax_add_cable_local_link',
@@ -216,8 +216,6 @@ function guifi_interfaces_form(&$interface,$ptree) {
 /* guifi_interfaces_form(): Main cable interface edit form */
 function guifi_interfaces_cable_form(&$edit,&$form_weight) {
 
-  guifi_log(GUIFILOG_TRACE,'guifi_interfaces_cable_form',$edit['interfaces']);
-
   $form = array();
   // skip device types which have their own forms for cable ports, or don't have to
   if (in_array($edit['type'],
@@ -251,9 +249,6 @@ function guifi_interfaces_cable_form(&$edit,&$form_weight) {
 
   $form['interfaces']['#type'] = 'fieldset';
   $form['interfaces']['#title'] = $msg;
-//  $form['interfaces']['#title'] = '<img src="/'.
-//    drupal_get_path('module', 'guifi').
-//    '/icons/interface.png"> '.t('Cable networking section').' - '.$msg;
   $form['interfaces']['#collapsible'] = TRUE;
   $form['interfaces']['#collapsed'] = $collapse;
   $form['interfaces']['#tree'] = TRUE;
@@ -265,7 +260,6 @@ function guifi_interfaces_cable_form(&$edit,&$form_weight) {
 
   // placeholder for the add interface form
   $form['interfaces']['ifs'] = array(
- //   '#type'   => 'hidden',
     '#prefix' => '<div id="add-interface">',
     '#suffix' => '</div>',
     '#weight' => $form_weight++,
@@ -282,8 +276,8 @@ function guifi_interfaces_cable_form(&$edit,&$form_weight) {
         '#src'=> drupal_get_path('module', 'guifi').'/icons/addinterface.png',
         '#parents' => array('addInterface'),
         '#attributes' => array('title' => t('Add Interface for cable connections')),
-        '#ahah' => array(
-          'path' => 'guifi/js/add-interface',
+        '#ajax' => array(
+          'callback' => 'guifi_ajax_add_interface',
           'wrapper' => 'add-interface',
           'method' => 'replace',
           'effect' => 'fade',
@@ -395,16 +389,12 @@ function guifi_interfaces_add_cable_p2p_link_submit(&$form,&$form_state) {
 }
 
 function guifi_interfaces_add_cable_public_link_submit(&$form,&$form_state) {
+
   $values = $form_state['clicked_button']['#parents'];
   $iid    = $values[1];
   $ipv4_id= $values[3];
-  $to_did = $form_state['values']['interfaces'][$iid]['ipv4'][$ipv4_id]['to_did'];
+  $to_did   = $form_state['input']['selectCreateCableLink-'.$iid.'-'.$ipv4_id];
   $rdevice = guifi_device_load($to_did);
-
-  guifi_log(GUIFILOG_TRACE,
-    sprintf('function guifi_interfaces_add_cable_public_link_submit(%d)',$iid),
-//      $form_state['values']);
-      $form_state['clicked_button']['#parents']);
 
   $ips_allocated=guifi_ipcalc_get_ips('0.0.0.0','0.0.0.0',$form_state['values'],1);
 
@@ -443,7 +433,6 @@ function guifi_interfaces_add_cable_public_link_submit(&$form,&$form_state) {
 
   $form_state['values']['interfaces'][$iid]['ipv4'][$ipv4_id]['links'][]=$newlk;
   $form_state['values']['interfaces'][$iid]['unfold']=TRUE;
-//  print_r($form_state['values']);
   $form_state['rebuild'] = TRUE;
 
   return TRUE;

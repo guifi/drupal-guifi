@@ -875,13 +875,12 @@ function guifi_device_ipv4_link_form($ipv4,$tree, $cable = TRUE) {
     );
 
     if ($cable)
-      $f['local']['AddCableLink'] = array(
+      $f['local']['AddCablePublicLocalLink'] = array(
         '#type' => 'image_button',
         '#src' => drupal_get_path('module', 'guifi').'/icons/addcable.png',
-        '#parents' => array_merge($tree,array('AddCableLink')),
+        '#parents' => array_merge($tree,array('AddCablePublicLocalLink')),
         '#attributes' => array('title' => t('Link to another device using a public IPv4 address')),
-        '#ahah' => array(
-          // TODO MIQUEL
+        '#ajax' => array(
           //'path' => 'guifi/js/add-cable-link/'.$ipv4['interface_id'].','.$ipv4['id'],
           'callback' => 'guifi_ajax_add_cable_local_link',
           'wrapper' => 'editInterface-'.$ipv4['interface_id'].'-'.$ipv4['id'],
@@ -892,6 +891,27 @@ function guifi_device_ipv4_link_form($ipv4,$tree, $cable = TRUE) {
         'editInterface-'.$ipv4['interface_id'].'-'.$ipv4['id'].'">',
         '#suffix'=> '</div>',
         //     '#submit' => array('guifi_radio_add_wds_submit'),
+      );
+
+      $f['local']['CreateCableLink'] = array(
+        'to_did' => array(
+          '#type' => 'select',
+          '#name' => 'selectCreateCableLink-'.$ipv4['interface_id'].'-'.$ipv4['id'],
+          '#id' => 'selectCreateCableLink-'.$ipv4['interface_id'].'-'.$ipv4['id'],
+          '#parents'=> array('interface', $ipv4['interface_id'], 'ipv4', $ipv4['id'], 'to_did'),
+          '#attributes' => array('hidden' => ''),
+          '#prefix'=> '<div id="editInterface-'.$ipv4['interface_id'].'-'.$ipv4['id'].'">',
+        ),
+        'createLink' => array(
+          '#type' => 'button',
+          '#value' => t('Create'),
+          '#name' => 'createCreateCableLink-'.$ipv4['interface_id'].'-'.$ipv4['id'],
+          '#attributes' => array('type' => 'button', 'id' => 'createCreateCableLink-'.$ipv4['interface_id'].'-'.$ipv4['id'], 'hidden' => ''),
+          '#parents' => array('interface', $ipv4['interface_id'], 'ipv4', $ipv4['id'], 'createLink'),
+          '#submit' => array('guifi_interfaces_add_cable_public_link_submit'),
+          '#executes_submit_callback' => TRUE,
+          '#suffix' => '</div>',
+        ),
       );
 
     if ($ipv4['deleted'])

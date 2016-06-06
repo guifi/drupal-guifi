@@ -612,7 +612,7 @@ function guifi_get_firmware($id) {
 }
 
 /* guifi_get_free_interfaces(): Populates a select list with the available & free cable interfaces */
-function guifi_get_free_interfaces($id,$edit = array()) {
+function guifi_get_free_interfaces($id, $edit = array()) {
 
   $possible = guifi_get_possible_interfaces($edit);
 

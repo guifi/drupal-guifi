@@ -10,10 +10,10 @@
  * @param array containing editing device information  $edit
  * @param weight form ewlements $form_weight
  */
-function guifi_ports_form($edit,&$form_weight) {
+function guifi_ports_form(&$edit,&$form_weight) {
   global $user;
 
-  guifi_log(GUIFILOG_TRACE,'function guifi_ports_form()',$edit);
+  // guifi_log(GUIFILOG_TRACE,'function guifi_ports_form()',$edit);
 
 // Select device model from model_specs
   if (!empty($edit['mid'])) {
@@ -49,10 +49,10 @@ function guifi_ports_form($edit,&$form_weight) {
       '/icons/ports-16.png"> '.t('%title section',array('%title'=>$fs_title)),
   );
 
-  guifi_log(GUIFILOG_TRACE,'function guifi_ports_form()',$swmodel);
+  // guifi_log(GUIFILOG_TRACE,'function guifi_ports_form()',$swmodel);
 
   $opto_interfaces = explode('|',$swmodel->opto_interfaces);
-  guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(opto_interfaces)',$opto_interfaces);
+  // guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(opto_interfaces)',$opto_interfaces);
 
   // if no switch model selected / unknown number of ports, ask for save
   if (empty($swmodel->etherdev_max) and (empty($edit['mid']))) {
@@ -76,11 +76,11 @@ function guifi_ports_form($edit,&$form_weight) {
   	$eCountOpts[$i] = $i;
 
   $m = guifi_get_model_specs($edit[variable][model_id]);
-  guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(m)',$m);
+  // guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(m)',$m);
 
   foreach ($edit['interfaces'] as $port => $interface) {
 
-    guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(interface)',$interface);
+    // guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(interface)',$interface);
 
     // Skip ports:
     // -with no interface type
@@ -91,7 +91,7 @@ function guifi_ports_form($edit,&$form_weight) {
        (empty($interface[interface_class]) and $interface[interface_type]=='wLan/Lan')
        )
     {
-      guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(interface)',$interface);
+      // guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(interface)',$interface);
       continue;
     }
 
@@ -119,8 +119,7 @@ function guifi_ports_form($edit,&$form_weight) {
       '#tree'         => TRUE,
       '#type'         => 'textfield',
       '#title'        => ($first_port) ? t('name') : false,
-      '#default_value'=> ($interface['deleted']) ? t('deleted').' - '.$interface['interface_type'] :
-        $interface['interface_type'],
+      '#default_value'=> ($interface['deleted']) ? t('deleted').' - '.$interface['interface_type'] : $interface['interface_type'],
       '#size'         => in_array($edit['type'],array('switch')) ? 10 : 20,
       '#size'         => 10,
       '#maxlength'    => 40,
@@ -137,7 +136,7 @@ function guifi_ports_form($edit,&$form_weight) {
          $form[$port]['iname'] = array('#tree'=>true,'#type'=>'hidden','#value'=>$interface['interface_type']);
      }
 
-     guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(type)',$interface);
+     // guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(type)',$interface);
 
     $form[$port]['connector_type'] = array(
       '#tree'         => TRUE,
@@ -171,8 +170,7 @@ function guifi_ports_form($edit,&$form_weight) {
           array('class' => array('interface-item-disabled')),
        '#weight'       => $form_weight++,
      );
-     // TODO MIQUEL
-     /*
+
      if (!($interface[deleted])) {
        $form[$port]['addLink'] = array(
          '#type' => 'image_button',
@@ -183,8 +181,8 @@ function guifi_ports_form($edit,&$form_weight) {
             'title' => t('Edit dialog for connecting to another device'),
             array('class' => array('interface-item.form-button')),
           ),
-         '#ahah' => array(
-           'path' => 'guifi/js/edit_cableconn/'.$port,
+         '#ajax' => array(
+           'callback' => 'guifi_ajax_edit_cableconn',
            'wrapper' => 'interface-cableconn-'.$port,
            'method' => 'replace',
            'effect' => 'fade',
@@ -194,7 +192,7 @@ function guifi_ports_form($edit,&$form_weight) {
           '#weight' => $form_weight++,
        );
      }
-       */
+
     $form[$port]['vlan'] = array(
       '#tree'         => TRUE,
       '#type'         => 'textfield',
@@ -249,11 +247,13 @@ function guifi_ports_form($edit,&$form_weight) {
       );
 
       $form[$port]['conn'] = array(
-        '#type'         => 'hidden',
+        '#type'         => 'fieldset',
+        '#attributes'   => array('hidden' => ''),
         '#prefix'       => '<div id="interface-cableconn-'.$port.'">',
         '#suffix'       => '</div>',
         '#weight'       => $form_weight++,
       );
+
       $form[$port]['conn']['did'] = array(
         '#type'            => 'textfield',
         '#parents'         => array('interfaces',$port,'did'),
@@ -263,25 +263,26 @@ function guifi_ports_form($edit,&$form_weight) {
         '#maxlength'       => 128,
         '#element_validate'=> array('guifi_devicename_validate'),
         '#attributes'   => array('class' => array('interface-item')),
-        '#ahah'         => array(
-          'path'          => 'guifi/js/select-device-interface/'.$port,
+        '#ajax'         => array(
+          'callback'    => 'guifi_ajax_select_device_interface',
           'wrapper'       => 'fieldset-port-'.$port,
           'method'        => 'replace',
           'effect'        => 'fade',
         ),
 //        '#weight'       => $form_weight++,
       );
+
       $form[$port]['conn']['if'] = array(
         '#parents'      => array('interfaces',$port,'if'),
         '#type'         => 'select',
         '#value'        => $interface['connto_iid'],
         '#attributes'   => array('class' => array('interface-item')),
         '#options'      => $dinterfaces,
-        '#ahah'         => array(
-          'path'          => 'guifi/js/select-device-interface/'.$port,
-          'wrapper'       => 'fieldset-port-'.$port,
-          'method'        => 'replace',
-          'effect'        => 'fade',
+        '#ajax'         => array(
+          'callback'    => 'guifi_ajax_select_device_interface',
+          'wrapper'     => 'fieldset-port-'.$port,
+          'method'      => 'replace',
+          'effect'      => 'fade',
         ),
     );
 
@@ -342,7 +343,7 @@ function guifi_switch_form($edit, &$form_weight) {
   while ($model = $querymid->fetchAssoc()) {
      $models_array[$model["mid"]] = $model["manufacturer"] .", " .$model["model"];
   }
-  guifi_log(GUIFILOG_TRACE,'function guifi_switch_form(models)',$models_array);
+  // guifi_log(GUIFILOG_TRACE,'function guifi_switch_form(models)',$models_array);
 
   $form['settings'] = array(
     '#type' => 'fieldset',
@@ -395,7 +396,7 @@ function guifi_switch_form($edit, &$form_weight) {
  * @param ethernet ports $ports
  */
 function guifi_vinterface_save($iid,$did,$nid,&$to_mail) {
-  guifi_log(GUIFILOG_TRACE,"function guifi_vinterface_save()",$ports);
+  // guifi_log(GUIFILOG_TRACE,"function guifi_vinterface_save()",$ports);
 
   foreach ($ports as $kport => $vport) {
     $dev = explode('-',$vport['did']);
@@ -426,9 +427,9 @@ function guifi_vinterface_save($iid,$did,$nid,&$to_mail) {
     else {
   	  // if there is no chages, next
       $changes = array_diff_assoc($if,$if_current);
-      guifi_log(GUIFILOG_TRACE,"function _guifi_switch_save(existing ".$kport.")",$if_current);
-      guifi_log(GUIFILOG_TRACE,"function _guifi_switch_save(posted ".$kport.")",$if);
-      guifi_log(GUIFILOG_TRACE,"function _guifi_switch_save(changes ".$kport.")",$changes);
+      // guifi_log(GUIFILOG_TRACE,"function _guifi_switch_save(existing ".$kport.")",$if_current);
+      // guifi_log(GUIFILOG_TRACE,"function _guifi_switch_save(posted ".$kport.")",$if);
+      // guifi_log(GUIFILOG_TRACE,"function _guifi_switch_save(changes ".$kport.")",$changes);
       if (!count($changes))
         continue;
     }
@@ -442,7 +443,7 @@ function guifi_vinterface_save($iid,$did,$nid,&$to_mail) {
         'connto_did'     =>(string)$did,
         'connto_iid'     =>(string)$vport['iid'],
       );
-      guifi_log(GUIFILOG_TRACE,"function _guifi_switch_save(remote-set)",$if);
+      // guifi_log(GUIFILOG_TRACE,"function _guifi_switch_save(remote-set)",$if);
       _guifi_db_sql('guifi_interfaces',array('device_id'=>$dev[0],'id'=>$vport['if']),$if_remote);
     }
 
@@ -456,12 +457,12 @@ function guifi_vinterface_save($iid,$did,$nid,&$to_mail) {
           'connto_did'     => (string) null,
           'connto_iid'     => (string) null,
         );
-        guifi_log(GUIFILOG_TRACE,"function _guifi_switch_save(remote-clear)",$if_remote);
+        // guifi_log(GUIFILOG_TRACE,"function _guifi_switch_save(remote-clear)",$if_remote);
         _guifi_db_sql('guifi_interfaces',array('device_id'=>$if_remote['device_id'],'id'=>$if_remote['id']),$if_remote);
       } // Clear remote interface
   	}
 
-    guifi_log(GUIFILOG_TRACE,"function _guifi_switch_save(local)",$if);
+    // guifi_log(GUIFILOG_TRACE,"function _guifi_switch_save(local)",$if);
   	_guifi_db_sql('guifi_interfaces',array('device_id'=>$if['device_id'],'id'=>$if['id']),$if);
 
   }
@@ -476,7 +477,7 @@ function guifi_vinterface_save($iid,$did,$nid,&$to_mail) {
 function guifi_vinterfaces_form($iClass, $edit, &$form_weight) {
   global $user;
 
-  guifi_log(GUIFILOG_TRACE,'function guifi_vinterfaces_form(iClass)',$edit[$iClass]);
+  // guifi_log(GUIFILOG_TRACE,'function guifi_vinterfaces_form(iClass)',$edit[$iClass]);
 
   switch($edit[type]) {
   	case 'switch':
@@ -528,7 +529,7 @@ function guifi_vinterfaces_form($iClass, $edit, &$form_weight) {
   );
 
   if (empty($edit[$iClass])) {
-    guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(empty)',$iClass);
+    // guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(empty)',$iClass);
     guifi_vinterface_form($form, $iClass, 0, $edit, true, $form_weight);
     /* $form['msgnone'] = array(
       '#type' =>'item',
@@ -551,15 +552,15 @@ function guifi_vinterfaces_form($iClass, $edit, &$form_weight) {
     '#weight'    => $form_weight++,
   ); */
 
-  guifi_log(GUIFILOG_TRACE,'function guifi_vinterfaces_form(edit)',$edit[$iClass]);
+  // guifi_log(GUIFILOG_TRACE,'function guifi_vinterfaces_form(edit)',$edit[$iClass]);
 
   foreach ($edit[$iClass] as $vifId => $vif) {
-    guifi_log(GUIFILOG_TRACE,'function guifi_vinterfaces_form(vint LOOP)',$vifId);
+    // guifi_log(GUIFILOG_TRACE,'function guifi_vinterfaces_form(vint LOOP)',$vifId);
     $form[$vifId] =
       guifi_vinterface_form($iClass, $vif, $first_vif,guifi_get_currentInterfaces($edit));
     $first_vif = false;
   }
-  guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(vint LOOP AFTER)',$form);
+  // guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(vint LOOP AFTER)',$form);
   // placeholder for the add interface form
 /*  $form['vinew'] = array(
     '#type'   => 'hidden',
@@ -599,7 +600,7 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
   	  break;
   }
 
-  guifi_log(GUIFILOG_TRACE,'function guifi_vinterface_form (iClass)',$iClass);
+  // guifi_log(GUIFILOG_TRACE,'function guifi_vinterface_form (iClass)',$iClass);
 
   if (empty($vinterface[interface_type]))
     if (isset($vinterface[iname]))
@@ -608,7 +609,7 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
       $vinterface[interface_type] = substr($iType,0,4).($vinterface[id]);
 
   $prefix = ''; $suffix = '';
-  guifi_log(GUIFILOG_TRACE,'function guifi_vinterface_form (vinterface)',$vinterface);
+  // guifi_log(GUIFILOG_TRACE,'function guifi_vinterface_form (vinterface)',$vinterface);
 
  
 /*  if ($vinterface['deleted']) {
@@ -665,7 +666,7 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
          array('#type'=>'hidden','#value'=>$vinterface['interface_type']);
    }
 
-   guifi_log(GUIFILOG_TRACE,'function guifi_vinterface_form(type)',$vinterface);
+   // guifi_log(GUIFILOG_TRACE,'function guifi_vinterface_form(type)',$vinterface);
 
  // $eInterfaces = array_merge(array(''=>t('not defined')),$eInterfaces);
   $form['related_interfaces'] = array(
@@ -773,8 +774,7 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
 function guifi_vinterfaces_delete_submit(&$form,&$form_state) {
   $values      = $form_state['clicked_button']['#parents'];
   $interface_id= $values[1];
-  guifi_log(GUIFILOG_TRACE,sprintf('function guifi_vinterface_delete_submit(radio: %d, interface: %d)',
-    $radio_id,$interface_id),$form_state['clicked_button']['#parents']);
+  // guifi_log(GUIFILOG_TRACE,sprintf('function guifi_vinterface_delete_submit(radio: %d, interface: %d)',$radio_id,$interface_id), $form_state['clicked_button']['#parents']);
   $vinterface = &$form_state['values'][$values[0]][$interface_id];
   $vinterface['deleted'] = TRUE;
 //  $form_state['deleteInterface']=($radio_id).','.($interface_id);

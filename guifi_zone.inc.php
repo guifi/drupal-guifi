@@ -1089,8 +1089,8 @@ function guifi_zone_childs_tree($parents, $maxdepth, &$depth = 0) {
 
   if (is_numeric($parents))
     $parents = array($parents => array('depth' => 0,'master' => 0));
-  guifi_log(GUIFILOG_TRACE,'function guifi_zone_childs_tree(childs)',$parents);
-
+ // guifi_log(GUIFILOG_TRACE,'function guifi_zone_childs_tree(childs)',$parents);
+print $parents;
   // check only current depth
   $current_depth = array();
   foreach ($parents as $k => $v) {

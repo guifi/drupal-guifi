@@ -465,33 +465,6 @@ function guifi_ahah_select_device() {
 }
 
 /**
- * Add wireless radio
- *
- * URL: http://guifi.net/guifi/js/add-radio
- */
-function guifi_ahah_add_radio() {
-  $cid = 'form_'. $_POST['form_build_id'];
-  $cache = cache_get($cid, 'cache_form');
-
-  if ($cache) {
-    $form = $cache->data;
-
-    $form['r']['newRadio'] = guifi_radio_add_radio_form($_POST);
-
-    cache_set($cid, $form, 'cache_form', $cache->expire);
-    // Build and render the new select element, then return it in JSON format.
-    $form_state = array();
-    $form['#post'] = array();
-    $form = form_builder($form['form_id']['#value'] , $form, $form_state);
-    $output = drupal_render($form['r']['newRadio']);
-    drupal_json(array('status' => TRUE, 'data' => $output));
-  } else {
-    drupal_json(array('status' => FALSE, 'data' => ''));
-  }
-  exit;
-}
-
-/**
  * Edit cable connection
  *
  * URL: http://guifi.net/guifi/js/edit-cableconn/%
@@ -536,9 +509,9 @@ function guifi_ahah_edit_cableconn() {
     $form['#post'] = $_POST;
     $form = form_builder($form['form_id']['#value'] , $form, $form_state);
     $output = drupal_render($form['interfaces'][$port]['conn']);
-    drupal_json(array('status' => TRUE, 'data' => $output));
+    drupal_json_output(array('status' => TRUE, 'data' => $output));
   } else {
-    drupal_json(array('status' => FALSE, 'data' => ''));
+    drupal_json_output(array('status' => FALSE, 'data' => ''));
   }
   exit;
 }
@@ -722,163 +695,6 @@ function guifi_ahah_add_remoteipv4() {
   exit;
 
 }
-
-
-
-/**
- * Add cable link
- *
- * URL: http://guifi.net/guifi/js/add-cable-link/%
- */
-// REMOVE?
-/* 
-function guifi_ahah_add_cable_link() {
-  $cid = 'form_'. $_POST['form_build_id'];
-  $cache = cache_get($cid, 'cache_form');
-
-  $values = explode(',',arg(3));
-  $interface_id = $values[0];
-  if (count($values)==2) {
-    // create the cable link on an already allocated subnetwork
-    $ipv4_id = $values[1];
-    $submit =  array('guifi_interfaces_add_cable_public_link_submit');
-    $parents = array('interfaces',$interface_id,'ipv4',$ipv4_id);
-  } else {
-    // create the cable link over an interface, with a backbone p2p network
-    $submit =  array('guifi_interfaces_add_cable_p2p_link_submit');
-    $parents = array('interfaces',$interface_id);
-  }
-
-  $node = explode('-',$_POST['movenode']);
-
-  $orig_device_id = $_POST['id'];
-
-  $qry = db_query('SELECT id, nick ' .
-                  'FROM {guifi_devices} ' .
-                  'WHERE nid = :nid',
-                  array(':nid' => $node[0]));
-
-  while ($value = $qry->fetchAssoc()) {
-    if (!($value['id']==$orig_device_id))
-      $list[$value['id']] = $value['nick'];
-  }
-
-  if (count($_POST['interfaces'])) foreach ($_POST['interfaces'] as $iid => $intf)
-    if (count($intf['ipv4'])) foreach ($intf['ipv4'] as $i => $ipv4)
-      if (count($ipv4['links'])) foreach ($ipv4['links'] as $l => $link) {
-        if (isset($list[$link['device_id']]))
-          unset($list[$link['device_id']]);
-      }
-
-  if ($cache) {
-    $form = $cache->data;
-
-    if ($node[0] != $_POST['nid']) {
-      $f['msg'] = array(
-        '#type' => 'item',
-        '#title' => t('Device node changed. Option not available'),
-        '#description' => t('Can\'t link this device to another device ' .
-          'since has been changed the assigned node.<br />' .
-          'To link the device to a device defined at another node, ' .
-        'you should save the node of this device before proceeding.')
-      );
-    } else if (count($list)) {
-      $tree = $parents;
-      $tree[] = 'to_did';
-      $f['to_did'] = array(
-        '#type' => 'select',
-        '#parents'=> $tree,
-        '#title' => t('Link to device'),
-        '#description' => t('Select the device which you want to link with'),
-        '#options' => $list,
-        '#prefix' => '<div>&nbsp</div><table style="width: 0"><td align="left">',
-        '#suffix' => '</td>'
-      );
-      $tree = $parents;
-      $tree[] = 'addLink';
-      $f['createLink'] = array(
-        '#type' => 'button',
-        '#default_value' => 'Create',
-        '#parents' => $tree,
-        '#submit' => $submit,
-        '#executes_submit_callback' => TRUE,
-        '#prefix' => '<td align="left">',
-        '#suffix' => '</td></table>'
-      );
-    } else {
-      $f['msg'] = array(
-        '#type' => 'item',
-        '#title' => t('No devices available'),
-        '#description' => t('Can\'t link this device to another device ' .
-        'since there are no other devices defined on this node.'),
-      );
-    }
-
-    $form['if']['interfaces']['ifs'][$interface_id]['addLink'] = $f;
-
-    cache_set($cid, $form, 'cache_form', $cache->expire);
-    // Build and render the new select element, then return it in JSON format.
-    $form_state = array();
-    $form['#post'] = array();
-    $form = form_builder($form['form_id']['#value'] , $form, $form_state);
-    $output = drupal_render($form['if']['interfaces']['ifs'][$interface_id]['addLink']);
-    drupal_json(array('status' => TRUE, 'data' => $output));
-  } else {
-    drupal_json(array('status' => FALSE, 'data' => ''));
-  }
-  exit;
-}
-*/
-
-/**
- * Add public subnetwork mask
- *
- * URL: http://guifi.net/guifi/js/add-subnet-mask/%
- */
-// REMOVE?
-/* 
-function guifi_ahah_add_subnet_mask() {
-  $cid = 'form_'. $_POST['form_build_id'];
-  $cache = cache_get($cid, 'cache_form');
-
-  $interface_id = arg(3);
-
-  if ($cache) {
-    $form = $cache->data;
-
-    $form['if']['interface'][$interface_id]['ifs']['interface']['selectNetmask'] = array(
-        '#type' => 'select',
-        '#parents' => array('interface',$interface_id,'newNetmask'),
-        '#title' => t("Network mask"),
-        '#description' => t('Size of the next available set of addresses to be allocated'),
-        '#default_value' => '255.255.255.224',
-        '#options' => guifi_types('netmask',30,23),
-        '#prefix'=> '<div>&nbsp</div><table style="width: 0"><td style="width: 0" align="LEFT">',
-        '#suffix'=> '</td>',
-      );
-    $form['if']['interface'][$interface_id]['ifs']['interface']['createNetmask'] = array(
-      '#type' => 'button',
-      '#default_value' => 'Create',
-      '#parents' => array('interface',$interface_id,'addNetmask'),
-      '#submit' => array('guifi_interfaces_add_subnet_submit'),
-      '#executes_submit_callback' => TRUE,
-      '#prefix' => '<td align="left">',
-      '#suffix' => '</td></table>'
-    );
-
-    cache_set($cid, $form, 'cache_form', $cache->expire);
-    // Build and render the new select element, then return it in JSON format.
-    $form_state = array();
-    $form['#post'] = array();
-    $form = form_builder($form['form_id']['#value'] , $form, $form_state);
-    $output = drupal_render($form['if']['interface'][$interface_id]['ifs']['interface']);
-    drupal_json(array('status' => TRUE, 'data' => $output));
-  } else {
-    drupal_json(array('status' => FALSE, 'data' => ''));
-  }
-  exit;
-}
-*/
 
 /**
  * Move device
@@ -1251,49 +1067,6 @@ function guifi_ahah_add_vinterface($iClass) {
   drupal_json(array('status' => TRUE, 'data' => $output));
   exit;
 }
-
-/**
- * Select firmware by model
- *
- * URL: http://guifi.net/guifi/js/firmware_by_model
- */
-// REMOVE?
-/* 
-function guifi_ahah_select_firmware_by_model(){
-
-  $cid = 'form_'. $_POST['form_build_id'];
-//  $bid = $_POST['book']['bid'];
-  $cache = cache_get($cid, 'cache_form');
-  $mid = $_POST['variable']['model_id'];
-
-  if ($cache) {
-    $form = $cache->data;
-
-    // Validate the firmware.
-    if (isset($form['radio_settings']['variable']['model_id'])) {
-      $form['radio_settings']['variable']['firmware_id'] =
-        guifi_radio_firmware_field($_POST['variable']['firmware_id'],
-          $mid);
-      cache_set($cid, $form, 'cache_form', $cache->expire);
-
-      // Build and render the new select element, then return it in JSON format.
-      $form_state = array();
-      $form['#post'] = array();
-      $form = form_builder($form['form_id']['#value'] , $form, $form_state);
-      $output = drupal_render($form['radio_settings']['variable']['firmware_id']);
-
-      drupal_json_output(array('status' => TRUE, 'data' => $output));
-    }
-    else {
-      drupal_json_output(array('status' => FALSE, 'data' => ''));
-    }
-  }
-  else {
-    drupal_json_output(array('status' => FALSE, 'data' => ''));
-  }
-  exit;
-}
-*/
 
 /**
  * Select channel by protocol

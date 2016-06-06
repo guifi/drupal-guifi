@@ -145,7 +145,7 @@ function guifi_maintainers_form($node,&$form_weight) {
       'A maintainer is who takes care of this infrastructure. Can be also a founder, but is a distinct role.<br>'.
       'Use "Preview" button if you need more rows to fill.'),
     '#collapsible' => TRUE,
-    '#collapsed'   => ($node->maintainers[0]!='') ? TRUE : FALSE,
+    '#collapsed'   => ($node->maintainers[0] != '') ? TRUE : FALSE,
     '#attributes'  => array('class'=> array('maintainers')),
     '#weight'      => $form_weight++,
     '#tree'        => TRUE,

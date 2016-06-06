@@ -41,12 +41,22 @@ function guifi_ajax_add_subnet_mask(&$form, &$form_state, $moreinfo) {
 }
 
 /**
- * Function function guifi_ajax_add_cable_local_link
+ * Function guifi_ajax_add_cable_local_link
+ * TODO info
  */
 function guifi_ajax_add_cable_local_link(&$form, &$form_state, $moreinfo) {
 
   $int_name = $form_state['triggering_element']['#array_parents'][3];
   $int_id = $form_state['triggering_element']['#array_parents'][4];
+
+  if ($form_state['triggering_element']['#array_parents'][5] == 'ipv4') {
+    // Public address
+    $public = TRUE;
+    $ipv4_id = $form_state['triggering_element']['#array_parents'][6];
+  } else {
+    // Private address
+    $public = FALSE;
+  }
   $values = $form_state['values'];
   $orig_device_id = $values['id'];
   $node = explode('-',$values['movenode']);
@@ -66,7 +76,10 @@ function guifi_ajax_add_cable_local_link(&$form, &$form_state, $moreinfo) {
           unset($list[$link['device_id']]);
       }
 
-  $f = $form['if']['interfaces']['ifs'][$int_name][$int_id]['interface']['CreateCableLink'];
+  if ($public == FALSE)
+    $f = $form['if']['interfaces']['ifs'][$int_name][$int_id]['interface']['CreateCableLink'];
+  else
+    $f = $form['if']['interfaces']['ifs'][$int_name][$int_id]['ipv4'][$ipv4_id]['local']['CreateCableLink'];
 
   if ($node[0] != $values['nid']) {
     $f['msg'] = array(
@@ -111,7 +124,92 @@ function guifi_ajax_add_cable_local_link(&$form, &$form_state, $moreinfo) {
  * @param  array  $form_state  The current state of the form
  * @return array               The firmware selection item in the form
  */
-function guifi_ajax_select_firmware_by_model($form, &$form_state){
+function guifi_ajax_select_firmware_by_model(&$form, &$form_state){
   return $form['radio_settings']['variable']['firmware_id'];
+}
+
+/**
+ * Add interface
+ *
+ * URL: http://guifi.net/guifi/js/add-interface
+ */
+function guifi_ajax_add_interface(&$form, &$form_state, $moreinfo) {
+//dsm($form);
+  $interfaces = $form['interfaces'];
+
+  // Build our new form element.
+  //$free = guifi_get_free_interfaces($form['id'],$form);
+  $free = array('ether4','other');
+  $newI['interface_type'] = array_shift($free);
+  $newI['new'] = TRUE;
+  $newI['unfold'] = TRUE;
+
+  $interfaces[] = $newI;
+  end($interfaces);
+  $delta = key($interfaces);
+  
+  $form_element = guifi_interfaces_form($newI,array('interfaces',$delta));
+  $form['if']['interfaces']['ifs'][$newI['interface_type']][$delta] = $form_element;
+
+  return $form['if']['interfaces']['ifs'][$newI['interface_type']][$delta];
+  
+}
+
+/**
+ * Edit cable connection
+ *
+ * URL: http://guifi.net/guifi/js/edit-cableconn/%
+ */
+function guifi_ajax_edit_cableconn(&$form, &$form_state, $moreinfo) {
+
+  $port = $form_state['triggering_element']['#array_parents'][1];
+  $interface = $form['interfaces'][$port];
+  $tree = array('interfaces',$port);
+  $dname = guifi_get_devicename($interface['connto_did'],'large');
+//dpm($form;
+  $device_interfaces = guifi_get_device_interfaces($interface['connto_did'],$interface['connto_iid']);
+
+  $form_weight = -10000;
+
+    unset($form['interfaces'][$port]['conn']['#attributes']['hidden']);
+    $form['interfaces'][$port]['conn']['#attributes']    =  array('class'=>'fieldset-interface-connection');
+    $form['interfaces'][$port]['conn']['#description']   =  t('Links to device & interface');
+    $form['interfaces'][$port]['conn']['#collapsible']   =  FALSE;
+    $form['interfaces'][$port]['conn']['#tree']          =  FALSE;
+    $form['interfaces'][$port]['conn']['#collapsed']     =  FALSE;
+
+    unset($form['interfaces'][$port]['conn']['did']['#value']);
+    $form['interfaces'][$port]['conn']['did']['#value']  = ($interface['deleted']) ? '' : $dname;
+    $form['interfaces'][$port]['conn']['did']['#type']   = 'textfield';
+
+ //   $form['if']['interfaces'][$port]['conn']['if']['#type'] = 'select';
+    $form['interfaces'][$port]['conn']['if']['#options'] = $device_interfaces;
+    $form['interfaces'][$port]['conn']['if']['#value'] = $interface['connto_iid'];
+
+    return $form['interfaces'][$port]['conn'];
+}
+
+function guifi_ajax_select_device_interface(&$form, &$form_state, $moreinfo) {
+
+  $port = $form_state['triggering_element']['#array_parents'][1];
+
+  $device    = $form['interfaces'][$port]['did'];
+  $dnamel    = guifi_get_devicename($device,'large');
+  $dnames    = guifi_get_devicename($device);
+  $interface = $form['interfaces'][$port]['if'];
+
+  $device_interfaces = guifi_get_device_interfaces($device,$interface);
+
+    $form['interfaces'][$port]['conn']['if']['#options'] = $device_interfaces;
+    $form['interfaces'][$port]['conn']['if']['#value'] = $interface;
+    $form['interfaces'][$port]['conn']['did']['#value'] = $dnamel;
+    $form['interfaces'][$port]['dname']['#value'] = (empty($dnames)) ? '' :
+      $dnames.' / '.$device_interfaces[$interface];
+    $form['interfaces'][$port]['dname']['#attributes'] = (empty($dnames)) ? array('class'=>'interface-item-available') :
+      array('class'=>'interface-item-edited');
+    unset($form['interfaces'][$port]['conn']['#attributes']['hidden']);
+
+ //   dsm($form['interfaces'][$port]);
+   //   return $form['interfaces'][$port];
 }
 ?>

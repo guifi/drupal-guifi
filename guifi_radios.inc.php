@@ -248,21 +248,24 @@ function guifi_radio_form($edit, $form_weight) {
        'WHERE mid = :mid',
        array(':mid' => $edit['variable']['model_id']))->fetchObject();
 
-    if ($rc < $dradios->max)
+    if ($rc < $dradios->max) {
+      if ($radio['mode'] == 'ap')
+        $form['r']['newradio_mode'] = array('#type' => 'hidden', '#value' => 'ap');
+      if ($radio['mode'] == 'client')
+        $form['r']['newradio_mode'] = array('#type' => 'hidden', '#value' => 'client');
+      if ($radio['mode'] == 'mesh')
+        $form['r']['newradio_mode'] = array('#type' => 'hidden', '#value' => 'mesh');
+
       $form['r']['addRadio'] = array(
         '#type' => 'image_button',
         '#src'=> drupal_get_path('module', 'guifi').'/icons/addwifi.png',
         '#parents' => array('addRadio'),
         '#attributes' => array('title' => t('Add wireless radio to this device')),
-        '#ajax' => array(
-          'path' => 'guifi/js/add-radio',
-          'wrapper' => 'add-radio',
-          'method' => 'replace',
-          'effect' => 'fade',
-        ),
+        '#submit' => array('guifi_radio_add_radio_submit'),
         '#prefix' => '<div id="add-radio">',
         '#suffix' => '</div>',
       );
+    }
   } else
     $form['r']['newRadio'] = guifi_radio_add_radio_form($edit);
 
@@ -273,20 +276,8 @@ function guifi_radio_add_radio_form($edit) {
 
   // Edit radio form or add new radio
   $cr = 0; $tr = 0; $firewall=FALSE;
-  $maxradios = db_query('SELECT radiodev_max FROM {guifi_model_specs} WHERE mid = :mid', array(':mid' => $edit[variable][model_id]))->fetchObject();
 
-  if (isset($edit[radios]))
-  foreach ($edit[radios] as $k => $radio) {
-    $tr++;
-    if (!$radio['deleted'])
-      $cr++;
-    if ($radio['mode'] == 'client')
-      $firewall = TRUE;
-  } // foreach $radio
-
-  // print "Max radios: ".$maxradios->radiodev_max." Current: $cr Total: $tr Firewall: $firewall Edit details: $edit[edit_details]\n<br />";
   $modes_arr = guifi_types('mode');
-  //  print_r($modes_arr);
 
   if ($cr>0)
 	  if (!$firewall)
@@ -885,7 +876,6 @@ function _guifi_radio_prepare_add_radio($edit) {
 
 /* Add  a radio to the device */
 function guifi_radio_add_radio_submit(&$form, &$form_state) {
-  guifi_log(GUIFILOG_TRACE, "function guifi_radio_add_radio_submit()",$form_state['values']);
 
   // wrong form navigation, can't do anything
   if ($form_state['values']['newradio_mode'] == NULL) {
@@ -903,9 +893,9 @@ function guifi_radio_add_radio_submit(&$form, &$form_state) {
   $form_state['rebuild'] = TRUE;
   $form_state['values']['radios'][] = $radio;
 
-  drupal_set_message(t('Radio %ssid added in mode %mode.',
-     array('%ssid' => $radio['ssid'],
-           '%mode' => $radio['mode'])));
+  drupal_set_message(t('Radio @ssid added in mode @mode.',
+     array('@ssid' => $radio['ssid'],
+           '@mode' => $radio['mode'])));
 
   return;
 }

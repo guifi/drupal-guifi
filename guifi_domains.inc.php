@@ -493,7 +493,7 @@ if (!empty($domainname['name']))
       $qrydomain = db_query("
         SELECT mname, name
         FROM {guifi_dns_domains}
-        WHERE mname = :name", array(':name' => form_state['values']['name']));
+        WHERE mname = :name", array(':name' => $form_state['values']['name']));
       while ($hostdom = $qrydomain->fetchAssoc()) {
         $hostdomx = strstr($hostdom['name'], '.', true);
         if ($hostdomx == $hosts['host']) {
