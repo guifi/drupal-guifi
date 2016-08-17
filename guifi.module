@@ -587,9 +587,36 @@ function guifi_menu() {
     $items['node/%guifi_zone/suppliers'] = array(
       'title' => 'Suppliers',
       'page callback' => 'budgets_supplier_list_by_zone',
-      'page arguments' => array(1,3),
+      'page arguments' => array(1),
       'access callback' => 'user_access',
       'access arguments' => array('access content'),
+      'type' => MENU_LOCAL_TASK
+    );
+    $items['node/%guifi_zone/suppliers/certified'] = array(
+      'title' => 'Verified suppliers',
+      'page callback' => 'budgets_supplier_list_by_zone',
+      'page arguments' => array(1),
+      'access callback' => 'user_access',
+      'access arguments' => array('access content'),
+      'weight'=> 1,
+      'type' => MENU_DEFAULT_LOCAL_TASK
+    );
+    $items['node/%guifi_zone/suppliers/volunteers'] = array(
+      'title' => 'Volunteers',
+      'page callback' => 'budgets_supplier_list_by_zone',
+      'page arguments' => array(1),
+      'access callback' => 'user_access',
+      'access arguments' => array('access content'),
+      'weight'=> 2,
+      'type' => MENU_LOCAL_TASK
+    );
+    $items['node/%guifi_zone/suppliers/all'] = array(
+      'title' => 'All',
+      'page callback' => 'budgets_supplier_list_by_zone',
+      'page arguments' => array(1),
+      'access callback' => 'user_access',
+      'access arguments' => array('access content'),
+      'weight'=> 3,
       'type' => MENU_LOCAL_TASK
     );
 
@@ -626,14 +653,23 @@ function guifi_menu() {
 //       'access arguments' => array('access content'),
 //       'type' => MENU_LOCAL_TASK
 //     );
-  $items['node/%guifi_zone/volunteers'] = array(
-    'title' => 'Volunteers',
-    'page callback' => 'budgets_supplier_list_by_zone',
-    'page arguments' => array(1,3),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_LOCAL_TASK
-  );
+//     $items['node/%guifi_zone/allsuppliers'] = array(
+//     'title' => 'All suppliers',
+//     'page callback' => 'budgets_supplier_list_by_zone',
+//     'page arguments' => array(1,3),
+//     'access callback' => 'user_access',
+//     'access arguments' => array('access content'),
+//     'weight' => 99,
+//     'type' => MENU_LOCAL_TASK
+//     );
+//     $items['node/%guifi_zone/volunteers'] = array(
+//     'title' => 'Volunteers',
+//     'page callback' => 'budgets_supplier_list_by_zone',
+//     'page arguments' => array(1,3),
+//     'access callback' => 'user_access',
+//     'access arguments' => array('access content'),
+//     'type' => MENU_LOCAL_TASK
+//   );
   }
   $items['node/%guifi_zone/view/userqueue'] = array(
     'title' => 'users queue',
