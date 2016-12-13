@@ -878,6 +878,11 @@ function guifi_install() {
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('101', 'channel', '10546', '96 - 10546MHz', 'Legacy');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('102', 'channel', '10560', '99 - 10560MHz', 'Legacy');");
   db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('103', 'channel', '10574', '101 - 10574MHz', 'Legacy');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('104', 'channel', '5745', '149 - 5745MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('105', 'channel', '5765', '153 - 5765MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('106', 'channel', '5785', '157 - 5785MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('107', 'channel', '5805', '161 - 5805MHz', '802.11a|802.11n|802.11ac');");
+  db_query("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES ('108', 'channel', '5825', '165 - 5825MHz', '802.11a|802.11n|802.11ac');");
 
   // --
   // -- Wireless channel bandwith
@@ -894,7 +899,8 @@ function guifi_install() {
                 "('10', 'chbandwith', '50Mhz', '50Mhz')," .
                 "('11', 'chbandwith', '60Mhz', '60Mhz')," .
                 "('12', 'chbandwith', '70Mhz', '70Mhz')," .
-                "('13', 'chbandwith', '80Mhz', '80Mhz');");
+                "('13', 'chbandwith', '80Mhz', '80Mhz');" .
+                "('14', 'chbandwith', '160Mhz', '160Mhz');");
 
   // --
   // -- Routing methods
@@ -3369,5 +3375,27 @@ function guifi_update_1043() {
   return $items;
 }
 
+function guifi_update_1044() {
+  $items = array();
+
+  $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description) VALUES " .
+
+                "('14', 'chbandwith', '160Mhz', '160Mhz');");
+
+  return $items;
+}
+
+function guifi_update_1045() {
+  $items = array();
+
+  $items[] = update_sql("INSERT INTO {guifi_types} (id, type, text, description, relations) VALUES " .
+                "('104', 'channel', '5745', '149 - 5745MHz', '802.11a|802.11n|802.11ac')," .
+                "('105', 'channel', '5765', '153 - 5765MHz', '802.11a|802.11n|802.11ac')," .
+                "('106', 'channel', '5785', '157 - 5785MHz', '802.11a|802.11n|802.11ac')," .
+                "('107', 'channel', '5805', '161 - 5805MHz', '802.11a|802.11n|802.11ac')," .
+                "('108', 'channel', '5825', '165 - 5825MHz', '802.11a|802.11n|802.11ac');");
+
+  return $items;
+}
 
 ?>
