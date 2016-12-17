@@ -69,11 +69,8 @@ function guifi_device_load($id,$ret = 'array') {
         (interface_class is NULL AND ( interface_type NOT IN ("wLan","wds/p2p","Wan","Hotspot")))
         /* schema v2 */
         OR (interface_class = "ethernet")
-        /* TODO HACK!!
-            Permetem temporalment fer enllaços per cable a interficies bridge
-            OJO! afecta al comptador de ports quan es crea el switch dins un trasto, s\'ha de corregir.
-        */
         OR (interface_class = "bridge")
+        OR (interface_class = "vlan")
       )
     ORDER BY etherdev_counter, id',
     $id);
