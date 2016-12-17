@@ -72,7 +72,7 @@ function guifi_device_load($id,$ret = 'array') {
         OR (interface_class = "bridge")
         OR (interface_class = "vlan")
       )
-    ORDER BY etherdev_counter, id',
+    ORDER BY interface_class, etherdev_counter, id',
     $id);
 
   while ($i = db_fetch_array($qi)) {
