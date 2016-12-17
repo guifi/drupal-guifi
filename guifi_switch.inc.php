@@ -67,17 +67,17 @@ function guifi_ports_form($edit,&$form_weight) {
   if ($swmodel->opto_interfaces)
     $connector_types = array_merge($connector_types, guifi_types('fo_port'));
 
-  // Loop across all existing interfaces
-  $port_count = 0;
-  $total_ports = count($edit['interfaces']);
-  $first_port = true;
+  // Initialize the Ethernet port count array by looping across all interfaces
+  // and counting only those of class "ethernet" (no vlans, bridges, etc.)
   $eCountOpts = array();
-  for ($i = 0; $i < $total_ports; $i++)
-  	$eCountOpts[$i] = $i;
+  foreach ($edit['interfaces'] as $key => $value)
+    if ($value['interface_class'] == 'ethernet')
+      $eCountOpts[count($eCountOpts)] = count($eCountOpts);
 
   $m = guifi_get_model_specs($edit[variable][model_id]);
   guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(m)',$m);
 
+  $port_count = 0;
   foreach ($edit['interfaces'] as $port => $interface) {
 
     guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(interface)',$interface);
