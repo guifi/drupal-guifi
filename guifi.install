@@ -165,7 +165,8 @@ function guifi_schema() {
          'ipv4_id' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE),
          'link_type' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE),
          'routing' => array('type' => 'varchar', 'length' => '40', 'not null' => FALSE),
-         'flag' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => 'Planned')),
+         'flag' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => 'Planned'),
+         'hybrid' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0)),
     'primary key' => array('device_id', 'id'),
     'indexes' => array(
          'id' => array('id'),
@@ -3394,6 +3395,18 @@ function guifi_update_1045() {
                 "('106', 'channel', '5785', '157 - 5785MHz', '802.11a|802.11n|802.11ac')," .
                 "('107', 'channel', '5805', '161 - 5805MHz', '802.11a|802.11n|802.11ac')," .
                 "('108', 'channel', '5825', '165 - 5825MHz', '802.11a|802.11n|802.11ac');");
+
+  return $items;
+}
+
+function guifi_update_1046() {
+
+  $items = array();
+
+  $items[] = update_sql("ALTER TABLE {guifi_links} " .
+    "ADD COLUMN hybrid BOOLEAN NOT NULL DEFAULT '0' AFTER flag");
+
+  $items[] = update_sql("UPDATE {guifi_links} SET hybrid = FALSE");
 
   return $items;
 }

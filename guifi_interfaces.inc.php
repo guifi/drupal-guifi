@@ -33,7 +33,7 @@ function guifi_interfaces_form(&$interface,$ptree) {
 
   $f['interface'] = guifi_form_hidden_var(
     $interface,
-    array('id','interface_type','radiodev_counter'),
+    array('id','interface_type','radiodev_counter', 'interface_class'),
     $ptree
   );
 

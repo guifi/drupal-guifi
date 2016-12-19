@@ -549,7 +549,7 @@ function guifi_get_device_interfaces($id,$iid = NULL, $used = NULL) {
     WHERE device_id = ' .$did[0];
 
   $sql_i .=
-    ' AND ( interface_class = "ethernet" OR
+    ' AND ( interface_class = "ethernet" OR interface_class = "vlan" OR interface_class = "bridge" OR
       ( interface_class is NULL AND (radiodev_counter is NULL OR upper(interface_type) IN ("WLAN/LAN"))))';
 
   guifi_log(GUIFILOG_TRACE,'guifi_get_devicename(sql)',$sql_i);

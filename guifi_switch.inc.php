@@ -67,17 +67,18 @@ function guifi_ports_form($edit,&$form_weight) {
   if ($swmodel->opto_interfaces)
     $connector_types = array_merge($connector_types, guifi_types('fo_port'));
 
-  // Loop across all existing interfaces
-  $port_count = 0;
-  $total_ports = count($edit['interfaces']);
-  $first_port = true;
+  // Initialize the Ethernet port count array by looping across all interfaces
+  // and counting only those of class "ethernet" (no vlans, bridges, etc.)
   $eCountOpts = array();
-  for ($i = 0; $i < $total_ports; $i++)
-  	$eCountOpts[$i] = $i;
+  foreach ($edit['interfaces'] as $key => $value)
+    if ($value['interface_class'] == 'ethernet')
+      $eCountOpts[count($eCountOpts)] = count($eCountOpts);
 
   $m = guifi_get_model_specs($edit[variable][model_id]);
   guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(m)',$m);
 
+  $port_count = 0;
+  $first_port = true;
   foreach ($edit['interfaces'] as $port => $interface) {
 
     guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(interface)',$interface);
@@ -86,10 +87,13 @@ function guifi_ports_form($edit,&$form_weight) {
     // -with no interface type
     // -with related interfaces
     // -no interface_class but 'wLan/Lan' (v1 schema)
-    if (empty($interface['interface_type']) or
-       (!empty($interface[related_interfaces])) or
-       (empty($interface[interface_class]) and $interface[interface_type]=='wLan/Lan')
-       )
+    // -vlans
+    // -bridges
+    if (empty($interface['interface_type']) OR
+        !empty($interface[related_interfaces]) OR
+        (empty($interface[interface_class]) and $interface[interface_type]=='wLan/Lan') OR
+        $interface[interface_class] == 'vlan' OR
+        $interface[interface_class] == 'bridge' )
     {
       guifi_log(GUIFILOG_TRACE,'function guifi_ports_form(interface)',$interface);
       continue;
@@ -297,6 +301,16 @@ function guifi_ports_form($edit,&$form_weight) {
       $form[$port]['id'] = array(
         '#type'         => 'hidden',
         '#value'        => $interface['id'],
+        '#weight'       => $form_weight++,
+      );
+      $form[$port]['interface_class'] = array(
+        '#type'         => 'hidden',
+        '#value'        => $interface['interface_class'],
+        '#weight'       => $form_weight++,
+      );
+      $form[$port]['related_interfaces'] = array(
+        '#type'         => 'hidden',
+        '#value'        => $interface['related_interfaces'],
         '#weight'       => $form_weight++,
       );
       $form[$port]['device_id'] = array(
@@ -751,6 +765,16 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
     $form['id'] = array(
       '#type'         => 'hidden',
       '#value'        => $vinterface['id'],
+    );
+    $form[$port]['interface_class'] = array(
+      '#type'         => 'hidden',
+      '#value'        => $interface['interface_class'],
+      '#weight'       => $form_weight++,
+    );
+    $form[$port]['related_interfaces'] = array(
+      '#type'         => 'hidden',
+      '#value'        => $interface['related_interfaces'],
+      '#weight'       => $form_weight++,
     );
     $form['device_id'] = array(
       '#type'         => 'hidden',
