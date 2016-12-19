@@ -2543,7 +2543,7 @@ function guifi_device_link_list($id = 0, $ltype = '%') {
       AND link_type like '%s'
     ORDER BY c.link_type, c.device_id",
     $id,$ltype);
-  if (db_num_rows($queryloc1)) {
+  if (db_result($queryloc1)) {
     while ($loc1 = db_fetch_object($queryloc1)) {
       $queryloc2 = db_query("
         SELECT
