@@ -1236,6 +1236,15 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
        // TODO: Before saving the new IPv4 address, we should check if it is in use already or notification
        // Save the IPv4 address
        db_query("UPDATE {guifi_ipv4} SET ipv4 = '%s' WHERE id = '%d' AND interface_id = %d",$ipv4['ipv4'], $ipv4['id'],$ipv4['interface_id']);
+
+        // Manage the IPv4 addresses in the subnet
+        // TODO: Before saving the new IPv4 address, we should check if it is in use already or notification
+        // Save the IPv4 address
+        foreach ($ipv4['subnet'] as $l => $subnet) {
+           if (is_numeric($l) AND is_numeric($subnet['id']) AND is_numeric($subnet['interface_id'])) {
+             db_query("UPDATE {guifi_ipv4} SET ipv4 = '%s' WHERE id = '%d' AND interface_id = %d",$subnet['ipv4'], $subnet['id'],$subnet['interface_id']);
+           }
+        }
       }
     }
   }
