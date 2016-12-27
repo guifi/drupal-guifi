@@ -1260,18 +1260,37 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
 
 }
 
+/**
+* Function guifi_device_interface_save
+*
+* This function saves to the database any changes made to an interface. In
+* particular, it takes into account if the interface is physically connected to
+* another interface and updates this information appropriately both in the local
+* and in the remote interface.
+*
+* @param  array   $interface  An array containing the interface details.
+* @param  int     $iid        The interface id
+* @param  int     $did        The device id
+* @param  int     $nid        The node id
+* @param  int     &$to_mail   An e-mail address for notification
+* @return string  $log        A log text
+*/
 function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
   $log = '';
 
-  // if remote device or interface has changed
+  // Get the id of the [new] remote device, in case the local interface is linked
   $v = explode('-',$interface['did']);
   $new_rdid = $v[0];
+  // Get the id of the [new] remote interface, in case the local interface is linked
   $new_riid = ($new_rdid) ? $interface['if'] : 0;
+  // Get the id of the current [old] remote device, in case the local interface was linked
   $old_rdid = $interface['connto_did'];
+  // Get the id of the current [old] remote interface, in case the local interface was linked
   $old_riid = $interface['connto_iid'];
 
   guifi_log(GUIFILOG_TRACE,sprintf('guifi_device_interface_save ID=%s (ids=%d-%d)',$iid,$old_rdid,$old_riid),$interface);
 
+  // Check whether the remote device, the remote interface or both have changed
   if ((($new_rdid != $old_rdid) or ($new_riid != $old_riid)) and ($iid != 'ifs')) {
     guifi_log(GUIFILOG_TRACE,sprintf('guifi_device_interface_save (id=%d)',$iid),$interface);
     $connection_changed = true;
@@ -1279,7 +1298,22 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
     $interface['connto_iid'] = (string)$new_riid;
   }
 
-  // todo if interface chaged, update ninterface accordingly.
+  // Even if the remote device and interface have not changed, the 'local_node'
+  // field may have changed. Check here that both local and remote interfaces
+  // have the same 'local_node' value. If they are different, the value on the
+  // local interface prevails.
+  if ($old_rdid) {
+    $rlocal_node = db_fetch_array(
+      db_query(
+        'SELECT local_node ' .
+        'FROM {guifi_interfaces} ' .
+        'WHERE id=%d',
+        $old_riid))['local_node'];
+    if ($interface['local_node'] != $rlocal_node)
+      $connection_changed = true;
+  }
+
+  // TODO: if interface changed, update ninterface accordingly.
   $ninterface = _guifi_db_sql(
     'guifi_interfaces',
     array('id' => $iid),$interface,$log,$to_mail);
@@ -1289,18 +1323,20 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
   if (empty($ninterface))
     return $log;
 
-  guifi_log(GUIFILOG_TRACE,'SQL interface',$ninterface);
+  guifi_log(GUIFILOG_TRACE, 'SQL interface', $ninterface);
 
   if ($connection_changed) {
-    guifi_log(GUIFILOG_TRACE  ,'connection_changed',$ninterface);
+    guifi_log(GUIFILOG_TRACE, 'connection_changed', $ninterface);
 
-      // if was not new, clear remote interface
+      // If the interface was previously connected somewhere, clear the remote
+      // interfaces's connection information
       if (($old_rdid) and ($old_riid)) {
         $if_remote = array(
           'device_id'      =>$old_rdid,
           'id'             =>$old_riid,
           'connto_did'     => '',
           'connto_iid'     => '',
+          'local_node'     => '',
         );
         guifi_log(GUIFILOG_TRACE,"function _guifi_switch_save(remote-set)",$if);
           _guifi_db_sql('guifi_interfaces',
@@ -1308,7 +1344,7 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
             $if_remote,$log,$to_mail);
       }
 
-      // save new reference to remote interface
+      // Save the new connection to the remote interface
       if (($new_rdid) && ($new_riid)) {
         $if_remote = array(
           'device_id'      =>$new_rdid,
@@ -1316,6 +1352,7 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
           'connector_type' =>$interface['connector_type'],
           'connto_did'     =>$ninterface['device_id'],
           'connto_iid'     =>$ninterface['id'],
+          'local_node'     =>$interface['local_node'],
         );
 
         guifi_log(GUIFILOG_TRACE,"function _guifi_switch_save(remote-set)",$if);
