@@ -246,7 +246,15 @@ function guifi_ports_form($edit,&$form_weight) {
         '#element_validate' => array('guifi_mac_validate'),
         '#weight'          => $form_weight++,
       );
-
+      $form[$port]['local_node'] = array(
+        '#tree'         => TRUE,
+        '#type'         => 'select',
+        '#title'        => ($first_port) ? t('Hybrid node') : false,
+        '#options'	  => array(0,1),
+        '#default_value'=> $interface['local_node'],
+        '#attributes'   => array('class'=>'interface-item'),
+        '#weight'       => $form_weight++,
+      );
     if ((!$interface[deleted]) and !($port_count <= $m->ethermax))
       $form[$port]['delete'] = array(
         '#type'       => 'image_button',
