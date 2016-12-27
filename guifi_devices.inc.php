@@ -1223,13 +1223,19 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
     foreach ($edit['ipv4'] as $k => $ipv4) {
       if (is_numeric($k)) {
         guifi_log(GUIFILOG_TRACE,'guifi_device_save (ipv4)',$ipv4);
-          $iipv4 = db_fetch_array(db_query("SELECT * FROM {guifi_ipv4} WHERE ipv4 = '%s' ",$ipv4['ipv4']));
+        // The previous SELECT would not fetch any IPv4 if the IP address had changed
+        // $iipv4 = db_fetch_array(db_query("SELECT * FROM {guifi_ipv4} WHERE ipv4 = '%s' ",$ipv4['ipv4']));
+        // Therefore, we select the IPv4 by id and interface_id
+        $iipv4 = db_fetch_array(db_query("SELECT * FROM {guifi_ipv4} WHERE id = '%d' AND interface_id = '%d' ",$ipv4['id'],$ipv4['interface_id']));
           $countqry = db_query("SELECT COUNT(*) FROM {guifi_ipv4} WHERE interface_id = %d",$iipv4['interface_id']);
           $count = db_result($countqry, 0);
           $ipv4_id = $count+1;
        // TODO abans del save cal comprovar un id ipv4 disponbile, modificar-lo als links si en te, si es un link sense fils no ha de permtre triar uan interficie etherX,etc..
        //   db_query("UPDATE {guifi_ipv4} SET id = %d, interface_id = %d WHERE ipv4 = '%s' AND interface_id = %d",$ipv4_id, $ipv4['interface_id'],$iipv4['ipv4'],$iipv4['interface_id']);
 
+       // TODO: Before saving the new IPv4 address, we should check if it is in use already or notification
+       // Save the IPv4 address
+       db_query("UPDATE {guifi_ipv4} SET ipv4 = '%s' WHERE id = '%d' AND interface_id = %d",$ipv4['ipv4'], $ipv4['id'],$ipv4['interface_id']);
       }
     }
   }
