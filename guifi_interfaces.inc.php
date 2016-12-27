@@ -237,6 +237,8 @@ function guifi_interfaces_cable_form(&$edit,&$form_weight) {
     '#weight' => $form_weight++,
   );
 
+  // Deprecate Cable networking section
+  /*
   foreach ($edit['interfaces'] as $iid => $interface) {
     guifi_log(GUIFILOG_TRACE,'guifi_interfaces_cable_form',$edit['interfaces']);
     $form['interfaces']['ifs'][$interface['interface_type']][$iid] =
@@ -256,6 +258,7 @@ function guifi_interfaces_cable_form(&$edit,&$form_weight) {
          ),
          '#weight' => $form_weight++,
   );
+  */
 
   return $form;
 }
