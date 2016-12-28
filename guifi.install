@@ -190,7 +190,8 @@ function guifi_schema() {
          'vlan' => array('type' => 'varchar', 'length' => 10, 'comment' => 'vlan (if have)'),
          'comments' => array('type' => 'varchar', 'length' => 64, 'comment' => 'Additional info/comments'),
          'connto_did' => array('type' => 'int', 'size' => 'medium', 'not null' => FALSE, 'comment' => 'connected to (device)'),
-         'connto_iid' => array('type' => 'int', 'size' => 'medium', 'not null' => FALSE, 'comment' => 'connected to (interface)')),
+         'connto_iid' => array('type' => 'int', 'size' => 'medium', 'not null' => FALSE, 'comment' => 'connected to (interface)'),
+         'hybrid' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0)),
     'primary key' => array('device_id', 'id'),
     'indexes' =>  array(
          'id' => array('id'),
@@ -3407,6 +3408,18 @@ function guifi_update_1046() {
     "ADD COLUMN hybrid BOOLEAN NOT NULL DEFAULT '0' AFTER flag");
 
   $items[] = update_sql("UPDATE {guifi_links} SET hybrid = FALSE");
+
+  return $items;
+}
+
+function guifi_update_1047() {
+
+  $items = array();
+
+  $items[] = update_sql("ALTER TABLE {guifi_interfaces} " .
+    "ADD COLUMN hybrid BOOLEAN NOT NULL DEFAULT '0' AFTER connto_iid");
+
+  $items[] = update_sql("UPDATE {guifi_interfaces} SET hybrid = FALSE");
 
   return $items;
 }

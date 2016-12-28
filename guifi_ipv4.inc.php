@@ -478,7 +478,7 @@ function guifi_ipv4subnet_form($ipv4,$k,$view = false) {
     );
 //    if (!empty($snet['ipv4'])) {
     $dinterfaces = guifi_get_device_allinterfaces($snet['did']);
-    $form[$ks]['iid'] = array(
+    $form[$ks][iid] = array(
       '#type'    => 'select',
       '#value'   => $snet['iid'],
       '#required'=> true,

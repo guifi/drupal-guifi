@@ -557,8 +557,9 @@ function guifi_device_form_submit($form, &$form_state) {
 //    print_r($form_state['values']);
 //    exit;
 //    $id = guifi_device_save($form_state['clicked_button']['#post']);
-//    $id = guifi_device_save($form_state['clicked_button']['#post']);
-    $id = guifi_device_save($form_state['values']);
+// TODO: this hack allows saving remote IPv4s. Why was it changed previously?
+      $id = guifi_device_save($form_state['clicked_button']['#post']);
+//    $id = guifi_device_save($form_state['values']);
 //    exit;
     if ($form_state['clicked_button']['#value'] == t('Save & exit'))
       drupal_goto('guifi/device/'.$id);
@@ -1227,23 +1228,41 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
         // $iipv4 = db_fetch_array(db_query("SELECT * FROM {guifi_ipv4} WHERE ipv4 = '%s' ",$ipv4['ipv4']));
         // Therefore, we select the IPv4 by id and interface_id
         $iipv4 = db_fetch_array(db_query("SELECT * FROM {guifi_ipv4} WHERE id = '%d' AND interface_id = '%d' ",$ipv4['id'],$ipv4['interface_id']));
-          $countqry = db_query("SELECT COUNT(*) FROM {guifi_ipv4} WHERE interface_id = %d",$iipv4['interface_id']);
-          $count = db_result($countqry, 0);
-          $ipv4_id = $count+1;
-       // TODO abans del save cal comprovar un id ipv4 disponbile, modificar-lo als links si en te, si es un link sense fils no ha de permtre triar uan interficie etherX,etc..
-       //   db_query("UPDATE {guifi_ipv4} SET id = %d, interface_id = %d WHERE ipv4 = '%s' AND interface_id = %d",$ipv4_id, $ipv4['interface_id'],$iipv4['ipv4'],$iipv4['interface_id']);
+        $countqry = db_query("SELECT COUNT(*) FROM {guifi_ipv4} WHERE interface_id = %d",$iipv4['interface_id']);
+        $count = db_result($countqry, 0);
+        $ipv4_id = $count+1;
 
-       // TODO: Before saving the new IPv4 address, we should check if it is in use already or notification
-       // Save the IPv4 address
-       db_query("UPDATE {guifi_ipv4} SET ipv4 = '%s' WHERE id = '%d' AND interface_id = %d",$ipv4['ipv4'], $ipv4['id'],$ipv4['interface_id']);
+        // TODO abans del save cal comprovar un id ipv4 disponbile, modificar-lo als links si en te, si es un link sense fils no ha de permtre triar uan interficie etherX,etc..
+        // db_query("UPDATE {guifi_ipv4} SET id = %d, interface_id = %d WHERE ipv4 = '%s' AND interface_id = %d",$ipv4_id, $ipv4['interface_id'],$iipv4['ipv4'],$iipv4['interface_id']);
+
+        // TODO: Before saving the new IPv4 address, we should check if it is in use already or notification
+        // Save the IPv4 address
+        db_query("UPDATE {guifi_ipv4} SET ipv4 = '%s' WHERE id = '%d' AND interface_id = %d",$ipv4['ipv4'], $ipv4['id'],$ipv4['interface_id']);
 
         // Manage the IPv4 addresses in the subnet
         // TODO: Before saving the new IPv4 address, we should check if it is in use already or notification
         // Save the IPv4 address
         foreach ($ipv4['subnet'] as $l => $subnet) {
-           if (is_numeric($l) AND is_numeric($subnet['id']) AND is_numeric($subnet['interface_id'])) {
-             db_query("UPDATE {guifi_ipv4} SET ipv4 = '%s' WHERE id = '%d' AND interface_id = %d",$subnet['ipv4'], $subnet['id'],$subnet['interface_id']);
-           }
+          if (is_numeric($l) AND $subnet['did'] AND $subnet['ipv4']) {
+            // New IPv4 addresses
+            if ($subnet['new']) {
+              $nipv4 = array(
+                'id'           => null,
+                'interface_id' => $subnet['iid'],
+                'ipv4'         => $subnet['ipv4'],
+                'netmask'      => $ipv4['netmask'],
+                'ipv4_type'    => $ipv4['ipv4_type'],
+              );
+              _guifi_db_sql('guifi_ipv4',
+                array('id'=>$ipv4['id'],'interface_id'=>$nipv4['interface_id']),$nipv4);
+            }
+            else {
+              // Update IPv4 changes
+              if ($subnet['ipv4value'] AND ($subnet['ipv4'] != $subnet['ipv4value'])) {
+                db_query("UPDATE {guifi_ipv4} SET ipv4 = '%s' WHERE id = '%d' AND interface_id = %d", $subnet['ipv4'], $subnet['id'],$subnet['interface_id']);
+              }
+            }
+          }
         }
       }
     }
@@ -1313,18 +1332,18 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
     $interface['connto_iid'] = (string)$new_riid;
   }
 
-  // Even if the remote device and interface have not changed, the 'local_node'
+  // Even if the remote device and interface have not changed, the 'hybrid'
   // field may have changed. Check here that both local and remote interfaces
-  // have the same 'local_node' value. If they are different, the value on the
+  // have the same 'hybrid' value. If they are different, the value on the
   // local interface prevails.
   if ($old_rdid) {
-    $rlocal_node = db_fetch_array(
+    $rhybrid = db_fetch_array(
       db_query(
-        'SELECT local_node ' .
+        'SELECT hybrid ' .
         'FROM {guifi_interfaces} ' .
         'WHERE id=%d',
-        $old_riid))['local_node'];
-    if ($interface['local_node'] != $rlocal_node)
+        $old_riid))['hybrid'];
+    if ($interface['hybrid'] != $rhybrid)
       $connection_changed = true;
   }
 
@@ -1351,7 +1370,7 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
           'id'             =>$old_riid,
           'connto_did'     => '',
           'connto_iid'     => '',
-          'local_node'     => '',
+          'hybrid'         => '',
         );
         guifi_log(GUIFILOG_TRACE,"function _guifi_switch_save(remote-set)",$if);
           _guifi_db_sql('guifi_interfaces',
@@ -1367,7 +1386,7 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
           'connector_type' =>$interface['connector_type'],
           'connto_did'     =>$ninterface['device_id'],
           'connto_iid'     =>$ninterface['id'],
-          'local_node'     =>$interface['local_node'],
+          'hybrid'         =>$interface['hybrid'],
         );
 
         guifi_log(GUIFILOG_TRACE,"function _guifi_switch_save(remote-set)",$if);
