@@ -287,15 +287,16 @@ function guifi_schema() {
 
   $schema['guifi_ipv4'] = array(
     'fields' => array(
-         'id' => array('type' => 'int', 'not null' => TRUE, 'comment' => 'primary key 1st column, numbers the sequential order of each address into the same interface'),
-         'interface_id' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'comment' => 'primary key 2nd column and foreign key to guifi_interfaces(id)'),
+         'id' => array('type' => 'serial', 'not null' => TRUE, 'comment' => 'IPv4 address unique ID (PRIMARY key)'),
+         'interface_order' => array('type' => 'int', 'not null' => TRUE, 'comment' => 'Sequential order for each address assigned to an interface'),
+         'interface_id' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'comment' => 'Foreign key to an interface in guifi_interfaces->id'),
          'ipv4' => array('type' => 'varchar', 'length' => '16', 'not null' => FALSE),
          'netmask' => array('type' => 'varchar', 'length' => '16', 'not null' => TRUE, 'default' => '255.255.255.0'),
          'ipv4_type' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
          'zone_id' => array('type' => 'int', 'not null' => TRUE, 'default' => 0)),
-    'primary key' => array('interface_id', 'id'),
-    'unique keys' => array(
-         'ipv4' => array('ipv4')),
+         'primary key' => array('id'),
+         'unique keys' => array(
+           'ipv4' => array('ipv4')),
   );
 
   $schema['guifi_manufacturer'] = array(
@@ -3420,6 +3421,17 @@ function guifi_update_1047() {
     "ADD COLUMN hybrid BOOLEAN NOT NULL DEFAULT '0' AFTER connto_iid");
 
   $items[] = update_sql("UPDATE {guifi_interfaces} SET hybrid = FALSE");
+
+  return $items;
+}
+
+function guifi_update_1048() {
+
+  $items = array();
+
+  $items[] = update_sql("ALTER TABLE `guifi_ipv4` DROP PRIMARY KEY");
+  $items[] = update_sql("ALTER TABLE `guifi_ipv4` CHANGE `id` `interface_order` INT(11) NOT NULL");
+  $items[] = update_sql("ALTER TABLE `guifi_ipv4` ADD `id` INT NOT NULL AUTO_INCREMENT FIRST, ADD PRIMARY KEY (`id`)");
 
   return $items;
 }
