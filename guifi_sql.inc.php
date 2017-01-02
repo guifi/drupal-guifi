@@ -109,11 +109,11 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 	    $new_id=db_fetch_array(db_query('SELECT max(id)+1 id FROM {guifi_interfaces}'));
 	    $data['id']=$new_id['id'];
 	    break;
-	  case 'guifi_ipv4':
-	    $next_id = db_fetch_array(db_query('SELECT max(a.id) + 1 id FROM {guifi_ipv4} a, {guifi_interfaces} i WHERE a.interface_id=i.id AND i.id=%d',$data['interface_id']));
-	    if (is_null($next_id['id']))
-	      $next_id['id'] = 0;
-	    $data['id'] = $next_id['id'];
+    case 'guifi_ipv4':
+      $next_order = db_fetch_array(db_query('SELECT max(a.interface_order) + 1 interface_order FROM {guifi_ipv4} a, {guifi_interfaces} i WHERE a.interface_id=i.id AND i.id=%d',$data['interface_id']));
+      if (is_null($next_order['interface_order']))
+        $next_order['interface_order'] = 0;
+      $data['interface_order'] = $next_order['interface_order'];
 	    break;
 	  case 'guifi_links':
 	    // fill only if insert (remote id already know the id)

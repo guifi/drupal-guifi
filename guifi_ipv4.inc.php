@@ -660,6 +660,10 @@ function guifi_ipv4i_form($ipv4, $k, $first_port = true, $eInterfaces) {
       '#type'         => 'hidden',
       '#value'        => $ipv4['id'],
     );
+    $form['interface_order'] = array(
+      '#type'         => 'hidden',
+      '#value'        => $ipv4['interface_order'],
+    );
     $form['ipv4_type'] = array(
       '#type'         => 'hidden',
       '#value'        => $ipv4['ipv4_type'],
@@ -704,7 +708,7 @@ function guifi_ipv4s_form($edit, &$form_weight) {
     '#collapsible' => TRUE,
     '#tree'        => TRUE,
     '#collapsed'   => TRUE,
-    '#description' => 'Under development. Changes at this form take no effect.',
+    '#description' => 'Under development: use with care. Some of the changes at this form may take no effect.',
     '#weight'      => $form_weight++,
     '#prefix'      =>
       '<br><img src="/'.drupal_get_path('module', 'guifi').

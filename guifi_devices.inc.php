@@ -1222,46 +1222,100 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
   // ipv4s
   if (!empty($edit['ipv4'])) {
     guifi_log(GUIFILOG_TRACE,'guifi_device_save (ipv4s)',$edit['ipv4']);
-    foreach ($edit['ipv4'] as $k => $ipv4) {
+    foreach ($edit['ipv4'] as $k => $form_ipv4) {
       if (is_numeric($k)) {
-        guifi_log(GUIFILOG_TRACE,'guifi_device_save (ipv4)',$ipv4);
-        // The previous SELECT would not fetch any IPv4 if the IP address had changed
-        // $iipv4 = db_fetch_array(db_query("SELECT * FROM {guifi_ipv4} WHERE ipv4 = '%s' ",$ipv4['ipv4']));
-        // Therefore, we select the IPv4 by id and interface_id
-        $iipv4 = db_fetch_array(db_query("SELECT * FROM {guifi_ipv4} WHERE id = '%d' AND interface_id = '%d' ",$ipv4['id'],$ipv4['interface_id']));
-        $countqry = db_query("SELECT COUNT(*) FROM {guifi_ipv4} WHERE interface_id = %d",$iipv4['interface_id']);
-        $count = db_result($countqry, 0);
-        $ipv4_id = $count+1;
+        guifi_log(GUIFILOG_TRACE,'guifi_device_save (ipv4)',$form_ipv4);
 
-        // TODO: This seems to be deprecated:
+        // The IPv4 item received from the form may have the following changes:
+        //  · IPv4 address
+        //  · Mask (TODO: not yet implemented)
+        //  · Interface to which it is assigned
+
+        // We first fetch the IPv4 address stored in the database on $db_ipv4 by
+        // its id, which does not change over time.
+        $db_ipv4 = db_fetch_array(db_query("SELECT * FROM {guifi_ipv4} WHERE id = '%d' ",$form_ipv4['id']));
+
+        // TODO: ensure the code manages the interface_order field properly
+        $countqry = db_query("SELECT COUNT(*) FROM {guifi_ipv4} WHERE interface_id = %d",$db_ipv4['interface_id']);
+        $count = db_result($countqry, 0);
+        $form_ipv4_id = $count+1;
+
+        // TODO: This seems to be deprecated
         // TODO: abans del save cal comprovar un id ipv4 disponbile, modificar-lo als links si en te, si es un link sense fils no ha de permtre triar uan interficie etherX,etc..
         // db_query("UPDATE {guifi_ipv4} SET id = %d, interface_id = %d WHERE ipv4 = '%s' AND interface_id = %d",$form_ipv4_id, $form_ipv4['interface_id'],$db_ipv4['ipv4'],$db_ipv4['interface_id']);
 
-        // TODO: Before saving the new IPv4 address, we should check if it is in use already or notification
-        // Save the IPv4 address
-        db_query("UPDATE {guifi_ipv4} SET ipv4 = '%s' WHERE id = '%d' AND interface_id = %d",$ipv4['ipv4'], $ipv4['id'],$ipv4['interface_id']);
+        // Check if the IPv4 address has been changed in the form
+        if ($form_ipv4['ipv4'] != $db_ipv4['ipv4']){
+          // TODO: Before saving the new IPv4 address, we should check if it is in use already or notification
+          // TODO: Use _guifi_db_sql
+          db_query("UPDATE {guifi_ipv4} SET ipv4 = '%s' WHERE id = '%d'", $form_ipv4['ipv4'], $db_ipv4['id']);
+        }
+
+        // Check if the netmask has been changed in the form
+        // if ($form_ipv4['netmask'] != $db_ipv4['netmask']){
+          // Save the netmask
+          // TODO: Before saving the new netmask, ensure this change can be made, as collision between network prefixes might happen.
+          // TODO: In fact, it's better to just ignore this field
+          // TODO: Use _guifi_db_sql
+          // db_query("UPDATE {guifi_ipv4} SET netmask = '%s' WHERE id = '%d'", $form_ipv4['netmask'], $db_ipv4['id']);
+        // }
+
+        // Check if the assigned interface has been changed in the form
+        if ($form_ipv4['interface_id'] != $db_ipv4['interface_id']){
+          // Save the new interface id the IPv4 address is assigned to
+          // TODO: Manage the interface_order properly
+          // TODO: Use _guifi_db_sql
+          db_query("UPDATE {guifi_ipv4} SET interface_id = '%d' WHERE id = '%d'", $form_ipv4['interface_id'], $db_ipv4['id']);
+        }
 
         // Manage the IPv4 addresses in the subnet
         // TODO: Before saving the new IPv4 address, we should check if it is in use already or notification
         // Save the IPv4 address
-        foreach ($ipv4['subnet'] as $l => $subnet) {
+        foreach ($form_ipv4['subnet'] as $l => $subnet) {
           if (is_numeric($l) AND $subnet['did'] AND $subnet['ipv4']) {
-            // New IPv4 addresses
+
+            // Manage a subnet containing a new IPv4 address
             if ($subnet['new']) {
-              $nipv4 = array(
-                'id'           => null,
-                'interface_id' => $subnet['iid'],
-                'ipv4'         => $subnet['ipv4'],
-                'netmask'      => $ipv4['netmask'],
-                'ipv4_type'    => $ipv4['ipv4_type'],
+              $new_ipv4 = array(
+                'id' => null,
+                'interface_order' => null,
+                'interface_id'    => $subnet['iid'],
+                'ipv4'            => $subnet['ipv4'],
+                'netmask'         => $form_ipv4['netmask'],
+                'ipv4_type'       => $form_ipv4['ipv4_type'],
+                'new'             => true,
               );
               _guifi_db_sql('guifi_ipv4',
-                array('id'=>$ipv4['id'],'interface_id'=>$nipv4['interface_id']),$nipv4);
+                array('id' => $new_ipv4['id']), $new_ipv4);
+            }
+            // Manage a subnet containing an IPv4 address to be deleted
+            elseif ($subnet['deleted']) {
+              dpm('Subnet #'.$l. ' in IPv4 #'.$k.' is deletable!');
+              _guifi_db_sql('guifi_ipv4',
+                array('id' => $subnet['id']), $subnet);
             }
             else {
-              // Update IPv4 changes
-              if ($subnet['ipv4value'] AND ($subnet['ipv4'] != $subnet['ipv4value'])) {
-                db_query("UPDATE {guifi_ipv4} SET ipv4 = '%s' WHERE id = '%d' AND interface_id = %d", $subnet['ipv4'], $subnet['id'],$subnet['interface_id']);
+              // The subnet item received from the form may have the following changes:
+              //  · IPv4 address
+              //  · Interface to which it is assigned
+              //  · Device id (not relevant, since addresses are assigned to interfaces -not devices-)
+
+              // Check if the IPv4 address has been changed in the form
+              // Tip: ipv4value is the "previous" value, ipv4 is the "new" value in the form
+              if ($subnet['ipv4'] AND ($subnet['ipv4'] != $subnet['ipv4value'])){
+                // Save the new IPv4 address
+                // TODO: Check if the IPv4 address is valid (i.e. it belongs to the same prefix)
+                // TODO: Use _guifi_db_sql
+                db_query("UPDATE {guifi_ipv4} SET ipv4 = '%s' WHERE id = '%d'", $subnet['ipv4'], $subnet['id']);
+              }
+
+              // Check if the interface has been changed in the form
+              // Tip: interface_id is the "previous" value, iid is the "new" value in the form
+              if ($subnet['iid'] AND ($subnet['iid'] != $subnet['interface_id'])){
+                // Save the new interface
+                // TODO: Ensure the interface_order stuff is properly managed
+                // TODO: Use _guifi_db_sql
+                db_query("UPDATE {guifi_ipv4} SET interface_id = '%d' WHERE id = '%d'", $subnet['iid'], $subnet['id']);
               }
             }
           }
