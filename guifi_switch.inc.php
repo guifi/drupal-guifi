@@ -246,12 +246,12 @@ function guifi_ports_form($edit,&$form_weight) {
         '#element_validate' => array('guifi_mac_validate'),
         '#weight'          => $form_weight++,
       );
-      $form[$port]['local_node'] = array(
+      $form[$port]['hybrid'] = array(
         '#tree'         => TRUE,
         '#type'         => 'select',
         '#title'        => ($first_port) ? t('Hybrid node') : false,
         '#options'	  => array(0,1),
-        '#default_value'=> $interface['local_node'],
+        '#default_value'=> $interface['hybrid'],
         '#attributes'   => array('class'=>'interface-item'),
         '#weight'       => $form_weight++,
       );

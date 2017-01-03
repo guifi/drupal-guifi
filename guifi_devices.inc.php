@@ -1369,10 +1369,22 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
   $log = '';
 
   // Get the id of the [new] remote device, in case the local interface is linked
-  $v = explode('-',$interface['did']);
-  $new_rdid = $v[0];
+  if (isset($interface['did'])) {
+    if (is_null($interface['did'])) {
+      $new_rdid = 0;
+    }
+    else {
+      $v = explode('-',$interface['did']);
+      $new_rdid = $v[0];
+    }
+  }
+  else {
+    $new_rdid = null;
+  }
+
   // Get the id of the [new] remote interface, in case the local interface is linked
-  $new_riid = ($new_rdid) ? $interface['if'] : 0;
+  $new_riid = ($new_rdid) ? $interface['if'] : null;
+
   // Get the id of the current [old] remote device, in case the local interface was linked
   $old_rdid = $interface['connto_did'];
   // Get the id of the current [old] remote interface, in case the local interface was linked
@@ -1381,7 +1393,8 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
   guifi_log(GUIFILOG_TRACE,sprintf('guifi_device_interface_save ID=%s (ids=%d-%d)',$iid,$old_rdid,$old_riid),$interface);
 
   // Check whether the remote device, the remote interface or both have changed
-  if ((($new_rdid != $old_rdid) or ($new_riid != $old_riid)) and ($iid != 'ifs')) {
+  if ((isset($new_rdid) and ($new_rdid != $old_rdid)) or
+      (isset($new_riid) and ($new_riid != $old_riid) and ($iid != 'ifs'))){
     guifi_log(GUIFILOG_TRACE,sprintf('guifi_device_interface_save (id=%d)',$iid),$interface);
     $connection_changed = true;
     $interface['connto_did'] = (string)$new_rdid;
