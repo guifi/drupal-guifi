@@ -1712,11 +1712,12 @@ function guifi_device_add_ipv4s_submit($form, &$form_state) {
 
   $ipv4 = array(
     'new'          => true,
-    'id'           =>null,
-    'interface_id' =>$ipv4sdialog['iid'],
-    'ipv4'         =>$ipv4sdialog['ipv4'],
-    'netmask'      =>$ipv4sdialog['netmask'],
-    'ipv4_type'    =>$ipv4sdialog['ipv4_type'],
+    'id'           => null,
+    'interface_id' => $ipv4sdialog['iid'],
+    'ipv4'         => $ipv4sdialog['ipv4'],
+    'netmask'      => $ipv4sdialog['netmask'],
+    'ipv4_type'    => $ipv4sdialog['ipv4_type'],
+    'master'       => true,
   );
   guifi_log(GUIFILOG_BASIC,'function guifi_device_add_ipv4s_submit SAVE:',$ipv4);
 
