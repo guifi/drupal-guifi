@@ -293,7 +293,8 @@ function guifi_schema() {
          'ipv4' => array('type' => 'varchar', 'length' => '16', 'not null' => FALSE),
          'netmask' => array('type' => 'varchar', 'length' => '16', 'not null' => TRUE, 'default' => '255.255.255.0'),
          'ipv4_type' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
-         'zone_id' => array('type' => 'int', 'not null' => TRUE, 'default' => 0)),
+         'zone_id' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
+         'master' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE, 'default' => 0)),
          'primary key' => array('id'),
          'unique keys' => array(
            'ipv4' => array('ipv4')),
@@ -532,7 +533,7 @@ function guifi_schema() {
       'pid' => array('type' => 'int', 'not null' => FALSE),
       'notification' => array('type' => 'varchar', 'length' => 1024, 'not null' => TRUE),
       'user_created' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE),
-      'user_changed' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE),  
+      'user_changed' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE),
       'timestamp_created' => array('type' => 'int', 'not null' => TRUE),
       'timestamp_changed' => array('type' => 'int', 'not null' => TRUE),
       ),
@@ -1583,7 +1584,7 @@ function guifi_install() {
 	(318,36,24,'firmware_description',1,'albert.sarle@gmail.com',541,NULL,1332454981,NULL);");
 
   // insert de firmwares
-  update_sql("INSERT INTO {guifi_firmware} (id, nom, descripcio, relations, enabled, notification, user_created, user_changed, timestamp_created, timestamp_changed) VALUES 
+  update_sql("INSERT INTO {guifi_firmware} (id, nom, descripcio, relations, enabled, notification, user_created, user_changed, timestamp_created, timestamp_changed) VALUES
 	(1,'n/a','not available','Other',0,'albertsarle@gmailcom',541,0,0,0),
 	(2,'Alchemy','Alchemy from sveasoft','WRT54Gv1-4|WRT54GSv1-2',0,'albertsarle@gmailcom',541,0,0,0),
 	(3,'Talisman','Talisman from sveasoft','WRT54Gv1-4|WRT54GL|WRT54GSv1-2|WRT54GSv4',0,'albertsarle@gmailcom',541,0,0,0),
@@ -3442,6 +3443,18 @@ function guifi_update_1049() {
 
   $items[] = update_sql("ALTER TABLE `guifi_ipv4` CHANGE `interface_order` `ipv4_order` TINYINT(4) NOT NULL");
   $items[] = update_sql("ALTER TABLE `guifi_links` CHANGE `ipv4_id` `ipv4_order` TINYINT(4) NOT NULL");
+  return $items;
+}
+
+function guifi_update_1050() {
+
+  $items = array();
+
+  $items[] = update_sql("ALTER TABLE {guifi_ipv4} " .
+    "ADD COLUMN master BOOLEAN NOT NULL DEFAULT '0' AFTER zone_id");
+
+  $items[] = update_sql("UPDATE {guifi_ipv4} SET master = FALSE");
+
   return $items;
 }
 
