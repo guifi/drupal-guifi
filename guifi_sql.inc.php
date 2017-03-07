@@ -110,10 +110,10 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
 	    $data['id']=$new_id['id'];
 	    break;
     case 'guifi_ipv4':
-      $next_order = db_fetch_array(db_query('SELECT max(a.interface_order) + 1 interface_order FROM {guifi_ipv4} a, {guifi_interfaces} i WHERE a.interface_id=i.id AND i.id=%d',$data['interface_id']));
-      if (is_null($next_order['interface_order']))
-        $next_order['interface_order'] = 0;
-      $data['interface_order'] = $next_order['interface_order'];
+      $next_order = db_fetch_array(db_query('SELECT max(a.ipv4_order) + 1 ipv4_order FROM {guifi_ipv4} a, {guifi_interfaces} i WHERE a.interface_id=i.id AND i.id=%d',$data['interface_id']));
+      if (is_null($next_order['ipv4_order']))
+        $next_order['ipv4_order'] = 0;
+      $data['ipv4_order'] = $next_order['ipv4_order'];
 	    break;
 	  case 'guifi_links':
 	    // fill only if insert (remote id already know the id)
@@ -445,7 +445,7 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
     if (!$cascade)
       break;
     // cascade links
-    $qc = db_query('SELECT id, device_id FROM {guifi_links} WHERE ipv4_id=%d AND interface_id=%d',$key['id'],$key['interface_id']);
+    $qc = db_query('SELECT id, device_id FROM {guifi_links} WHERE ipv4_order=%d AND interface_id=%d',$key['id'],$key['interface_id']);
     while ($link = db_fetch_array($qc))
       $log .= '<br />'._guifi_db_delete('guifi_links',$link,$to_mail,$depth);
     break;
@@ -453,7 +453,7 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
   // delete links
   case 'guifi_links':
     $item=db_fetch_object(db_query(
-       'SELECT l.id, l.link_type, l.ipv4_id, i.id interface_id, ' .
+       'SELECT l.id, l.link_type, l.ipv4_order, i.id interface_id, ' .
        '       d.nick dname, d.id device_id, d.notification, d.nid, n.nick nname
         FROM {guifi_links} l ' .
         '    LEFT JOIN {guifi_interfaces} i ON l.interface_id=i.id ' .
@@ -473,7 +473,7 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
       break;
 
     // cascade to remote link
-    $qc = db_query('SELECT id, ipv4_id, interface_id, device_id ' .
+    $qc = db_query('SELECT id, ipv4_order, interface_id, device_id ' .
         'FROM {guifi_links} ' .
         'WHERE id=%d ' .
         '  AND device_id !=%d',
@@ -486,7 +486,7 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
       $qar = db_query('SELECT * ' .
           'FROM {guifi_ipv4} '.
           'WHERE id=%d AND interface_id=%d',
-          $link['ipv4_id'],$link['interface_id']);
+          $link['ipv4_order'],$link['interface_id']);
       while ($ripv4 = db_fetch_array($qar)) {
         $aitem = _ipcalc($ripv4['ipv4'],$ripv4['netmask']);
 
@@ -498,7 +498,7 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
           if (($ripv4['netmask'] == '255.255.255.252') or  ($ripv4['netmask'] == '255.255.255.248') or  ($ripv4['netmask'] == '255.255.255.240')) {
             $log .= '<br />'._guifi_db_delete(
               'guifi_ipv4',
-              array('id' => $link['ipv4_id'],
+              array('id' => $link['ipv4_order'],
               'interface_id' => $link['interface_id']),
               $to_mail,
               $depth,
@@ -507,7 +507,7 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
            // cascade to local ipv4
             $log .= '<br />'._guifi_db_delete(
               'guifi_ipv4',
-              array('id' => $item->ipv4_id,
+              array('id' => $item->ipv4_order,
               'interface_id' => $item->interface_id),
               $to_mail,
               $depth,
@@ -517,13 +517,13 @@ function _guifi_db_delete($table,$key,&$to_mail = array(),$depth = 0,$cascade = 
 
       $mlinks = db_fetch_array(db_query('SELECT count(id) AS links ' .
           'FROM {guifi_links} '.
-          'WHERE ipv4_id=%d AND interface_id=%d',
-          $link['ipv4_id'],$link['interface_id']));
+          'WHERE ipv4_order=%d AND interface_id=%d',
+          $link['ipv4_order'],$link['interface_id']));
 
        if  (($ripv4['ipv4'] != $aitem['netstart']) and ( $mlinks['links'] < 1)) {
               $log .= '<br />'._guifi_db_delete(
               'guifi_ipv4',
-              array('id' => $link['ipv4_id'],
+              array('id' => $link['ipv4_order'],
               'interface_id' => $link['interface_id']),
               $to_mail,
               $depth,

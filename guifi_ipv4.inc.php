@@ -393,9 +393,9 @@ function guifi_ipv4subnet_form($ipv4,$k,$view = false) {
   else
     $subnet = $ipv4['snet'];
   guifi_log(GUIFILOG_FULL,sprintf('guifi_ipv4subnet_form (id=%d)',$k),$subnet);
-    
+
   $ips = array(ip2long($ipv4['ipv4']));
-  
+
   foreach ($subnet as $ki=>$ip) {
     if (empty($ip['ipv4']) and !(empty($ip['ipv4value'])))
       $subnet[$ki]['ipv4']=$ip['ipv4value'];
@@ -433,22 +433,22 @@ function guifi_ipv4subnet_form($ipv4,$k,$view = false) {
       '#prefix'     => '<div id="fieldset-ipv4subnet-'.$k.'-'.$ks.'">',
       '#suffix'     => '</div>',
     );
-    
+
     $form[$ks]['ipv4value'] = array('#type'=>'hidden','#value'=>$snet['ipv4']);
-    
-    if (isset($snet['id'])) 
+
+    if (isset($snet['id']))
       $form[$ks]['id'] = array('#type'=>'hidden','#value'=>$snet['id']);
-    
-    if (isset($snet['interface_id'])) 
+
+    if (isset($snet['interface_id']))
       $form[$ks]['interface_id'] = array('#type'=>'hidden','#value'=>$snet['interface_id']);
-        
+
     $form[$ks]['ipv4'] = array(
       '#type'          => 'textfield',
       '#default_value' => $snet['ipv4'],
       '#size'          => 24,
       '#maxlength'     => 16,
     );
-    
+
     if ($snet['new']) {
       $form[$ks]['ipv4']['#type'] = 'hidden';
       $form[$ks]['ipv4']['#value'] = $snet['ipv4'];
@@ -461,7 +461,7 @@ function guifi_ipv4subnet_form($ipv4,$k,$view = false) {
         '#value'=> true,
       );
     }
-    
+
     // TODO: check this part, it causes PHP warnings
     $form[$ks]['did'] = array(
       '#type'              => (($view) and (!empty($snet['ipv4']))) ? 'textfield' : 'hidden',
@@ -580,6 +580,7 @@ function guifi_ipv4i_form($ipv4, $k, $first_port = true, $eInterfaces) {
     '#options' => guifi_types('netmask',30,0),
   );
 
+
   $iid_eInterfaces = array();
   foreach ($eInterfaces as $key => $iface) {
     if (strpos($key,','))
@@ -603,7 +604,7 @@ function guifi_ipv4i_form($ipv4, $k, $first_port = true, $eInterfaces) {
     '#options'      => $iid_eInterfaces,
     '#default_value'=> $ipv4['interface_id'],
   );
-  
+
  /* Commenting from now: I was unable to do it successfully with ahah :() 
  $form['esubnet'] = array(
        '#type' => 'image_button',
@@ -666,9 +667,9 @@ function guifi_ipv4i_form($ipv4, $k, $first_port = true, $eInterfaces) {
       '#type'         => 'hidden',
       '#value'        => $ipv4['id'],
     );
-    $form['interface_order'] = array(
+    $form['ipv4_order'] = array(
       '#type'         => 'hidden',
-      '#value'        => $ipv4['interface_order'],
+      '#value'        => $ipv4['ipv4_order'],
     );
     $form['ipv4_type'] = array(
       '#type'         => 'hidden',
@@ -713,7 +714,7 @@ function guifi_ipv4s_form($edit, &$form_weight) {
     '#title'       => t('IPv4 addresses networking section').' - '.count($edit['ipv4']),
     '#collapsible' => TRUE,
     '#tree'        => TRUE,
-    '#collapsed'   => TRUE,
+    '#collapsed'   => FALSE,
     '#description' => 'Under development: use with care. Some of the changes at this form may take no effect.',
     '#weight'      => $form_weight++,
     '#prefix'      =>

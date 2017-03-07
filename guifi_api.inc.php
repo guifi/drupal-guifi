@@ -1313,7 +1313,7 @@ function guifi_api_cloudy_addlink($gapi, $parameters) {
     return FALSE;
   }
 
-  $ipv4_id = 0;
+  $ipv4_order = 0;
 /* Si no hi ha interface sel·leccionada busquem una que tingui IPv4 */
   foreach($device['interfaces'] as $iid=>$if){
 		if(is_array($if['ipv4'])) break;
@@ -1326,7 +1326,7 @@ function guifi_api_cloudy_addlink($gapi, $parameters) {
  /* Coses que no m'agraden a. El 0 posat a ipv4, s'hauria de calcular. b. interface_type, tb sembla que es contabilitza */
 
   $ips_allocated=guifi_ipcalc_get_ips('0.0.0.0','0.0.0.0',$device,1);
-  $base_ip = $device['interfaces'][$iid]['ipv4'][$ipv4_id];
+  $base_ip = $device['interfaces'][$iid]['ipv4'][$ipv4_order];
   $item = _ipcalc($base_ip['ipv4'],$base_ip['netmask']);
   $ip= guifi_ipcalc_find_ip($item['netid'],$base_ip['netmask'],$ips_allocated);
 
@@ -1338,7 +1338,7 @@ function guifi_api_cloudy_addlink($gapi, $parameters) {
 		array("new" => TRUE, "ipv4_type" => 1, "ipv4" => $ip, "netmask" => $base_ip['netmask'] )
 		),"id"=> -1, "link_type" => "cable","flag" => "Planned","nid" => $cloudy['nid'],"device_id" => $cloudy['id'],"routing" => "Gateway");
 
-	$device['interfaces'][$iid]['ipv4'][$ipv4_id]['links'][]=$newLink;
+	$device['interfaces'][$iid]['ipv4'][$ipv4_order]['links'][]=$newLink;
 	$device['interfaces'][$iid]['unfold']=TRUE;
 
 	guifi_device_save($device);
@@ -1568,8 +1568,8 @@ function guifi_api_link_update($gapi, $parameters) {
 
       $interface = db_fetch_object(db_query('SELECT * FROM {guifi_interfaces} WHERE id = %d LIMIT 1', $link->interface_id));
 
-      $lipv4 = &$device['radios'][$interface->radiodev_counter]['interfaces'][$link->interface_id]['ipv4'][$link->ipv4_id];
-      $rlink = &$device['radios'][$interface->radiodev_counter]['interfaces'][$link->interface_id]['ipv4'][$link->ipv4_id]['links'][$link->id];
+      $lipv4 = &$device['radios'][$interface->radiodev_counter]['interfaces'][$link->interface_id]['ipv4'][$link->ipv4_order];
+      $rlink = &$device['radios'][$interface->radiodev_counter]['interfaces'][$link->interface_id]['ipv4'][$link->ipv4_order]['links'][$link->id];
 
       if ($parameters['flag']) {
         $rlink['flag'] = $parameters['flag'];
@@ -1642,10 +1642,10 @@ function guifi_api_link_remove($gapi, $parameters) {
       $interface = db_fetch_object(db_query('SELECT * FROM {guifi_interfaces} WHERE id = %d LIMIT 1', $link->interface_id));
 
       if ($interface->interface_type == 'Wan' || $interface->interface_type == 'wds/p2p') {
-        $device['radios'][$interface->radiodev_counter]['interfaces'][$link->interface_id]['ipv4'][$link->ipv4_id]['deleted'] = TRUE;
-        $device['radios'][$interface->radiodev_counter]['interfaces'][$link->interface_id]['ipv4'][$link->ipv4_id]['links'][$link->id]['deleted'] = TRUE;
+        $device['radios'][$interface->radiodev_counter]['interfaces'][$link->interface_id]['ipv4'][$link->ipv4_order]['deleted'] = TRUE;
+        $device['radios'][$interface->radiodev_counter]['interfaces'][$link->interface_id]['ipv4'][$link->ipv4_order]['links'][$link->id]['deleted'] = TRUE;
       } else {
-        $device['radios'][$interface->radiodev_counter]['interfaces'][$link->interface_id]['ipv4'][$link->ipv4_id]['links'][$link->id]['deleted'] = TRUE;
+        $device['radios'][$interface->radiodev_counter]['interfaces'][$link->interface_id]['ipv4'][$link->ipv4_order]['links'][$link->id]['deleted'] = TRUE;
       }
 
       guifi_device_save($device);

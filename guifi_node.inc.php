@@ -1463,7 +1463,7 @@ function theme_guifi_node_links_by_type($id = 0, $ltype = '%') {
     "  LEFT JOIN {guifi_interfaces} i ON c.interface_id = i.id " .
     "  LEFT JOIN {guifi_location} l ON d.nid = l.id " .
     "  LEFT JOIN {guifi_ipv4} a ON i.id=a.interface_id " .
-    "    AND a.id=c.ipv4_id " .
+    "    AND a.ipv4_order=c.ipv4_order " .
     "  LEFT JOIN {guifi_radios} r ON d.id=r.id " .
     "    AND i.radiodev_counter=r.radiodev_counter " .
     "WHERE d.nid = %d AND link_type like '%s' " .
@@ -1480,7 +1480,7 @@ function theme_guifi_node_links_by_type($id = 0, $ltype = '%') {
       "  LEFT JOIN {guifi_interfaces} i ON c.interface_id = i.id " .
       "  LEFT JOIN {guifi_location} l ON d.nid = l.id " .
       "  LEFT JOIN {guifi_ipv4} a ON i.id=a.interface_id " .
-      "    AND a.id = c.ipv4_id " .
+      "    AND a.ipv4_order = c.ipv4_order " .
       "  LEFT JOIN {guifi_radios} r ON d.id=r.id " .
       "    AND i.radiodev_counter=r.radiodev_counter " .
       "WHERE c.id = %d " .

@@ -150,7 +150,7 @@ function guifi_device_load($id,$ret = 'array') {
         WHERE l1.link_type NOT IN ("ap/client","wds/p2p")
         AND l1.device_id=%d
         AND l1.interface_id=%d
-        AND l1.ipv4_id=%d
+        AND l1.ipv4_order=%d
         AND l2.device_id!=%d',
         $id,
         $i['id'],
@@ -164,7 +164,7 @@ function guifi_device_load($id,$ret = 'array') {
           FROM {guifi_ipv4}
           WHERE id=%d
           AND interface_id=%d',
-          $l['ipv4_id'],
+          $l['ipv4_order'],
           $l['interface_id']);
         while ($ra = db_fetch_array($qra)) {
           $ipdec2[$ra['id']] = ip2long($ra['ipv4']);
@@ -376,7 +376,7 @@ function guifi_device_load_radios($id,&$device) {
             WHERE l2.device_id != %d
               AND l1.device_id=%d
               AND l1.interface_id=%d
-              AND l1.ipv4_id=%d',
+              AND l1.ipv4_order=%d',
             $id,
             $id,
             $i['id'],
@@ -391,7 +391,7 @@ function guifi_device_load_radios($id,&$device) {
               FROM {guifi_ipv4}
               WHERE id=%d
                 AND interface_id=%d',
-              $l['ipv4_id'],
+              $l['ipv4_order'],
               $l['interface_id']);
             $qra = db_query($qrasql);
 
@@ -1235,14 +1235,14 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
         // its id, which does not change over time.
         $db_ipv4 = db_fetch_array(db_query("SELECT * FROM {guifi_ipv4} WHERE id = '%d' ",$form_ipv4['id']));
 
-        // TODO: ensure the code manages the interface_order field properly
+        // TODO: ensure the code manages the ipv4_order field properly
         $countqry = db_query("SELECT COUNT(*) FROM {guifi_ipv4} WHERE interface_id = %d",$db_ipv4['interface_id']);
         $count = db_result($countqry, 0);
-        $form_ipv4_id = $count+1;
+        $form_ipv4_order = $count+1;
 
         // TODO: This seems to be deprecated
         // TODO: abans del save cal comprovar un id ipv4 disponbile, modificar-lo als links si en te, si es un link sense fils no ha de permtre triar uan interficie etherX,etc..
-        // db_query("UPDATE {guifi_ipv4} SET id = %d, interface_id = %d WHERE ipv4 = '%s' AND interface_id = %d",$form_ipv4_id, $form_ipv4['interface_id'],$db_ipv4['ipv4'],$db_ipv4['interface_id']);
+        // db_query("UPDATE {guifi_ipv4} SET id = %d, interface_id = %d WHERE ipv4 = '%s' AND interface_id = %d",$form_ipv4_order, $form_ipv4['interface_id'],$db_ipv4['ipv4'],$db_ipv4['interface_id']);
 
         // Check if the IPv4 address has been changed in the form
         if ($form_ipv4['ipv4'] != $db_ipv4['ipv4']){
@@ -1263,7 +1263,7 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
         // Check if the assigned interface has been changed in the form
         if ($form_ipv4['interface_id'] != $db_ipv4['interface_id']){
           // Save the new interface id the IPv4 address is assigned to
-          // TODO: Manage the interface_order properly
+          // TODO: Manage the ipv4_order properly
           // TODO: Use _guifi_db_sql
           db_query("UPDATE {guifi_ipv4} SET interface_id = '%d' WHERE id = '%d'", $form_ipv4['interface_id'], $db_ipv4['id']);
         }
@@ -1278,7 +1278,7 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
             if ($subnet['new']) {
               $new_ipv4 = array(
                 'id' => null,
-                'interface_order' => null,
+                'ipv4_order' => null,
                 'interface_id'    => $subnet['iid'],
                 'ipv4'            => $subnet['ipv4'],
                 'netmask'         => $form_ipv4['netmask'],
@@ -1313,7 +1313,7 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
               // Tip: interface_id is the "previous" value, iid is the "new" value in the form
               if ($subnet['iid'] AND ($subnet['iid'] != $subnet['interface_id'])){
                 // Save the new interface
-                // TODO: Ensure the interface_order stuff is properly managed
+                // TODO: Ensure the ipv4_order stuff is properly managed
                 // TODO: Use _guifi_db_sql
                 db_query("UPDATE {guifi_ipv4} SET interface_id = '%d' WHERE id = '%d'", $subnet['iid'], $subnet['id']);
               }
@@ -1466,16 +1466,16 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
   } // remote connector is set
 
   // ipv4
-  if ($interface['ipv4']) foreach ($interface['ipv4'] as $ipv4_id => $ipv4) {
+  if ($interface['ipv4']) foreach ($interface['ipv4'] as $ipv4_order => $ipv4) {
     $ipv4['interface_id'] = $ninterface['id'];
-    guifi_log(GUIFILOG_TRACE,sprintf('SQL ipv4 local (id=%d, iid=%d)', $ipv4_id, $ipv4['interface_id']), $ipv4);
+    guifi_log(GUIFILOG_TRACE,sprintf('SQL ipv4 local (id=%d, iid=%d)', $ipv4_order, $ipv4['interface_id']), $ipv4);
 
     if (($ipv4['netmask']=='255.255.255.252') and (!count($ipv4['links'])))
       $ipv4['deleted'] = TRUE;
 
     $nipv4 = _guifi_db_sql(
       'guifi_ipv4',
-      array('id' => $ipv4_id,'interface_id' => $ipv4['interface_id']),$ipv4,$log,$to_mail);
+      array('id' => $ipv4_order,'interface_id' => $ipv4['interface_id']),$ipv4,$log,$to_mail);
 
     if (empty($nipv4) or ($ipv4['deleted']))
       continue;
@@ -1486,7 +1486,7 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
       $llink['nid'] = $nid;
       $llink['device_id'] = $interface['device_id'];
       $llink['interface_id'] = $ninterface['id'];
-      $llink['ipv4_id'] = $nipv4['id'];
+      $llink['ipv4_order'] = $nipv4['id'];
       guifi_log(GUIFILOG_TRACE,'going to SQL for local link',$llink);
       $nllink = _guifi_db_sql(
         'guifi_links',
@@ -1560,7 +1560,7 @@ function guifi_device_interface_save($interface,$iid,$did,$nid,&$to_mail) {
       }
       if (!$llink['deleted']) {
         $link['id'] = $nllink['id'];
-        $link['ipv4_id'] = $ripv4['id'];
+        $link['ipv4_order'] = $ripv4['id'];
         $link['interface_id'] = $rinterface['id'];
         $nrlink = _guifi_db_sql(
           'guifi_links',
@@ -2544,7 +2544,7 @@ function guifi_device_links_print($device,$ltype = '%') {
     $dname_curr = '';
     if ($device['radios']) foreach ($device['radios'] as $radio_id => $radio)
     if ($radio['interfaces']) foreach ($radio['interfaces'] as $interface_id => $interface)
-    if ($interface['ipv4']) foreach ($interface['ipv4'] as $ipv4_id => $ipv4)
+    if ($interface['ipv4']) foreach ($interface['ipv4'] as $ipv4_order => $ipv4)
     if ($ipv4['links']) foreach ($ipv4['links'] as $link_id => $link) {
       guifi_log(GUIFILOG_TRACE,'going to list link',$link);
       $loc2 = db_fetch_object(db_query(
@@ -2602,7 +2602,7 @@ function guifi_device_links_print($device,$ltype = '%') {
   case 'cable':
     $iname_curr = '';
     if ($device['interfaces']) foreach ($device['interfaces'] as $interface_id => $interface) {
-      if ($interface['ipv4']) foreach ($interface['ipv4'] as $ipv4_id => $ipv4)
+      if ($interface['ipv4']) foreach ($interface['ipv4'] as $ipv4_order => $ipv4)
       if ($ipv4['links']) foreach ($ipv4['links'] as $link_id => $link) {
         $loc2 = db_fetch_object(db_query('SELECT lat, lon, nick FROM {guifi_location} WHERE id=%d',$link['nid']));
         $gDist = round($oGC->EllipsoidDistance($loc1->lat, $loc1->lon, $loc2->lat, $loc2->lon),3);
@@ -2674,7 +2674,7 @@ function guifi_device_link_list($id = 0, $ltype = '%') {
     FROM {guifi_links} c
       LEFT JOIN {guifi_devices} d ON c.device_id=d.id
       LEFT JOIN {guifi_interfaces} i ON c.interface_id = i.id
-      LEFT JOIN {guifi_ipv4} a ON i.id=a.interface_id AND a.id=c.ipv4_id
+      LEFT JOIN {guifi_ipv4} a ON i.id=a.interface_id AND a.id=c.ipv4_order
       LEFT JOIN {guifi_location} l ON d.nid = l.id
     WHERE c.device_id = %d
       AND link_type like '%s'
@@ -2690,7 +2690,7 @@ function guifi_device_link_list($id = 0, $ltype = '%') {
           LEFT JOIN {guifi_devices} d ON c.device_id=d.id
           LEFT JOIN {guifi_interfaces} i ON c.interface_id = i.id
           LEFT JOIN {guifi_ipv4} a ON i.id=a.interface_id
-            AND a.id=c.ipv4_id
+            AND a.id=c.ipv4_order
           LEFT JOIN {guifi_location} l ON d.nid = l.id
           LEFT JOIN {guifi_radios} r ON d.id=r.id
             AND i.radiodev_counter=r.radiodev_counter

@@ -162,7 +162,7 @@ function guifi_schema() {
          'nid' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE),
          'device_id' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE),
          'interface_id' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE),
-         'ipv4_id' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE),
+         'ipv4_order' => array('type' => 'int', 'size' => 'tiny', 'not null' => TRUE),
          'link_type' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE),
          'routing' => array('type' => 'varchar', 'length' => '40', 'not null' => FALSE),
          'flag' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => 'Planned'),
@@ -288,7 +288,7 @@ function guifi_schema() {
   $schema['guifi_ipv4'] = array(
     'fields' => array(
          'id' => array('type' => 'serial', 'not null' => TRUE, 'comment' => 'IPv4 address unique ID (PRIMARY key)'),
-         'interface_order' => array('type' => 'int', 'not null' => TRUE, 'comment' => 'Sequential order for each address assigned to an interface'),
+         'ipv4_order' => array('type' => 'int', 'not null' => TRUE, 'comment' => 'Sequential order for each address assigned to an interface'),
          'interface_id' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'comment' => 'Foreign key to an interface in guifi_interfaces->id'),
          'ipv4' => array('type' => 'varchar', 'length' => '16', 'not null' => FALSE),
          'netmask' => array('type' => 'varchar', 'length' => '16', 'not null' => TRUE, 'default' => '255.255.255.0'),
@@ -3433,6 +3433,15 @@ function guifi_update_1048() {
   $items[] = update_sql("ALTER TABLE `guifi_ipv4` CHANGE `id` `interface_order` INT(11) NOT NULL");
   $items[] = update_sql("ALTER TABLE `guifi_ipv4` ADD `id` INT NOT NULL AUTO_INCREMENT FIRST, ADD PRIMARY KEY (`id`)");
 
+  return $items;
+}
+
+function guifi_update_1049() {
+
+  $items = array();
+
+  $items[] = update_sql("ALTER TABLE {guifi_ipv4} CHANGE 'interface_order' 'ipv4_order' TINYINT(4) NOT NULL");
+  $items[] = update_sql("ALTER TABLE {guifi_links} CHANGE 'ipv4_id' 'ipv4_order' TINYINT(4) NOT NULL");
   return $items;
 }
 

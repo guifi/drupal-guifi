@@ -38,7 +38,7 @@ function clientModeError($device){
   if ($device->radios[0]['mode'] == 'client') {
     $links = 0;
     foreach ($device->radios[0]['interfaces'] as $interface_id => $interface)
-      foreach ($interface['ipv4'] as $ipv4_id => $ipv4)
+      foreach ($interface['ipv4'] as $ipv4_order => $ipv4)
       if (isset($ipv4['links'])) foreach ($ipv4['links'] as $key => $link) {
       if ($link['link_type'] == 'ap/client') {
         $links++;
@@ -206,7 +206,7 @@ function guifi_unsolclic($dev, $format = 'html') {
  if ($dev->radios[0]['mode'] == 'client') {
     $links = 0;
      foreach ($dev->radios[0]['interfaces'] as $interface_id => $interface)
-     foreach ($interface['ipv4'] as $ipv4_id => $ipv4)
+     foreach ($interface['ipv4'] as $ipv4_order => $ipv4)
      if (isset($ipv4['links'])) foreach ($ipv4['links'] as $key => $link) {
        if ($link['link_type'] == 'ap/client') {
         $links++;

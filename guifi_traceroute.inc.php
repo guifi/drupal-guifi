@@ -98,7 +98,7 @@ function guifi_traceroute($path, $to, &$routes, $maxhops = 10,$cost = 0, $alinks
       //                [0] => links with device_id
       //                [1] => node id
       //                [2] => interface_id
-      //                [3] => ipv4_id
+      //                [3] => ipv4_order
 
       if (isset($alinks['links'][$link['id']])) {
         // link data is alredy filled just adding a peer
@@ -115,7 +115,7 @@ function guifi_traceroute($path, $to, &$routes, $maxhops = 10,$cost = 0, $alinks
           $peer,
           $link['nid'],
           $link['interface_id'],
-          $link['ipv4_id']
+          $link['ipv4_order']
         );
       } else
         // first peer of the link, the other peer is still unknown
@@ -125,7 +125,7 @@ function guifi_traceroute($path, $to, &$routes, $maxhops = 10,$cost = 0, $alinks
             0,  // peer still unknown
             $link['nid'],
             $link['interface_id'],
-            $link['ipv4_id']
+            $link['ipv4_order']
           ),
         );
     }
@@ -138,7 +138,7 @@ function guifi_traceroute($path, $to, &$routes, $maxhops = 10,$cost = 0, $alinks
 //  print "Hop# $hop path ".implode(',',$kpath)." parent $parent looking for ".implode(',',$to)."\n<br />";
 
 //  $qry = db_query(
-//    'SELECT l1.*, l2.device_id ddevice_id, l2.ipv4_id dipv4_id, l2.interface_id dinterface_id, l2.nid dnid
+//    'SELECT l1.*, l2.device_id ddevice_id, l2.ipv4_order dipv4_order, l2.interface_id dinterface_id, l2.nid dnid
 //     FROM {guifi_links} l1, {guifi_links} l2
 //     WHERE l1.device_id=%d AND l1.id=l2.id AND l2.device_id != %d AND l1.flag != "Dropped" AND l1.flag="Working"',
 //     $parent, $parent);
@@ -175,7 +175,7 @@ function guifi_traceroute($path, $to, &$routes, $maxhops = 10,$cost = 0, $alinks
       $link[0][0],       // 1 type
       $link[0][1],       // 2 flag
       $link[$parent][2], // 3 interface_id
-      $link[$parent][3], // 4 ipv4_id
+      $link[$parent][3], // 4 ipv4_order
       $link[$parent][1]  // 5 node id
 
     );

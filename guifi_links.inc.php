@@ -208,7 +208,7 @@ function guifi_links_delete_submit(&$form,&$form_state) {
   $remote_nid = array_pop($values);
   $link_id = array_pop($values);
   $dummy =  array_pop($values);
-  $ipv4_id = array_pop($values);
+  $ipv4_order = array_pop($values);
   $dummy =  array_pop($values);
   $interface_id = array_pop($values);
   $dummy =  array_pop($values);
@@ -225,11 +225,11 @@ function guifi_links_delete_submit(&$form,&$form_state) {
       $radio_id,
       $form_state['values']['radios'][$radio_id]['mode'],
       $interface_id,
-      $ipv4_id,$link_id,$remote_nid,$remote_did),
+      $ipv4_order,$link_id,$remote_nid,$remote_did),
     $values);
 
   $fbase['interfaces'][$interface_id]['unfold'] = TRUE;
-  $fipv4 = &$fbase['interfaces'][$interface_id]['ipv4'][$ipv4_id];
+  $fipv4 = &$fbase['interfaces'][$interface_id]['ipv4'][$ipv4_order];
   $fipv4['unfold'] = TRUE;
 
   $flink = &$fipv4['links'][$link_id];
@@ -265,16 +265,16 @@ function guifi_links_validate_subnet($remoteIp,&$form_state) {
   $keys         = count($remoteIp['#parents']);
   $radio_id     = $remoteIp['#parents'][$keys - 10];
   $interface_id = $remoteIp['#parents'][$keys - 8];
-  $ipv4_id      = $remoteIp['#parents'][$keys - 6];
+  $ipv4_order      = $remoteIp['#parents'][$keys - 6];
   $link_id      = $remoteIp['#parents'][$keys - 4];
 
   if ($keys == 11)
     $ipv4 = &$form_state['values']['radios'][$radio_id]
                                   ['interfaces'][$interface_id]
-                                  ['ipv4'][$ipv4_id];
+                                  ['ipv4'][$ipv4_order];
   else
     $ipv4 = &$form_state['values']['interfaces'][$interface_id]
-                                  ['ipv4'][$ipv4_id];
+                                  ['ipv4'][$ipv4_order];
 
   if ($ipv4['links'][$link_id]['deleted'])
     return;
@@ -305,14 +305,14 @@ function guifi_links_check_overlap($overlap,&$form_state) {
   $keys         = count($overlap['#parents']);
   $radio_id     = $overlap['#parents'][$keys - 6];
   $interface_id = $overlap['#parents'][$keys - 4];
-  $ipv4_id      = $overlap['#parents'][$keys - 2];
+  $ipv4_order      = $overlap['#parents'][$keys - 2];
   if ($keys == 7)
     $ipv4 = &$form_state['values']['radios'][$radio_id]
                                   ['interfaces'][$interface_id]
-                                  ['ipv4'][$ipv4_id];
+                                  ['ipv4'][$ipv4_order];
   else
     $ipv4 = &$form_state['values']['interfaces'][$interface_id]
-                                  ['ipv4'][$ipv4_id];
+                                  ['ipv4'][$ipv4_order];
 
   if ($ipv4['links'][$link_id]['deleted'])
     return;

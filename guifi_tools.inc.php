@@ -853,7 +853,7 @@ function guifi_tools_isdevconnect_search($path, $to, &$routes, $maxhops = 50, $a
           $peer,
           $link['nid'],
           $link['interface_id'],
-          $link['ipv4_id']
+          $link['ipv4_order']
         );
       } else
         // first peer of the link, the other peer is still unknown
@@ -863,7 +863,7 @@ function guifi_tools_isdevconnect_search($path, $to, &$routes, $maxhops = 50, $a
             0,  // peer still unknown
             $link['nid'],
             $link['interface_id'],
-            $link['ipv4_id']
+            $link['ipv4_order']
           ),
         );
     }
@@ -894,7 +894,7 @@ function guifi_tools_isdevconnect_search($path, $to, &$routes, $maxhops = 50, $a
       $link[0][0],       // 1 type
       $link[0][1],       // 2 flag
       $link[$parent][2], // 3 interface_id
-      $link[$parent][3], // 4 ipv4_id
+      $link[$parent][3], // 4 ipv4_order
       $link[$parent][1]  // 5 node id
 
     );

@@ -371,8 +371,8 @@ function guifi_interfaces_add_cable_p2p_link_submit(&$form,&$form_state) {
 function guifi_interfaces_add_cable_public_link_submit(&$form,&$form_state) {
   $values = $form_state['clicked_button']['#parents'];
   $iid    = $values[1];
-  $ipv4_id= $values[3];
-  $to_did = $form_state['values']['interfaces'][$iid]['ipv4'][$ipv4_id]['to_did'];
+  $ipv4_order= $values[3];
+  $to_did = $form_state['values']['interfaces'][$iid]['ipv4'][$ipv4_order]['to_did'];
   $rdevice = guifi_device_load($to_did);
 
   guifi_log(GUIFILOG_TRACE,
@@ -384,7 +384,7 @@ function guifi_interfaces_add_cable_public_link_submit(&$form,&$form_state) {
 
   // get next available ip address
   $base_ip=
-    $form_state['values']['interfaces'][$iid]['ipv4'][$ipv4_id];
+    $form_state['values']['interfaces'][$iid]['ipv4'][$ipv4_order];
   $item = _ipcalc($base_ip['ipv4'],$base_ip['netmask']);
   $ip= guifi_ipcalc_find_ip($item['netid'],$base_ip['netmask'],$ips_allocated);
 
@@ -415,7 +415,7 @@ function guifi_interfaces_add_cable_public_link_submit(&$form,&$form_state) {
   $newlk['interface']['ipv4']['ipv4'] = $ip;
   $newlk['interface']['ipv4']['netmask'] = $base_ip['netmask'];
 
-  $form_state['values']['interfaces'][$iid]['ipv4'][$ipv4_id]['links'][]=$newlk;
+  $form_state['values']['interfaces'][$iid]['ipv4'][$ipv4_order]['links'][]=$newlk;
   $form_state['values']['interfaces'][$iid]['unfold']=TRUE;
 //  print_r($form_state['values']);
   $form_state['rebuild'] = TRUE;

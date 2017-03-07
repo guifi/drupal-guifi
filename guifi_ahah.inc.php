@@ -294,14 +294,14 @@ function guifi_ahah_select_device_interfacename($delete = false) {
   $device = explode('-',$_POST['ipv4'][$ids[0]]['subnet'][$ids[1]]['did']);
 
   guifi_log(GUIFILOG_TRACE,sprintf('guifi_ahah_select_device_interfacename (ids=%s did=%d)',arg(3),$device[0]));
-  
+
   $device_interfaces = guifi_get_device_allinterfaces($device[0]);
 
   $rIpv4 = $_POST['ipv4'][$ids[0]]['subnet'][$ids[1]];
 
   if ($cache) {
     $form = $cache->data;
-    
+
     if (!$delete) {
       $form['ipv4'][$ids[0]]['subnet'][$ids[1]]['iid']['#options'] = $device_interfaces;
       $form['ipv4'][$ids[0]]['subnet'][$ids[1]]['did']['#value'] = guifi_get_devicename($device[0],'large');
@@ -317,7 +317,7 @@ function guifi_ahah_select_device_interfacename($delete = false) {
       $form['ipv4'][$ids[0]]['subnet'][$ids[1]]['deletedmsg']= array(
         '#type'=>'item',
         '#value'=>t('Address %addr will be DELETED',array('%addr'=>$_POST['ipv4'][$ids[0]]['subnet'][$ids[1]]['ipv4']))
-      );      
+      );
       drupal_set_message(t('Press "Reset" to discard changes.'),'warning');
     }
 
@@ -764,9 +764,9 @@ function guifi_ahah_add_cable_link() {
   $interface_id = $values[0];
   if (count($values)==2) {
     // create the cable link on an already allocated subnetwork
-    $ipv4_id = $values[1];
+    $ipv4_order = $values[1];
     $submit =  array('guifi_interfaces_add_cable_public_link_submit');
-    $parents = array('interfaces',$interface_id,'ipv4',$ipv4_id);
+    $parents = array('interfaces',$interface_id,'ipv4',$ipv4_order);
   } else {
     // create the cable link over an interface, with a backbone p2p network
     $submit =  array('guifi_interfaces_add_cable_p2p_link_submit');
