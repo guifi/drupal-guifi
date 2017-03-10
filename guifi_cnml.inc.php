@@ -1006,14 +1006,12 @@ function dump_guifi_domains($cnmlid, $action){
   foreach ( $scopedef as $key => $scope) {
     $classXML = $CNML->addChild('domains');
     $classXML->addAttribute('network_domains',$action);
-    $qryservice=db_query("SELECT notification FROM {guifi_services} WHERE id = '%s'", $cnmlid);
     $qrydname=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid = '%s' AND scope ='%s' AND management = 'automatic'", $cnmlid, $scope);
     $domainname = db_fetch_object($qrydname);
     $qrymaster=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid = '%s' AND scope ='%s' AND management = 'automatic'", $cnmlid, $scope);
     $qryslavemas=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid != '%s' AND scope ='%s' AND mname != '%s' AND allow = 'slave'", $cnmlid,$scope,$domainname->name);
     $qryslavefor=db_query("SELECT * FROM {guifi_dns_domains} WHERE sid != '%s' AND scope ='%s' AND mname != '%s' AND allow = 'forward'", $cnmlid,$scope,$domainname->name);
     $scopex = $classXML->addChild($scope);
-    $notification= db_fetch_object($qryservice);
     while ($record = db_fetch_object($qrymaster)){
       $domain = $scopex->addChild('master');
       $domain->addAttribute('zone',$record->name);
@@ -1028,7 +1026,8 @@ function dump_guifi_domains($cnmlid, $action){
       else
         $domain->addAttribute('allow-transfer','none');
 
-      $domain->addAttribute('contact',$notification->notification);
+      $notification = explode(",", $domainname->notification);
+      $domain->addAttribute('contact',$notification[0]);
       $domain->addAttribute('domain_id',$record->id);
       $domain->addAttribute('service_id',$record->sid);
       $qrydelegation=db_query("SELECT * FROM {guifi_dns_domains} WHERE mname = '%s' AND scope = '%s'", $record->name,$scope);
