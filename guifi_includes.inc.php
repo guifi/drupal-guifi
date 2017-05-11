@@ -172,6 +172,31 @@ function guifi_types($type,$start = 24,$end = 0,$relations = NULL) {
   return $values;
 }
 
+/**
+* Function guifi_validate_firmware
+*
+* This function true if a device model is compatible with a certain firmware,
+* false otherwise.
+*
+* @param  string  $firmware  The firmware name
+* @param  int     $model_id  The numeric id of the device model
+* @return bool
+*/
+function guifi_validate_firmware($firmware, $model_id) {
+  $fquery = db_query("SELECT {id} FROM {guifi_firmware} WHERE nom='%s' ORDER BY id", $firmware);
+  $flist = db_fetch_object($fquery);
+
+  if (count($flist) == 1) {
+      $fmquery = db_query("SELECT COUNT(*) AS count FROM {guifi_configuracioUnSolclic} WHERE mid='%s' AND fid='%s' ORDER BY id", $model_id, $flist->id);
+      $fmlist = db_fetch_object($fmquery);
+
+      if ($fmlist->count == 1)
+        return true;
+  }
+
+  return false;
+}
+
 function guifi_validate_types($type, $text, $relations = NULL) {
   if ($relations == NULL) {
     $query = db_query("SELECT COUNT(*) AS count FROM {guifi_types} WHERE type='%s' AND text = '%s' ORDER BY id", $type, $text);
