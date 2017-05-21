@@ -573,7 +573,7 @@ function _guifi_api_device_check_parameters($gapi, &$parameters) {
         return FALSE;
       }
       $model = db_fetch_object(db_query("SELECT model name FROM {guifi_model_specs} WHERE mid = '%d' LIMIT 1", $model_id));
-      if (!guifi_validate_types('firmware', $firmware, $model->name)) {
+      if (true &&!guifi_validate_firmware($firmware, $model_id, $gapi)) {
         $gapi->addError(403, "firmware is not supported: $firmware");
         return FALSE;
       }
