@@ -2129,9 +2129,12 @@ function guifi_coord_dtodms($coord){
 
 function guifi_gmap_key() {
   drupal_add_js(drupal_get_path('module', 'guifi').'/js/wms-gs-2_0_0.js','file');
+  
+  $map_key = variable_get("guifi_gmap_key", '');
+  
   $element = array(
   '#type' => 'markup', // The #tag is the html tag - <link />
-  '#markup' => '<script src="http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places" type="text/javascript"></script>',
+  '#markup' => "<script src=\"http://maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places&3.22&key=$map_key\" type=\"text/javascript\"></script>",
   );
   drupal_add_html_head($element, 'guifi_gmap_key');
   return TRUE;
