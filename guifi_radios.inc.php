@@ -504,14 +504,17 @@ function guifi_radio_radio_form($radio, $key, &$form_weight = -200) {
             '#options' => guifi_types('contribution'),
             '#description' => t('Funding required?'),
           );
-          $f['ap']['fund_amount'] = array(
+
+            $fund_amount = $radio["fund_amount"] ?: 0.00; //Setting default value on fund
+
+            $f['ap']['fund_amount'] = array(
             '#type' => 'textfield',
             '#size'  => 12,
             '#maxlength' => 15,
             '#required' => false,
             '#title' => t("Amount"),
             '#parents' => array('radios',$key,'fund_amount'),
-            '#default_value' =>  $radio["fund_amount"],
+            '#default_value' =>  $fund_amount,
             '#description' => t('Funding if required'),
           );
           $f['ap']['fund_currency'] = array(

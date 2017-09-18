@@ -1050,7 +1050,7 @@ function guifi_device_save($edit, $verbose = TRUE, $notify = TRUE) {
   $sql = db_query('SELECT id as uscid, enabled FROM {guifi_configuracioUnSolclic} WHERE mid = :mid and fid = :fid ', array(':mid' => $edit['mid'], ':fid' => $edit['fid']));
   $configuracio = $sql->fetchObject();
 
-  $edit['usc_id'] = $configuracio->uscid;
+  $edit['usc_id'] = $configuracio->uscid; //usc_id changed
   $ndevice = _guifi_db_sql('guifi_devices',array('id' => $edit['id']),$edit,$log,$to_mail);
 
   guifi_maintainers_save($ndevice['id'],'device',$edit['maintainers']);

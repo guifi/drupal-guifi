@@ -201,9 +201,16 @@ function _guifi_db_sql($table, $key, $idata, &$log = NULL, &$to_mail = array()) 
     foreach ($data as $k => $value) {
       $values_data[$k] = $value;
     }
-  db_insert($table)
-     ->fields($values_data)
-     ->execute();
+
+    try {
+      db_insert($table)
+        ->fields($values_data)
+        ->execute();
+      }
+      catch (PDOException $e) {
+        drupal_set_message(t('Error: %message', array('%message' => $e->getMessage())), 'error');
+      }
+
   } else {
    // update
 
