@@ -1,0 +1,6 @@
+guifi.zones:
+  title: 'Guifi module settings'
+  description: 'Guifi.net custom module designed for running a community network.'
+  parent: system.admin_config_development
+  route_name: guifi.content
+  weight: 100

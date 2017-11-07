@@ -1,0 +1,6 @@
+name: guifi.net module
+description: Guifi.net custom module designed for running a community network.
+package: Custom
+
+type: module
+core: 8.x

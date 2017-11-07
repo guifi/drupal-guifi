@@ -1,0 +1,7 @@
+guifi.zones:
+  path: '/guifi/zones'
+  defaults:
+    _controller: '\Drupal\guifi\Controller\GuifiZoneController::list'
+    _title: 'Guifi Zones'
+  requirements:
+    _permission: 'access content'
