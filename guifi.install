@@ -40,11 +40,13 @@ function guifi_schema() {
          'nick' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => ''),
          'zone_id' => array('type' => 'int',  'size' => 'medium', 'not null' => FALSE, 'comment' => 'foreign key to guifi_zone(id)'),
          'zone_description' => array('type' => 'varchar', 'length' => '255', 'not null' => FALSE),
+         'location_type' => array('type' => 'varchar', 'size' => '10', 'not_null' => 'TRUE', 'default' => 'node'),
          'lat' => array('type' => 'numeric', 'precision' => '10', 'scale' => '6', 'not null' => FALSE),
          'lon' => array('type' => 'numeric', 'precision' => '10', 'scale' => '6', 'not null' => FALSE),
          'elevation' => array('type' => 'int', 'size' => 'tiny', 'not null' => FALSE),
          'notification' => array('type' => 'varchar', 'length' => '1024', 'not null' => TRUE),
          'status_flag' => array('type' => 'varchar', 'length' => '40', 'not null' => TRUE, 'default' => 'Planned'),
+         'project_id' => array('type' => 'int', 'size' => 'medium', 'not_null' => 'FALSE'),
          'stable' => array('type' => 'varchar', 'length' => '25', 'not null' => TRUE, 'default' => 'Yes', 'comment' => 'Yes,No'),
          'graph_server' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, 'default' => 0, 'comment' => 'FK to guifi_services (SNPGraphs)'),
          'user_created' => array('type' => 'int', 'size' => 'medium', 'not null' => TRUE, 'default' => 0),
@@ -58,6 +60,7 @@ function guifi_schema() {
         'zcs_index' => array('zone_id', 'timestamp_created', 'status_flag'),
         'year_index' => array('timestamp_created'),
         'status_index' => array('status_flag'),
+        'project_index' => array('project_id'),
     ),
   );
 
@@ -3409,6 +3412,20 @@ function guifi_update_1046() {
   $items[] = update_sql("UPDATE {guifi_links} SET hybrid = FALSE");
 
   return $items;
+}
+
+function guifi_update_1047() {
+
+  $items = array();
+
+  $items[] = update_sql("ALTER TABLE {guifi_location} " .
+    		"ADD COLUMN location_type VARCHAR(10) NOT NULL DEFAULT 'node' AFTER zone_description," .
+    		"ADD COLUMN project_id INT(11) DEFAULT NULL AFTER status_flag;");
+
+  $items[] = update_sql("ALTER TABLE guifi_location ADD INDEX project_index    USING BTREE (project_id);");
+
+  return $items;
+
 }
 
 ?>
