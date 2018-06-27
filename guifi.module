@@ -2129,7 +2129,7 @@ function guifi_cron() {
     guifi_notify_send();
     variable_set('guifi_notify_last', time());
   }
-
+/*
   // Check for loading statistics
   $last_stats = variable_get('guifi_loadstats_last', array());
   $qry = db_query('SELECT id FROM {guifi_services} WHERE service_type="SNPgraphs"');
@@ -2146,7 +2146,7 @@ function guifi_cron() {
       }
     }
   }
-
+*/
   guifi_purge();
 }
 

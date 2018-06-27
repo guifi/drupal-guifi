@@ -2484,6 +2484,7 @@ function guifi_device_links_print($device,$ltype = '%') {
         $ltotal++;
         $iname_curr = $interface['interface_type'];
       } else {
+        $item = _ipcalc( $ipv4['ipv4'],  $ipv4['netmask']);
         $rows_cable[] = array(($iname_curr != $interface['interface_type']) ? $interface['interface_type'] : null,
                          null, null, null,
                        $ipv4['ipv4'].'/'.$item['maskbits'],

@@ -25,7 +25,7 @@ var GuifiLayer = function(map, url, layers) {
     if (typeof url === "undefined") {
         this.baseURL = url;
     } else {
-        this.baseURL = "http://guifi.net/cgi-bin/mapserv?map=/home/guifi/maps.guifi.net/guifimaps/GMap.map";
+        this.baseURL = "http://guifimaps.guifi.net/cgi-bin/mapserv?map=/var/www/guifimaps/GMap.map";
     }
     if (typeof layers === "undefined") {
         this.layers="Nodes,Links";
