@@ -2273,8 +2273,7 @@ function guifi_device_print_interfaces($device) {
     {
       guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_print_interfaces(ip %s)',$ipv4['ipv4']),$ipv4);
   	  if ($ipv4['ipv4']) {
-        $ip = _ipcalc($ipv4['ipv4'],$ipv4['netmask']);
-        $ipstr = $ipv4['ipv4'].'/'.$ip['maskbits'];
+        $ipstr = $ipv4['ipv4'];
   	  } else
   	    $ipstr = t('n/a');
       $rows_if[] = array($ipstr,$ipv4['netmask']);
