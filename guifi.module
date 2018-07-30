@@ -142,7 +142,7 @@ function guifi_menu() {
     'title' => 'Data to review and Pending actions',
     'description' => 'Clean and review the database and take the appropriate pending actions',
     'page callback' => 'guifi_menu_block_page',
-    'access arguments' => array('access content'),
+    'access arguments' => array('create guifi nodes'),
     'weight' => 1,
   );
   $items['guifi/menu/workflow/usersqueue'] = array(
@@ -150,21 +150,21 @@ function guifi_menu() {
     'description' => 'Track the users assigned to nodes detected as active, and therefore pending for approval',
     'page callback' => 'drupal_goto',
     'page arguments' => array('node/' .guifi_zone_root(). '/view/userqueue'),
-    'access arguments' => array('access content'),
+    'access arguments' => array('create guifi nodes'),
   );
   $items['guifi/menu/workflow/pending'] = array(
     'title' => 'Node queue',
     'description' => 'Track the status of the not active nodes, pending for getting connected',
     'page callback' => 'drupal_goto',
     'page arguments' => array('node/'. guifi_zone_root() .'/view/pending'),
-    'access arguments' => array('access content'),
+    'access arguments' => array('create guifi nodes'),
   );
   $items['guifi/menu/workflow/availability'] = array(
     'title' => 'Availability report',
     'description' => 'Report of the status and availability of all nodes',
     'page callback' => 'drupal_goto',
     'page arguments' => array('node/'. guifi_zone_root() .'/view/availability'),
-    'access arguments' => array('access content'),
+    'access arguments' => array('create guifi nodes'),
   );
     $items['guifi/menu/workflow/datareview'] = array(
     'title' => 'Data review',
@@ -179,14 +179,14 @@ function guifi_menu() {
     'title' => 'IP and Network management tools',
     'description' => 'Utilities toolset for various network addressing and management',
     'page callback' => 'guifi_menu_block_page',
-    'access arguments' => array('access content'),
+    'access arguments' => array('create guifi nodes'),
     'weight' => 2,
   );
   $items['guifi/menu/ip/ipsearch'] = array(
     'title' => 'Search IPv4',
     'description' => 'Query information about assigned IPv4 addresses',
     'page callback' => 'guifi_tools_ip_search',
-    'access arguments' => array('access content'),
+    'access arguments' => array('create guifi nodes'),
     'file' => 'guifi_tools.inc.php',
     'weight' => 1
   );
@@ -194,7 +194,7 @@ function guifi_menu() {
     'title' => 'Available subnetwork range',
     'description' => 'Search for a not used range of network addresses at the database',
     'page callback' => 'guifi_tools_ip_rangesearch',
-    'access arguments' => array('access content'),
+    'access arguments' => array('create guifi nodes'),
     'file' => 'guifi_tools.inc.php',
     'weight' => 2
   );
@@ -210,7 +210,7 @@ function guifi_menu() {
     'title' => 'Search MAC',
     'description' => 'Query information about existing MAC addresses',
     'page callback' => 'guifi_tools_mac_search',
-    'access arguments' => array('access content'),
+    'access arguments' => array('create guifi nodes'),
     'file' => 'guifi_tools.inc.php',
     'weight' => 4
   );
@@ -234,7 +234,7 @@ function guifi_menu() {
     'title' => 'live ping',
     'description' => 'ping to address',
     'page callback' => 'guifi_live_ping',
-    'access arguments' => array('access content'),
+    'access arguments' => array('create guifi nodes'),
     'type' => MENU_CALLBACK,
     'file' => 'guifi_traceroute.inc.php'
   );
@@ -242,7 +242,7 @@ function guifi_menu() {
     'title' => 'live traceroute',
     'description' => 'traceroute to device',
     'page callback' => 'guifi_live_traceroute',
-    'access arguments' => array('access content'),
+    'access arguments' => array('create guifi nodes'),
     'type' => MENU_CALLBACK,
     'file' => 'guifi_traceroute.inc.php'
   );
@@ -1676,7 +1676,7 @@ function guifi_admin_settings() {
     '#type' => 'textfield',
     '#title' => t('URL for WMS service'),
     '#required' => FALSE,
-    '#default_value' => variable_get("guifi_wms_service", 'http://guifi.net/cgi-bin/mapserv?map=/var/www/maps.guifi.net/guifimaps/GMap.map'),
+    '#default_value' => variable_get("guifi_wms_service", 'https://guifimaps.guifi.net/cgi-bin/mapserv?map=/var/www/guifimaps/GMap.map'),
     '#size' => 80,
     '#maxlength' => 1024,
     '#description' => t("URL to call to get WMS guifi mapping services"),
