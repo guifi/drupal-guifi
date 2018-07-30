@@ -698,6 +698,8 @@ function guifi_node_delete($node) {
 
 **/
 function guifi_node_view($node, $teaser = FALSE, $page = FALSE, $block = FALSE) {
+  global $user;
+
   node_prepare($node);
   if ($teaser)
     return $node;
@@ -723,12 +725,23 @@ function guifi_node_view($node, $teaser = FALSE, $page = FALSE, $block = FALSE) 
       )
     ),
     '#weight'=> 1);
-  $node->content['graphs'] = array(
-    '#value'=> theme_guifi_node_graphs_overview($node),
-    '#weight'=> 2);
+
+ if (
+    // TODO: REMOVE NEXT LINE TO ONLY ALLOw NODE NODE OWNERS
+    ((user_access('administer guifi zones')) || ($node->uid == $user->uid)) ||
+    //
+    (($node->uid == $user->uid) and (user_access('edit own guifi nodes'))) ||
+    (in_array($user->uid,guifi_maintainers_load($node->nid,'location','uid'))) ||
+    (in_array($user->uid,guifi_funders_load($node->nid,'location','uid')))
+  ) {
+    $node->content['graphs'] = array(
+      '#value'=> theme_guifi_node_graphs_overview($node),
+      '#weight'=> 2);
+  }
   $node->content['devices'] = array(
     '#value'=> theme_guifi_node_devices_list($node),
     '#weight'=> 3);
+
   $node->content['wdsLinks'] = array(
     '#value'=> theme_guifi_node_links_by_type($node->id,'wds'),
     '#weight'=> 4);
@@ -738,6 +751,7 @@ function guifi_node_view($node, $teaser = FALSE, $page = FALSE, $block = FALSE) 
   $node->content['clientLinks'] = array(
     '#value'=> theme_guifi_node_links_by_type($node->id,'ap/client'),
     '#weight'=> 6);
+
   return $node;
 }
 
@@ -1267,7 +1281,6 @@ function theme_guifi_node_graphs_overview($node,$links = FALSE) {
         'node' => $node->id,
       );
 
-//      $args = sprintf('type=supernode&node=%d&direction=',$node->id);
       $rows[] = array(array(
         'data'=> '<a href='.base_path().'guifi/graph_detail?'.
                  guifi_cnml_args($args,'direction=in').
@@ -1283,9 +1296,6 @@ function theme_guifi_node_graphs_overview($node,$links = FALSE) {
                  '"></a>',
         'align' => 'center'));
 
-//      $rows[] = array(
-//      guifi_cnml_call_service($gs->var['url'],'graph',$args,'direction=in'sprintf('<a href="'.base_path().'guifi/graph_detail?'.$args.'in"><img src="'.$gs->var['url'].'?'.$args.'in"></a>',$node->id));
-//      $rows[] = array(sprintf('<a href="'.base_path().'guifi/graph_detail?'.$args.'out"><img src="'.$gs->var['url'].'?'.$args.'out"></a>',$node->id));
       $ret = array_merge($rows);
     }
   } else {

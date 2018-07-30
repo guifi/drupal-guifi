@@ -2306,6 +2306,8 @@ function guifi_device_print_interfaces($device) {
 
 /* guifi_device_print(): main print function, outputs the device information and call the others */
 function guifi_device_print($device = NULL) {
+  global $user;
+
   if ($device == NULL) {
     print theme('page',t('Not found'), FALSE);
     return;
@@ -2330,9 +2332,20 @@ function guifi_device_print($device = NULL) {
   case 'graphs':
     if (empty($device['interfaces']))
       break;
+
+ if (
+    // TODO: REMOVE NEXT LINE TO ONLY ALLOw NODE DEVICE OWNERS
+    ((user_access('administer guifi zones')) || ($node->uid == $user->uid)) ||
+    //
+    (($node->uid == $user->uid) and (user_access('edit own guifi nodes'))) ||
+    (in_array($user->uid,guifi_maintainers_load($node->nid,'location','uid'))) ||
+    (in_array($user->uid,guifi_funders_load($node->nid,'location','uid')))
+  ) {
+
     // device graphs
     $table = theme('table', array(t('traffic overview')), guifi_device_graph_overview($device));
     $output .= theme('box', t('device graphs'), $table);
+}
     if (arg(4) == 'graphs') break;
   case 'links':
     // links
