@@ -223,7 +223,7 @@ function guifi_node_form(&$node, $form_state) {
     '#maxlength' => 20,
     '#element_validate' => array('guifi_node_nick_validate'),
     '#default_value' => $node->nick,
-    '#description' => t("Unique identifier for this node. Avoid generic names such 'MyNode', use something that really identifies your node.<br />Short name, single word with no spaces, 7-bit chars only, will be used for  hostname, reports, etc."),
+    '#description' => t("Unique identifier for this node. Avoid generic names such 'MyNode', use something that uniquely identifies your node.<br />Short name, single word with no spaces, 7-bit chars only, will be used for  hostname, reports, etc."),
     '#weight' => $form_weight++,
   );
   $form['notification'] = array(
