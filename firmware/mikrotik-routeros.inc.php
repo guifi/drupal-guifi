@@ -136,7 +136,7 @@ function unsolclic_routeros($dev) {
   _outln_comment('SNMP');
   if (( $dev->variable['firmware'] == 'RouterOSv5.x' ) or ( $dev->variable['firmware'] == 'RouterOSv6.x' )) {
      $community = 'trap-community=public';
-     _outln(sprintf('/snmp community set public addresses=0.0.0.0/0'));
+     _outln(sprintf('/snmp community set public addresses=10.0.0.0/8'));
   } else {
     $community = '';
   }
@@ -147,7 +147,7 @@ function unsolclic_routeros($dev) {
   _outln_comment('Guest user');
   _outln('/user');
   _outln(':foreach i in [find group=read] do={/user remove $i;}');
-  _outln('add name="guest" group=read address=0.0.0.0/0 comment="" disabled=no');
+  _outln('add name="guest" group=read address=10.0.0.0/8 comment="" disabled=no');
 
   // Graphing
   _outln_comment();

@@ -2273,8 +2273,7 @@ function guifi_device_print_interfaces($device) {
     {
       guifi_log(GUIFILOG_TRACE,sprintf('function guifi_device_print_interfaces(ip %s)',$ipv4['ipv4']),$ipv4);
   	  if ($ipv4['ipv4']) {
-        $ip = _ipcalc($ipv4['ipv4'],$ipv4['netmask']);
-        $ipstr = $ipv4['ipv4'].'/'.$ip['maskbits'];
+        $ipstr = $ipv4['ipv4'];
   	  } else
   	    $ipstr = t('n/a');
       $rows_if[] = array($ipstr,$ipv4['netmask']);
@@ -2307,6 +2306,8 @@ function guifi_device_print_interfaces($device) {
 
 /* guifi_device_print(): main print function, outputs the device information and call the others */
 function guifi_device_print($device = NULL) {
+  global $user;
+
   if ($device == NULL) {
     print theme('page',t('Not found'), FALSE);
     return;
@@ -2331,9 +2332,20 @@ function guifi_device_print($device = NULL) {
   case 'graphs':
     if (empty($device['interfaces']))
       break;
+
+ if (
+    // TODO: REMOVE NEXT LINE TO ONLY ALLOw NODE DEVICE OWNERS
+    ((user_access('administer guifi zones')) || ($node->uid == $user->uid)) ||
+    //
+    (($node->uid == $user->uid) and (user_access('edit own guifi nodes'))) ||
+    (in_array($user->uid,guifi_maintainers_load($node->nid,'location','uid'))) ||
+    (in_array($user->uid,guifi_funders_load($node->nid,'location','uid')))
+  ) {
+
     // device graphs
     $table = theme('table', array(t('traffic overview')), guifi_device_graph_overview($device));
     $output .= theme('box', t('device graphs'), $table);
+}
     if (arg(4) == 'graphs') break;
   case 'links':
     // links
@@ -2484,6 +2496,7 @@ function guifi_device_links_print($device,$ltype = '%') {
         $ltotal++;
         $iname_curr = $interface['interface_type'];
       } else {
+        $item = _ipcalc( $ipv4['ipv4'],  $ipv4['netmask']);
         $rows_cable[] = array(($iname_curr != $interface['interface_type']) ? $interface['interface_type'] : null,
                          null, null, null,
                        $ipv4['ipv4'].'/'.$item['maskbits'],

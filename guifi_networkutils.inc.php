@@ -63,7 +63,7 @@ function _ipcalc($ip,$mask) {
         $octets[$obj]['binary'] .= str_repeat("0",8-strlen(decbin($val))).decbin($val);
       } else {
         guifi_log(GUIFILOG_NONE,'_ipcalc '.$ip. ' mask '.$mask.' invalid('.$obj.')', NULL);
-        print "Error: Item '$obj' invàlid";
+        print "Error: Item '$obj' invalid";
         return -1;
       }
     }
