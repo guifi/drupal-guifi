@@ -1488,7 +1488,7 @@ function theme_guifi_zone_nodes($node,$links = TRUE) {
     SELECT l.id,l.nick, l.notification, l.zone_description,
       l.status_flag, count(*) radios
     FROM {guifi_location} l LEFT JOIN {guifi_radios} r ON l.id = r.nid
-    WHERE l.zone_id = %d
+    WHERE l.zone_id = %d AND l.location_type = "node"
     GROUP BY 1,2,3,4,5
     ORDER BY radios DESC, l.nick',
     50,0,

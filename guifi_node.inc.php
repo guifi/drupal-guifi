@@ -15,6 +15,11 @@ function guifi_node_access($op, $node) {
   if (is_numeric($node))
     $node = node_load(array('nid' => $node));
 
+  $result = db_fetch_array(db_query('SELECT location_type FROM {guifi_location} WHERE id = %d', $node->nid));
+
+  if ($result[0] != 'node')
+    return FALSE;
+
   if ($op == 'view')
     return TRUE;
 
@@ -121,7 +126,7 @@ function guifi_node_load($node) {
   else
     $k = $node;
 
-  $node = db_fetch_object(db_query("SELECT * FROM {guifi_location} WHERE id = '%d'", $k));
+  $node = db_fetch_object(db_query("SELECT * FROM {guifi_location} WHERE id = '%d' AND location_type = 'node'", $k));
 
   $node->maintainers=guifi_maintainers_load($node->id,'location');
   $node->funders=guifi_funders_load($node->id,'location');
