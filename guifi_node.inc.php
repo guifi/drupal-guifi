@@ -15,11 +15,6 @@ function guifi_node_access($op, $node) {
   if (is_numeric($node))
     $node = node_load(array('nid' => $node));
 
-  $result = db_fetch_array(db_query('SELECT location_type FROM {guifi_location} WHERE id = %d', $node->nid));
-
-  if ($result[0] != 'node')
-    return FALSE;
-
   if ($op == 'view')
     return TRUE;
 
