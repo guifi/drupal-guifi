@@ -92,7 +92,7 @@ var data =
       }
     }
   ],
-  selectedOverlayTiles: [
+  selectedOverlayTiles: [0,1
 
   ],
   selectedBaseTile: 0
@@ -102,7 +102,7 @@ var map = null;
 
 if(Drupal.jsEnabled) {
     $(document).ready(function(){
-        draw_map();
+        drawMap();
     });
 }
 
@@ -133,7 +133,21 @@ function loadTiles () {
   controlLayers.addTo(map);
 }
 
-function draw_map() {
-  map = L.map('map').setView([51.505, -0.09], 13);
+function drawMap() {
+  let maxy = document.getElementById("maxy").value;
+  let maxx = document.getElementById("maxx").value;
+  let miny = document.getElementById("miny").value;
+  let minx = document.getElementById("minx").value;
+
+  // define rectangle geographical bounds
+  let bounds = [[maxy, maxx], [miny, minx]];
+
+  map = L.map('map').fitBounds(bounds);
+  drawBoxZone(bounds);
   loadTiles();
+}
+
+function drawBoxZone (bounds) {
+  // add rectangle passing bounds and some basic styles
+  L.rectangle(bounds, {color: '#000000', weight: 5, opacity: 0.4, fillOpacity: 0.0, }).addTo(map);
 }
