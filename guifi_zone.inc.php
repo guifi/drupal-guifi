@@ -637,7 +637,7 @@ function guifi_zone_hidden_map_fileds($node) {
  */
 function guifi_zone_simple_map($node) {
   if (guifi_gmap_key()) {
-    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_zone.js','module');
+    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_leaflet.js','module');
     $output = '<div id="map" style="width: 100%; height: 380px; margin:5px;"></div>';
     $output .= guifi_zone_hidden_map_fileds($node);
   } else {
@@ -1535,7 +1535,7 @@ function theme_guifi_zone_map($node) {
   $node = node_load(array('nid' => $node->id));
 
   if (guifi_gmap_key()) {
-    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_zone.js','module');
+    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_leaflet.js','module');
     $output = '<div id="map" style="width: 100%; height: 640px; margin:5px;"></div>';
     $output .= guifi_zone_hidden_map_fileds($node);
   } else {

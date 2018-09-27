@@ -2160,7 +2160,8 @@ function guifi_coord_dtodms($coord){
 
 function guifi_gmap_key() {
   drupal_add_js(drupal_get_path('module', 'guifi').'/js/wms-gs-2_0_0.js','module');
-  drupal_set_html_head('<script src="//maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places' .
+  drupal_add_js(drupal_get_path('module', 'guifi').'/js/leaflet.js','module');
+  drupal_set_html_head('<script src="//maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places&3.22&key=AIzaSyD2HdZ9zq_cEyFdTFsZ_aNWI6QkxK4wwYs' .
       '" type="text/javascript"></script>');
   return TRUE;
 }
