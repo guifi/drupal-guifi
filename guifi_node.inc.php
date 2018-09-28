@@ -340,7 +340,8 @@ function guifi_node_form(&$node, $form_state) {
   );
 
   if (guifi_gmap_key()) {
-    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_node.js','module');
+    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_leaflet_common.js','module');
+    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_leaflet_node.js','module');
     $form['position']['GMAP'] = array(
       '#type' => 'item',
       '#title' => t('Map'),
@@ -1240,7 +1241,8 @@ function theme_guifi_node_data($node,$links = FALSE) {
 
 function theme_guifi_node_map($node) {
   if (guifi_gmap_key()) {
-    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_gmap_point.js','module');
+    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_leaflet_common.js','module');
+    drupal_add_js(drupal_get_path('module', 'guifi').'/js/guifi_leaflet_point.js','module');
     $output = '<div id="map" style="width: 100%; height: 340px; margin:5px;"></div>';
     $output .= guifi_node_hidden_map_fileds($node);
   } else {

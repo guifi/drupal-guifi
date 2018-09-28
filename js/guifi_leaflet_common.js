@@ -6,7 +6,7 @@ var data =
         tiles: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
         options: {
           maxZoom: 20,
-          attribution: 'Guifi FO <a href="http://openstreetmap.org">&copy; OpenStreetMap</a>, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
+          attribution: '<a href="http://openstreetmap.org">&copy; OpenStreetMap</a>, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
         }
       },
       {
@@ -49,7 +49,7 @@ var data =
   overlayTiles: [
     {
       name: 'Guifi.net nodes',
-      tiles: 'https://www.guifi.net/cgi-bin/mapserv?map=/var/www/guifimaps/GMap.map',
+      tiles: 'https://guifimaps.guifi.net/cgi-bin/mapserv?map=/var/www/guifimaps/GMap.map',
       options: {
         format: 'image/png',
         transparent: true,
@@ -100,12 +100,6 @@ var data =
 
 var map = null;
 
-if(Drupal.jsEnabled) {
-    $(document).ready(function(){
-        drawMap();
-    });
-}
-
 function loadTiles () {
   let baseMaps = {}
   for (let x in data.baseTiles) {
@@ -133,7 +127,7 @@ function loadTiles () {
   controlLayers.addTo(map);
 }
 
-function drawMap() {
+function drawMapZone () {
   let maxy = document.getElementById("maxy").value;
   let maxx = document.getElementById("maxx").value;
   let miny = document.getElementById("miny").value;
@@ -145,6 +139,45 @@ function drawMap() {
   map = L.map('map').fitBounds(bounds);
   drawBoxZone(bounds);
   loadTiles();
+}
+
+function drawMapPoint () {
+  let lat = document.getElementById('lat').value;
+  let lon = document.getElementById('lon').value;
+
+  map = L.map('map');
+  map.setView(L.latLng(lat, lon), 16);
+
+  let marker = L.marker([lat, lon]).addTo(map);
+  loadTiles();
+}
+
+function drawMapNode () {
+  let lat = document.getElementById('edit-lat').value;
+  let lon = document.getElementById('edit-lon').value;
+
+  map = L.map('map');
+  map.setView(L.latLng(lat, lon), 16);
+
+  loadTiles();
+
+  let marker = L.marker([lat, lon], {draggable: true}).addTo(map);
+
+  marker.on('move', onMoveMarkerNode);
+}
+
+function onMoveMarkerNode (event) {
+  document.getElementById('edit-latdeg').value = event.latlng.lat;
+  document.getElementById('edit-londeg').value = event.latlng.lng;
+  document.getElementById('edit-latmin').value = '';
+  document.getElementById('edit-lonmin').value = '';
+  document.getElementById('edit-latseg').value = '';
+  document.getElementById('edit-lonseg').value = '';
+
+  if (map.getZoom() <= 15) {
+      map.setCenter(event.latLng);
+      map.setView(map.getZoom() + 3);
+  }
 }
 
 function drawBoxZone (bounds) {
