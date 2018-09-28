@@ -1526,7 +1526,7 @@ function guifi_devel_modelfeature_form($form_state, $id) {
     '#default_value' => $feature->tipus,
     '#size' => 32,
     '#maxlength' => 32,
-    '#description' => t('Feature type, please, use a clear and short description.'),
+    '#description' => t('VALID VALUES: "bool" , "numeric" , "text" and "rang". Feature type, please, use a clear and short description.'),
     '#prefix' => '<td>',
     '#suffix' => '</td></tr></table>',
     '#weight' => 1,
