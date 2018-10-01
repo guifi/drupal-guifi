@@ -787,6 +787,11 @@ function guifi_zone_insert($node) {
   $to_mail = explode(',',$node->notification);
 
   // $node->maintainer=guifi_maintainers_save($node->maintaners);
+  $master_id = explode("-",$node->master);
+  $node->master = $master_id['0'];
+
+  if (empty($node->proxy_id))
+  $node->proxy_id = '0';
 
   $nzone = _guifi_db_sql(
     'guifi_zone',
@@ -835,6 +840,13 @@ function guifi_zone_update($node) {
   $node->miny = (float)$node->miny;
   $node->maxy = (float)$node->maxy;
   $to_mail = explode(',',$node->notification);
+
+  $master_id = explode("-",$node->master);
+  $node->master = $master_id['0'];
+
+  if (empty($node->proxy_id))
+  $node->proxy_id = '0';
+
   $nzone = _guifi_db_sql(
     'guifi_zone',
     array('id' => $node->nid),
@@ -1067,6 +1079,9 @@ function guifi_zone_childs($zid) {
 
 function guifi_zone_childs_tree($parents, $maxdepth = 1, &$depth = 0) {
 
+if  (empty($parents))
+return $childs;
+
   if (is_numeric($parents))
     $parents = array($parents => array('depth' => 0,'master' => 0));
   guifi_log(GUIFILOG_TRACE,'function guifi_zone_childs_tree(childs)',$parents);
@@ -1098,7 +1113,7 @@ function guifi_zone_childs_tree($parents, $maxdepth = 1, &$depth = 0) {
 
 function guifi_zone_childs_tree_depth($parents, $maxdepth = 1, &$depth = 0) {
 
-  if (is_numeric($parents))
+if ((is_numeric($parents) OR empty($parents)))
     $parents = array($parents => array('depth' => 0,'master' => 0));
   guifi_log(GUIFILOG_TRACE,'function guifi_zone_childs_tree_depth(childs)',$parents);
 

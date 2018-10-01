@@ -251,7 +251,7 @@ function guifi_ahah_select_zone() {
       drupal_json(array('status' => FALSE, 'data' => ''));
     }
     exit();
-    
+ 
   } else {
     $matches = array();
     $string = strtoupper(arg(3));
@@ -259,7 +259,7 @@ function guifi_ahah_select_zone() {
       'SELECT ' .
       '  CONCAT(z.id,"-",z.title) str, m.title master '.
       'FROM {guifi_zone} z, {guifi_zone} m ' .
-      'WHERE z.master=m.id '.
+      'WHERE z.master=m.id OR z.master=0 '.
       '  AND CONCAT(z.id,"-",upper(z.title)) LIKE "%'. $string .'%"';
 
     $qry = db_query($query);
