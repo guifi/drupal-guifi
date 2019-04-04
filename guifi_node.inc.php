@@ -123,11 +123,17 @@ function guifi_node_load($node) {
 
   $node = db_fetch_object(db_query("SELECT * FROM {guifi_location} WHERE id = '%d' AND location_type = 'node'", $k));
 
-  $node->maintainers=guifi_maintainers_load($node->id,'location');
-  $node->funders=guifi_funders_load($node->id,'location');
-
-  if (!$node->id == NULL)
+  if ($node->id != NULL) {
+    $maintainer = guifi_maintainers_load($node->id,'location');
+    $funders = guifi_funders_load($node->id,'location');
+    if ($maintainer != '') {
+      $node->maintainers = $maintainer;
+    }
+    if ($funders != '') {
+      $node->funders = $funders;
+    }
     return $node;
+  }
 
   return FALSE;
 }
@@ -456,9 +462,9 @@ function guifi_node_form(&$node, $form_state) {
     '#size' => 5,
     '#length' => 20,
     '#maxlength' => 20,
-    '#default_value' => $node->elevation,
+    '#default_value' => ($node->elevation ? $node->elevation : '5'),
     '#element_validate' => array('guifi_elevation_validate'),
-    '#description' => t("Antenna height over the floor level."),
+    '#description' => t("Antenna height over the floor level in meters."),
     '#weight' => 10,
   );
 
@@ -542,14 +548,16 @@ function guifi_node_get_service($id, $type ,$path = FALSE) {
 function guifi_node_validate($node,$form) {
   guifi_validate_nick($node->nick);
 
+  $nzid = explode('-',$node->zone_id);
   // not at root zone
-  if (($node->zone_id == 0) or ($node->zone_id == guifi_zone_root())){
+  if (($nzid[0] == 0) or ($nzid[0] == guifi_zone_root())){
     form_set_error('zone_id',
       t('Can\'t be assigned to root zone, please assign the node to an appropiate zone.'));
-  }else{
+  } else {
     $nz=0;
-    guifi_zone_childs_tree_depth($node->zone_id, 3, $nz);
-    if($nz>2){
+    guifi_zone_childs_tree($nzid[0], 3, $nz);
+
+    if( $nz > 1 ){
       form_set_error('zone_id',
         t('Can\'t be assigned to parent zone, please assign the node to an final zone.'));
     }

@@ -627,13 +627,12 @@ function guifi_vinterface_form($iClass, $vinterface, $first_port = true, $eInter
   if (empty($vinterface[interface_type]))
     if (isset($vinterface[iname]))
       $vinterface[interface_type] = $vinterface[iname];
-    else 
-      $vinterface[interface_type] = substr($iType,0,4).($vinterface[id]);
+    else
+      $vinterface[interface_type] = substr($iType,0,4).($vinterface['id']);
 
   $prefix = ''; $suffix = '';
   guifi_log(GUIFILOG_TRACE,'function guifi_vinterface_form (vinterface)',$vinterface);
 
- 
 /*  if ($vinterface['deleted']) {
     $form['deleted'] = array(
       '#type'         => 'hidden',

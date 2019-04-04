@@ -109,7 +109,6 @@ function guifi_gml_links($zid,$type) {
     "HAVING count(*) = 2");
 
   $zchilds = guifi_zone_childs($zid);
-  $zchilds[$zid] = 'Top';
 
   while ($row = db_fetch_object($res)) {
 

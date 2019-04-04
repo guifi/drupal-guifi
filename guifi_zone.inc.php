@@ -7,6 +7,7 @@
 /**
  * Implementation of hook_access().
  */
+
 function guifi_zone_access($op, $node) {
   global $user;
 
@@ -64,14 +65,11 @@ function guifi_zone_load($node) {
     if ($node->type != 'guifi_zone')
       return FALSE;
   } else
-  if (is_numeric($node))
-    $k = $node;
-
+    return FALSE;
 
   $loaded = db_fetch_object(
     db_query("
-    SELECT * FROM {guifi_zone} WHERE id = '%d'",
-    $k));
+    SELECT * FROM {guifi_zone} WHERE id = '%d'", $k));
 
   if (($loaded->nick == '') or ($loaded->nick == NULL))
     $loaded->nick = guifi_abbreviate($loaded->title);
@@ -82,7 +80,6 @@ function guifi_zone_load($node) {
        ($loaded->maxx==0) and
        ($loaded->maxy==0) ) {
     $coords = guifi_zone_get_coords($loaded->master);
-
     $loaded->minx = $coords['minx'];
     $loaded->miny = $coords['miny'];
     $loaded->maxx = $coords['maxx'];
@@ -740,24 +737,25 @@ function guifi_zone_validate($node) {
               array('%s' => $rootZone->title)));
      }
   }
-
+  if (!empty($node->nid)) {
   // check if master zone is a child
- $childs = guifi_zone_childs($node->nid);
-  foreach ( $childs as $key => $child) {
-    if ( $child == $node->master ) {
-      $childname = db_fetch_object(db_query(
+    $childs = guifi_zone_childs($node->nid);
+    foreach ( $childs as $key => $child) {
+      if ( $child == $node->master ) {
+        $childname = db_fetch_object(db_query(
            'SELECT title
             FROM {guifi_zone}
             WHERE id = %s', $child));
-       form_set_error('master',
-         t("You can't use a child zone <strong>%child</strong> from %zone as master!!!", array('%child' => $childname->title, '%zone' => $node->title)));
+         form_set_error('master',
+           t("You can't use a child zone <strong>%child</strong> from %zone as master!!!", array('%child' => $childname->title, '%zone' => $node->title)));
+      }
     }
-  }
+
   // check that master is not being assigned to itself
-  if (!empty($node->nid))
-  if ($node->master == $node->nid)
+    if ($node->master == $node->nid)
     form_set_error('master',
       t("Master zone can't be set to itself"));
+  }
 
   // check that zone area is consistent
   if ($node->minx > $node->maxx)
@@ -798,9 +796,8 @@ function guifi_zone_insert($node) {
     array('id' => $node->id),(array)$node,$log,$to_mail);
 
   guifi_maintainers_save($nzone,'zone',$node->maintainers);
-
-  guifi_notify(
-    explode(',',$node->notification),
+  $to = $node->notification;
+  guifi_notify($to,
     t('A new zone %nick-%name has been created',
       array('%nick' => $node->nick,'%name' => $node->title)),
     $log);
@@ -856,8 +853,8 @@ function guifi_zone_update($node) {
 
   guifi_maintainers_save($node->nid,'zone',$node->maintainers);
 
-  guifi_notify(
-    explode(',',$node->notification),
+  $to = explode(',',$node->notification);
+  guifi_notify($to,
     t('Zone %nick-%name has been updated',
       array('%nick' => $node->nick,'%name' => $node->title)),
     $log);
@@ -893,6 +890,7 @@ function guifi_zone_delete(&$node) {
 
   $to = explode(',',$node->notification);
   $to[] = variable_get('guifi_contact','webmestre@guifi.net');
+
   if (!$delete) {
     $messages = drupal_get_messages(NULL, FALSE);
     guifi_notify(
@@ -1079,43 +1077,13 @@ function guifi_zone_childs($zid) {
 
 function guifi_zone_childs_tree($parents, $maxdepth = 1, &$depth = 0) {
 
-if  (empty($parents))
-return $childs;
+  if  (empty($parents))
+    return $childs;
 
   if (is_numeric($parents))
     $parents = array($parents => array('depth' => 0,'master' => 0));
+
   guifi_log(GUIFILOG_TRACE,'function guifi_zone_childs_tree(childs)',$parents);
-
-  // check only current depth
-  $current_depth = array();
-  foreach ($parents as $k => $v) {
-    if ($v['depth'] == $depth)
-      $current_depth[] = $k;
-  }
-  $depth++;
-
-  $result = db_query('SELECT z.id, z.master ' .
-                     'FROM {guifi_zone} z ' .
-                     'WHERE z.master IN ('.implode(',',$current_depth).')');
-
-  $childs = $parents;
-  $found = FALSE;
-  while ($child = db_fetch_object($result)) {
-    $childs[$child->id] = array('depth' => $depth,'master' => $child->master);
-    $found = TRUE;
-  }
-
-  if ($found and ($depth < $maxdepth))
-    $childs = guifi_zone_childs_tree($childs,$maxdepth,$depth);
-
-  return $childs;
-}
-
-function guifi_zone_childs_tree_depth($parents, $maxdepth = 1, &$depth = 0) {
-
-if ((is_numeric($parents) OR empty($parents)))
-    $parents = array($parents => array('depth' => 0,'master' => 0));
-  guifi_log(GUIFILOG_TRACE,'function guifi_zone_childs_tree_depth(childs)',$parents);
 
   // check only current depth
   $current_depth = array();
