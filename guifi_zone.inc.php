@@ -65,7 +65,10 @@ function guifi_zone_load($node) {
     if ($node->type != 'guifi_zone')
       return FALSE;
   } else
-    return FALSE;
+    if (is_numeric($node))
+      $k = $node;
+// TODO
+//    return FALSE;
 
   $loaded = db_fetch_object(
     db_query("
@@ -148,7 +151,7 @@ function guifi_zone_root() {
   $root = db_fetch_object(db_query(
     "SELECT id " .
     "FROM {guifi_zone} " .
-    "WHERE master = 0"));
+    "WHERE master = 9999999"));
   return $root->id;
 }
 
@@ -724,11 +727,11 @@ function guifi_emails_validate($element, &$form_state) {
 function guifi_zone_validate($node) {
 
   // if node master is root, check that there is not another zone as root
-  if ($node->master == 0) {
+  if ($node->master == 9999999) {
       $qry = db_query(
            'SELECT id, title, nick
             FROM {guifi_zone}
-            WHERE master = 0');
+            WHERE master = 9999999');
      while ($rootZone = db_fetch_object($qry))
      {
         if ($node->nid != $rootZone->id)
@@ -786,7 +789,10 @@ function guifi_zone_insert($node) {
 
   // $node->maintainer=guifi_maintainers_save($node->maintaners);
   $master_id = explode("-",$node->master);
-  $node->master = $master_id['0'];
+  if ($master_id['0'] != 0)
+    $node->master = $master_id['0'];
+  else
+     $node->master = 9999999;
 
   if (empty($node->proxy_id))
   $node->proxy_id = '0';

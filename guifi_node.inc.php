@@ -557,7 +557,7 @@ function guifi_node_validate($node,$form) {
     $nz=0;
     guifi_zone_childs_tree($nzid[0], 3, $nz);
 
-    if( $nz > 1 ){
+    if( $nz > 2 ){
       form_set_error('zone_id',
         t('Can\'t be assigned to parent zone, please assign the node to an final zone.'));
     }
