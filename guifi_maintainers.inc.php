@@ -133,8 +133,10 @@ function guifi_maintainers_links($maintainers) {
 function guifi_maintainers_form($node,&$form_weight) {
 
   guifi_log(GUIFILOG_TRACE, 'function guifi_maintainers_form(mantainers 1)', $node->maintainers);
+
+  if ( $node->maintainers != '')
   foreach ($node->maintainers as $km => $vm)
-    if (($vm['new'] and ($vm['maintainer'])=='')) 
+    if (($vm['new'] and ($vm['maintainer'])==''))
       unset($node->maintainers[$km]);
 
   $form['maintainers'] = array(
@@ -149,7 +151,7 @@ function guifi_maintainers_form($node,&$form_weight) {
     '#attributes'  => array('class'=>'maintainers'),
     '#weight'      => $form_weight++,
     '#tree'        => TRUE,
-  );    
+  );
 
   $maintainer_id=0;
   $nmaintainers = count($node->maintainers);
