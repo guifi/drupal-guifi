@@ -1805,4 +1805,9 @@ function guifi_install() {
 
 }
 
+  // ROOT ZONE ID 9999999
+  update_sql("INSERT INTO `guifi_zone` (`id`, `title`, `nick`, `body`, `master`, `graph_server`, `proxy_id`, `voip_id`, `time_zone`, `dns_servers`, `ntp_servers`, `homepage`, `notification`, `ospf_zone`, `minx`, `miny`, `maxx`, `maxy`, `local`, `nodexchange_url`, `refresh`, `remote_server_id`, `host_nodes`, `weight`, `user_created`, `user_changed`, `timestamp_created`, `timestamp_changed`) VALUES
+    (9999999, 'ROOT', 'ROOT', '', 0, '', 0, 0, '+01 2 2', '', '', '', 'webmestre@guifi.net', '', '-70.000000', '-50.000000', '70.000000', '50.000000', 'Yes', NULL, NULL, NULL, 0, 0, 1, 0, 0, 0);");
+
+
 ?>
