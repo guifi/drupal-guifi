@@ -3,7 +3,7 @@ var GWMSTileLayer = function() {
     this.WGS84_ECCENTRICITY = 0.0818191913108718138;
 }
 
-GWMSTileLayer.prototype = { 
+GWMSTileLayer.prototype = {
 
     dd2MercMetersLng: function(longitude) {
         return this.WGS84_SEMI_MAJOR_AXIS * (longitude * Math.PI / 180.0);
@@ -22,7 +22,7 @@ var GuifiLayer = function(map, url, layers) {
     this.map = map;
     this.tileSize = new google.maps.Size(256, 256);
 
-    if (typeof url === "undefined") {
+    if (url != null) {
         this.baseURL = url;
     } else {
         this.baseURL = "http://guifimaps.guifi.net/cgi-bin/mapserv?map=/var/www/guifimaps/GMap.map";
@@ -32,7 +32,7 @@ var GuifiLayer = function(map, url, layers) {
     } else {
         this.layers=layers;
     }
-     
+
     this.overlay = new google.maps.ImageMapType( {
 
         name: "guifi.net",

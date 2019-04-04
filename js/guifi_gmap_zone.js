@@ -13,7 +13,7 @@ if(Drupal.jsEnabled) {
 function draw_map() {
 
     var divmap = document.getElementById("map");
-    var baseURL = document.getElementById("guifi-wms").value
+    var baseURL = document.getElementById("guifi-wms").value;
 
     opts = {
         center: new google.maps.LatLng(41.974175, 2.238118),
