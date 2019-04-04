@@ -640,10 +640,8 @@ function guifi_get_firmware($id) {
     foreach($m as $v)
       $managed[$v] = $v;
     $firmware->managed = $managed;
-  } else
-    $firmware->managed = array();
-  guifi_log(GUIFILOG_TARCE,'function guifi_get_firmware(managed)',$firmware->managed);
-
+    guifi_log(GUIFILOG_TARCE,'function guifi_get_firmware(managed)',$firmware->managed);
+  }
   return $firmware;
 }
 
@@ -2160,8 +2158,7 @@ function guifi_coord_dtodms($coord){
 
 function guifi_gmap_key() {
   drupal_add_js(drupal_get_path('module', 'guifi').'/js/wms-gs-2_0_0.js','module');
-  drupal_set_html_head('<script src="//maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places' .
-      '" type="text/javascript"></script>');
+  drupal_set_html_head('<script src="//maps.googleapis.com/maps/api/js?sensor=false&amp;libraries=places&key=' . variable_get('guifi_gmap_key', '') . '" type="text/javascript"></script>');
   return TRUE;
 }
 
