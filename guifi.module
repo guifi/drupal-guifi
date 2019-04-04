@@ -800,62 +800,7 @@ function guifi_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_LOCAL_TASK
   );
-// TODO:
-/*
-  $items['node/%guifi_service/view/proxyusers'] = array(
-    'title' => 'users',
-    'page callback' => 'guifi_users_node_list',
-    'page arguments' => array(1),
-    'access callback' => 'user_access',
-    'access arguments' => array('create guifi nodes'),
-    'type' => MENU_LOCAL_TASK
-  );
-*/
 
-//  TODO: To be deleted in the future to avoid include in the robots.txt
-// exclusion lists. In the future, will be /guifi/export/<service>/<export_type>
-  $items['node/%guifi_service/view/passwd'] = array(
-    'title' => 'passwd',
-    'page callback' => 'guifi_users_dump_passwd',
-    'page arguments' => array(1),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK
-  );
-  $items['node/%guifi_service/view/federated'] = array(
-    'title' => 'federated',
-    'page callback' => 'guifi_users_dump_federated',
-    'page arguments' => array(1),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK
-  );
-  $items['node/%guifi_service/view/federated_md5'] = array(
-    'title' => 'federated_md5',
-    'page callback' => 'guifi_users_dump_federated_md5',
-    'page arguments' => array(1),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK
-  );
-  $items['node/%guifi_service/view/ldif'] = array(
-    'title' => 'ldif',
-    'page callback' => 'guifi_users_dump_ldif',
-    'page arguments' => array(1),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK
-   );
-
-   // New menu entries to substitute old entries
-   $items['guifi/export/%guifi_service/passwd'] = array(
-    'title' => 'passwd',
-    'page callback' => 'guifi_users_dump_passwd',
-    'page arguments' => array(2),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK
-  );
    $items['guifi/export/%guifi_service/federation'] = array(
     'title' => 'federation',
     'page callback' => 'dump_guifi_proxy_federation',
@@ -864,41 +809,6 @@ function guifi_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK
   );
-  $items['guifi/export/%guifi_service/federated'] = array(
-    'title' => 'federated',
-    'page callback' => 'guifi_users_dump_federated',
-    'page arguments' => array(2),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK
-  );
-  $items['guifi/export/%guifi_service/federated_md5'] = array(
-    'title' => 'federated_md5',
-    'page callback' => 'guifi_users_dump_federated_md5',
-    'page arguments' => array(2),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK
-  );
-  $items['guifi/export/%guifi_service/ldif'] = array(
-    'title' => 'ldif',
-    'page callback' => 'guifi_users_dump_ldif',
-    'page arguments' => array(2),
-    'access callback' => 'user_access',
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK
-   );
-
-
-
-/*
-   $items['guifi'] = array(
-     'title' => 'guifi menu page',
-     'page callback' => 'guifi_main',
-     'access callback' => 'user_access',
-     'access arguments' => array('access content'),
-     'type' => MENU_LOCAL_TASK
-   ); */
 
   // Devices menus
   $items['guifi/device/add/%guifi_node/%'] = array(
@@ -1257,20 +1167,6 @@ function guifi_menu() {
     'type' => MENU_CALLBACK
   );
 
-//  $items['guifi/nodexchange/%'] = array(
-//    'title' => 'export zone in nodeXchange format',
-//    'page callback' => 'guifi_nodexchange',
-//    'page arguments' => array(2),
-//    'access arguments' => array('access content'),
-//    'type' => MENU_CALLBACK
-//  );
-//  $items['guifi/nodexchange/%/%'] = array(
-//    'title' => 'export zone in nodeXchange format',
-//    'page callback' => 'guifi_nodexchange',
-//    'page arguments' => array(2, 3),
-//    'access arguments' => array('access content'),
-//    'type' => MENU_CALLBACK
-//  );
   $items['guifi/gml/%'] = array(
     'title' => 'export zone in gml format',
     'page callback' => 'guifi_gml',
@@ -1282,13 +1178,6 @@ function guifi_menu() {
     'title' => 'export zone in gml format',
     'page callback' => 'guifi_gml',
     'page arguments' => array(2, 3),
-    'access arguments' => array('access content'),
-    'type' => MENU_CALLBACK
-  );
-  $items['guifi/mrtg/%'] = array(
-    'title' => 'generate mrtg config file',
-    'page callback' => 'guifi_mrtg',
-    'page arguments' => array(2),
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK
   );
@@ -2027,15 +1916,6 @@ function guifi_link($type, $node = 0) {
   $links = array();
 
   if ($type == "node" && $node->type == "guifi_zone") {
-    $links['mrtg'] = array(
-      'title' => t('create mrtg config'),
-      'href' => "guifi/mrtg/$node->nid",
-      'attributes' => array(
-        'title' => t('get an mrtg configuration file for this zone')));
-//    $links['nodeXchange'] = array(
-//      'title'=> t('nodeXchange'),
-//      'href' => "guifi/nodexchange/$node->nid",
-//      'attributes' => array('title' => t('export zone in nodeXchange format')));
     $links['guifiproxy'] = array(
       'title' => t('guifiproxy'),
       'href' => "guifi/csvproxy/$node->nid",
