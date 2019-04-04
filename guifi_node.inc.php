@@ -62,7 +62,7 @@ function guifi_node_ariadna($node, $nlink = 'node/%d',$dlink = 'guifi/device/%d'
   $ret[] = l(t('Main menu'),'guifi');
 
   foreach (array_reverse(guifi_zone_get_parents($node->zone_id)) as $parent)
-  if ($parent > 0) {
+  if ($parent >0 && $parent != '9999999') {
     $parentData = db_fetch_array(db_query(
       'SELECT z.id, z.title ' .
       'FROM {guifi_zone} z ' .

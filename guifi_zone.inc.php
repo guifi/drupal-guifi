@@ -953,7 +953,7 @@ function guifi_zone_ariadna($id = 0, $link = 'node/%d') {
   $ret[] = l(t('Home'), NULL);
   $ret[] = l(t('Main menu'),'guifi');
   foreach (array_reverse(guifi_zone_get_parents($id)) as $parent)
-  if ($parent > 0) {
+  if ($parent >0 && $parent != '9999999') {
     $parentData = db_fetch_array(db_query(
       'SELECT z.id, z.title ' .
       'FROM {guifi_zone} z ' .
