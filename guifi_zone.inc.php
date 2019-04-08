@@ -192,6 +192,13 @@ function guifi_zone_select_field($zid,$fname) {
     $row = db_fetch_object($result);
     $parent = $row->master;
 
+    if ($row->zid == '9999999') {
+      continue;
+    }
+    if ($row->zid == '0') {
+      $parent = $master;
+      continue;
+    }
     if ($row->zid == $zid) {
       $master = $parent;
       continue;
@@ -202,19 +209,27 @@ function guifi_zone_select_field($zid,$fname) {
 
   $parents = array_reverse($parents, TRUE);
 
-  $lzones['0'] = t('(root zone)');
+  $zroot = guifi_zone_root();
+
+  $lzones[$zroot] = t('(root zone)');
   $ident = $c;
   foreach ($parents as $k => $value) {
     $lzones[$k] = str_repeat('-',($c+1)-$ident).$value;
     $ident--;
   }
 
+  if ($zid == '') {
+    $zid = guifi_zone_root();
+    $master = '9999999';
+  }
 
+/*
   ob_start();
   print "<br />Zid: $zid Master: $master <br />";
   print_r($lzones);
   $txt = ob_get_clean();
   ob_end_clean();
+*/
 
   $has_peers = FALSE;
   $has_childs = FALSE;
