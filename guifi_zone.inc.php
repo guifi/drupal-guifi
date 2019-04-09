@@ -860,7 +860,10 @@ function guifi_zone_update($node) {
   $to_mail = explode(',',$node->notification);
 
   $master_id = explode("-",$node->master);
-  $node->master = $master_id['0'];
+  if ($master_id['0'] != '')
+    $node->master = $master_id['0'];
+  else
+   $node->master = '9999999';
 
   if (empty($node->proxy_id))
   $node->proxy_id = '0';
