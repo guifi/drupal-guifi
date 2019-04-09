@@ -171,7 +171,7 @@ function guifi_zone_autocomplete_field($zid,$fname) {
      '#title' => t($title),
      '#description' => t('Find and select the appropriate zone'),
      '#size' => 80,
-     '#default_value'=> ($zid!='') ?
+     '#default_value'=> ($zid != '' and $zid != '9999999') ?
          $zid.'-'.guifi_get_zone_name($zid) : NULL,
      '#maxsize'=> 256,
      '#autocomplete_path' => 'guifi/js/select-zone',
@@ -742,7 +742,7 @@ function guifi_emails_validate($element, &$form_state) {
 function guifi_zone_validate($node) {
 
   // if node master is root, check that there is not another zone as root
-  if ($node->master == 9999999) {
+  if ($node->master == '9999999' OR $node->master == '') {
       $qry = db_query(
            'SELECT id, title, nick
             FROM {guifi_zone}
