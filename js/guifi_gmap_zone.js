@@ -7,7 +7,7 @@ var marker_move ;
 if(Drupal.jsEnabled) {
     $(document).ready(function(){
         draw_map();
-    }); 
+    });
 }
 
 function draw_map() {
@@ -20,7 +20,7 @@ function draw_map() {
         zoom: 2,
         mapTypeControl: true,
         mapTypeControlOptions: {
-            mapTypeIds: [ 
+            mapTypeIds: [
                           google.maps.MapTypeId.ROADMAP,
                           google.maps.MapTypeId.TERRAIN,
                           google.maps.MapTypeId.SATELLITE,
@@ -43,7 +43,7 @@ function draw_map() {
 
 
 
-    
+
     // Add the OSM map type
     map.mapTypes.set('osm', openStreet);
     map.mapTypes.set('opencyclemap', opencyclemap);
@@ -52,11 +52,11 @@ function draw_map() {
     map.mapTypes.set('mapquestosm', mapquestosm);
     map.mapTypes.set('mapquestopenaerial', mapquestopenaerial);
     initCopyrights();
-    
+
 
     // directory of Drupal installation
     var basepath = (typeof Drupal.settings.basePath === "undefined") ? '' : Drupal.settings.basePath;
-    
+
     // Add the right panel
     var panelcontrol = new PanelControl({
         forms:{
@@ -75,6 +75,9 @@ function draw_map() {
                     //superenlaces: { name: 'Superenlaces', tooltip: 'Enlaces entre supernodos (troncales)', default: true},
                     enlaces: { name: 'Enlaces', tooltip: /*'Enlaces cliente (de nodo a supernodo)'*/'Enlaces cliente y enlaces troncales', default: true,
                                         extrahtml: '<img id="img_overlay_enlaces" alt="(loading)" title="cargando" src="'
+                                        + basepath + 'sites/all/modules/guifi/js/loading.gif" style="vertical-align: middle; margin-left: 10px;" />'},
+                    fibra: { name: 'Fibra', tooltip: /* distribucion troncal fibra*/'Distribucion troncal fibra optica', default: true,
+                                        extrahtml: '<img id="img_overlay_fibra" alt="(loading)" title="cargando" src="'
                                         + basepath + 'sites/all/modules/guifi/js/loading.gif" style="vertical-align: middle; margin-left: 10px;" />'},
                     nodosd: { name: 'Nodos dinámicos', tooltip: 'Nodos interactivos (con información al hacer click)', default: false, extrahtml: '<img id="img_nodos_dinamicos" alt="(loading)" title="cargando" src="'
                                         + basepath + 'sites/all/modules/guifi/js/loading.gif" style="vertical-align: middle; margin-left: 10px; display: none;" />' }
@@ -95,50 +98,98 @@ function draw_map() {
     // Guifi layers
     var guifinodes = new GuifiLayer(map, baseURL,"Nodes");
     var guifilinks = new GuifiLayer(map, baseURL,"Links");
+    var guififibra = new GuifiLayer(map, baseURL,"Fibra");
     var guifinodeslinks = new GuifiLayer(map, baseURL,"Nodes,Links");
-    //map.overlayMapTypes.insertAt(0, guifinodes.overlay);
-    //map.overlayMapTypes.insertAt(0, guifilinks.overlay);
-    map.overlayMapTypes.insertAt(0, guifinodeslinks.overlay);
+    var guifilinksfibra = new GuifiLayer(map, baseURL,"Links,Fibra");
+    var guifinodesfibra = new GuifiLayer(map, baseURL,"Nodes,Fibra");
+    var guifiall = new GuifiLayer(map, baseURL,"Nodes,Links,Fibra");
+
+    map.overlayMapTypes.insertAt(0, guifiall.overlay);
 
     // sets the 'loading' icon visible for the layer
     var loadingTiles = function (p) {
         var n = document.getElementById('img_overlay_nodos');
         var e = document.getElementById('img_overlay_enlaces');
-        if (p.panel.capas.nodos && p.panel.capas.enlaces) {
+        var f = document.getElementById('img_overlay_fibra');
+
+        if ( p.panel.capas.nodos && p.panel.capas.enlaces && !p.panel.capas.fibra ) {
             if (n) { n.style.display='inline'; }
             if (e) { e.style.display='inline'; }
-        } else {
-            if (p.panel.capas.nodos) {
-                if (n) { n.style.display='inline'; }
-            } else if (p.panel.capas.enlaces) {
-                if (e) { e.style.display='inline'; }
-            }
-        }   
+        }
+        else if ( p.panel.capas.nodos && p.panel.capas.fibra && !p.panel.capas.enlaces ) {
+            if (n) { n.style.display='inline'; }
+            if (f) { f.style.display='inline'; }
+        }
+        else if ( p.panel.capas.enlaces && p.panel.capas.fibra && !p.panel.capas.nodos ) {
+            if (e) { e.style.display='inline'; }
+            if (f) { f.style.display='inline'; }
+        }
+        else if ( p.panel.capas.nodos && p.panel.capas.enlaces && p.panel.capas.fibra ) {
+            if (n) { n.style.display='inline'; }
+            if (e) { e.style.display='inline'; }
+            if (f) { f.style.display='inline'; }
+        }
+        else if ( p.panel.capas.nodos && !p.panel.capas.enlaces && !p.panel.capas.fibra ) {
+            if (n) { n.style.display='inline'; }
+        }
+        else if ( p.panel.capas.enlaces && !p.panel.capas.nodos && !p.panel.capas.fibra ) {
+            if (e) { e.style.display='inline'; }
+        }
+        else if ( p.panel.capas.fibra && !p.panel.capas.nodos && !p.panel.capas.enlaces ) {
+            if (f) { f.style.display='inline'; }
+        }
     }
+
     // loads the selected layers
     var toggleOverlays = function () {
         var n = document.getElementById('img_overlay_nodos');
         var e = document.getElementById('img_overlay_enlaces');
-        if (this.panel.capas.nodos && this.panel.capas.enlaces) {
+        var f = document.getElementById('img_overlay_fibra');
+
+        if (this.panel.capas.nodos && this.panel.capas.enlaces && !this.panel.capas.fibra) {
             map.overlayMapTypes.setAt(0, guifinodeslinks.overlay);
             n.style.display='inline';
             e.style.display='inline';
-        } else {
-            if (this.panel.capas.nodos) {
-                map.overlayMapTypes.setAt(0, guifinodes.overlay);
-                n.style.display='inline';
-            } else if (this.panel.capas.enlaces) {
-                map.overlayMapTypes.setAt(0, guifilinks.overlay);
-                e.style.display='inline';
-            } else {
-                map.overlayMapTypes.pop();
-                n.style.display='none';
-                e.style.display='none';
-            }
+        }
+        else if (this.panel.capas.nodos && this.panel.capas.fibra && !this.panel.capas.enlaces) {
+            map.overlayMapTypes.setAt(0, guifinodesfibra.overlay);
+            n.style.display='inline';
+            f.style.display='inline';
+        }
+        else if (this.panel.capas.enlaces && this.panel.capas.fibra && !this.panel.capas.nodos) {
+            map.overlayMapTypes.setAt(0, guifilinksfibra.overlay);
+            e.style.display='inline';
+            f.style.display='inline';
+        }
+        else if (this.panel.capas.nodos && this.panel.capas.enlaces && this.panel.capas.fibra) {
+            map.overlayMapTypes.setAt(0, guifiall.overlay);
+            n.style.display='inline';
+            e.style.display='inline';
+            f.style.display='inline';
+        }
+        else if (this.panel.capas.nodos && !this.panel.capas.fibra && !this.panel.capas.enlaces) {
+            map.overlayMapTypes.setAt(0, guifinodes.overlay);
+            n.style.display='inline';
+        }
+        else if (this.panel.capas.enlaces && !this.panel.capas.fibra && !this.panel.capas.nodos)  {
+            map.overlayMapTypes.setAt(0, guifilinks.overlay);
+            e.style.display='inline';
+        }
+        else if (this.panel.capas.fibra && !this.panel.capas.nodos && !this.panel.capas.enlaces) {
+            map.overlayMapTypes.setAt(0, guififibra.overlay);
+            f.style.display='inline';
+        }
+        else {
+            map.overlayMapTypes.pop();
+            n.style.display='none';
+            e.style.display='none';
+            f.style.display='none';
         }
     }
+
     google.maps.event.addDomListener(panelcontrol.inputs.nodos, 'click', toggleOverlays);
     google.maps.event.addDomListener(panelcontrol.inputs.enlaces, 'click', toggleOverlays);
+    google.maps.event.addDomListener(panelcontrol.inputs.fibra, 'click', toggleOverlays);
     // every time the zoom changes, new tiles have to be loaded
     google.maps.event.addListener(map, 'zoom_changed', function () {
         new loadingTiles(panelcontrol);
@@ -158,11 +209,35 @@ function draw_map() {
         var n = document.getElementById('img_overlay_enlaces');
         n.style.display='none';
     });
+    google.maps.event.addListener(guififibra.overlay, 'tilesloaded', function () {
+        var n = document.getElementById('img_overlay_fibra');
+        n.style.display='none';
+    });
     google.maps.event.addListener(guifinodeslinks.overlay, 'tilesloaded', function () {
         var n = document.getElementById('img_overlay_nodos');
         var e = document.getElementById('img_overlay_enlaces');
         n.style.display='none';
+        e.style.display='none'
+    });
+    google.maps.event.addListener(guifilinksfibra.overlay, 'tilesloaded', function () {
+        var e = document.getElementById('img_overlay_enlaces');
+        var f = document.getElementById('img_overlay_fibra');
         e.style.display='none';
+        f.style.display='none';
+    });
+    google.maps.event.addListener(guifinodesfibra.overlay, 'tilesloaded', function () {
+        var n = document.getElementById('img_overlay_nodos');
+        var f = document.getElementById('img_overlay_fibra');
+        n.style.display='none';
+        f.style.display='none';
+    });
+    google.maps.event.addListener(guifiall.overlay, 'tilesloaded', function () {
+        var n = document.getElementById('img_overlay_nodos');
+        var e = document.getElementById('img_overlay_enlaces');
+        var f = document.getElementById('img_overlay_fibra');
+        n.style.display='none';
+        e.style.display='none';
+        f.style.display='none';
     });
 
     /* ---------------------------------------------------------------  */
@@ -177,7 +252,7 @@ function draw_map() {
             "title": "Pulse aquí para seleccionar mapas alternativos",
             "type": "menulist",
             "list": [
-                { "name": "Mapa", "title": "Muestra el callejero", "type": "menu", "selected": "true", 
+                { "name": "Mapa", "title": "Muestra el callejero", "type": "menu", "selected": "true",
                 "list": [
                     { "name": "Capa base", "title": "Mapa que se verá al fondo del todo", "type": "radiolist", "list": [
                         { "name": "OpenStreetMap", "title": "Mapa casero elaborado con datos de OpenStreetMap", "type": "radio", "selected": "true" },
@@ -196,7 +271,7 @@ function draw_map() {
                     { "name": "Etiquetas", "title": "Nombres de pueblos, etc", "type": "checklist", "list": [
                         { "name": "Nombres de ciudades", "title": "Etiquetas con los nombres de las ciudades principales", "type": "check", "selected": "true", "enabled": "false" },
                         { "name": "Carreteras", "title": "Principales carreteras", "type": "check", "selected": "true", "enabled": "false" }
-                    ] }                    
+                    ] }
                 ]}
             ]}
     });
@@ -275,7 +350,7 @@ function draw_map() {
     layerswitcher_osm.model.list[1].onSelected.attach( function (sender, args) {
         sender.notifyChildrenSelections(true);
     });
-    
+
     layerswitcher_mapquest.model.list[0].onSelected.attach( function (sender, args) {
         if (args.state) {
             map.setMapTypeId("mapquestosm");
@@ -301,7 +376,7 @@ function draw_map() {
         var self;
         self = this;
         this.lastshown = -1;
-        
+
         // reads the checkboxes
         this.update = function () {
             var e;
@@ -397,7 +472,7 @@ function draw_map() {
         };
         this.searchLastShown = function (from) {
             var i, len, lastpos;
-            
+
             len = nodes.length;
             if (typeof from === "undefined") {
                 lastpos = len - 1;
@@ -417,8 +492,8 @@ function draw_map() {
 
     // enables/disables the entire "clickable nodes" feature
     var toggleClickableNodes = function () {
-        var id, filters;        
-        
+        var id, filters;
+
         filters = document.getElementById('filtros');
         if (clickablenodes) {
             for (id in markers) {
@@ -567,7 +642,7 @@ function draw_map() {
         star,*/ nimg, shown;
 
         if (!clickablenodes) { return; }
-        
+
         /*desaturate = function (red, green, blue, alpha) {
             var gray;
             // different grayscale methods
@@ -730,7 +805,7 @@ function draw_map() {
         nimg.style.display = 'none';
         }
     };
-    
+
     var dragging, pendingupdate;
     dragging = false;
     pendingupdate = false;
@@ -745,11 +820,11 @@ function draw_map() {
             google.maps.event.trigger(map, 'bounds_changed');
         }
     });
-    
+
     google.maps.event.addListener(map, 'bounds_changed', function () {
         var coord, n;
         if (dragging) { pendingupdate = true; }
-        
+
         if (clickablenodes && !dragging) {
             pendingupdate = false;
             n = document.getElementById('img_nodos_dinamicos');
@@ -762,7 +837,7 @@ function draw_map() {
         }
     });
     /****************************************************************************/
-    
+
     /*var guifiControl = new Control("guifi");
     guifiControl.div.index = 1;
     map.controls[google.maps.ControlPosition.TOP_RIGHT].push(guifiControl.div);
@@ -848,11 +923,9 @@ function draw_map() {
     ];
 
     var border = new google.maps.Polyline( { path: points, strokeColor: "#66000", strokeOpacity: .4, strokeWeight: 5, map: map });
- 
+
     bounds.extend(marker_SW.getPosition());
     bounds.extend(marker_NE.getPosition());
     map.fitBounds(bounds);
- 
+
 }
-
-
